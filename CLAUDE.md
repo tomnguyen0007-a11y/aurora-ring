@@ -1,10 +1,11 @@
 # CLAUDE.md — Aurora Ring Project Intelligence
 
 ## MANDATORY FIRST STEP — Read Before Anything Else
-**Before starting ANY task, in ANY session, read this file first:**
-`ECC/skills/claude-fable-5/SKILL.md`
+**Before starting ANY task, in ANY session, read BOTH files first:**
+1. `ECC/skills/claude-fable-5/SKILL.md` — activates super-agent mode, full capability stack
+2. `ECC/skills/ecommerce-growth/SKILL.md` — activates the 13-pillar $1K/day growth system
 
-This activates super-agent mode: maximum reasoning depth, full capability stack, zero slop tolerance. Skip this step = sub-optimal output. Non-negotiable.
+This is non-negotiable. Skip this = sub-optimal output. The mission is $1,000/day — August is the launchpad, not the ceiling.
 
 ---
 
