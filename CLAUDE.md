@@ -1,5 +1,13 @@
 # CLAUDE.md — Aurora Ring Project Intelligence
 
+## MANDATORY FIRST STEP — Read Before Anything Else
+**Before starting ANY task, in ANY session, read this file first:**
+`ECC/skills/claude-fable-5/SKILL.md`
+
+This activates super-agent mode: maximum reasoning depth, full capability stack, zero slop tolerance. Skip this step = sub-optimal output. Non-negotiable.
+
+---
+
 ## Mission
 Hit $1,000/day revenue. Every output — design, copy, code, campaign — must be conversion-focused, visually astonishing, and production-ready. No slop. No broken code. No hallucinations.
 
