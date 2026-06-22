@@ -7,354 +7,180 @@
   <meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no" />
   <meta name="x-apple-disable-message-reformatting" />
   <meta name="color-scheme" content="dark" />
-  <meta name="supported-color-schemes" content="dark light" />
-  <title>AURORA — All the data. None of the subscription.</title>
-
+  <meta name="supported-color-schemes" content="dark" />
+  <title>AURORA — Your body. Deeply understood.</title>
   <!--[if mso]>
-  <noscript>
-    <xml>
-      <o:OfficeDocumentSettings>
-        <o:PixelsPerInch>96</o:PixelsPerInch>
-        <o:AllowPNG/>
-      </o:OfficeDocumentSettings>
-    </xml>
-  </noscript>
+  <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch><o:AllowPNG/></o:OfficeDocumentSettings></xml></noscript>
   <![endif]-->
-
-  <!-- Web fonts load in Apple Mail / iOS Mail; everything else falls back gracefully. -->
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style type="text/css">
-    /* ---------- Resets ---------- */
-    html, body { margin:0 !important; padding:0 !important; height:100% !important; width:100% !important; }
+    html, body { margin:0 !important; padding:0 !important; background-color:#000000 !important; }
     * { -ms-text-size-adjust:100%; -webkit-text-size-adjust:100%; }
     table, td { mso-table-lspace:0pt; mso-table-rspace:0pt; border-collapse:collapse !important; }
-    img { -ms-interpolation-mode:bicubic; border:0; height:auto; line-height:100%; outline:none; text-decoration:none; display:block; }
+    img { border:0; height:auto; line-height:100%; outline:none; text-decoration:none; display:block; }
     a { text-decoration:none; }
-    body, #bodyTable { background-color:#0A0A0F; }
-
-    /* ---------- Button hover (supported clients) ---------- */
-    .btn-outline { transition:all .2s ease; }
-    .btn-outline:hover { background-color:#FFFFFF !important; border-color:#FFFFFF !important; }
-    .btn-outline:hover .btn-link { color:#0A0A0F !important; }
-    .btn-solid { transition:all .2s ease; }
-    .btn-solid:hover { background-color:#E9ECFF !important; }
-
-    /* ---------- Soft glow (Apple Mail / iOS only) ---------- */
-    @media (prefers-reduced-motion: no-preference) {
-      .glow-pulse { animation: glowPulse 6s ease-in-out infinite; }
-      @keyframes glowPulse {
-        0%,100% { opacity:.65; }
-        50%     { opacity:1; }
-      }
-    }
-
-    /* ---------- Mobile ---------- */
+    .btn-w:hover { background-color:#dcdcdc !important; }
+    .btn-o:hover { border-color:#ffffff !important; }
     @media only screen and (max-width:600px) {
-      .container { width:100% !important; max-width:100% !important; }
-      .px { padding-left:22px !important; padding-right:22px !important; }
-      .h1 { font-size:38px !important; line-height:42px !important; letter-spacing:-0.5px !important; }
-      .quote { font-size:21px !important; line-height:30px !important; }
-      .closing { font-size:42px !important; line-height:44px !important; }
-      .feat-card { padding:18px 8px !important; }
-      .feat-glyph { font-size:24px !important; }
-      .stack { display:block !important; width:100% !important; }
-      .hero-img, .lifestyle-img { width:100% !important; height:auto !important; }
-      .cmp-cell { font-size:14px !important; }
+      .container { width:100% !important; }
+      .px { padding-left:26px !important; padding-right:26px !important; }
+      .h1 { font-size:40px !important; line-height:42px !important; }
+      .h2 { font-size:28px !important; line-height:32px !important; }
+      .closing { font-size:44px !important; line-height:46px !important; }
+      .half { display:block !important; width:100% !important; }
+      .cmp-cell { font-size:14px !important; padding:16px 18px !important; }
     }
-
-    /* ---------- Dark-mode safety (prevent inversion of our already-dark art) ---------- */
-    @media (prefers-color-scheme: dark) {
-      body, #bodyTable { background-color:#0A0A0F !important; }
-    }
-    [data-ogsc] body, [data-ogsc] #bodyTable { background-color:#0A0A0F !important; }
+    @media (prefers-color-scheme: light) { body { background-color:#000000 !important; } }
   </style>
 </head>
+<body style="margin:0; padding:0; background-color:#000000;" bgcolor="#000000">
 
-<body style="margin:0; padding:0; background-color:#0A0A0F;">
+  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all; font-size:1px; color:#000000; opacity:0;">Pay €109 once. Sleep, HRV, blood oxygen and skin temperature on your finger — no monthly fee, ever.&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>
 
-  <!-- Preheader (hidden inbox preview text) -->
-  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all; font-size:1px; line-height:1px; color:#0A0A0F; opacity:0;">
-    Pay €109 once. Sleep score, HRV and recovery on your finger — no monthly fee, ever.
-    &#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;
-  </div>
+  <center style="width:100%; background-color:#000000;" bgcolor="#000000">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#000000" style="background-color:#000000;">
+    <tr><td align="center" bgcolor="#000000" style="padding:0; background-color:#000000;">
+      <table class="container" width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#000000" style="width:600px; max-width:600px; background-color:#000000;">
 
-  <center role="article" aria-roledescription="email" lang="en" style="width:100%; background-color:#0A0A0F;">
-  <table role="presentation" id="bodyTable" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0A0A0F;">
-    <tr>
-      <td align="center" style="padding:0;">
+        <!-- View in browser (Klaviyo) -->
+        <tr><td align="center" bgcolor="#000000" style="padding:18px 24px 0; background-color:#000000;">
+          <a href="{% web_view %}" target="_blank" style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:10px; letter-spacing:1px; color:#5a5a5a; text-transform:uppercase;">View in browser</a>
+        </td></tr>
 
-        <!-- ================= CONTAINER ================= -->
-        <table role="presentation" class="container" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px; background-color:#0A0A0F;">
+        <!-- Logo -->
+        <tr><td align="center" bgcolor="#000000" style="padding:30px 24px 8px; background-color:#000000;">
+          <img src="https://cdn.shopify.com/s/files/1/0999/8427/7830/files/aurora_logo_transparent_3d1e1281-e69e-4c93-b38c-b7df5222fc5f.png" width="150" alt="AURORA" style="width:150px; max-width:150px; height:auto; display:block; margin:0 auto;" />
+        </td></tr>
 
-          <!-- View in browser -->
-          <tr>
-            <td align="center" style="padding:14px 24px 0;">
-              <a href="{% web_view %}" style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; letter-spacing:0.5px; color:#5A5A6A;">View in browser</a>
+        <!-- HERO -->
+        <tr><td class="px" align="center" bgcolor="#000000" style="padding:40px 50px 6px; background-color:#000000;">
+          <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; font-weight:600; letter-spacing:3px; color:#7a7a7a; text-transform:uppercase; padding-bottom:24px;">Titanium Smart Ring</div>
+          <h1 class="h1" style="margin:0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:46px; line-height:48px; font-weight:600; letter-spacing:-1.4px; color:#ffffff;">Your body.<br /><span style="color:#7d7d7d;">Deeply understood.</span></h1>
+          <p style="margin:26px 0 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:16px; line-height:26px; color:#9a9a9a; font-weight:400;">Sleep, HRV, blood oxygen and skin temperature —<br />tracked continuously from titanium.</p>
+        </td></tr>
+
+        <tr><td align="center" bgcolor="#000000" style="padding:14px 20px 6px; background-color:#000000;">
+          <a href="https://auroraring.store/products/aurora-ring?utm_source=klaviyo&utm_medium=email&utm_campaign=aurora_hero&utm_content=hero_image" target="_blank">
+            <img src="https://cdn.shopify.com/s/files/1/0999/8427/7830/files/IMG_9592.webp?v=1776632627" width="560" alt="AURORA titanium smart ring with live metrics display" style="width:100%; max-width:560px; display:block; margin:0 auto;" />
+          </a>
+        </td></tr>
+
+        <tr><td align="center" bgcolor="#000000" style="padding:18px 40px 6px; background-color:#000000;">
+          <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:15px; font-weight:400; color:#9a9a9a; padding-bottom:4px;">One price. No subscription. Ever.</div>
+          <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:34px; font-weight:600; letter-spacing:-1px; color:#ffffff; padding-bottom:6px;">&euro;109</div>
+          <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; letter-spacing:1.4px; color:#6a6a6a; text-transform:uppercase; padding-bottom:24px;">Black · Silver · Gold &nbsp;|&nbsp; Sizes 6–13</div>
+          <table cellpadding="0" cellspacing="0" border="0" align="center"><tr>
+            <td class="btn-w" align="center" bgcolor="#ffffff" style="border-radius:40px; background-color:#ffffff;">
+              <a href="https://auroraring.store/products/aurora-ring?utm_source=klaviyo&utm_medium=email&utm_campaign=aurora_hero&utm_content=hero_cta" target="_blank" style="display:inline-block; padding:17px 46px; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:13px; font-weight:600; letter-spacing:1px; color:#000000; text-transform:uppercase;">Shop AURORA</a>
             </td>
-          </tr>
+          </tr></table>
+          <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:10px; letter-spacing:1.4px; color:#5a5a5a; text-transform:uppercase; padding-top:18px;">Free shipping · 30-day returns · Pay once</div>
+        </td></tr>
 
-          <!-- ================= WORDMARK ================= -->
-          <tr>
-            <td align="center" style="padding:26px 24px 6px;">
-              <div style="font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:20px; font-weight:700; letter-spacing:10px; color:#FFFFFF; text-transform:uppercase; padding-left:10px;">
-                AURORA
-              </div>
-              <div style="width:26px; height:1px; background-color:#4A7AFF; margin:12px auto 0; line-height:1px; font-size:0;">&nbsp;</div>
+        <tr><td bgcolor="#000000" style="padding:46px 50px 0; background-color:#000000;"><div style="height:1px; background-color:#1c1c1c; font-size:0; line-height:1px;">&nbsp;</div></td></tr>
+
+        <!-- METRICS -->
+        <tr><td class="px" align="center" bgcolor="#000000" style="padding:46px 50px 4px; background-color:#000000;">
+          <h2 class="h2" style="margin:0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:30px; line-height:34px; font-weight:600; letter-spacing:-0.8px; color:#ffffff;">Everything it reads</h2>
+          <p style="margin:14px 0 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:15px; line-height:23px; color:#8a8a8a;">Clinical-grade signals, every minute of every day.</p>
+        </td></tr>
+        <tr><td class="px" bgcolor="#000000" style="padding:30px 40px 12px; background-color:#000000;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td class="half" width="50%" valign="top" style="padding:0;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:22px 24px; border-top:1px solid #1c1c1c;">
+                <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:16px; font-weight:600; color:#ffffff;">Deep Sleep</div>
+                <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:13px; line-height:19px; color:#7a7a7a; padding-top:5px;">Wake, light, deep &amp; REM stages</div>
+              </td></tr></table></td>
+              <td class="half" width="50%" valign="top" style="padding:0;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:22px 24px; border-top:1px solid #1c1c1c;">
+                <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:16px; font-weight:600; color:#ffffff;">HRV &amp; Recovery</div>
+                <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:13px; line-height:19px; color:#7a7a7a; padding-top:5px;">Your daily readiness signal</div>
+              </td></tr></table></td>
+            </tr>
+            <tr>
+              <td class="half" width="50%" valign="top" style="padding:0;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:22px 24px; border-top:1px solid #1c1c1c;">
+                <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:16px; font-weight:600; color:#ffffff;">Blood Oxygen</div>
+                <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:13px; line-height:19px; color:#7a7a7a; padding-top:5px;">Continuous overnight SpO&#8322;</div>
+              </td></tr></table></td>
+              <td class="half" width="50%" valign="top" style="padding:0;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:22px 24px; border-top:1px solid #1c1c1c;">
+                <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:16px; font-weight:600; color:#ffffff;">Stress Index</div>
+                <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:13px; line-height:19px; color:#7a7a7a; padding-top:5px;">Know when to push or rest</div>
+              </td></tr></table></td>
+            </tr>
+            <tr>
+              <td class="half" width="50%" valign="top" style="padding:0;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:22px 24px; border-top:1px solid #1c1c1c; border-bottom:1px solid #1c1c1c;">
+                <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:16px; font-weight:600; color:#ffffff;">Skin Temperature</div>
+                <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:13px; line-height:19px; color:#7a7a7a; padding-top:5px;">Nightly variations &amp; trends</div>
+              </td></tr></table></td>
+              <td class="half" width="50%" valign="top" style="padding:0;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:22px 24px; border-top:1px solid #1c1c1c; border-bottom:1px solid #1c1c1c;">
+                <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:16px; font-weight:600; color:#ffffff;">7-Day Battery</div>
+                <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:13px; line-height:19px; color:#7a7a7a; padding-top:5px;">IP68 · water-resistant to 50 m</div>
+              </td></tr></table></td>
+            </tr>
+          </table>
+        </td></tr>
+
+        <tr><td align="center" bgcolor="#000000" style="padding:38px 20px 0; background-color:#000000;">
+          <a href="https://auroraring.store/products/aurora-ring?utm_source=klaviyo&utm_medium=email&utm_campaign=aurora_hero&utm_content=lifestyle" target="_blank">
+            <img src="https://cdn.shopify.com/s/files/1/0999/8427/7830/files/IMG_9632.webp?v=1776633768" width="560" alt="AURORA ring worn" style="width:100%; max-width:560px; display:block; margin:0 auto;" />
+          </a>
+        </td></tr>
+
+        <!-- COMPARISON -->
+        <tr><td class="px" align="center" bgcolor="#000000" style="padding:50px 50px 4px; background-color:#000000;">
+          <h2 class="h2" style="margin:0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:30px; line-height:34px; font-weight:600; letter-spacing:-0.8px; color:#ffffff;">Skip the subscription</h2>
+          <p style="margin:14px 0 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:15px; line-height:23px; color:#8a8a8a;">Same data the others rent to you monthly.</p>
+        </td></tr>
+        <tr><td class="px" bgcolor="#000000" style="padding:28px 40px 6px; background-color:#000000;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr><td bgcolor="#0b0b0b" style="background-color:#0b0b0b; border:1px solid #1c1c1c; border-radius:12px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+              <td class="cmp-cell" align="left" bgcolor="#0b0b0b" style="padding:20px 24px; background-color:#0b0b0b; border-radius:12px 0 0 12px; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:16px; font-weight:500; color:#cfcfcf;">Oura Ring</td>
+              <td class="cmp-cell" align="right" bgcolor="#0b0b0b" style="padding:20px 24px; background-color:#0b0b0b; border-radius:0 12px 12px 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:15px; color:#7a7a7a; white-space:nowrap;">&euro;5.99 / mo · <span style="color:#5a5a5a;">forever</span></td>
+            </tr></table></td></tr>
+            <tr><td bgcolor="#000000" style="height:10px; font-size:0; background-color:#000000;">&nbsp;</td></tr>
+            <tr><td bgcolor="#0b0b0b" style="background-color:#0b0b0b; border:1px solid #1c1c1c; border-radius:12px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+              <td class="cmp-cell" align="left" bgcolor="#0b0b0b" style="padding:20px 24px; background-color:#0b0b0b; border-radius:12px 0 0 12px; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:16px; font-weight:500; color:#cfcfcf;">WHOOP</td>
+              <td class="cmp-cell" align="right" bgcolor="#0b0b0b" style="padding:20px 24px; background-color:#0b0b0b; border-radius:0 12px 12px 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:15px; color:#7a7a7a; white-space:nowrap;">&euro;239 + &euro;30 / mo</td>
+            </tr></table></td></tr>
+            <tr><td bgcolor="#000000" style="height:10px; font-size:0; background-color:#000000;">&nbsp;</td></tr>
+            <tr><td bgcolor="#ffffff" style="background-color:#ffffff; border-radius:12px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+              <td class="cmp-cell" align="left" bgcolor="#ffffff" style="padding:22px 24px; background-color:#ffffff; border-radius:12px 0 0 12px; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:17px; font-weight:700; color:#000000;">AURORA</td>
+              <td class="cmp-cell" align="right" bgcolor="#ffffff" style="padding:22px 24px; background-color:#ffffff; border-radius:0 12px 12px 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:17px; font-weight:700; color:#000000; white-space:nowrap;">&euro;109. <span style="color:#888888;">Done.</span></td>
+            </tr></table></td></tr>
+          </table>
+          <p style="margin:20px 6px 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; line-height:16px; color:#5a5a5a; text-align:center;">Competitor pricing as of 2026. AURORA has no subscription and no gated features — pay once, own everything.</p>
+        </td></tr>
+
+        <!-- CLOSING -->
+        <tr><td class="px" align="center" bgcolor="#000000" style="padding:56px 50px 6px; background-color:#000000;">
+          <h2 class="closing" style="margin:0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:48px; line-height:50px; font-weight:600; letter-spacing:-1.6px; color:#ffffff;">Wear the data.</h2>
+          <p style="margin:20px 0 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:14px; line-height:22px; color:#8a8a8a;">Titanium. 2.8 mm. Worn by people who take recovery seriously.</p>
+        </td></tr>
+        <tr><td align="center" bgcolor="#000000" style="padding:30px 24px 8px; background-color:#000000;">
+          <table cellpadding="0" cellspacing="0" border="0" align="center"><tr>
+            <td class="btn-o" align="center" bgcolor="#000000" style="border:1px solid #3a3a3a; border-radius:40px; background-color:#000000;">
+              <a href="https://auroraring.store/products/aurora-ring?utm_source=klaviyo&utm_medium=email&utm_campaign=aurora_hero&utm_content=closer_cta" target="_blank" style="display:inline-block; padding:16px 44px; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:13px; font-weight:600; letter-spacing:1px; color:#ffffff; text-transform:uppercase;">Get Yours — &euro;109</a>
             </td>
-          </tr>
+          </tr></table>
+        </td></tr>
 
-          <!-- ================= HERO ================= -->
-          <tr>
-            <td class="px" align="center" style="padding:34px 40px 6px; background-color:#0A0A0F; background-image:radial-gradient(circle at 50% 30%, rgba(26,58,255,0.20), rgba(10,10,15,0.0) 62%);">
+        <!-- FOOTER (Klaviyo compliance tags) -->
+        <tr><td bgcolor="#000000" style="padding:54px 40px 32px; background-color:#000000;">
+          <div style="height:1px; background-color:#1c1c1c; font-size:0; line-height:1px; margin-bottom:30px;">&nbsp;</div>
+          <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" bgcolor="#000000" style="background-color:#000000;">
+            <img src="https://cdn.shopify.com/s/files/1/0999/8427/7830/files/aurora_logo_transparent_3d1e1281-e69e-4c93-b38c-b7df5222fc5f.png" width="104" alt="AURORA" style="width:104px; max-width:104px; height:auto; display:block; margin:0 auto;" />
+            <p style="margin:18px 0 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; line-height:18px; color:#6a6a6a;">Health intelligence. On your finger. No subscription.<br />Pairs free with the QRing app · iOS &amp; Android</p>
+            <p style="margin:16px 0 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; line-height:18px; color:#4a4a4a;">You&rsquo;re receiving this because you signed up at auroraring.store.<br />{{ organization.name }} · {{ organization.full_address }}</p>
+            <p style="margin:16px 0 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; line-height:18px; color:#6a6a6a;">
+              <a href="{% unsubscribe %}" style="color:#9a9a9a; text-decoration:underline;">Unsubscribe</a> &nbsp;·&nbsp;
+              <a href="{% manage_preferences %}" style="color:#9a9a9a; text-decoration:underline;">Email preferences</a> &nbsp;·&nbsp;
+              <a href="https://auroraring.store" style="color:#9a9a9a; text-decoration:underline;">auroraring.store</a>
+            </p>
+            <p style="margin:16px 0 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:10px; color:#3a3a3a;">© 2026 AURORA. All rights reserved.</p>
+          </td></tr></table>
+        </td></tr>
 
-              <!-- Eyebrow -->
-              <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; font-weight:600; letter-spacing:3px; color:#4A7AFF; text-transform:uppercase; padding-bottom:18px;">
-                Titanium smart ring
-              </div>
-
-              <!-- Headline -->
-              <h1 class="h1" style="margin:0; font-family:'Archivo','Helvetica Neue',Helvetica,Arial,sans-serif; font-size:50px; line-height:50px; font-weight:800; letter-spacing:-1px; color:#FFFFFF; text-transform:uppercase;">
-                Your body<br />tracks it.<br />
-                <span style="color:#8A8A9A;">Your ring<br />remembers it.</span>
-              </h1>
-
-              <!-- Subhead -->
-              <p style="margin:22px 0 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:16px; line-height:25px; color:#8A8A9A; font-weight:400;">
-                Sleep score. HRV. Recovery. All on your finger.<br />
-                <span style="color:#FFFFFF; font-weight:600;">No subscription. Ever.</span>
-              </p>
-
-              <!-- Primary CTA -->
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:30px auto 0;">
-                <tr>
-                  <td class="btn-outline" align="center" bgcolor="#0A0A0F" style="border:1.5px solid #FFFFFF; border-radius:44px;">
-                    <a class="btn-link" href="https://auroraring.store/products/aurora-ring?utm_source=klaviyo&utm_medium=email&utm_campaign=aurora_hero&utm_content=hero_cta" target="_blank" style="display:inline-block; padding:16px 36px; font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; letter-spacing:1.8px; line-height:14px; color:#FFFFFF; text-transform:uppercase;">
-                      Shop AURORA — €109
-                    </a>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Trust line -->
-              <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; letter-spacing:1px; color:#5A5A6A; text-transform:uppercase; padding-top:16px;">
-                Free shipping · 30-day returns · Pay once
-              </div>
-            </td>
-          </tr>
-
-          <!-- Hero product image (framed, with glow) -->
-          <tr>
-            <td class="px" align="center" style="padding:18px 28px 8px; background-color:#0A0A0F; background-image:radial-gradient(circle at 50% 45%, rgba(26,58,255,0.16), rgba(10,10,15,0.0) 65%);">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:544px;">
-                <tr>
-                  <td align="center" class="glow-pulse" style="border-radius:24px; background-color:#101018; background-image:linear-gradient(180deg, #14141E 0%, #0C0C12 100%); border:1px solid #20202C;">
-                    <a href="https://auroraring.store/products/aurora-ring?utm_source=klaviyo&utm_medium=email&utm_campaign=aurora_hero&utm_content=hero_image" target="_blank">
-                      <img class="hero-img" src="https://cdn.shopify.com/s/files/1/0999/8427/7830/files/IMG_9592.webp?v=1776632627" width="544" alt="AURORA titanium smart ring" style="width:100%; max-width:544px; border-radius:24px; display:block;" />
-                    </a>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-          <!-- ================= PULL QUOTE ================= -->
-          <tr>
-            <td class="px" align="center" style="padding:44px 44px 44px;">
-              <div style="font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:34px; line-height:1px; color:#4A7AFF; height:18px;">&ldquo;</div>
-              <p class="quote" style="margin:0; font-family:Georgia,'Times New Roman',serif; font-style:italic; font-size:25px; line-height:34px; color:#FFFFFF; font-weight:400;">
-                The ring that pays for<br />itself in month one.
-              </p>
-            </td>
-          </tr>
-
-          <!-- divider breathing room -->
-          <tr><td style="padding:0 40px;"><div style="height:1px; background-color:#17171F; line-height:1px; font-size:0;">&nbsp;</div></td></tr>
-
-          <!-- ================= 3 FEATURE CARDS ================= -->
-          <tr>
-            <td class="px" style="padding:38px 28px 14px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <!-- Sleep -->
-                  <td class="stack" width="33.33%" valign="top" style="padding:6px;">
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#13131A; border:1px solid #2A2A3A; border-radius:16px;">
-                      <tr><td class="feat-card" align="center" style="padding:24px 10px;">
-                        <div class="feat-glyph" style="font-family:Georgia,serif; font-size:28px; line-height:30px; color:#4A7AFF;">&#9790;</div>
-                        <div style="font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; letter-spacing:1px; color:#FFFFFF; text-transform:uppercase; padding-top:12px;">Sleep&nbsp;Score</div>
-                        <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; line-height:15px; color:#8A8A9A; padding-top:6px;">Wake · Light<br />Deep · REM</div>
-                      </td></tr>
-                    </table>
-                  </td>
-                  <!-- HRV -->
-                  <td class="stack" width="33.33%" valign="top" style="padding:6px;">
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#13131A; border:1px solid #2A2A3A; border-radius:16px;">
-                      <tr><td class="feat-card" align="center" style="padding:24px 10px;">
-                        <div class="feat-glyph" style="font-family:Georgia,serif; font-size:28px; line-height:30px; color:#4A7AFF;">&#8767;</div>
-                        <div style="font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; letter-spacing:1px; color:#FFFFFF; text-transform:uppercase; padding-top:12px;">HRV&nbsp;Monitor</div>
-                        <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; line-height:15px; color:#8A8A9A; padding-top:6px;">Your daily<br />recovery signal</div>
-                      </td></tr>
-                    </table>
-                  </td>
-                  <!-- Battery -->
-                  <td class="stack" width="33.33%" valign="top" style="padding:6px;">
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#13131A; border:1px solid #2A2A3A; border-radius:16px;">
-                      <tr><td class="feat-card" align="center" style="padding:24px 10px;">
-                        <div class="feat-glyph" style="font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:24px; line-height:30px; font-weight:800; color:#4A7AFF;">7d</div>
-                        <div style="font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; letter-spacing:1px; color:#FFFFFF; text-transform:uppercase; padding-top:12px;">Battery</div>
-                        <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; line-height:15px; color:#8A8A9A; padding-top:6px;">One charge<br />a week</div>
-                      </td></tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-          <!-- ================= COMPARISON ================= -->
-          <tr>
-            <td class="px" align="center" style="padding:40px 40px 4px;">
-              <h2 style="margin:0; font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:30px; line-height:34px; font-weight:800; letter-spacing:-0.5px; color:#FFFFFF; text-transform:uppercase;">
-                Skip the<br />subscription.
-              </h2>
-              <p style="margin:14px 0 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:14px; line-height:21px; color:#8A8A9A;">
-                Same data the others sell you monthly.<br />Here&rsquo;s the math.
-              </p>
-            </td>
-          </tr>
-
-          <tr>
-            <td class="px" style="padding:24px 32px 6px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                <!-- Oura -->
-                <tr>
-                  <td style="background-color:#101016; border:1px solid #20202C; border-radius:12px; padding:0;">
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-                      <td class="cmp-cell" align="left" style="padding:18px 20px; font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:15px; font-weight:700; letter-spacing:0.5px; color:#FFFFFF; text-transform:uppercase;">Oura&nbsp;Ring</td>
-                      <td class="cmp-cell" align="right" style="padding:18px 20px; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:14px; color:#8A8A9A;">€5.99&nbsp;/&nbsp;mo&nbsp;·&nbsp;<span style="color:#5A5A6A;">forever</span></td>
-                    </tr></table>
-                  </td>
-                </tr>
-                <tr><td style="height:10px; line-height:10px; font-size:0;">&nbsp;</td></tr>
-                <!-- WHOOP -->
-                <tr>
-                  <td style="background-color:#101016; border:1px solid #20202C; border-radius:12px; padding:0;">
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-                      <td class="cmp-cell" align="left" style="padding:18px 20px; font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:15px; font-weight:700; letter-spacing:0.5px; color:#FFFFFF; text-transform:uppercase;">WHOOP</td>
-                      <td class="cmp-cell" align="right" style="padding:18px 20px; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:14px; color:#8A8A9A;">€239&nbsp;+&nbsp;€30&nbsp;/&nbsp;mo</td>
-                    </tr></table>
-                  </td>
-                </tr>
-                <tr><td style="height:10px; line-height:10px; font-size:0;">&nbsp;</td></tr>
-                <!-- AURORA (highlighted) -->
-                <tr>
-                  <td style="background-color:#0F1A40; border-radius:12px; border-left:3px solid #4A7AFF; padding:0;">
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-                      <td class="cmp-cell" align="left" style="padding:20px 20px; font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:16px; font-weight:800; letter-spacing:0.5px; color:#FFFFFF; text-transform:uppercase;">AURORA</td>
-                      <td class="cmp-cell" align="right" style="padding:20px 20px; font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:16px; font-weight:800; color:#FFFFFF;">€109. <span style="color:#7E9CFF;">Done.</span></td>
-                    </tr></table>
-                  </td>
-                </tr>
-              </table>
-
-              <p style="margin:16px 4px 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; line-height:16px; color:#5A5A6A; text-align:center;">
-                Competitor pricing as of 2026. AURORA has no subscription and no gated features — pay once, own everything.
-              </p>
-            </td>
-          </tr>
-
-          <!-- Comparison CTA (solid, strongest) -->
-          <tr>
-            <td align="center" style="padding:24px 24px 8px;">
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
-                <tr>
-                  <td class="btn-solid" align="center" bgcolor="#FFFFFF" style="border-radius:44px;">
-                    <a class="btn-link" href="https://auroraring.store/products/aurora-ring?utm_source=klaviyo&utm_medium=email&utm_campaign=aurora_hero&utm_content=compare_cta" target="_blank" style="display:inline-block; padding:17px 40px; font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:13px; font-weight:800; letter-spacing:1.8px; line-height:14px; color:#0A0A0F; text-transform:uppercase;">
-                      Get AURORA now
-                    </a>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-          <!-- ================= LIFESTYLE CLOSER ================= -->
-          <tr>
-            <td class="px" align="center" style="padding:40px 28px 0;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:544px;">
-                <tr>
-                  <td align="center" style="border-radius:24px; background-color:#0C0C12; border:1px solid #20202C;">
-                    <a href="https://auroraring.store/products/aurora-ring?utm_source=klaviyo&utm_medium=email&utm_campaign=aurora_hero&utm_content=lifestyle" target="_blank">
-                      <img class="lifestyle-img" src="https://cdn.shopify.com/s/files/1/0999/8427/7830/files/IMG_9632.webp?v=1776633768" width="544" alt="AURORA ring on wrist" style="width:100%; max-width:544px; border-radius:24px; display:block;" />
-                    </a>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-          <tr>
-            <td class="px" align="center" style="padding:34px 40px 6px;">
-              <h2 class="closing" style="margin:0; font-family:'Archivo','Helvetica Neue',Helvetica,Arial,sans-serif; font-size:52px; line-height:50px; font-weight:900; letter-spacing:-1px; color:#FFFFFF; text-transform:uppercase;">
-                Wear the<br />data.
-              </h2>
-              <p style="margin:18px 0 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:14px; line-height:22px; color:#8A8A9A;">
-                Titanium. 2.8&nbsp;mm. IP68 to 50&nbsp;m.<br />
-                Worn by people who take recovery seriously.
-              </p>
-            </td>
-          </tr>
-
-          <!-- Secondary CTA -->
-          <tr>
-            <td align="center" style="padding:26px 24px 8px;">
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
-                <tr>
-                  <td class="btn-outline" align="center" bgcolor="#0A0A0F" style="border:1.5px solid #FFFFFF; border-radius:44px;">
-                    <a class="btn-link" href="https://auroraring.store/products/aurora-ring?utm_source=klaviyo&utm_medium=email&utm_campaign=aurora_hero&utm_content=closer_cta" target="_blank" style="display:inline-block; padding:16px 38px; font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; letter-spacing:1.8px; line-height:14px; color:#FFFFFF; text-transform:uppercase;">
-                      Get yours
-                    </a>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-          <!-- ================= FOOTER ================= -->
-          <tr>
-            <td style="padding:44px 40px 18px;">
-              <div style="height:1px; background-color:#17171F; line-height:1px; font-size:0; margin-bottom:28px;">&nbsp;</div>
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td align="center">
-                    <div style="font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:15px; font-weight:700; letter-spacing:8px; color:#6A6A7A; text-transform:uppercase; padding-left:8px;">AURORA</div>
-                    <p style="margin:14px 0 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; line-height:18px; color:#5A5A6A;">
-                      Health intelligence. On your finger. No subscription.<br />
-                      Pairs free with the QRing app · iOS &amp; Android
-                    </p>
-                    <p style="margin:18px 0 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; line-height:18px; color:#4A4A58;">
-                      You&rsquo;re receiving this because you signed up at auroraring.store.<br />
-                      {{ organization.name|default:'AURORA' }} · {{ organization.full_address|default:'Czech Republic' }}
-                    </p>
-                    <p style="margin:14px 0 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; line-height:18px; color:#5A5A6A;">
-                      <a href="{% unsubscribe %}" style="color:#8A8A9A; text-decoration:underline;">Unsubscribe</a>
-                      &nbsp;·&nbsp;
-                      <a href="{% manage_preferences %}" style="color:#8A8A9A; text-decoration:underline;">Email preferences</a>
-                      &nbsp;·&nbsp;
-                      <a href="https://auroraring.store?utm_source=klaviyo&utm_medium=email&utm_campaign=aurora_hero&utm_content=footer" style="color:#8A8A9A; text-decoration:underline;">auroraring.store</a>
-                    </p>
-                    <p style="margin:16px 0 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:10px; color:#3A3A46;">© 2026 AURORA. All rights reserved.</p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-        </table>
-        <!-- ================= /CONTAINER ================= -->
-
-      </td>
-    </tr>
+      </table>
+    </td></tr>
   </table>
   </center>
 </body>
