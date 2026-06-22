@@ -11,144 +11,110 @@
   <title>AURORA — All the data. None of the subscription.</title>
 
   <!--[if mso]>
-  <noscript>
-    <xml>
-      <o:OfficeDocumentSettings>
-        <o:PixelsPerInch>96</o:PixelsPerInch>
-        <o:AllowPNG/>
-      </o:OfficeDocumentSettings>
-    </xml>
-  </noscript>
+  <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch><o:AllowPNG/></o:OfficeDocumentSettings></xml></noscript>
   <![endif]-->
 
-  <!-- Web fonts load in Apple Mail / iOS Mail; everything else falls back gracefully. -->
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
 
   <style type="text/css">
-    /* ---------- Resets ---------- */
-    html, body { margin:0 !important; padding:0 !important; height:100% !important; width:100% !important; }
+    html, body { margin:0 !important; padding:0 !important; height:100% !important; width:100% !important; background-color:#0A0A0F !important; }
     * { -ms-text-size-adjust:100%; -webkit-text-size-adjust:100%; }
     table, td { mso-table-lspace:0pt; mso-table-rspace:0pt; border-collapse:collapse !important; }
     img { -ms-interpolation-mode:bicubic; border:0; height:auto; line-height:100%; outline:none; text-decoration:none; display:block; }
     a { text-decoration:none; }
-    body, #bodyTable { background-color:#0A0A0F; }
 
-    /* ---------- Button hover (supported clients) ---------- */
-    .btn-outline { transition:all .2s ease; }
     .btn-outline:hover { background-color:#FFFFFF !important; border-color:#FFFFFF !important; }
     .btn-outline:hover .btn-link { color:#0A0A0F !important; }
-    .btn-solid { transition:all .2s ease; }
     .btn-solid:hover { background-color:#E9ECFF !important; }
 
-    /* ---------- Soft glow (Apple Mail / iOS only) ---------- */
     @media (prefers-reduced-motion: no-preference) {
       .glow-pulse { animation: glowPulse 6s ease-in-out infinite; }
-      @keyframes glowPulse {
-        0%,100% { opacity:.65; }
-        50%     { opacity:1; }
-      }
+      @keyframes glowPulse { 0%,100% { opacity:.65; } 50% { opacity:1; } }
     }
 
-    /* ---------- Mobile ---------- */
     @media only screen and (max-width:600px) {
       .container { width:100% !important; max-width:100% !important; }
-      .px { padding-left:22px !important; padding-right:22px !important; }
-      .h1 { font-size:38px !important; line-height:42px !important; letter-spacing:-0.5px !important; }
-      .quote { font-size:21px !important; line-height:30px !important; }
-      .closing { font-size:42px !important; line-height:44px !important; }
-      .feat-card { padding:18px 8px !important; }
-      .feat-glyph { font-size:24px !important; }
-      .stack { display:block !important; width:100% !important; }
+      .px { padding-left:18px !important; padding-right:18px !important; }
+      .h1 { font-size:36px !important; line-height:40px !important; letter-spacing:-0.5px !important; }
+      .quote { font-size:20px !important; line-height:28px !important; }
+      .closing { font-size:40px !important; line-height:42px !important; }
+      .feat-card { padding:16px 6px !important; }
+      .feat-glyph { font-size:22px !important; }
+      .stack { display:block !important; width:100% !important; box-sizing:border-box !important; }
       .hero-img, .lifestyle-img { width:100% !important; height:auto !important; }
-      .cmp-cell { font-size:14px !important; }
+      .cmp-cell { font-size:13px !important; padding:14px 14px !important; }
     }
 
-    /* ---------- Dark-mode safety (prevent inversion of our already-dark art) ---------- */
     @media (prefers-color-scheme: dark) {
-      body, #bodyTable { background-color:#0A0A0F !important; }
+      body { background-color:#0A0A0F !important; }
     }
-    [data-ogsc] body, [data-ogsc] #bodyTable { background-color:#0A0A0F !important; }
+    [data-ogsc] body { background-color:#0A0A0F !important; }
   </style>
 </head>
 
-<body style="margin:0; padding:0; background-color:#0A0A0F;">
+<body style="margin:0; padding:0; background-color:#0A0A0F;" bgcolor="#0A0A0F">
 
-  <!-- Preheader (hidden inbox preview text) -->
+  <!-- Preheader -->
   <div style="display:none; max-height:0; overflow:hidden; mso-hide:all; font-size:1px; line-height:1px; color:#0A0A0F; opacity:0;">
     Pay €109 once. Sleep score, HRV and recovery on your finger — no monthly fee, ever.
-    &#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;
+    &#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;
   </div>
 
-  <center role="article" aria-roledescription="email" lang="en" style="width:100%; background-color:#0A0A0F;">
-  <table role="presentation" id="bodyTable" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0A0A0F;">
+  <center role="article" aria-roledescription="email" lang="en" style="width:100%; background-color:#0A0A0F;" bgcolor="#0A0A0F">
+  <table role="presentation" id="bodyTable" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0A0A0F" style="background-color:#0A0A0F;">
     <tr>
-      <td align="center" style="padding:0;">
+      <td align="center" bgcolor="#0A0A0F" style="padding:0; background-color:#0A0A0F;">
 
-        <!-- ================= CONTAINER ================= -->
-        <table role="presentation" class="container" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px; background-color:#0A0A0F;">
+        <!-- CONTAINER -->
+        <table role="presentation" class="container" width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#0A0A0F" style="width:600px; max-width:600px; background-color:#0A0A0F;">
 
           <!-- View in browser -->
           <tr>
-            <td align="center" style="padding:14px 24px 0;">
-              <a href="https://auroraring.store/products/aurora-ring?utm_source=gmail_test&utm_medium=email&utm_campaign=aurora_hero&utm_content=web_view" style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; letter-spacing:0.5px; color:#5A5A6A;">View in browser</a>
+            <td align="center" bgcolor="#0A0A0F" style="padding:14px 24px 0; background-color:#0A0A0F;">
+              <a href="https://auroraring.store/products/aurora-ring?utm_source=email&utm_medium=email&utm_campaign=aurora_hero&utm_content=store_link" target="_blank" style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; letter-spacing:0.5px; color:#5A5A6A;">View at auroraring.store</a>
             </td>
           </tr>
 
-          <!-- ================= WORDMARK ================= -->
+          <!-- WORDMARK -->
           <tr>
-            <td align="center" style="padding:26px 24px 6px;">
-              <div style="font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:20px; font-weight:700; letter-spacing:10px; color:#FFFFFF; text-transform:uppercase; padding-left:10px;">
-                AURORA
-              </div>
-              <div style="width:26px; height:1px; background-color:#4A7AFF; margin:12px auto 0; line-height:1px; font-size:0;">&nbsp;</div>
+            <td align="center" bgcolor="#0A0A0F" style="padding:26px 24px 6px; background-color:#0A0A0F;">
+              <div style="font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:20px; font-weight:700; letter-spacing:10px; color:#FFFFFF; text-transform:uppercase; padding-left:10px;">AURORA</div>
+              <div style="width:26px; height:2px; background-color:#4A7AFF; margin:12px auto 0; line-height:2px; font-size:0;">&nbsp;</div>
             </td>
           </tr>
 
-          <!-- ================= HERO ================= -->
+          <!-- HERO -->
           <tr>
-            <td class="px" align="center" style="padding:34px 40px 6px; background-color:#0A0A0F; background-image:radial-gradient(circle at 50% 30%, rgba(26,58,255,0.20), rgba(10,10,15,0.0) 62%);">
-
-              <!-- Eyebrow -->
-              <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; font-weight:600; letter-spacing:3px; color:#4A7AFF; text-transform:uppercase; padding-bottom:18px;">
-                Titanium smart ring
-              </div>
-
-              <!-- Headline -->
-              <h1 class="h1" style="margin:0; font-family:'Archivo','Helvetica Neue',Helvetica,Arial,sans-serif; font-size:50px; line-height:50px; font-weight:800; letter-spacing:-1px; color:#FFFFFF; text-transform:uppercase;">
+            <td class="px" align="center" bgcolor="#0A0A0F" style="padding:34px 40px 6px; background-color:#0A0A0F;">
+              <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; font-weight:600; letter-spacing:3px; color:#4A7AFF; text-transform:uppercase; padding-bottom:18px;">Titanium smart ring</div>
+              <h1 class="h1" style="margin:0; font-family:'Archivo','Helvetica Neue',Helvetica,Arial,sans-serif; font-size:50px; line-height:52px; font-weight:800; letter-spacing:-1px; color:#FFFFFF; text-transform:uppercase;">
                 Your body<br />tracks it.<br />
                 <span style="color:#8A8A9A;">Your ring<br />remembers it.</span>
               </h1>
-
-              <!-- Subhead -->
               <p style="margin:22px 0 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:16px; line-height:25px; color:#8A8A9A; font-weight:400;">
                 Sleep score. HRV. Recovery. All on your finger.<br />
                 <span style="color:#FFFFFF; font-weight:600;">No subscription. Ever.</span>
               </p>
-
               <!-- Primary CTA -->
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:30px auto 0;">
                 <tr>
-                  <td class="btn-outline" align="center" bgcolor="#0A0A0F" style="border:1.5px solid #FFFFFF; border-radius:44px;">
+                  <td class="btn-outline" align="center" bgcolor="#0A0A0F" style="border:2px solid #FFFFFF; border-radius:44px; background-color:#0A0A0F;">
                     <a class="btn-link" href="https://auroraring.store/products/aurora-ring?utm_source=klaviyo&utm_medium=email&utm_campaign=aurora_hero&utm_content=hero_cta" target="_blank" style="display:inline-block; padding:16px 36px; font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; letter-spacing:1.8px; line-height:14px; color:#FFFFFF; text-transform:uppercase;">
                       Shop AURORA — €109
                     </a>
                   </td>
                 </tr>
               </table>
-
-              <!-- Trust line -->
-              <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; letter-spacing:1px; color:#5A5A6A; text-transform:uppercase; padding-top:16px;">
-                Free shipping · 30-day returns · Pay once
-              </div>
+              <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; letter-spacing:1px; color:#5A5A6A; text-transform:uppercase; padding-top:16px;">Free shipping · 30-day returns · Pay once</div>
             </td>
           </tr>
 
-          <!-- Hero product image (framed, with glow) -->
+          <!-- Hero product image -->
           <tr>
-            <td class="px" align="center" style="padding:18px 28px 8px; background-color:#0A0A0F; background-image:radial-gradient(circle at 50% 45%, rgba(26,58,255,0.16), rgba(10,10,15,0.0) 65%);">
+            <td class="px" align="center" bgcolor="#0A0A0F" style="padding:18px 28px 8px; background-color:#0A0A0F;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:544px;">
                 <tr>
-                  <td align="center" class="glow-pulse" style="border-radius:24px; background-color:#101018; background-image:linear-gradient(180deg, #14141E 0%, #0C0C12 100%); border:1px solid #20202C;">
+                  <td align="center" bgcolor="#101018" class="glow-pulse" style="border-radius:24px; background-color:#101018; border:1px solid #20202C;">
                     <a href="https://auroraring.store/products/aurora-ring?utm_source=klaviyo&utm_medium=email&utm_campaign=aurora_hero&utm_content=hero_image" target="_blank">
                       <img class="hero-img" src="https://cdn.shopify.com/s/files/1/0999/8427/7830/files/IMG_9592.webp?v=1776632627" width="544" alt="AURORA titanium smart ring" style="width:100%; max-width:544px; border-radius:24px; display:block;" />
                     </a>
@@ -158,52 +124,62 @@
             </td>
           </tr>
 
-          <!-- ================= PULL QUOTE ================= -->
+          <!-- PULL QUOTE -->
           <tr>
-            <td class="px" align="center" style="padding:44px 44px 44px;">
-              <div style="font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:34px; line-height:1px; color:#4A7AFF; height:18px;">&ldquo;</div>
-              <p class="quote" style="margin:0; font-family:Georgia,'Times New Roman',serif; font-style:italic; font-size:25px; line-height:34px; color:#FFFFFF; font-weight:400;">
+            <td class="px" align="center" bgcolor="#0A0A0F" style="padding:44px 44px; background-color:#0A0A0F;">
+              <div style="font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:40px; line-height:20px; color:#4A7AFF; height:20px;">&ldquo;</div>
+              <p class="quote" style="margin:8px 0 0; font-family:Georgia,'Times New Roman',serif; font-style:italic; font-size:25px; line-height:34px; color:#FFFFFF; font-weight:400;">
                 The ring that pays for<br />itself in month one.
               </p>
             </td>
           </tr>
 
-          <!-- divider breathing room -->
-          <tr><td style="padding:0 40px;"><div style="height:1px; background-color:#17171F; line-height:1px; font-size:0;">&nbsp;</div></td></tr>
-
-          <!-- ================= 3 FEATURE CARDS ================= -->
+          <!-- Divider -->
           <tr>
-            <td class="px" style="padding:38px 28px 14px;">
+            <td bgcolor="#0A0A0F" style="padding:0 40px; background-color:#0A0A0F;">
+              <div style="height:1px; background-color:#17171F; line-height:1px; font-size:0;">&nbsp;</div>
+            </td>
+          </tr>
+
+          <!-- 3 FEATURE CARDS -->
+          <tr>
+            <td class="px" bgcolor="#0A0A0F" style="padding:38px 28px 14px; background-color:#0A0A0F;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <!-- Sleep -->
                   <td class="stack" width="33.33%" valign="top" style="padding:6px;">
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#13131A; border:1px solid #2A2A3A; border-radius:16px;">
-                      <tr><td class="feat-card" align="center" style="padding:24px 10px;">
-                        <div class="feat-glyph" style="font-family:Georgia,serif; font-size:28px; line-height:30px; color:#4A7AFF;">&#9790;</div>
-                        <div style="font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; letter-spacing:1px; color:#FFFFFF; text-transform:uppercase; padding-top:12px;">Sleep&nbsp;Score</div>
-                        <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; line-height:15px; color:#8A8A9A; padding-top:6px;">Wake · Light<br />Deep · REM</div>
-                      </td></tr>
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#13131A" style="background-color:#13131A; border:1px solid #2A2A3A; border-radius:16px;">
+                      <tr>
+                        <td class="feat-card" align="center" bgcolor="#13131A" style="padding:24px 10px; background-color:#13131A; border-radius:16px;">
+                          <div class="feat-glyph" style="font-family:Georgia,serif; font-size:28px; line-height:32px; color:#4A7AFF;">&#9790;</div>
+                          <div style="font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; letter-spacing:1px; color:#FFFFFF; text-transform:uppercase; padding-top:12px;">Sleep&nbsp;Score</div>
+                          <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; line-height:16px; color:#8A8A9A; padding-top:6px;">Wake · Light<br />Deep · REM</div>
+                        </td>
+                      </tr>
                     </table>
                   </td>
                   <!-- HRV -->
                   <td class="stack" width="33.33%" valign="top" style="padding:6px;">
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#13131A; border:1px solid #2A2A3A; border-radius:16px;">
-                      <tr><td class="feat-card" align="center" style="padding:24px 10px;">
-                        <div class="feat-glyph" style="font-family:Georgia,serif; font-size:28px; line-height:30px; color:#4A7AFF;">&#8767;</div>
-                        <div style="font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; letter-spacing:1px; color:#FFFFFF; text-transform:uppercase; padding-top:12px;">HRV&nbsp;Monitor</div>
-                        <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; line-height:15px; color:#8A8A9A; padding-top:6px;">Your daily<br />recovery signal</div>
-                      </td></tr>
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#13131A" style="background-color:#13131A; border:1px solid #2A2A3A; border-radius:16px;">
+                      <tr>
+                        <td class="feat-card" align="center" bgcolor="#13131A" style="padding:24px 10px; background-color:#13131A; border-radius:16px;">
+                          <div class="feat-glyph" style="font-family:Georgia,serif; font-size:28px; line-height:32px; color:#4A7AFF;">&#8767;</div>
+                          <div style="font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; letter-spacing:1px; color:#FFFFFF; text-transform:uppercase; padding-top:12px;">HRV&nbsp;Monitor</div>
+                          <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; line-height:16px; color:#8A8A9A; padding-top:6px;">Your daily<br />recovery signal</div>
+                        </td>
+                      </tr>
                     </table>
                   </td>
                   <!-- Battery -->
                   <td class="stack" width="33.33%" valign="top" style="padding:6px;">
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#13131A; border:1px solid #2A2A3A; border-radius:16px;">
-                      <tr><td class="feat-card" align="center" style="padding:24px 10px;">
-                        <div class="feat-glyph" style="font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:24px; line-height:30px; font-weight:800; color:#4A7AFF;">7d</div>
-                        <div style="font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; letter-spacing:1px; color:#FFFFFF; text-transform:uppercase; padding-top:12px;">Battery</div>
-                        <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; line-height:15px; color:#8A8A9A; padding-top:6px;">One charge<br />a week</div>
-                      </td></tr>
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#13131A" style="background-color:#13131A; border:1px solid #2A2A3A; border-radius:16px;">
+                      <tr>
+                        <td class="feat-card" align="center" bgcolor="#13131A" style="padding:24px 10px; background-color:#13131A; border-radius:16px;">
+                          <div class="feat-glyph" style="font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:24px; line-height:32px; font-weight:800; color:#4A7AFF;">7d</div>
+                          <div style="font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; letter-spacing:1px; color:#FFFFFF; text-transform:uppercase; padding-top:12px;">Battery</div>
+                          <div style="font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; line-height:16px; color:#8A8A9A; padding-top:6px;">One charge<br />a week</div>
+                        </td>
+                      </tr>
                     </table>
                   </td>
                 </tr>
@@ -211,9 +187,9 @@
             </td>
           </tr>
 
-          <!-- ================= COMPARISON ================= -->
+          <!-- COMPARISON header -->
           <tr>
-            <td class="px" align="center" style="padding:40px 40px 4px;">
+            <td class="px" align="center" bgcolor="#0A0A0F" style="padding:44px 40px 4px; background-color:#0A0A0F;">
               <h2 style="margin:0; font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:30px; line-height:34px; font-weight:800; letter-spacing:-0.5px; color:#FFFFFF; text-transform:uppercase;">
                 Skip the<br />subscription.
               </h2>
@@ -223,53 +199,59 @@
             </td>
           </tr>
 
+          <!-- COMPARISON rows -->
           <tr>
-            <td class="px" style="padding:24px 32px 6px;">
+            <td class="px" bgcolor="#0A0A0F" style="padding:24px 32px 6px; background-color:#0A0A0F;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <!-- Oura -->
                 <tr>
-                  <td style="background-color:#101016; border:1px solid #20202C; border-radius:12px; padding:0;">
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-                      <td class="cmp-cell" align="left" style="padding:18px 20px; font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:15px; font-weight:700; letter-spacing:0.5px; color:#FFFFFF; text-transform:uppercase;">Oura&nbsp;Ring</td>
-                      <td class="cmp-cell" align="right" style="padding:18px 20px; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:14px; color:#8A8A9A;">€5.99&nbsp;/&nbsp;mo&nbsp;·&nbsp;<span style="color:#5A5A6A;">forever</span></td>
-                    </tr></table>
+                  <td bgcolor="#101016" style="background-color:#101016; border:1px solid #20202C; border-radius:12px; padding:0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td class="cmp-cell" align="left" bgcolor="#101016" style="padding:18px 20px; background-color:#101016; border-radius:12px 0 0 12px; font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:15px; font-weight:700; letter-spacing:0.5px; color:#FFFFFF; text-transform:uppercase;">Oura&nbsp;Ring</td>
+                        <td class="cmp-cell" align="right" bgcolor="#101016" style="padding:18px 20px; background-color:#101016; border-radius:0 12px 12px 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:14px; color:#8A8A9A; white-space:nowrap;">€5.99&nbsp;/&nbsp;mo&nbsp;·&nbsp;<span style="color:#5A5A6A;">forever</span></td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
-                <tr><td style="height:10px; line-height:10px; font-size:0;">&nbsp;</td></tr>
+                <tr><td bgcolor="#0A0A0F" style="height:10px; line-height:10px; font-size:0; background-color:#0A0A0F;">&nbsp;</td></tr>
                 <!-- WHOOP -->
                 <tr>
-                  <td style="background-color:#101016; border:1px solid #20202C; border-radius:12px; padding:0;">
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-                      <td class="cmp-cell" align="left" style="padding:18px 20px; font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:15px; font-weight:700; letter-spacing:0.5px; color:#FFFFFF; text-transform:uppercase;">WHOOP</td>
-                      <td class="cmp-cell" align="right" style="padding:18px 20px; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:14px; color:#8A8A9A;">€239&nbsp;+&nbsp;€30&nbsp;/&nbsp;mo</td>
-                    </tr></table>
+                  <td bgcolor="#101016" style="background-color:#101016; border:1px solid #20202C; border-radius:12px; padding:0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td class="cmp-cell" align="left" bgcolor="#101016" style="padding:18px 20px; background-color:#101016; border-radius:12px 0 0 12px; font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:15px; font-weight:700; letter-spacing:0.5px; color:#FFFFFF; text-transform:uppercase;">WHOOP</td>
+                        <td class="cmp-cell" align="right" bgcolor="#101016" style="padding:18px 20px; background-color:#101016; border-radius:0 12px 12px 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:14px; color:#8A8A9A; white-space:nowrap;">€239&nbsp;+&nbsp;€30&nbsp;/&nbsp;mo</td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
-                <tr><td style="height:10px; line-height:10px; font-size:0;">&nbsp;</td></tr>
-                <!-- AURORA (highlighted) -->
+                <tr><td bgcolor="#0A0A0F" style="height:10px; line-height:10px; font-size:0; background-color:#0A0A0F;">&nbsp;</td></tr>
+                <!-- AURORA highlighted -->
                 <tr>
-                  <td style="background-color:#0F1A40; border-radius:12px; border-left:3px solid #4A7AFF; padding:0;">
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-                      <td class="cmp-cell" align="left" style="padding:20px 20px; font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:16px; font-weight:800; letter-spacing:0.5px; color:#FFFFFF; text-transform:uppercase;">AURORA</td>
-                      <td class="cmp-cell" align="right" style="padding:20px 20px; font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:16px; font-weight:800; color:#FFFFFF;">€109. <span style="color:#7E9CFF;">Done.</span></td>
-                    </tr></table>
+                  <td bgcolor="#0F1A40" style="background-color:#0F1A40; border-radius:12px; border-left:4px solid #4A7AFF; padding:0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td class="cmp-cell" align="left" bgcolor="#0F1A40" style="padding:20px 20px; background-color:#0F1A40; border-radius:12px 0 0 12px; font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:16px; font-weight:800; letter-spacing:0.5px; color:#FFFFFF; text-transform:uppercase;">AURORA</td>
+                        <td class="cmp-cell" align="right" bgcolor="#0F1A40" style="padding:20px 20px; background-color:#0F1A40; border-radius:0 12px 12px 0; font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:16px; font-weight:800; color:#FFFFFF; white-space:nowrap;">€109.&nbsp;<span style="color:#7E9CFF;">Done.</span></td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
               </table>
-
               <p style="margin:16px 4px 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; line-height:16px; color:#5A5A6A; text-align:center;">
                 Competitor pricing as of 2026. AURORA has no subscription and no gated features — pay once, own everything.
               </p>
             </td>
           </tr>
 
-          <!-- Comparison CTA (solid, strongest) -->
+          <!-- Mid CTA (solid, strongest) -->
           <tr>
-            <td align="center" style="padding:24px 24px 8px;">
+            <td align="center" bgcolor="#0A0A0F" style="padding:28px 24px 8px; background-color:#0A0A0F;">
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
                 <tr>
-                  <td class="btn-solid" align="center" bgcolor="#FFFFFF" style="border-radius:44px;">
-                    <a class="btn-link" href="https://auroraring.store/products/aurora-ring?utm_source=klaviyo&utm_medium=email&utm_campaign=aurora_hero&utm_content=compare_cta" target="_blank" style="display:inline-block; padding:17px 40px; font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:13px; font-weight:800; letter-spacing:1.8px; line-height:14px; color:#0A0A0F; text-transform:uppercase;">
+                  <td class="btn-solid" align="center" bgcolor="#FFFFFF" style="border-radius:44px; background-color:#FFFFFF;">
+                    <a href="https://auroraring.store/products/aurora-ring?utm_source=klaviyo&utm_medium=email&utm_campaign=aurora_hero&utm_content=compare_cta" target="_blank" style="display:inline-block; padding:17px 40px; font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:13px; font-weight:800; letter-spacing:1.8px; line-height:14px; color:#0A0A0F; text-transform:uppercase;">
                       Get AURORA now
                     </a>
                   </td>
@@ -278,12 +260,19 @@
             </td>
           </tr>
 
-          <!-- ================= LIFESTYLE CLOSER ================= -->
+          <!-- Divider -->
           <tr>
-            <td class="px" align="center" style="padding:40px 28px 0;">
+            <td bgcolor="#0A0A0F" style="padding:8px 40px 0; background-color:#0A0A0F;">
+              <div style="height:1px; background-color:#17171F; line-height:1px; font-size:0;">&nbsp;</div>
+            </td>
+          </tr>
+
+          <!-- LIFESTYLE CLOSER -->
+          <tr>
+            <td class="px" align="center" bgcolor="#0A0A0F" style="padding:40px 28px 0; background-color:#0A0A0F;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:544px;">
                 <tr>
-                  <td align="center" style="border-radius:24px; background-color:#0C0C12; border:1px solid #20202C;">
+                  <td align="center" bgcolor="#0C0C12" style="border-radius:24px; background-color:#0C0C12; border:1px solid #20202C;">
                     <a href="https://auroraring.store/products/aurora-ring?utm_source=klaviyo&utm_medium=email&utm_campaign=aurora_hero&utm_content=lifestyle" target="_blank">
                       <img class="lifestyle-img" src="https://cdn.shopify.com/s/files/1/0999/8427/7830/files/IMG_9632.webp?v=1776633768" width="544" alt="AURORA ring on wrist" style="width:100%; max-width:544px; border-radius:24px; display:block;" />
                     </a>
@@ -294,8 +283,8 @@
           </tr>
 
           <tr>
-            <td class="px" align="center" style="padding:34px 40px 6px;">
-              <h2 class="closing" style="margin:0; font-family:'Archivo','Helvetica Neue',Helvetica,Arial,sans-serif; font-size:52px; line-height:50px; font-weight:900; letter-spacing:-1px; color:#FFFFFF; text-transform:uppercase;">
+            <td class="px" align="center" bgcolor="#0A0A0F" style="padding:36px 40px 6px; background-color:#0A0A0F;">
+              <h2 class="closing" style="margin:0; font-family:'Archivo','Helvetica Neue',Helvetica,Arial,sans-serif; font-size:52px; line-height:52px; font-weight:900; letter-spacing:-1px; color:#FFFFFF; text-transform:uppercase;">
                 Wear the<br />data.
               </h2>
               <p style="margin:18px 0 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:14px; line-height:22px; color:#8A8A9A;">
@@ -305,12 +294,12 @@
             </td>
           </tr>
 
-          <!-- Secondary CTA -->
+          <!-- Closing CTA -->
           <tr>
-            <td align="center" style="padding:26px 24px 8px;">
+            <td align="center" bgcolor="#0A0A0F" style="padding:26px 24px 8px; background-color:#0A0A0F;">
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center">
                 <tr>
-                  <td class="btn-outline" align="center" bgcolor="#0A0A0F" style="border:1.5px solid #FFFFFF; border-radius:44px;">
+                  <td class="btn-outline" align="center" bgcolor="#0A0A0F" style="border:2px solid #FFFFFF; border-radius:44px; background-color:#0A0A0F;">
                     <a class="btn-link" href="https://auroraring.store/products/aurora-ring?utm_source=klaviyo&utm_medium=email&utm_campaign=aurora_hero&utm_content=closer_cta" target="_blank" style="display:inline-block; padding:16px 38px; font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:13px; font-weight:700; letter-spacing:1.8px; line-height:14px; color:#FFFFFF; text-transform:uppercase;">
                       Get yours
                     </a>
@@ -320,13 +309,13 @@
             </td>
           </tr>
 
-          <!-- ================= FOOTER ================= -->
+          <!-- FOOTER -->
           <tr>
-            <td style="padding:44px 40px 18px;">
+            <td bgcolor="#0A0A0F" style="padding:44px 40px 24px; background-color:#0A0A0F;">
               <div style="height:1px; background-color:#17171F; line-height:1px; font-size:0; margin-bottom:28px;">&nbsp;</div>
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                  <td align="center">
+                  <td align="center" bgcolor="#0A0A0F" style="background-color:#0A0A0F;">
                     <div style="font-family:'Archivo',Helvetica,Arial,sans-serif; font-size:15px; font-weight:700; letter-spacing:8px; color:#6A6A7A; text-transform:uppercase; padding-left:8px;">AURORA</div>
                     <p style="margin:14px 0 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; line-height:18px; color:#5A5A6A;">
                       Health intelligence. On your finger. No subscription.<br />
@@ -351,7 +340,7 @@
           </tr>
 
         </table>
-        <!-- ================= /CONTAINER ================= -->
+        <!-- /CONTAINER -->
 
       </td>
     </tr>
