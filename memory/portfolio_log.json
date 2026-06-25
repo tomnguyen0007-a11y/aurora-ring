@@ -1,0 +1,9 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "IBKR pre-market research log. Appended each weekday run. Read by next run to detect changes.",
+    "last_run": null,
+    "created": "2026-06-25T00:00:00Z"
+  },
+  "runs": []
+}
