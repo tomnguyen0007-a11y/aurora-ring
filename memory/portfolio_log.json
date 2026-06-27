@@ -1,0 +1,121 @@
+{
+  "meta": {
+    "last_run": "2026-06-27T00:00:00Z",
+    "schema_version": "1.0",
+    "note": "First run — memory/ and scripts/ directories bootstrapped. No prior log existed."
+  },
+  "runs": [
+    {
+      "date": "2026-06-27",
+      "timestamp": "2026-06-27T00:00:00Z",
+      "account": {
+        "net_liquidation_eur": 1146.01,
+        "net_liquidation_usd_approx": 1304,
+        "cash_available_eur": 95.36,
+        "stock_market_value_usd": 1196.19,
+        "unrealized_pnl_usd": 26.57,
+        "realized_pnl_usd": 0,
+        "leverage": "0.92",
+        "balances": {
+          "EUR": 3.77,
+          "CZK": 2221.78,
+          "USD": 0
+        }
+      },
+      "positions": {
+        "SLS": {
+          "contract_id": 390872440,
+          "shares": 50,
+          "cost_basis": 10.84482,
+          "prev_regular_close": 10.53,
+          "premarket_price": 12.23,
+          "gap_pct": 16.1,
+          "market_value_usd": 611.50,
+          "unrealized_pnl_usd": 69.25,
+          "daily_pnl_usd": 54.92,
+          "pct_of_nav": 46.9,
+          "52w_high": 12.43,
+          "52w_low": 1.39,
+          "13w_high": 12.43,
+          "13w_low": 3.95,
+          "open_52w_ago": 2.01,
+          "catalyst": "REGAL Phase 3 AML: 78/80 events as of May 11 2026 — 80th event triggers DB lock, unblinding, topline data + FDA NDA prep underway",
+          "catalyst_status": "IMMINENT — 2 events remaining as of May 11; 6+ weeks have passed",
+          "risk_flag": "OVERSIZED — 46.9% NAV exceeds 35% cap; pre-catalyst trim decision required"
+        },
+        "CING": {
+          "contract_id": 721288785,
+          "shares": 38,
+          "cost_basis": 4.80147632,
+          "prev_regular_close": 4.76,
+          "premarket_price": 4.99,
+          "gap_pct": 4.8,
+          "market_value_usd": 189.62,
+          "unrealized_pnl_usd": 7.16,
+          "daily_pnl_usd": 8.74,
+          "pct_of_nav": 14.5,
+          "52w_high": 11.89,
+          "52w_low": 3.16,
+          "13w_high": 6.76,
+          "13w_low": 3.16,
+          "open_52w_ago": 4.15,
+          "catalyst": "FDA CRL June 2 2026 for CTx-1301 (ADHD) — CMC-only issue, no safety concerns; $30M cash runway; patent issued June 16 2026 through 2042; resubmission in progress",
+          "catalyst_status": "RESUBMISSION PENDING — timeline not disclosed",
+          "risk_flag": "UNDERSIZED — 14.5% NAV; can add on resubmission news"
+        },
+        "SPCX": {
+          "contract_id": 890493863,
+          "shares": 2.6,
+          "cost_basis": 171.12423077,
+          "prev_regular_close": 153.00,
+          "premarket_price": 152.77,
+          "gap_pct": -0.15,
+          "market_value_usd": 397.20,
+          "unrealized_pnl_usd": -47.72,
+          "daily_pnl_usd": -0.60,
+          "pct_of_nav": 30.5,
+          "52w_high": 225.64,
+          "52w_low": 147.11,
+          "13w_high": 225.64,
+          "13w_low": 147.11,
+          "open_52w_ago": 150.00,
+          "catalyst": "$25B bond offering settled June 26 2026 ($89B demand); stock fell ~16% on bond debut; IPO June 12 2026 at $135; first lockup unlock ~late July/Aug 2026 (~20% of 180-day block); Dec 8 2026 full 180-day expiry",
+          "catalyst_status": "LOCKUP OVERHANG — first unlock ~7-9 weeks out; bond news digested",
+          "risk_flag": "UNDERWATER — -10.7% vs cost basis $171.12; 52w low support at $147.11"
+        }
+      },
+      "macro": {
+        "sp500_futures": {
+          "price": 7401.00,
+          "open": 7367.75,
+          "range_today": "7360.75-7459.50",
+          "volume": 1396600,
+          "technical_signal": "Strong Sell",
+          "note": "Nasdaq/S&P treaded water June 26 amid tech sell-off; reported OpenAI IPO delay"
+        }
+      },
+      "news_log": {
+        "SLS": [
+          "Q1 2026 results filed May 11 2026: REGAL at 78/80 events",
+          "8-K filed June 2 2026",
+          "Annual meeting June 16 2026; S-8 filed registering 20M shares for equity plan",
+          "8-K filed June 16 2026 (most recent — content: likely REGAL update or annual meeting results)",
+          "Multiple sources: 'SELLAS Stock Jumps After AML Trial Moves Two Events From Final Readout'",
+          "SLS009 mid-stage 80-patient trial in first-line AML; topline data Q4 2026"
+        ],
+        "CING": [
+          "June 2 2026: FDA issues CRL for CTx-1301 — CMC data requests only, no safety/efficacy concerns",
+          "June 16 2026: USPTO issues patent No. 12,653,791 for CTx-1301 formulation through Dec 2042",
+          "Company: $30M cash sufficient for resubmission and pre-commercial activities into 2027",
+          "Stonegate Capital updated coverage post-CRL"
+        ],
+        "SPCX": [
+          "June 12 2026: SpaceX IPO at $135/share (SPCX, Nasdaq)",
+          "June 22 2026: $25B bond debut — stock fell ~16%; $89B demand, 4x oversubscribed",
+          "June 26 2026: Bond offering settled; bridge loan fully repaid; maturities 2031-2056",
+          "Lockup schedule: ~20% of 180-day block unlocks Q2 earnings (late Jul/Aug); two 7% tranches Aug 21 + Sep 10; largest tranche (~28%) at Q3 earnings; full expiry Dec 8 2026"
+        ]
+      }
+    }
+  ]
+}
