@@ -1,0 +1,91 @@
+{
+  "meta": {
+    "last_run": "2026-06-28T00:00:00Z",
+    "routine": "premarket-research",
+    "account_currency": "EUR",
+    "note": "First run — no prior log existed. Prices from IBKR positions API (after-hours marks) and snapshot (regular-session close). SLS/CING show after-hours premium over regular close."
+  },
+  "account": {
+    "net_liquidation_eur": 1146.01,
+    "net_liquidation_usd_approx": 1304.70,
+    "gross_position_value_eur": 1050.65,
+    "cash_eur": 3.77,
+    "cash_czk": 2221.78,
+    "cash_usd": 0,
+    "available_funds_eur": 95.36,
+    "unrealized_pnl_usd": 26.57,
+    "realized_pnl_usd": 0,
+    "leverage": 0.92
+  },
+  "positions": {
+    "SLS": {
+      "shares": 50,
+      "avg_cost": 10.84482,
+      "position_mark_price": 12.23,
+      "session_close_price": 10.53,
+      "market_value_usd": 611.50,
+      "unrealized_pnl_usd": 69.25,
+      "daily_pnl_usd": 84.995,
+      "nav_pct": 46.9,
+      "52w_high": 12.43,
+      "52w_low": 1.39,
+      "13w_high": 12.43,
+      "13w_low": 3.95,
+      "catalyst": "REGAL Phase 3 AML - 78/80 events as of 2026-05-11. 80th event triggers unblinding + topline readout. BINARY EVENT IMMINENT.",
+      "after_hours_gap_pct": 16.1
+    },
+    "CING": {
+      "shares": 38,
+      "avg_cost": 4.80147632,
+      "position_mark_price": 4.99,
+      "session_close_price": 4.76,
+      "market_value_usd": 189.62,
+      "unrealized_pnl_usd": 7.16,
+      "daily_pnl_usd": 8.74,
+      "nav_pct": 14.5,
+      "52w_high": 11.89,
+      "52w_low": 3.16,
+      "13w_high": 6.76,
+      "13w_low": 3.16,
+      "catalyst": "FDA CRL received 2026-06-02 for CTx-1301 (ADHD). CMC-only issues; no clinical safety concerns. Resubmission planned. ~$30M cash.",
+      "after_hours_gap_pct": 4.8
+    },
+    "SPCX": {
+      "shares": 2.6,
+      "avg_cost": 171.12423077,
+      "position_mark_price": 152.77,
+      "session_close_price": 153.00,
+      "market_value_usd": 397.20,
+      "unrealized_pnl_usd": -47.72,
+      "daily_pnl_usd": -0.60,
+      "nav_pct": 30.4,
+      "52w_high": 225.64,
+      "52w_low": 147.11,
+      "13w_high": 225.64,
+      "13w_low": 147.11,
+      "catalyst": "Nasdaq-100 add July 7 (~$4.3B passive inflows). Main 180-day lockup Dec 8, 2026. $20B bond closed June 26. IPO June 11 at $135.",
+      "after_hours_gap_pct": -0.15
+    }
+  },
+  "macro": {
+    "sp500_futures_june28": {
+      "open": 7431.00,
+      "range_low": 7357.25,
+      "range_high": 7459.50,
+      "last": 7401.75,
+      "signal": "Strong Sell (technical indicators)"
+    }
+  },
+  "runs": [
+    {
+      "date": "2026-06-28",
+      "flags": [
+        "SLS NAV overweight at 46.9% (threshold 35%) — trim candidate",
+        "SLS after-hours +16.1% on REGAL readout immminence",
+        "CING FDA CRL issued 2026-06-02 — resubmission path open",
+        "SPCX below cost basis -10.7%; Nasdaq-100 add July 7 is near-term catalyst",
+        "S&P 500 futures technical signal: Strong Sell"
+      ]
+    }
+  ]
+}
