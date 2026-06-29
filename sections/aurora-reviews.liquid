@@ -44,16 +44,19 @@
 
   <div class="ar-summary">
     <div>
-      <div class="ar-avg-num">4.6</div>
+      <div class="ar-avg-num">{{ section.settings.avg_rating | default: '4.6' }}</div>
       <div class="ar-avg-stars">&#9733;&#9733;&#9733;&#9733;<span class="off">&#9733;</span></div>
-      <div class="ar-avg-total">55 REVIEWS</div>
+      <div class="ar-avg-total">{{ section.settings.review_total | default: '55' }} REVIEWS</div>
     </div>
     <div class="ar-bars">
-      {%- assign dist = "38,10,6,1,0" | split: "," -%}
+      {%- capture dist_str -%}{{ section.settings.count_5 | default: 38 }},{{ section.settings.count_4 | default: 10 }},{{ section.settings.count_3 | default: 6 }},{{ section.settings.count_2 | default: 1 }},{{ section.settings.count_1 | default: 0 }}{%- endcapture -%}
+      {%- assign dist = dist_str | split: "," -%}
+      {%- assign maxn = 1 -%}
+      {%- for d in dist -%}{%- assign dn = d | times: 1 -%}{%- if dn > maxn -%}{%- assign maxn = dn -%}{%- endif -%}{%- endfor -%}
       {%- assign starlbls = "5,4,3,2,1" | split: "," -%}
       {%- for s in starlbls -%}
         {%- assign n = dist[forloop.index0] | times: 1 -%}
-        {%- assign pct = n | times: 100 | divided_by: 55 -%}
+        {%- assign pct = n | times: 100 | divided_by: maxn -%}
         <div class="ar-bar-row">
           <span class="ar-bar-lbl">{{ s }}</span>
           <span class="ar-bar-star">&#9733;</span>
@@ -86,7 +89,7 @@
     {%- endfor -%}
   </div>
 
-  <label for="ar-more-toggle" class="ar-more-btn">Show all 55 reviews</label>
+  <label for="ar-more-toggle" class="ar-more-btn">Show all {{ section.settings.review_total | default: '55' }} reviews</label>
 
   <p class="ar-foot">Reviews collected from verified marketplace orders.</p>
 </div></div>
@@ -94,7 +97,16 @@
 {% schema %}
 {
   "name": "Aurora Reviews",
-  "settings": [],
+  "settings": [
+    { "type": "text", "id": "avg_rating", "label": "Average rating", "default": "4.6" },
+    { "type": "text", "id": "review_total", "label": "Total reviews (your real marketplace count)", "default": "55" },
+    { "type": "header", "content": "Rating distribution (bar counts)" },
+    { "type": "number", "id": "count_5", "label": "5-star count", "default": 38 },
+    { "type": "number", "id": "count_4", "label": "4-star count", "default": 10 },
+    { "type": "number", "id": "count_3", "label": "3-star count", "default": 6 },
+    { "type": "number", "id": "count_2", "label": "2-star count", "default": 1 },
+    { "type": "number", "id": "count_1", "label": "1-star count", "default": 0 }
+  ],
   "presets": []
 }
 {% endschema %}
