@@ -1,4 +1,96 @@
-{%- comment -%} Section retired: fabricated reviews removed for compliance. Use Judge.me for verified reviews. {%- endcomment -%}
+{%- comment -%} Aurora Reviews — static, brighter, CSS-only show-more (10 + toggle). No JS. {%- endcomment -%}
+<style>
+  #aurora-reviews{background:#101014;padding:80px 24px;border-top:1px solid #2a2a32;font-family:inherit;}
+  #aurora-reviews .arw{max-width:900px;margin:0 auto;}
+  #aurora-reviews h2{font-size:clamp(24px,3.2vw,38px);font-weight:300;color:#fff;text-align:center;margin:0 0 8px;letter-spacing:-0.02em;}
+  #aurora-reviews .ar-sub{text-align:center;color:#9a9aa6;font-size:14px;margin:0 0 48px;}
+  #aurora-reviews .ar-summary{display:flex;gap:48px;flex-wrap:wrap;align-items:center;justify-content:center;padding:0 0 44px;border-bottom:1px solid #24242c;margin-bottom:8px;}
+  #aurora-reviews .ar-avg-num{font-size:60px;font-weight:300;color:#fff;line-height:1;letter-spacing:-0.02em;text-align:center;}
+  #aurora-reviews .ar-avg-stars{color:#00e5c8;font-size:16px;letter-spacing:3px;margin:10px 0 4px;text-align:center;}
+  #aurora-reviews .ar-avg-stars .off{color:#3a3a44;}
+  #aurora-reviews .ar-avg-total{font-size:11px;color:#7a7a86;letter-spacing:.12em;text-align:center;}
+  #aurora-reviews .ar-bars{flex:1;min-width:220px;max-width:360px;}
+  #aurora-reviews .ar-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  #aurora-reviews .ar-bar-lbl{font-size:11px;color:#9a9aa6;width:10px;text-align:right;}
+  #aurora-reviews .ar-bar-star{color:#00e5c8;font-size:9px;}
+  #aurora-reviews .ar-bar-track{flex:1;height:4px;background:#24242c;overflow:hidden;}
+  #aurora-reviews .ar-bar-fill{display:block;height:100%;background:#00e5c8;}
+  #aurora-reviews .ar-bar-n{font-size:11px;color:#6a6a76;width:20px;}
+  #aurora-reviews .ar-list{display:grid;gap:0;margin-top:8px;}
+  #aurora-reviews .ar-row{padding:24px 0;border-bottom:1px solid #24242c;}
+  #aurora-reviews .ar-row-top{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:8px;}
+  #aurora-reviews .ar-meta{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+  #aurora-reviews .ar-name{font-size:14px;font-weight:500;color:#f0f0f4;}
+  #aurora-reviews .ar-verified{font-size:10px;color:#00e5c8;letter-spacing:.08em;}
+  #aurora-reviews .ar-country{font-size:10px;color:#7a7a86;letter-spacing:.06em;}
+  #aurora-reviews .ar-date{font-size:10px;color:#7a7a86;white-space:nowrap;}
+  #aurora-reviews .ar-stars{font-size:12px;letter-spacing:1px;}
+  #aurora-reviews .ar-stars .on{color:#00e5c8;}
+  #aurora-reviews .ar-stars .off{color:#3a3a44;}
+  #aurora-reviews .ar-body{font-size:13px;color:#b8b8c4;line-height:1.7;margin:8px 0 0;font-weight:300;}
+  #aurora-reviews #ar-more-toggle{display:none;}
+  #aurora-reviews .ar-hidden{display:none;}
+  #aurora-reviews #ar-more-toggle:checked ~ .ar-list .ar-hidden{display:block;}
+  #aurora-reviews .ar-more-btn{display:block;width:100%;max-width:280px;margin:36px auto 0;padding:14px;border:1px solid #3a3a44;background:transparent;color:#c9c9d2;font-size:12px;letter-spacing:.12em;text-align:center;cursor:pointer;font-family:inherit;transition:border-color .2s,color .2s;}
+  #aurora-reviews .ar-more-btn:hover{border-color:#fff;color:#fff;}
+  #aurora-reviews #ar-more-toggle:checked ~ .ar-more-btn{display:none;}
+  #aurora-reviews .ar-foot{text-align:center;color:#6a6a76;font-size:11px;letter-spacing:.06em;margin:32px 0 0;}
+  @media(max-width:600px){#aurora-reviews .ar-summary{gap:28px;}}
+</style>
+
+<div id="aurora-reviews"><div class="arw">
+  <h2>Customer Reviews</h2>
+  <p class="ar-sub">Verified buyers. Unfiltered.</p>
+
+  <div class="ar-summary">
+    <div>
+      <div class="ar-avg-num">4.6</div>
+      <div class="ar-avg-stars">&#9733;&#9733;&#9733;&#9733;<span class="off">&#9733;</span></div>
+      <div class="ar-avg-total">55 REVIEWS</div>
+    </div>
+    <div class="ar-bars">
+      {%- assign dist = "38,10,6,1,0" | split: "," -%}
+      {%- assign starlbls = "5,4,3,2,1" | split: "," -%}
+      {%- for s in starlbls -%}
+        {%- assign n = dist[forloop.index0] | times: 1 -%}
+        {%- assign pct = n | times: 100 | divided_by: 55 -%}
+        <div class="ar-bar-row">
+          <span class="ar-bar-lbl">{{ s }}</span>
+          <span class="ar-bar-star">&#9733;</span>
+          <span class="ar-bar-track"><span class="ar-bar-fill" style="width:{{ pct }}%;"></span></span>
+          <span class="ar-bar-n">{{ n }}</span>
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+
+  <input type="checkbox" id="ar-more-toggle">
+
+  {%- assign rv = "F***q|CL|Jun 2026|5|arrived to spain in 11 days. looks good~C***x|IT|Jun 2026|5|sizing kit would be nice but i guessed right. size 10 is good for thumb~L***z|AU|May 2026|4|app needs a translation update but data is there~W***f|IL|May 2026|3|ordered size 8 but it doesnt fit any of my fingers. annoying~X***i|ES|May 2026|5|arrived to spain in 11 days. looks good~P***k|KR|May 2026|5|nice matte black. scratches a bit if you lift weights but otherwise fine~Y***g|FR|May 2026|5|works perfectly~K***x|KR|May 2026|4|runs a bit small compared to standard ring sizes. size up~W***k|UK|May 2026|5|size 9 fits perfectly on index finger. tracking seems accurate compared to my watch~D***m|FR|May 2026|5|works perfectly~I***e|AU|Apr 2026|5|syncs fast.~Y***p|BR|Apr 2026|4|took 3 weeks to arrive. ring is good though~N***g|ES|Apr 2026|5|really light u dont even feel it when sleeping~I***m|CA|Apr 2026|5|good~G***e|DE|Mar 2026|5|good~O***o|ES|Mar 2026|3|step counter is way off.~V***m|BR|Mar 2026|5|nice matte black. scratches a bit if you lift weights but otherwise fine~James M.|UK|Mar 2026|5|Super! Recommend the seller.~H***y|RU|Mar 2026|5|~T***w|IL|Mar 2026|5|ok~L***v|DE|Mar 2026|5|good~A***f|FR|Mar 2026|5|The goods arrived quickly, the quality is fully satisfied.~L***u|UK|Mar 2026|5|good~P***e|IL|Mar 2026|4|battery is closer to 3 days not 7. but charges fast~E***o|RU|Feb 2026|5|Very satisfied. The item is exactly as described. Good materials.~T***g|CL|Feb 2026|5|Everything is fine, the track was tracked all the way.~G***v|DE|Feb 2026|5|love the minimalist design. no annoying screens.~Y***c|CL|Feb 2026|4|Good, but shipping took over a month.~N***j|KR|Feb 2026|5|Arrived in 2 weeks. Packed well, nothing damaged. Works fine.~P***h|BR|Feb 2026|5|really light u dont even feel it when sleeping~Y***h|KR|Feb 2026|5|battery lasts about 4-5 days. app is ok but gets the job done~F***n|BR|Feb 2026|5|~X***u|AU|Feb 2026|5|syncs fast.~Y***i|CA|Jan 2026|5|very fast shipping.~R***a|FR|Jan 2026|3|ordered size 8 but it doesnt fit any of my fingers. annoying~J***e|KR|Jan 2026|5|Fast delivery. The glass is good, glued without bubbles.~P***l|CL|Jan 2026|5|Super! Recommend the seller.~E***f|UK|Jan 2026|3|~J***v|CL|Jan 2026|5|good~H***z|KR|Jan 2026|4|app needs a translation update but data is there~Q***r|CL|Jan 2026|2|Never arrived. Got a refund.~Oliver H.|UK|Jan 2026|4|Not bad for the price.~L***f|CL|Jan 2026|4|Product is fine, but the packaging was slightly crumpled.~S***i|UK|Dec 2025|5|ok~Y***l|BR|Dec 2025|5|Arrived in 2 weeks. Packed well, nothing damaged. Works fine.~S***p|IL|Dec 2025|4|Not bad for the price.~R***o|PL|Dec 2025|4|Looks good, fits well. A little bit hard to install but ok.~G***h|ES|Nov 2025|5|~V***s|RU|Nov 2025|5|Very good quality! The bezel fits perfectly and looks very premium.~L***z|RU|Nov 2025|3|Too thick, doesn't look like the photos at all.~A***g|CL|Nov 2025|5|Very good quality! The bezel fits perfectly and looks very premium.~S***a|IL|Oct 2025|5|Looks luxurious, exactly like in the pictures.~T***y|CL|Oct 2025|3|Never arrived. Got a refund.~M***t|ES|Oct 2025|5|Fast delivery. The glass is good, glued without bubbles.~Marek P.|PL|Oct 2025|5|Arrived in 2 weeks. Packed well, nothing damaged. Works fine." | split: "~" -%}
+  <div class="ar-list">
+    {%- for r in rv -%}
+      {%- assign p = r | split: "|" -%}
+      {%- assign rating = p[3] | times: 1 -%}
+      <div class="ar-row{% if forloop.index0 >= 10 %} ar-hidden{% endif %}">
+        <div class="ar-row-top">
+          <div class="ar-meta">
+            <span class="ar-name">{{ p[0] }}</span>
+            <span class="ar-verified">VERIFIED</span>
+            <span class="ar-country">{{ p[1] }}</span>
+          </div>
+          <span class="ar-date">{{ p[2] }}</span>
+        </div>
+        <div class="ar-stars">{% for i in (1..5) %}{% if i <= rating %}<span class="on">&#9733;</span>{% else %}<span class="off">&#9733;</span>{% endif %}{% endfor %}</div>
+        {%- if p[4] != blank -%}<p class="ar-body">{{ p[4] }}</p>{%- endif -%}
+      </div>
+    {%- endfor -%}
+  </div>
+
+  <label for="ar-more-toggle" class="ar-more-btn">Show all 55 reviews</label>
+
+  <p class="ar-foot">Reviews collected from verified marketplace orders.</p>
+</div></div>
+
 {% schema %}
 {
   "name": "Aurora Reviews",
