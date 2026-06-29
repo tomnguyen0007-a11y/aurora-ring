@@ -729,6 +729,41 @@
 }
 </style>
 
+<style>
+/* ════════════════════════════════════════════
+   CLEAN PASS — remove purple/galaxy gradients + heavy glass.
+   Dark, high-contrast, gold stars, one restrained teal accent.
+════════════════════════════════════════════ */
+
+/* — Editorial section — */
+#aued::before{background:radial-gradient(55% 45% at 50% 100%, rgba(255,255,255,.035), transparent 72%) !important;filter:blur(40px) !important;}
+.aued-title em{background:none !important;-webkit-text-fill-color:#ececf2 !important;color:#ececf2 !important;animation:none !important;}
+.aued-shot:hover{border-color:rgba(255,255,255,.22) !important;box-shadow:0 40px 80px -30px rgba(0,0,0,.95) !important;}
+.aued-panel,.aued-panel--data,.aued-panel--stat{background:#121214 !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important;box-shadow:0 20px 40px -30px rgba(0,0,0,.8) !important;}
+.aued-panel:hover{border-color:rgba(255,255,255,.2) !important;box-shadow:0 30px 60px -28px rgba(0,0,0,.95) !important;}
+.aued-spark i{background:#3a3a42 !important;}
+
+/* — Reviews section — */
+#aurs::before{background:radial-gradient(50% 40% at 50% 0%, rgba(255,255,255,.03), transparent 70%) !important;filter:none !important;animation:none !important;}
+.aurs-card,.aurs-vcard,.aurs-summary,.aurs-form-section{
+  background:#121214 !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important;
+  border:1px solid rgba(255,255,255,.07) !important;box-shadow:0 20px 40px -30px rgba(0,0,0,.85) !important;}
+.aurs-card::after,.aurs-vcard::after{display:none !important;}
+.aurs-card:hover,.aurs-vcard:hover{transform:translateY(-3px) !important;border-color:rgba(255,255,255,.18) !important;box-shadow:0 30px 60px -28px rgba(0,0,0,.95) !important;}
+.aurs-badge-num,.aurs-avg-num{background:none !important;-webkit-text-fill-color:#fff !important;color:#fff !important;}
+.aurs-avg-stars{filter:none !important;}
+.aurs-bar-fill{background:#f5b400 !important;box-shadow:none !important;}
+.aurs-btn-grad{background:#ffffff !important;background-size:auto !important;color:#0a0a0a !important;animation:none !important;font-weight:600 !important;}
+.aurs-btn-grad:hover{background:#e6e6e6 !important;opacity:1 !important;transform:translateY(-1px) !important;}
+.aurs-scroll-track{scrollbar-color:#2c2c34 #0d0d10 !important;}
+.aurs-scroll-track::-webkit-scrollbar-thumb,.aurs-list::-webkit-scrollbar-thumb{background:#2c2c34 !important;}
+
+/* show-more (aktin-style) */
+.aurs-showmore-wrap{grid-column:1 / -1;display:flex;justify-content:center;margin-top:16px;}
+.aurs-showmore{padding:13px 32px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:transparent;color:#e8e8ee;font-family:inherit;font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background .2s,border-color .2s;}
+.aurs-showmore:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.3);}
+</style>
+
 <div id="aurs" style="background:#0c0c10;">
 <div class="aurs-wrap">
 
@@ -983,7 +1018,7 @@ var SEED=[
    Do NOT inflate it — fabricated counts violate the FTC review rule and risk the store. */
 var REVIEW_COUNT=55;
 
-var state={reviews:[],fStar:0,sort:'helpful',pickedR:0,voted:{}};
+var state={reviews:[],fStar:0,sort:'helpful',pickedR:0,voted:{},expanded:false};
 var TARGET=REVIEW_COUNT;
 
 /* ── Scroll-reveal (respects prefers-reduced-motion via CSS) ── */
@@ -1061,7 +1096,8 @@ function renderGrid(){
   var nores=document.getElementById('aurs-nores');
   if(!list.length){grid.innerHTML='';nores.style.display='block';return;}
   nores.style.display='none';
-  grid.innerHTML=list.map(function(r){
+  var limit=state.expanded?list.length:6;
+  grid.innerHTML=list.slice(0,limit).map(function(r){
     var vt=state.voted[r.id];
     return '<div class="aurs-card">'
       +'<div class="aurs-card-top"><div>'
@@ -1075,6 +1111,9 @@ function renderGrid(){
       +'<button class="aurs-hbtn'+(vt?' voted':'')+'"'+(vt?' disabled':'')+' onclick="aursHelpful(\''+r.id+'\')">'
       +'&#128077; '+r.helpful+'</button></div></div>';
   }).join('');
+  if(list.length>limit){
+    grid.insertAdjacentHTML('beforeend','<div class="aurs-showmore-wrap"><button class="aurs-showmore" onclick="aursShowMore()">Show more reviews</button></div>');
+  }
   if(window.aursReveal){
     var cards=grid.querySelectorAll('.aurs-card'),i=0;
     for(;i<cards.length;i++){cards[i].setAttribute('data-d',(i%3)+1);window.aursReveal(cards[i]);}
@@ -1082,6 +1121,8 @@ function renderGrid(){
 }
 
 function render(){renderBars();renderGrid();}
+
+window.aursShowMore=function(){state.expanded=true;renderGrid();};
 
 window.aursFilter=function(s,btn){
   state.fStar=s;
