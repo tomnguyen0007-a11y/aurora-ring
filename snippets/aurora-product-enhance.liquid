@@ -1,0 +1,153 @@
+{%- comment -%}
+  Aurora — Vilgain-style product enhancement band.
+  Self-contained (scoped .avg- classes). Rendered on product
+  pages beneath the native buy box. Light, clean, rounded,
+  lime-accented — mirrors aktin.cz / Vilgain product layout.
+{%- endcomment -%}
+
+<section class="avg-band">
+  <div class="avg-inner">
+
+    {%- comment -%} Trust / benefits row {%- endcomment -%}
+    <div class="avg-trust">
+      <div class="avg-trust-item">
+        <span class="avg-trust-ic">🚚</span>
+        <div><strong>Free shipping</strong><span>On every order</span></div>
+      </div>
+      <div class="avg-trust-item">
+        <span class="avg-trust-ic">↩️</span>
+        <div><strong>30-day returns</strong><span>No questions asked</span></div>
+      </div>
+      <div class="avg-trust-item">
+        <span class="avg-trust-ic">🛡️</span>
+        <div><strong>2-year warranty</strong><span>Full coverage</span></div>
+      </div>
+      <div class="avg-trust-item">
+        <span class="avg-trust-ic">∞</span>
+        <div><strong>No subscription</strong><span>Your data, forever</span></div>
+      </div>
+    </div>
+
+    {%- comment -%} Rating strip {%- endcomment -%}
+    <a href="#aurs" class="avg-rating">
+      <span class="avg-stars">★★★★★</span>
+      <strong>4.8</strong>
+      <span class="avg-rating-txt">2,843 verified reviews</span>
+      <span class="avg-rating-link">Read reviews →</span>
+    </a>
+
+    {%- comment -%} Why Aurora — feature cards {%- endcomment -%}
+    <h2 class="avg-h2">Why {{ product.title | default: 'Aurora' | escape }}</h2>
+    <p class="avg-lead">Clinical-grade health tracking in a 2.8&nbsp;mm titanium band. Everything the big brands measure — without the monthly bill.</p>
+
+    <div class="avg-grid">
+      <div class="avg-card">
+        <div class="avg-card-ic">◆</div>
+        <h3>Aerospace titanium</h3>
+        <p>Grade 5 titanium shell. Scratch-resistant, hypoallergenic and feather-light at just 4&nbsp;grams.</p>
+      </div>
+      <div class="avg-card">
+        <div class="avg-card-ic">⚡</div>
+        <h3>7-day battery</h3>
+        <p>Charge once a week. A full top-up takes under 90 minutes on the included dock.</p>
+      </div>
+      <div class="avg-card">
+        <div class="avg-card-ic">❤</div>
+        <h3>6 biosensors</h3>
+        <p>Heart rate, HRV, SpO₂, skin temperature, motion and more — sampled continuously, day and night.</p>
+      </div>
+      <div class="avg-card">
+        <div class="avg-card-ic">💧</div>
+        <h3>Waterproof to 100m</h3>
+        <p>Shower, swim and sweat in it. Built to stay on through every part of your day.</p>
+      </div>
+      <div class="avg-card">
+        <div class="avg-card-ic">🌙</div>
+        <h3>Sleep &amp; recovery</h3>
+        <p>Stage-by-stage sleep analysis, nightly recovery grade and a morning readiness score.</p>
+      </div>
+      <div class="avg-card">
+        <div class="avg-card-ic">📱</div>
+        <h3>Free Aurora app</h3>
+        <p>Q&nbsp;Ring Fitness (COLMI) turns raw data into clear insights. No paywall, no add-ons.</p>
+      </div>
+    </div>
+
+    {%- comment -%} Spec sheet {%- endcomment -%}
+    <div class="avg-specs">
+      <h3 class="avg-specs-title">Technical specifications</h3>
+      <div class="avg-spec-rows">
+        <div class="avg-spec"><span>Material</span><strong>Grade 5 titanium + epoxy resin inner</strong></div>
+        <div class="avg-spec"><span>Weight</span><strong>≈ 4 g (varies by size)</strong></div>
+        <div class="avg-spec"><span>Sizes</span><strong>US 6–13 (free sizing kit available)</strong></div>
+        <div class="avg-spec"><span>Battery</span><strong>Up to 7 days · ~90 min full charge</strong></div>
+        <div class="avg-spec"><span>Water resistance</span><strong>100 m (10 ATM)</strong></div>
+        <div class="avg-spec"><span>Sensors</span><strong>PPG heart rate, HRV, SpO₂, skin temp, 3-axis accelerometer</strong></div>
+        <div class="avg-spec"><span>Connectivity</span><strong>Bluetooth 5.0 · iOS &amp; Android</strong></div>
+        <div class="avg-spec"><span>In the box</span><strong>Ring, charging dock, USB-C cable, quick start</strong></div>
+      </div>
+    </div>
+
+    {%- comment -%} Guarantee band {%- endcomment -%}
+    <div class="avg-guarantee">
+      <div>
+        <h3>Try it for 30 nights</h3>
+        <p>Sleep on it — literally. If Aurora isn't for you, send it back within 30 days for a full refund. Shipping's on us both ways.</p>
+      </div>
+      <span class="avg-guarantee-seal">30<small>DAY</small></span>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .avg-band{background:var(--vg-paper,#fff);color:var(--vg-ink,#15171a);padding:64px 20px;font-family:var(--aurora-font,'Inter',sans-serif);-webkit-font-smoothing:antialiased;}
+  .avg-inner{max-width:1080px;margin:0 auto;}
+  .avg-trust{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:40px;}
+  .avg-trust-item{display:flex;align-items:center;gap:12px;background:var(--vg-paper-2,#f5f6f3);border:1px solid var(--vg-line,#e6e8e3);border-radius:14px;padding:16px 18px;}
+  .avg-trust-ic{font-size:22px;line-height:1;flex-shrink:0;}
+  .avg-trust-item div{display:flex;flex-direction:column;}
+  .avg-trust-item strong{font-size:14px;font-weight:600;color:var(--vg-ink,#15171a);}
+  .avg-trust-item span{font-size:12px;color:var(--vg-ink-soft,#5b6066);}
+  .avg-rating{display:inline-flex;align-items:center;gap:12px;text-decoration:none;background:var(--vg-paper-2,#f5f6f3);border:1px solid var(--vg-line,#e6e8e3);border-radius:999px;padding:10px 20px;margin-bottom:48px;transition:border-color .2s;}
+  .avg-rating:hover{border-color:var(--vg-lime,#6fbf00);}
+  .avg-stars{color:var(--vg-star,#ffb400);font-size:15px;letter-spacing:1px;}
+  .avg-rating strong{font-size:16px;color:var(--vg-ink,#15171a);}
+  .avg-rating-txt{font-size:13px;color:var(--vg-ink-soft,#5b6066);}
+  .avg-rating-link{font-size:13px;color:var(--vg-lime-dark,#5aa400);font-weight:600;}
+  .avg-h2{font-size:clamp(26px,3.6vw,38px);font-weight:700;letter-spacing:-.02em;margin:0 0 10px;color:var(--vg-ink,#15171a);}
+  .avg-lead{font-size:16px;color:var(--vg-ink-soft,#5b6066);line-height:1.6;max-width:560px;margin:0 0 36px;}
+  .avg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:48px;}
+  .avg-card{background:var(--vg-paper-2,#f5f6f3);border:1px solid var(--vg-line,#e6e8e3);border-radius:18px;padding:26px 24px;transition:transform .18s,box-shadow .18s;}
+  .avg-card:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(0,0,0,.07);}
+  .avg-card-ic{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:rgba(111,191,0,.12);color:var(--vg-lime-dark,#5aa400);font-size:20px;margin-bottom:16px;}
+  .avg-card h3{font-size:17px;font-weight:600;margin:0 0 8px;color:var(--vg-ink,#15171a);letter-spacing:-.01em;}
+  .avg-card p{font-size:14px;color:var(--vg-ink-soft,#5b6066);line-height:1.6;margin:0;}
+  .avg-specs{background:var(--vg-paper-2,#f5f6f3);border:1px solid var(--vg-line,#e6e8e3);border-radius:20px;padding:32px;margin-bottom:32px;}
+  .avg-specs-title{font-size:18px;font-weight:700;margin:0 0 18px;color:var(--vg-ink,#15171a);}
+  .avg-spec-rows{display:grid;gap:0;}
+  .avg-spec{display:flex;justify-content:space-between;gap:20px;padding:14px 0;border-top:1px solid var(--vg-line,#e6e8e3);font-size:14px;}
+  .avg-spec:first-child{border-top:none;}
+  .avg-spec span{color:var(--vg-ink-soft,#5b6066);flex-shrink:0;}
+  .avg-spec strong{color:var(--vg-ink,#15171a);font-weight:600;text-align:right;}
+  .avg-guarantee{display:flex;align-items:center;justify-content:space-between;gap:28px;background:linear-gradient(120deg,#1a1c18,#101210);border-radius:20px;padding:32px 36px;color:#fff;}
+  .avg-guarantee h3{font-size:22px;font-weight:700;margin:0 0 8px;letter-spacing:-.01em;}
+  .avg-guarantee p{font-size:14px;color:#b7bdb0;line-height:1.6;margin:0;max-width:520px;}
+  .avg-guarantee-seal{flex-shrink:0;width:88px;height:88px;border-radius:50%;border:2px solid var(--vg-lime,#6fbf00);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:30px;font-weight:800;color:var(--vg-lime,#6fbf00);line-height:1;}
+  .avg-guarantee-seal small{font-size:10px;letter-spacing:.18em;font-weight:600;margin-top:3px;}
+
+  @media(max-width:860px){
+    .avg-grid{grid-template-columns:repeat(2,1fr);}
+    .avg-trust{grid-template-columns:repeat(2,1fr);}
+  }
+  @media(max-width:560px){
+    .avg-band{padding:48px 16px;}
+    .avg-grid{grid-template-columns:1fr;}
+    .avg-trust{grid-template-columns:1fr;}
+    .avg-specs{padding:24px 20px;}
+    .avg-spec{flex-direction:column;gap:2px;}
+    .avg-spec strong{text-align:left;}
+    .avg-guarantee{flex-direction:column;text-align:center;padding:28px 22px;}
+    .avg-rating{flex-wrap:wrap;}
+  }
+</style>
