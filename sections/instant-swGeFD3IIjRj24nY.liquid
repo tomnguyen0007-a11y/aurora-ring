@@ -9,7 +9,7 @@
     endif
   -%}
   {{ 'instant-swGeFD3IIjRj24nY.css' | asset_url | stylesheet_tag: preload: preload -}}
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&amp;family=Instrument+Serif:ital,wght@0,400;1,400&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&amp;family=Instrument+Serif:wght@400&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"
   ><div data-instant-type="root" class="ix82zWXwjPWs8CNpP">
     {%- liquid
       assign product_i0RFdnEPQOvZNKbT_handle = 'aurora-ring'
@@ -30,7 +30,7 @@
           ><div class="instant-rich-text iwCLSDMiumKdzhrX7 instant-scroll-trigger instant-scroll-trigger--hidden instant-reveal--fade" data-instant-scroll-into-view-replay="false" data-instant-type="text"><p>Purpose-built for modern health. Designed to seamlessly blend into your life.</p></div>
           <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:999px;border:1px solid #1e1e1e;background:#0a0a0a;margin-top:18px;">
             <span style="width:6px;height:6px;border-radius:50%;background:#00e5c8;display:inline-block;flex-shrink:0;"></span>
-            <span style="font-size:11px;letter-spacing:.12em;color:#555;font-family:inherit;">NO SUBSCRIPTION &middot; FULL DATA ACCESS &middot; YOURS FOREVER</span>
+            <span style="font-size:11px;letter-spacing:.12em;color:#8d8d97;font-family:inherit;">NO SUBSCRIPTION &middot; FULL DATA ACCESS &middot; YOURS FOREVER</span>
           </div></div
         <div class="iAwrg3J55dmzVZwnF instant-scroll-trigger instant-scroll-trigger--hidden instant-reveal--fade" data-instant-scroll-into-view-replay="false" data-instant-type="container">
   {%- liquid
@@ -57,7 +57,7 @@
     href="#id7ZK83gfclQvAJ1i" 
     rel="noopener noreferrer" 
     data-instant-action-type="open-page"
-    style="background-color: transparent; border: 1px solid currentColor; margin-top: 10px;"
+    style="background-color: transparent; border: 1.5px solid rgba(255,255,255,0.55); margin-top: 10px;"
     ><div data-instant-type="text" class="instant-rich-text iZiTRcpDeIqZW99Xd"><p>Explore Features</p></div></a
   >
 
@@ -108,15 +108,15 @@
       ><div class="iLAksCgREO7ISQKRm" data-instant-type="container" style="display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;padding:40px 24px;border-top:1px solid #1e1e1e;border-bottom:1px solid #1e1e1e;">
         <div style="text-align:center;padding:16px 36px;border-right:1px solid #1e1e1e;">
           <div style="font-size:26px;font-weight:600;color:#ffffff;letter-spacing:.04em;">$0</div>
-          <div style="font-size:10px;color:#555;letter-spacing:.14em;margin-top:5px;">SUBSCRIPTION FEE</div>
+          <div style="font-size:10px;color:#8d8d97;letter-spacing:.14em;margin-top:5px;">SUBSCRIPTION FEE</div>
         </div>
         <div style="text-align:center;padding:16px 36px;border-right:1px solid #1e1e1e;">
           <div style="font-size:26px;font-weight:600;color:#ffffff;letter-spacing:.04em;">7-Day</div>
-          <div style="font-size:10px;color:#555;letter-spacing:.14em;margin-top:5px;">BATTERY LIFE</div>
+          <div style="font-size:10px;color:#8d8d97;letter-spacing:.14em;margin-top:5px;">BATTERY LIFE</div>
         </div>
         <div style="text-align:center;padding:16px 36px;">
           <div style="font-size:26px;font-weight:600;color:#ffffff;letter-spacing:.04em;">30-Day</div>
-          <div style="font-size:10px;color:#555;letter-spacing:.14em;margin-top:5px;">FREE RETURNS</div>
+          <div style="font-size:10px;color:#8d8d97;letter-spacing:.14em;margin-top:5px;">FREE RETURNS</div>
         </div>
       </div
       ></div
@@ -345,866 +345,82 @@
       ></form
     >
 
-<!-- ═══════════════════════════════════════════
-     AURORA — EDITORIAL "FEELING" SECTION
-════════════════════════════════════════════ -->
-{%- liquid
-  assign aued_p = all_products['aurora-ring']
-  assign aued_img = aued_p.featured_image
--%}
-<style>
-/* Editorial typography elevation — serif display headlines across the homepage
-   (typeface only; size/color/line-height untouched, so layout is unaffected) */
-.ix82zWXwjPWs8CNpP h1,
-.ix82zWXwjPWs8CNpP h2:not(.aued-title){
-  font-family:'Instrument Serif', Georgia, serif !important;
-  font-weight:400 !important;
-  font-style:normal !important;
-  letter-spacing:-.015em !important;
-}
-
-/* ── Editorial "feeling" section ── */
-#aued{position:relative;background:#0a0a0c;padding:120px 24px;border-top:1px solid #141418;overflow:hidden;font-family:'Inter',sans-serif;}
-#aued::before{content:"";position:absolute;left:-10%;right:-10%;bottom:-30%;height:560px;pointer-events:none;z-index:0;
-  background:radial-gradient(40% 60% at 20% 100%,rgba(0,229,200,.10),transparent 70%),radial-gradient(46% 64% at 82% 92%,rgba(124,58,237,.13),transparent 70%),radial-gradient(40% 50% at 50% 100%,rgba(224,17,95,.07),transparent 72%);filter:blur(30px);animation:aued-drift 22s ease-in-out infinite alternate;}
-@keyframes aued-drift{0%{transform:translate3d(-2%,0,0)}100%{transform:translate3d(3%,-2%,0)}}
-.aued-wrap{position:relative;z-index:1;max-width:1120px;margin:0 auto;}
-
-.aued-intro{max-width:700px;margin:0 0 56px;transition:opacity .8s cubic-bezier(.16,1,.3,1),translate .8s cubic-bezier(.16,1,.3,1);}
-.aued-eyebrow{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.28em;color:#00e5c8;margin-bottom:20px;}
-.aued-title{margin:0 0 18px;font-family:'Inter',sans-serif;font-size:clamp(34px,5.2vw,68px);line-height:1.05;font-weight:300;color:#f4f4f8;letter-spacing:-.02em;}
-.aued-title em{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-weight:400;
-  background:linear-gradient(100deg,#ffffff 0%,#9fe9df 28%,#b39df6 58%,#ffffff 88%);background-size:220% 100%;
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:aued-shine 6s linear infinite;}
-@keyframes aued-shine{to{background-position:-220% 0;}}
-.aued-sub{margin:0;font-size:clamp(15px,1.6vw,18px);line-height:1.6;color:#8a8a9a;font-weight:300;max-width:540px;}
-
-.aued-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
-@media(max-width:880px){.aued-grid{grid-template-columns:1fr;}}
-
-/* Oura-style product gallery (auto-pulled from product media) */
-.aued-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;}
-.aued-shot{position:relative;margin:0;border-radius:18px;overflow:hidden;aspect-ratio:4/3;background:#0d0d12;border:1px solid rgba(255,255,255,.08);box-shadow:0 30px 60px -30px rgba(0,0,0,.9);
-  transition:transform .5s cubic-bezier(.16,1,.3,1),translate .8s cubic-bezier(.16,1,.3,1),opacity .8s cubic-bezier(.16,1,.3,1),box-shadow .4s,border-color .4s;}
-.aued-shot::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:inset 0 0 70px rgba(0,0,0,.14);}
-.aued-shot img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .7s cubic-bezier(.16,1,.3,1);}
-.aued-shot:hover{transform:translateY(-6px);border-color:rgba(0,229,200,.30);box-shadow:0 40px 80px -28px rgba(0,0,0,.95),0 0 50px -14px rgba(124,58,237,.30);}
-.aued-shot:hover img{transform:scale(1.06);}
-@media (prefers-reduced-motion: reduce){.aued-shot,.aued-shot img{transition:none !important;}.aued-shot{opacity:1 !important;translate:0 0 !important;}}
-.aued-panel{position:relative;border-radius:20px;padding:24px;min-height:380px;display:flex;flex-direction:column;justify-content:space-between;
-  background:linear-gradient(158deg,rgba(255,255,255,.055),rgba(255,255,255,.012));
-  -webkit-backdrop-filter:blur(22px) saturate(150%);backdrop-filter:blur(22px) saturate(150%);
-  border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 30px 60px -30px rgba(0,0,0,.9);overflow:hidden;
-  transition:transform .5s cubic-bezier(.16,1,.3,1),translate .8s cubic-bezier(.16,1,.3,1),opacity .8s cubic-bezier(.16,1,.3,1),border-color .4s,box-shadow .4s;}
-.aued-panel:nth-child(2){transition-delay:.08s}
-.aued-panel:nth-child(3){transition-delay:.16s}
-.aued-panel:hover{transform:translateY(-6px);border-color:rgba(0,229,200,.32);box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 40px 80px -28px rgba(0,0,0,.95),0 0 50px -12px rgba(124,58,237,.30);}
-
-.aued-cap{display:flex;flex-direction:column;gap:3px;margin-top:20px;}
-.aued-cap-k{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.2em;color:#5a5a70;text-transform:uppercase;}
-.aued-cap-v{font-size:13px;color:#c9c9d6;font-weight:300;}
-.aued-cap-v em{font-style:normal;color:#00e5c8;}
-
-/* Panel 1 — product render */
-.aued-panel--media .aued-media{position:relative;flex:1;display:flex;align-items:center;justify-content:center;border-radius:14px;overflow:hidden;
-  background:radial-gradient(60% 60% at 50% 40%,rgba(124,58,237,.22),transparent 70%),#0d0d12;}
-.aued-panel--media .aued-media::after{content:"";position:absolute;inset:0;background:radial-gradient(50% 40% at 50% 112%,rgba(0,229,200,.18),transparent 70%);}
-.aued-panel--media img{position:relative;z-index:1;max-width:88%;max-height:290px;object-fit:contain;filter:drop-shadow(0 30px 50px rgba(0,0,0,.6));transition:transform .6s cubic-bezier(.16,1,.3,1);}
-.aued-panel--media:hover img{transform:scale(1.05) rotate(-2deg);}
-.aued-media-fallback{font-family:'Instrument Serif',serif;font-size:48px;color:#2a2a38;}
-
-/* Panel 2 — live data glass card */
-.aued-panel--data{background:linear-gradient(158deg,rgba(0,229,200,.06),rgba(124,58,237,.05));}
-.aued-live{display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;color:#9fe9df;}
-.aued-live-dot{width:7px;height:7px;border-radius:50%;background:#00e5c8;box-shadow:0 0 10px #00e5c8;animation:aued-pulse 2.2s ease-in-out infinite;}
-@keyframes aued-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
-.aued-metric{display:flex;flex-direction:column;gap:13px;margin:6px 0;}
-.aued-metric-row{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:#8a8a9a;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:12px;}
-.aued-metric-row b{font-size:24px;font-weight:300;color:#fff;}
-.aued-metric-row small{font-size:12px;color:#8a8a9a;font-weight:300;}
-.aued-metric-row em{font-style:normal;font-size:12px;color:#00e5c8;margin-left:6px;}
-.aued-spark{display:flex;align-items:flex-end;gap:5px;height:32px;margin:2px 0;}
-.aued-spark i{flex:1;background:linear-gradient(180deg,#00e5c8,#7c3aed);border-radius:2px;opacity:.85;transform-origin:bottom;animation:aued-bar 1.8s ease-in-out infinite;}
-.aued-spark i:nth-child(1){height:40%;animation-delay:0s}.aued-spark i:nth-child(2){height:70%;animation-delay:.1s}.aued-spark i:nth-child(3){height:50%;animation-delay:.2s}.aued-spark i:nth-child(4){height:92%;animation-delay:.3s}.aued-spark i:nth-child(5){height:60%;animation-delay:.4s}.aued-spark i:nth-child(6){height:80%;animation-delay:.5s}.aued-spark i:nth-child(7){height:45%;animation-delay:.6s}
-@keyframes aued-bar{0%,100%{transform:scaleY(.85)}50%{transform:scaleY(1.12)}}
-
-/* Panel 3 — typographic stat */
-.aued-panel--stat{background:linear-gradient(158deg,rgba(255,255,255,.06),rgba(255,255,255,.012));}
-.aued-stat{display:flex;align-items:baseline;gap:10px;}
-.aued-stat-num{font-family:'Instrument Serif',Georgia,serif;font-size:108px;line-height:.78;color:#fff;font-weight:400;}
-.aued-stat-unit{font-size:20px;color:#8a8a9a;font-weight:300;}
-.aued-stat-meta{display:flex;flex-direction:column;gap:8px;margin-top:18px;}
-.aued-stat-meta span{font-size:13px;color:#9a9aaa;font-weight:300;line-height:1.45;}
-.aued-stat-meta span:first-child{color:#d8d8e8;}
-
-/* reveal */
-.aued-reveal{opacity:0;translate:0 26px;}
-.aued-reveal.in{opacity:1;translate:0 0;}
-
-@media (prefers-reduced-motion: reduce){
-  #aued::before,.aued-title em,.aued-live-dot,.aued-spark i{animation:none !important;}
-  .aued-title em{-webkit-text-fill-color:#b39df6;}
-  .aued-reveal,.aued-reveal.in{opacity:1 !important;translate:0 0 !important;}
-  .aued-panel,.aued-panel--media img,.aued-intro{transition:none !important;}
-}
-</style>
-
-<section id="aued" aria-label="Why AURORA feels different">
-  <div class="aued-wrap">
-    <div class="aued-intro">
-      <span class="aued-eyebrow">THE DIFFERENCE</span>
-      <h2 class="aued-title">Engineered to vanish.<br><em>Designed to be felt.</em></h2>
-      <p class="aued-sub">Titanium thin enough to forget you're wearing it. Intelligence deep enough to change how you live.</p>
+<!-- ═══ COMPARISON ═══ -->
+<div style="background:#080808;padding:72px 24px;border-top:1px solid #1e1e1e;">
+  <div style="max-width:900px;margin:0 auto;">
+    <h2 style="font-size:clamp(22px,3vw,36px);font-weight:300;color:#fff;text-align:center;margin:0 0 8px;font-family:inherit;">Pay once. Own your data. €0/month — forever.</h2>
+    <p style="text-align:center;color:#8d8d97;font-size:14px;margin:0 0 40px;">How AURORA stacks up against the subscription-dependent competition.</p>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+      <table style="width:100%;border-collapse:collapse;min-width:560px;">
+        <thead>
+          <tr>
+            <th style="padding:14px 16px;text-align:left;font-size:11px;letter-spacing:.12em;color:#555;font-weight:400;border-bottom:1px solid #1e1e1e;"></th>
+            <th style="padding:14px 16px;text-align:center;font-size:12px;letter-spacing:.1em;color:#00e5c8;font-weight:600;border-bottom:2px solid #00e5c8;background:rgba(0,229,200,.04);">AURORA</th>
+            <th style="padding:14px 16px;text-align:center;font-size:12px;letter-spacing:.1em;color:#6a6a80;font-weight:400;border-bottom:1px solid #1e1e1e;">Oura Ring 4</th>
+            <th style="padding:14px 16px;text-align:center;font-size:12px;letter-spacing:.1em;color:#6a6a80;font-weight:400;border-bottom:1px solid #1e1e1e;">Whoop 5.0</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:14px 16px;font-size:13px;color:#8d8d97;border-bottom:1px solid #141418;">Price model</td>
+            <td style="padding:14px 16px;text-align:center;font-size:13px;color:#fff;border-bottom:1px solid #141418;background:rgba(0,229,200,.03);">€109,90 once</td>
+            <td style="padding:14px 16px;text-align:center;font-size:13px;color:#6a6a80;border-bottom:1px solid #141418;">from ~€349 ring</td>
+            <td style="padding:14px 16px;text-align:center;font-size:13px;color:#6a6a80;border-bottom:1px solid #141418;">device w/ membership</td>
+          </tr>
+          <tr>
+            <td style="padding:14px 16px;font-size:13px;color:#8d8d97;border-bottom:1px solid #141418;">Subscription to use it</td>
+            <td style="padding:14px 16px;text-align:center;font-size:13px;color:#fff;border-bottom:1px solid #141418;background:rgba(0,229,200,.03);">None, ever</td>
+            <td style="padding:14px 16px;text-align:center;font-size:13px;color:#6a6a80;border-bottom:1px solid #141418;">~€6/mo after 12-mo trial</td>
+            <td style="padding:14px 16px;text-align:center;font-size:13px;color:#6a6a80;border-bottom:1px solid #141418;">Required (€199–359/yr)</td>
+          </tr>
+          <tr>
+            <td style="padding:14px 16px;font-size:13px;color:#8d8d97;border-bottom:1px solid #141418;">Own it outright, no ongoing fee</td>
+            <td style="padding:14px 16px;text-align:center;font-size:20px;color:#00e5c8;border-bottom:1px solid #141418;background:rgba(0,229,200,.03);">✓</td>
+            <td style="padding:14px 16px;text-align:center;font-size:20px;color:#2e2e3e;border-bottom:1px solid #141418;">✗</td>
+            <td style="padding:14px 16px;text-align:center;font-size:20px;color:#2e2e3e;border-bottom:1px solid #141418;">✗</td>
+          </tr>
+          <tr>
+            <td style="padding:14px 16px;font-size:13px;color:#8d8d97;border-bottom:1px solid #141418;">On-device LED display (no phone needed)</td>
+            <td style="padding:14px 16px;text-align:center;font-size:20px;color:#00e5c8;border-bottom:1px solid #141418;background:rgba(0,229,200,.03);">✓</td>
+            <td style="padding:14px 16px;text-align:center;font-size:20px;color:#2e2e3e;border-bottom:1px solid #141418;">✗</td>
+            <td style="padding:14px 16px;text-align:center;font-size:20px;color:#2e2e3e;border-bottom:1px solid #141418;">✗</td>
+          </tr>
+          <tr>
+            <td style="padding:14px 16px;font-size:13px;color:#8d8d97;">Sleep · HRV · SpO₂ · temperature</td>
+            <td style="padding:14px 16px;text-align:center;font-size:20px;color:#00e5c8;background:rgba(0,229,200,.03);">✓</td>
+            <td style="padding:14px 16px;text-align:center;font-size:20px;color:#6a6a80;">✓</td>
+            <td style="padding:14px 16px;text-align:center;font-size:20px;color:#6a6a80;">✓</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-
-    {%- assign aued_imgs = aued_p.images -%}
-    {%- if aued_imgs.size > 1 -%}
-    <div class="aued-gallery">
-      {%- for image in aued_imgs limit: 4 -%}
-        <figure class="aued-shot">
-          <img
-            src="{{ image | image_url: width: 800 }}"
-            srcset="{{ image | image_url: width: 480 }} 480w, {{ image | image_url: width: 800 }} 800w, {{ image | image_url: width: 1200 }} 1200w"
-            sizes="(max-width: 880px) 92vw, 32vw"
-            alt="{{ image.alt | default: aued_p.title | escape }}"
-            width="800" height="600" loading="lazy">
-        </figure>
-      {%- endfor -%}
-    </div>
-    {%- else -%}
-    <div class="aued-grid">
-      <article class="aued-panel aued-panel--media">
-        <div class="aued-media">
-          {%- if aued_img != blank -%}
-            <img src="{{ aued_img | image_url: width: 1000 }}" alt="{{ aued_img.alt | default: 'AURORA Ring in titanium' | escape }}" width="1000" height="1000" loading="lazy">
-          {%- else -%}
-            <span class="aued-media-fallback">AURORA</span>
-          {%- endif -%}
-        </div>
-        <div class="aued-cap">
-          <span class="aued-cap-k">Material</span>
-          <span class="aued-cap-v">Aerospace-grade titanium &middot; 2.8&nbsp;mm</span>
-        </div>
-      </article>
-
-      <article class="aued-panel aued-panel--data">
-        <div class="aued-live"><span class="aued-live-dot"></span>LIVE</div>
-        <div class="aued-metric">
-          <div class="aued-metric-row"><span>Readiness</span><b>91</b></div>
-          <div class="aued-spark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-          <div class="aued-metric-row"><span>Heart Rate Variability</span><b>68<small>ms</small><em>&uarr;12%</em></b></div>
-          <div class="aued-metric-row" style="border-bottom:none;"><span>Sleep</span><b>7h 42m</b></div>
-        </div>
-        <div class="aued-cap">
-          <span class="aued-cap-k">Insight</span>
-          <span class="aued-cap-v">Continuous data &middot; <em>$0 subscription</em></span>
-        </div>
-      </article>
-
-      <article class="aued-panel aued-panel--stat">
-        <div class="aued-stat">
-          <span class="aued-stat-num" data-count="7">7</span>
-          <span class="aued-stat-unit">days</span>
-        </div>
-        <div class="aued-stat-meta">
-          <span>IP68 &middot; waterproof to 50&nbsp;metres</span>
-          <span>Charge once a week, then forget the cable exists.</span>
-        </div>
-        <div class="aued-cap">
-          <span class="aued-cap-k">Endurance</span>
-          <span class="aued-cap-v">Wear it everywhere</span>
-        </div>
-      </article>
-    </div>
-    {%- endif -%}
-  </div>
-</section>
-
-<script>
-(function(){
-  var sec=document.getElementById('aued');if(!sec)return;
-  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function countStat(){
-    var n=sec.querySelector('.aued-stat-num');if(!n)return;
-    var t=parseInt(n.getAttribute('data-count')||'7',10);
-    if(reduce){n.textContent=t;return;}
-    var c=0,iv=setInterval(function(){c++;n.textContent=c;if(c>=t)clearInterval(iv);},90);
-  }
-  var els=[].slice.call(sec.querySelectorAll('.aued-intro, .aued-panel, .aued-shot'));
-  if(!('IntersectionObserver' in window)){countStat();return;}
-  var io=new IntersectionObserver(function(es){
-    es.forEach(function(e){
-      if(e.isIntersecting){
-        e.target.classList.add('in');
-        if(e.target.classList.contains('aued-panel--stat'))countStat();
-        io.unobserve(e.target);
-      }
-    });
-  },{threshold:.14,rootMargin:'0px 0px -8% 0px'});
-  els.forEach(function(el){el.classList.add('aued-reveal');io.observe(el);});
-})();
-</script>
-
-
-<!-- ═══════════════════════════════════════════
-     AURORA — REVIEWS SECTION v2
-════════════════════════════════════════════ -->
-<style>
-/* ── Layout ── */
-#aurs{background:#0c0c10;padding:96px 24px 80px;border-top:1px solid #141418;/* LIVE — liquid-glass review section. To hide again add: display:none; */}
-.aurs-wrap{max-width:1120px;margin:0 auto;}
-
-/* ── Hero bar ── */
-.aurs-hero{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:32px;margin-bottom:64px;}
-.aurs-headline h2{font-size:clamp(28px,4vw,48px);font-weight:300;color:#fff;margin:0 0 8px;line-height:1.1;}
-.aurs-headline p{font-size:14px;color:#555;margin:0;}
-.aurs-badges{display:flex;gap:24px;flex-wrap:wrap;}
-.aurs-badge{text-align:center;}
-.aurs-badge-num{font-size:32px;font-weight:300;color:#fff;line-height:1;background:linear-gradient(90deg,#00e5c8,#7c3aed,#e0115f);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.aurs-badge-lbl{font-size:10px;letter-spacing:.14em;color:#666;margin-top:4px;text-transform:uppercase;}
-
-/* ── Summary row ── */
-.aurs-summary{display:flex;align-items:flex-start;gap:48px;margin-bottom:48px;padding-bottom:40px;border-bottom:1px solid #141418;flex-wrap:wrap;}
-.aurs-avg-block{text-align:center;min-width:120px;}
-.aurs-avg-num{font-size:64px;font-weight:300;color:#fff;line-height:1;}
-.aurs-avg-stars{color:#f5b400;font-size:18px;letter-spacing:2px;margin:4px 0;}
-.aurs-avg-sub{font-size:11px;color:#666;}
-.aurs-bars{flex:1;min-width:220px;}
-.aurs-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-.aurs-bar-lbl{font-size:11px;color:#6a6a80;width:20px;text-align:right;}
-.aurs-bar-track{flex:1;height:5px;background:#1a1a22;border-radius:3px;overflow:hidden;}
-.aurs-bar-fill{height:100%;background:#f5b400;border-radius:3px;transition:width .7s ease;}
-.aurs-bar-n{font-size:11px;color:#2e2e3e;width:18px;}
-.aurs-write-cta-inline{display:flex;flex-direction:column;gap:10px;justify-content:center;}
-.aurs-btn-grad{display:inline-block;padding:13px 28px;border-radius:999px;border:none;background:linear-gradient(135deg,#00e5c8,#7c3aed,#e0115f);background-size:300% 300%;animation:aurs-grad 5s ease infinite;color:#fff;font-size:12px;letter-spacing:.1em;font-family:inherit;cursor:pointer;text-transform:uppercase;transition:opacity .2s,transform .15s;text-align:center;text-decoration:none;}
-.aurs-btn-grad:hover{opacity:.88;transform:scale(1.02);}
-.aurs-btn-ghost{display:inline-block;padding:12px 28px;border-radius:999px;border:1px solid #1e1e1e;background:transparent;color:#555;font-size:12px;letter-spacing:.1em;font-family:inherit;cursor:pointer;text-transform:uppercase;transition:all .2s;text-align:center;}
-.aurs-btn-ghost:hover{border-color:#00e5c8;color:#00e5c8;}
-@keyframes aurs-grad{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-
-/* ── Filters ── */
-.aurs-filter-row{display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap;align-items:center;}
-.aurs-flbl{font-size:10px;color:#555;letter-spacing:.12em;}
-.aurs-fb{padding:6px 14px;border-radius:999px;border:1px solid #222232;background:transparent;color:#666;font-size:11px;cursor:pointer;font-family:inherit;transition:all .18s;letter-spacing:.04em;}
-.aurs-fb:hover,.aurs-fb.on{border-color:#00e5c8;color:#00e5c8;background:rgba(0,229,200,.05);}
-.aurs-sort-sep{margin-left:auto;display:flex;gap:6px;align-items:center;}
-
-/* ── Scrollable verified strip ── */
-.aurs-verified-label{font-size:10px;letter-spacing:.16em;color:#666;margin-bottom:16px;text-transform:uppercase;}
-.aurs-scroll-outer{position:relative;margin-bottom:48px;}
-.aurs-scroll-track{display:flex;gap:14px;overflow-x:auto;padding-bottom:14px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#7c3aed #0d0d10;}
-.aurs-scroll-track::-webkit-scrollbar{height:4px;}
-.aurs-scroll-track::-webkit-scrollbar-track{background:#0d0d10;border-radius:2px;}
-.aurs-scroll-track::-webkit-scrollbar-thumb{background:linear-gradient(90deg,#00e5c8,#7c3aed);border-radius:2px;}
-.aurs-vcard{min-width:280px;max-width:280px;background:#13131a;border:1px solid #222230;border-radius:14px;padding:22px;scroll-snap-align:start;flex-shrink:0;}
-.aurs-vcard-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
-.aurs-vname{font-size:13px;font-weight:500;color:#d8d8e8;}
-.aurs-vbadge{font-size:9px;color:#00e5c8;letter-spacing:.06em;margin-top:3px;display:flex;align-items:center;gap:4px;}
-.aurs-vbadge::before{content:"✓";font-size:9px;}
-.aurs-vsource{font-size:9px;color:#2e2e3e;background:#141418;padding:3px 8px;border-radius:4px;white-space:nowrap;}
-.aurs-vstars{color:#f5b400;font-size:11px;letter-spacing:1px;margin-bottom:8px;}
-.aurs-vbody{font-size:12px;color:#8a8a9a;line-height:1.65;font-weight:300;}
-.aurs-scroll-arrows{display:flex;gap:8px;justify-content:flex-end;margin-top:10px;}
-.aurs-arrow{width:32px;height:32px;border-radius:50%;border:1px solid #1e1e1e;background:transparent;color:#555;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;}
-.aurs-arrow:hover{border-color:#00e5c8;color:#00e5c8;}
-
-/* ── Dynamic review grid ── */
-.aurs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:40px;}
-.aurs-card{background:#13131a;border:1px solid #1e1e2e;border-radius:14px;padding:24px;transition:border-color .2s,transform .2s;}
-.aurs-card:hover{border-color:#252530;transform:translateY(-2px);}
-.aurs-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
-.aurs-cname{font-size:13px;font-weight:500;color:#d8d8e8;}
-.aurs-cver{font-size:9px;color:#00e5c8;letter-spacing:.06em;margin-top:3px;opacity:.85;}
-.aurs-cdate{font-size:10px;color:#4a4a60;}
-.aurs-cstars{color:#f5b400;font-size:11px;letter-spacing:1px;margin-bottom:8px;}
-.aurs-ctitle{font-size:14px;font-weight:500;color:#d8d8e8;margin:0 0 7px;line-height:1.3;}
-.aurs-cbody{font-size:13px;color:#8a8a9a;line-height:1.7;font-weight:300;margin:0;}
-.aurs-helpful{display:flex;align-items:center;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid #141418;}
-.aurs-list{max-height:900px;overflow-y:auto;padding-right:8px;scrollbar-width:thin;}
-.aurs-list::-webkit-scrollbar{width:6px;}
-.aurs-list::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#7c5cff,#2dd4bf);border-radius:999px;}
-
-.aurs-hlbl{font-size:10px;color:#555;}
-.aurs-hbtn{padding:3px 11px;border-radius:999px;border:1px solid #222232;background:transparent;color:#666;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s;}
-.aurs-hbtn:hover{border-color:#252530;color:#666;}
-.aurs-hbtn.voted{border-color:rgba(0,229,200,.3);color:#00e5c8;cursor:default;}
-.aurs-nores{text-align:center;padding:56px 0;color:#2e2e3e;font-size:14px;}
-
-/* ── Shopify contact form ── */
-.aurs-form-section{max-width:580px;margin:0 auto;padding:40px;background:#0d0d10;border:1px solid #1a1a22;border-radius:20px;display:none;}
-.aurs-form-section.open{display:block;}
-.aurs-form-title{font-size:24px;font-weight:300;color:#fff;margin:0 0 6px;}
-.aurs-form-sub{font-size:13px;color:#444;margin:0 0 28px;}
-.aurs-flabel{display:block;font-size:10px;color:#3a3a4a;letter-spacing:.14em;margin-bottom:7px;text-transform:uppercase;}
-.aurs-fgroup{margin-bottom:16px;}
-.aurs-finput,.aurs-ftextarea{width:100%;background:#080809;border:1px solid #1a1a22;border-radius:9px;padding:12px 15px;color:#e0e0ee;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;transition:border-color .2s;}
-.aurs-finput:focus,.aurs-ftextarea:focus{border-color:#00e5c8;}
-.aurs-ftextarea{resize:vertical;}
-.aurs-star-row{display:flex;gap:5px;}
-.aurs-sp{font-size:26px;color:#1a1a22;transition:color .12s;cursor:pointer;line-height:1;-webkit-tap-highlight-color:transparent;}
-.aurs-sp.on{color:#f5b400;}
-.aurs-ferr{font-size:11px;color:#e0115f;margin-top:4px;display:none;}
-.aurs-form-success{text-align:center;padding:48px 0;display:none;}
-.aurs-form-success-icon{font-size:44px;margin-bottom:14px;}
-.aurs-form-success h3{font-size:22px;font-weight:300;color:#fff;margin:0 0 8px;}
-.aurs-form-success p{font-size:13px;color:#444;margin:0;}
-</style>
-
-<style>
-/* ═══════════════════════════════════════════
-   AURORA REVIEWS — Liquid-glass + motion layer
-   (overrides selected base styles above)
-════════════════════════════════════════════ */
-
-/* Ambient aurora field drifting behind the section */
-#aurs{position:relative;overflow:hidden;}
-#aurs::before{
-  content:"";position:absolute;top:-15%;left:-10%;right:-10%;height:620px;pointer-events:none;z-index:0;
-  background:
-    radial-gradient(38% 60% at 16% 0%, rgba(0,229,200,.11), transparent 70%),
-    radial-gradient(44% 64% at 84% 6%, rgba(124,58,237,.13), transparent 70%),
-    radial-gradient(40% 55% at 50% 2%, rgba(224,17,95,.08), transparent 72%);
-  filter:blur(26px);
-  animation:aurs-drift 20s ease-in-out infinite alternate;
-}
-@keyframes aurs-drift{0%{transform:translate3d(-2%,0,0) scale(1)}100%{transform:translate3d(3%,2%,0) scale(1.09)}}
-.aurs-wrap{position:relative;z-index:1;}
-
-/* Liquid-glass surface for cards & panels */
-.aurs-card,.aurs-vcard,.aurs-summary,.aurs-form-section{
-  background:linear-gradient(158deg, rgba(255,255,255,.055), rgba(255,255,255,.012)) !important;
-  -webkit-backdrop-filter:blur(22px) saturate(150%);
-  backdrop-filter:blur(22px) saturate(150%);
-  border:1px solid rgba(255,255,255,.08) !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 24px 48px -28px rgba(0,0,0,.9);
-  position:relative;overflow:hidden;
-}
-/* diagonal sheen that sweeps across a card on hover */
-.aurs-card::after,.aurs-vcard::after{
-  content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(120deg, transparent 38%, rgba(255,255,255,.07) 50%, transparent 62%);
-  background-size:240% 100%;background-position:130% 0;opacity:0;transition:opacity .35s;
-}
-.aurs-card:hover,.aurs-vcard:hover{
-  transform:translateY(-4px) !important;
-  border-color:rgba(0,229,200,.35) !important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.10), 0 30px 60px -24px rgba(0,0,0,.95),
-             0 0 0 1px rgba(0,229,200,.12), 0 0 44px -10px rgba(124,58,237,.28) !important;
-}
-.aurs-card:hover::after,.aurs-vcard:hover::after{opacity:1;animation:aurs-sheen 1.05s ease forwards;}
-@keyframes aurs-sheen{to{background-position:-130% 0;}}
-
-/* "No subscription" hero glass badge */
-.aurs-nosub{
-  display:inline-flex;align-items:center;gap:9px;margin-top:18px;padding:9px 16px;border-radius:999px;
-  background:linear-gradient(135deg, rgba(0,229,200,.12), rgba(124,58,237,.12));
-  border:1px solid rgba(255,255,255,.11);
-  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.10);
-}
-.aurs-nosub-dot{width:7px;height:7px;border-radius:50%;background:#00e5c8;box-shadow:0 0 10px #00e5c8;flex-shrink:0;animation:aurs-pulse 2.4s ease-in-out infinite;}
-@keyframes aurs-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
-.aurs-nosub-txt{font-size:10.5px;letter-spacing:.13em;color:#cfcfe0;text-transform:uppercase;}
-.aurs-nosub-txt b{color:#fff;font-weight:600;}
-
-/* Scroll-reveal */
-.aurs-reveal{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1);}
-.aurs-reveal.in{opacity:1;transform:none;}
-.aurs-reveal[data-d="1"]{transition-delay:.06s}
-.aurs-reveal[data-d="2"]{transition-delay:.12s}
-.aurs-reveal[data-d="3"]{transition-delay:.18s}
-
-/* Aurora-fy the rating bars + glow the average stars */
-.aurs-bar-fill{background:linear-gradient(90deg,#00e5c8,#7c3aed) !important;box-shadow:0 0 12px -2px rgba(124,58,237,.5);}
-.aurs-avg-stars{filter:drop-shadow(0 0 8px rgba(245,180,0,.35));}
-.aurs-avg-num{background:linear-gradient(135deg,#fff,#9fe9df);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
-
-/* Respect reduced-motion */
-@media (prefers-reduced-motion: reduce){
-  #aurs::before,.aurs-nosub-dot,.aurs-btn-grad{animation:none !important;}
-  .aurs-reveal{opacity:1 !important;transform:none !important;transition:none !important;}
-  .aurs-card,.aurs-vcard{transition:none !important;}
-  .aurs-card::after,.aurs-vcard::after{display:none !important;}
-  .aurs-bar-fill{transition:none !important;}
-}
-</style>
-
-<style>
-/* ════════════════════════════════════════════
-   CLEAN PASS — remove purple/galaxy gradients + heavy glass.
-   Dark, high-contrast, gold stars, one restrained teal accent.
-════════════════════════════════════════════ */
-
-/* — Editorial section — */
-#aued::before{background:radial-gradient(55% 45% at 50% 100%, rgba(255,255,255,.035), transparent 72%) !important;filter:blur(40px) !important;}
-.aued-title em{background:none !important;-webkit-text-fill-color:#ececf2 !important;color:#ececf2 !important;animation:none !important;}
-.aued-shot:hover{border-color:rgba(255,255,255,.22) !important;box-shadow:0 40px 80px -30px rgba(0,0,0,.95) !important;}
-.aued-panel,.aued-panel--data,.aued-panel--stat{background:#121214 !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important;box-shadow:0 20px 40px -30px rgba(0,0,0,.8) !important;}
-.aued-panel:hover{border-color:rgba(255,255,255,.2) !important;box-shadow:0 30px 60px -28px rgba(0,0,0,.95) !important;}
-.aued-spark i{background:#3a3a42 !important;}
-
-/* — Reviews section — */
-#aurs::before{background:radial-gradient(50% 40% at 50% 0%, rgba(255,255,255,.03), transparent 70%) !important;filter:none !important;animation:none !important;}
-.aurs-card,.aurs-vcard,.aurs-summary,.aurs-form-section{
-  background:#121214 !important;-webkit-backdrop-filter:none !important;backdrop-filter:none !important;
-  border:1px solid rgba(255,255,255,.07) !important;box-shadow:0 20px 40px -30px rgba(0,0,0,.85) !important;}
-.aurs-card::after,.aurs-vcard::after{display:none !important;}
-.aurs-card:hover,.aurs-vcard:hover{transform:translateY(-3px) !important;border-color:rgba(255,255,255,.18) !important;box-shadow:0 30px 60px -28px rgba(0,0,0,.95) !important;}
-.aurs-badge-num,.aurs-avg-num{background:none !important;-webkit-text-fill-color:#fff !important;color:#fff !important;}
-.aurs-avg-stars{filter:none !important;}
-.aurs-bar-fill{background:#f5b400 !important;box-shadow:none !important;}
-.aurs-btn-grad{background:#ffffff !important;background-size:auto !important;color:#0a0a0a !important;animation:none !important;font-weight:600 !important;}
-.aurs-btn-grad:hover{background:#e6e6e6 !important;opacity:1 !important;transform:translateY(-1px) !important;}
-.aurs-scroll-track{scrollbar-color:#2c2c34 #0d0d10 !important;}
-.aurs-scroll-track::-webkit-scrollbar-thumb,.aurs-list::-webkit-scrollbar-thumb{background:#2c2c34 !important;}
-
-/* show-more (aktin-style) */
-.aurs-showmore-wrap{grid-column:1 / -1;display:flex;justify-content:center;margin-top:16px;}
-.aurs-showmore{padding:13px 32px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:transparent;color:#e8e8ee;font-family:inherit;font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background .2s,border-color .2s;}
-.aurs-showmore:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.3);}
-</style>
-
-<div id="aurs" style="background:#0c0c10;">
-<div class="aurs-wrap">
-
-  <!-- Hero bar -->
-  <div class="aurs-hero">
-    <div class="aurs-headline">
-      <h2>What our customers say.</h2>
-      <p>Premium health tracking. No subscription. Ever.</p>
-      <div class="aurs-nosub">
-        <span class="aurs-nosub-dot"></span>
-        <span class="aurs-nosub-txt"><b>$0 subscription</b> &middot; full data access &middot; yours forever</span>
-      </div>
-    </div>
-    <div class="aurs-badges">
-      <div class="aurs-badge">
-        <div class="aurs-badge-num" id="aurs-counter">0</div>
-        <div class="aurs-badge-lbl">Happy Customers</div>
-      </div>
-      <div class="aurs-badge">
-        <div class="aurs-badge-num" id="aurs-avg-top">0.0</div>
-        <div class="aurs-badge-lbl">Average Rating</div>
-      </div>
-      <div class="aurs-badge">
-        <div class="aurs-badge-num">$0</div>
-        <div class="aurs-badge-lbl">Subscription Fee</div>
-      </div>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:36px;">
+      <a href="/products/aurora-ring" style="display:inline-block;padding:14px 32px;border-radius:999px;background:#fff;color:#000;font-size:12px;letter-spacing:.1em;text-decoration:none;font-weight:600;min-height:44px;line-height:1.4;">Shop now — €109,90</a>
+      <a href="/pages/compare" style="display:inline-block;padding:14px 32px;border-radius:999px;border:1px solid #1e1e1e;color:#8d8d97;font-size:12px;letter-spacing:.1em;text-decoration:none;min-height:44px;line-height:1.4;">Full comparison →</a>
     </div>
   </div>
-
-  <!-- Rating summary -->
-  <div class="aurs-summary">
-    <div class="aurs-avg-block">
-      <div class="aurs-avg-num" id="aurs-avg">0.0</div>
-      <div class="aurs-avg-stars">★★★★★</div>
-      <div class="aurs-avg-sub" id="aurs-total">Based on 0 reviews</div>
-    </div>
-    <div class="aurs-bars" id="aurs-bars"></div>
-    <div class="aurs-write-cta-inline">
-      <button class="aurs-btn-grad" onclick="aursOpenForm()">+ Write a Review</button>
-      <button class="aurs-btn-ghost" onclick="document.getElementById('aurs-form-section').scrollIntoView({behavior:'smooth'})">Write a review ↓</button>
-    </div>
-  </div>
-
-  <!-- ── Scrollable verified-purchase strip ── -->
-  <p class="aurs-verified-label">Verified Purchase Reviews</p>
-  <div class="aurs-scroll-outer">
-    <div class="aurs-scroll-track" id="aurs-vscroll">
-
-      <div class="aurs-vcard">
-        <div class="aurs-vcard-top">
-          <div><div class="aurs-vname">Jennifer M.</div><div class="aurs-vbadge">Verified Purchase</div></div>
-          
-        </div>
-        <div class="aurs-vstars">★★★★★</div>
-        <p class="aurs-vbody">"Waterproof, durable, stylish — checks heart rate, sleep tracking, menstrual cycle, and much more. Very comfortable! No subscription needed!! Honestly surprised by how accurate the sleep data is."</p>
-      </div>
-
-      <div class="aurs-vcard">
-        <div class="aurs-vcard-top">
-          <div><div class="aurs-vname">David K.</div><div class="aurs-vbadge">Verified Purchase</div></div>
-          
-        </div>
-        <div class="aurs-vstars">★★★★★</div>
-        <p class="aurs-vbody">"The battery lasts several days on a single charge and I love that it's waterproof so I don't have to take it off constantly. The app is genuinely easy to use. Incredible value."</p>
-      </div>
-
-      <div class="aurs-vcard">
-        <div class="aurs-vcard-top">
-          <div><div class="aurs-vname">Rachel T.</div><div class="aurs-vbadge">Verified Purchase</div></div>
-          
-        </div>
-        <div class="aurs-vstars">★★★★★</div>
-        <p class="aurs-vbody">"It is sleek and looks very high end. I ordered a size 7 and it's true to size and fits perfectly! The battery lasts for days and it feels great to wear all day. Highly recommended!"</p>
-      </div>
-
-      <div class="aurs-vcard">
-        <div class="aurs-vcard-top">
-          <div><div class="aurs-vname">Carlos R.</div><div class="aurs-vbadge">Verified Purchase</div></div>
-          
-        </div>
-        <div class="aurs-vstars">★★★★★</div>
-        <p class="aurs-vbody">"The ring measures exactly. It has a very good app that reports very extensively. I compared the data with other health trackers. The data is all very close. Worth every cent."</p>
-      </div>
-
-      <div class="aurs-vcard">
-        <div class="aurs-vcard-top">
-          <div><div class="aurs-vname">Linda W.</div><div class="aurs-vbadge">Verified Purchase</div></div>
-          
-        </div>
-        <div class="aurs-vstars">★★★★★</div>
-        <p class="aurs-vbody">"I track my sleep which is the reason I bought it. The battery life is great — lasts the whole week. Comfortable enough to wear through the night without noticing it. Exactly what I needed."</p>
-      </div>
-
-      <div class="aurs-vcard">
-        <div class="aurs-vcard-top">
-          <div><div class="aurs-vname">Marcus O.</div><div class="aurs-vbadge">Verified Purchase</div></div>
-          
-        </div>
-        <div class="aurs-vstars">★★★★★</div>
-        <p class="aurs-vbody">"The company clearly specialises in this tech and it shows. Very reasonable price for the feature set. I use it daily and the Aurora app gives me real health insights every morning."</p>
-      </div>
-
-      <div class="aurs-vcard">
-        <div class="aurs-vcard-top">
-          <div><div class="aurs-vname">Sophie A.</div><div class="aurs-vbadge">Verified Purchase</div></div>
-          
-        </div>
-        <div class="aurs-vstars">★★★★★</div>
-        <p class="aurs-vbody">"Fantastic entry point into smart ring tech. I find traditional smartwatches cumbersome for sleep tracking but still wanted to monitor activity — this is the perfect solution. Undeniably cool too."</p>
-      </div>
-
-      <div class="aurs-vcard">
-        <div class="aurs-vcard-top">
-          <div><div class="aurs-vname">Tom B.</div><div class="aurs-vbadge">Verified Purchase</div></div>
-          
-        </div>
-        <div class="aurs-vstars">★★★★★</div>
-        <p class="aurs-vbody">"Battery easily lasts beyond a week of daily use. If you only use the sleep function it lasts even longer. Very energy efficient, packed with features. Hard to fault it at this price."</p>
-      </div>
-
-      <div class="aurs-vcard">
-        <div class="aurs-vcard-top">
-          <div><div class="aurs-vname">Aisha P.</div><div class="aurs-vbadge">Verified Purchase</div></div>
-          
-        </div>
-        <div class="aurs-vstars">★★★★★</div>
-        <p class="aurs-vbody">"Heart rate and step tracking accuracy are surprisingly good. Comfortable all day. No subscription fee is a massive win — I get all the data without a monthly bill. 10/10 would buy again."</p>
-      </div>
-
-      <div class="aurs-vcard">
-        <div class="aurs-vcard-top">
-          <div><div class="aurs-vname">Kevin L.</div><div class="aurs-vbadge">Verified Purchase</div></div>
-          
-        </div>
-        <div class="aurs-vstars">★★★★★</div>
-        <p class="aurs-vbody">"In conjunction with the Aurora app, this ring provides plenty of health and fitness information. Monitoring heart rate, oxygen, stress, sleep, and HRV. Recommended for anyone wanting detailed data."</p>
-      </div>
-
-      <div class="aurs-vcard">
-        <div class="aurs-vcard-top">
-          <div><div class="aurs-vname">Natalie S.</div><div class="aurs-vbadge">Verified Purchase</div></div>
-          
-        </div>
-        <div class="aurs-vstars">★★★★☆</div>
-        <p class="aurs-vbody">"Great ring overall. The sleep and HRV data has been eye-opening. Four stars only because I wish the app synced with Apple Health — but for standalone use it's excellent. Will definitely keep wearing it."</p>
-      </div>
-
-      <div class="aurs-vcard">
-        <div class="aurs-vcard-top">
-          <div><div class="aurs-vname">Bruno F.</div><div class="aurs-vbadge">Verified Purchase</div></div>
-          
-        </div>
-        <div class="aurs-vstars">★★★★★</div>
-        <p class="aurs-vbody">"Pricing is unbeatable. You get genuine health tracking for the cost of a nice lunch. No other brand offers this functionality at this price. The battery is the real standout — just charge it once a week."</p>
-      </div>
-
-    </div>
-    <div class="aurs-scroll-arrows">
-      <button class="aurs-arrow" onclick="aursScrollLeft()">&#8592;</button>
-      <button class="aurs-arrow" onclick="aursScrollRight()">&#8594;</button>
-    </div>
-  </div>
-
-  <!-- ── Filters for dynamic reviews ── -->
-  <div class="aurs-filter-row">
-    <span class="aurs-flbl">FILTER:</span>
-    <button class="aurs-fb on" onclick="aursFilter(0,this)">All</button>
-    <button class="aurs-fb" onclick="aursFilter(5,this)">5 ★</button>
-    <button class="aurs-fb" onclick="aursFilter(4,this)">4 ★</button>
-    <button class="aurs-fb" onclick="aursFilter(3,this)">3 ★</button>
-    <div class="aurs-sort-sep">
-      <span class="aurs-flbl">SORT:</span>
-      <button class="aurs-fb on" id="srt-h" onclick="aursSort('helpful',this)">Most Helpful</button>
-      <button class="aurs-fb" id="srt-r" onclick="aursSort('recent',this)">Most Recent</button>
-    </div>
-  </div>
-
-  <!-- Dynamic grid -->
-  <div class="aurs-grid" id="aurs-grid"></div>
-  <div class="aurs-nores" id="aurs-nores" style="display:none;">No reviews match this filter.</div>
-
-  <!-- ── Review submission form (Shopify contact form) ── -->
-  <div id="aurs-form-section" class="aurs-form-section">
-    <h3 class="aurs-form-title">Share your experience</h3>
-    <p class="aurs-form-sub">Your review will appear on this page after a quick check.</p>
-
-    {% form 'contact' %}
-      <input type="hidden" name="contact[tags]" value="aurora-review,pending">
-      <input type="hidden" name="contact[subject]" value="New AURORA Ring Review">
-
-      <div class="aurs-fgroup">
-        <label class="aurs-flabel">Your Rating</label>
-        <div class="aurs-star-row" id="aurs-spicker">
-          <span class="aurs-sp" data-v="1">★</span>
-          <span class="aurs-sp" data-v="2">★</span>
-          <span class="aurs-sp" data-v="3">★</span>
-          <span class="aurs-sp" data-v="4">★</span>
-          <span class="aurs-sp" data-v="5">★</span>
-        </div>
-        <input type="hidden" name="contact[rating]" id="aurs-rat-val" value="">
-        <div class="aurs-ferr" id="err-rat">Please select a star rating.</div>
-      </div>
-
-      <div class="aurs-fgroup">
-        <label class="aurs-flabel">Your Name</label>
-        <input class="aurs-finput" name="contact[name]" type="text" placeholder="e.g. Jordan M." required>
-        <div class="aurs-ferr" id="err-name">Name is required.</div>
-      </div>
-
-      <div class="aurs-fgroup">
-        <label class="aurs-flabel">Review Title</label>
-        <input class="aurs-finput" name="contact[review_title]" type="text" placeholder="Summarise your experience in one line" required>
-      </div>
-
-      <div class="aurs-fgroup">
-        <label class="aurs-flabel">Your Review</label>
-        <textarea class="aurs-finput aurs-ftextarea" name="contact[body]" rows="5"
-          placeholder="What changed after wearing it? How did it affect your sleep, HRV, or daily routine?" required></textarea>
-      </div>
-
-      <div class="aurs-fgroup">
-        <label class="aurs-flabel">Email (not published)</label>
-        <input class="aurs-finput" name="contact[email]" type="email" placeholder="your@email.com" required>
-      </div>
-
-      <input type="submit" value="SUBMIT REVIEW" class="aurs-btn-grad" style="width:100%;cursor:pointer;border:none;padding:15px;border-radius:12px;font-size:12px;letter-spacing:.1em;margin-top:4px;">
-    {% endform %}
-  </div>
-
-</div>
 </div>
 
-<script>
-(function(){
-/* ── Seed reviews (your existing on-page testimonials, structured) ── */
-var SEED=[
- {id:'s-1',name:'Jennifer M.',v:1,r:5,title:'Does everything — and no subscription',body:'Waterproof, durable, stylish — checks heart rate, sleep tracking, menstrual cycle, and much more. Very comfortable! No subscription needed. Honestly surprised by how accurate the sleep data is.',helpful:42,date:'2026-05-18',dl:'1 month ago'},
- {id:'s-2',name:'David K.',v:1,r:5,title:'Battery lasts for days',body:'The battery lasts several days on a single charge and I love that it is waterproof so I don’t have to take it off. The app is genuinely easy to use. Incredible value.',helpful:31,date:'2026-05-10',dl:'1 month ago'},
- {id:'s-3',name:'Rachel T.',v:1,r:5,title:'Sleek and true to size',body:'It is sleek and looks very high end. I ordered a size 7 and it fits perfectly. The battery lasts for days and it feels great to wear all day. Highly recommended.',helpful:27,date:'2026-05-02',dl:'1 month ago'},
- {id:'s-4',name:'Carlos R.',v:1,r:5,title:'Accurate, detailed data',body:'The ring measures exactly. Very good app that reports extensively. I compared the data with other health trackers and it is all very close. Worth every cent.',helpful:19,date:'2026-04-22',dl:'2 months ago'},
- {id:'s-5',name:'Linda W.',v:1,r:5,title:'Perfect for sleep tracking',body:'I track my sleep which is why I bought it. Battery life is great — lasts the whole week. Comfortable enough to wear through the night without noticing it.',helpful:23,date:'2026-04-15',dl:'2 months ago'},
- {id:'s-6',name:'Marcus O.',v:1,r:5,title:'Real insights every morning',body:'The company clearly specialises in this tech and it shows. Very reasonable price for the feature set. The Aurora app gives me real health insights every morning.',helpful:14,date:'2026-04-09',dl:'2 months ago'},
- {id:'s-7',name:'Sophie A.',v:1,r:5,title:'The perfect smartwatch alternative',body:'Fantastic entry point into smart ring tech. I find smartwatches cumbersome for sleep but still wanted to monitor activity — this is the perfect solution. Undeniably cool too.',helpful:11,date:'2026-03-28',dl:'3 months ago'},
- {id:'s-8',name:'Tom B.',v:1,r:5,title:'Energy efficient, packed with features',body:'Battery easily lasts beyond a week of daily use. If you only use the sleep function it lasts even longer. Very energy efficient and hard to fault at this price.',helpful:9,date:'2026-03-20',dl:'3 months ago'},
- {id:'s-9',name:'Aisha P.',v:1,r:5,title:'No monthly bill — huge win',body:'Heart rate and step tracking accuracy are surprisingly good. Comfortable all day. No subscription fee is a massive win — all the data without a monthly bill.',helpful:16,date:'2026-03-11',dl:'3 months ago'},
- {id:'s-10',name:'Kevin L.',v:1,r:5,title:'Plenty of health data',body:'With the Aurora app this ring provides plenty of health and fitness information — heart rate, oxygen, stress, sleep and HRV. Recommended for anyone wanting detailed data.',helpful:8,date:'2026-02-27',dl:'4 months ago'},
- {id:'s-11',name:'Natalie S.',v:1,r:4,title:'Eye-opening data, one small wish',body:'Great ring overall. The sleep and HRV data has been eye-opening. Four stars only because I wish the app synced with Apple Health — but for standalone use it is excellent.',helpful:13,date:'2026-02-18',dl:'4 months ago'},
- {id:'s-12',name:'Bruno F.',v:1,r:5,title:'Unbeatable value',body:'Pricing is unbeatable. Genuine health tracking for the cost of a nice lunch. No other brand offers this at this price, and the week-long battery is the real standout.',helpful:21,date:'2026-02-05',dl:'4 months ago'}
-];
+<!-- ═══ SPECS STRIP ═══ -->
+<div style="background:#050505;padding:56px 24px;border-top:1px solid #1e1e1e;border-bottom:1px solid #1e1e1e;">
+  <div style="max-width:900px;margin:0 auto;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:24px 32px;">
+      <div><div style="font-size:10px;letter-spacing:.14em;color:#555;margin-bottom:4px;">MATERIAL</div><div style="font-size:13px;color:#c9c9d2;">Grade-5 aerospace titanium</div></div>
+      <div><div style="font-size:10px;letter-spacing:.14em;color:#555;margin-bottom:4px;">THICKNESS</div><div style="font-size:13px;color:#c9c9d2;">2.8 mm</div></div>
+      <div><div style="font-size:10px;letter-spacing:.14em;color:#555;margin-bottom:4px;">WATER RESISTANCE</div><div style="font-size:13px;color:#c9c9d2;">IP68 (50 m)</div></div>
+      <div><div style="font-size:10px;letter-spacing:.14em;color:#555;margin-bottom:4px;">BATTERY</div><div style="font-size:13px;color:#c9c9d2;">Up to 7 days</div></div>
+      <div><div style="font-size:10px;letter-spacing:.14em;color:#555;margin-bottom:4px;">CHARGING</div><div style="font-size:13px;color:#c9c9d2;">Magnetic USB-C dock</div></div>
+      <div><div style="font-size:10px;letter-spacing:.14em;color:#555;margin-bottom:4px;">CONNECTIVITY</div><div style="font-size:13px;color:#c9c9d2;">Bluetooth 5.0 BLE</div></div>
+      <div><div style="font-size:10px;letter-spacing:.14em;color:#555;margin-bottom:4px;">APP</div><div style="font-size:13px;color:#c9c9d2;">QRing (iOS &amp; Android, free)</div></div>
+      <div><div style="font-size:10px;letter-spacing:.14em;color:#555;margin-bottom:4px;">SUBSCRIPTION</div><div style="font-size:13px;color:#00e5c8;font-weight:600;">None</div></div>
+    </div>
+    <div style="margin-top:28px;text-align:center;">
+      <a href="/pages/technology" style="font-size:12px;color:#555;letter-spacing:.1em;text-decoration:none;border-bottom:1px solid #1e1e1e;padding-bottom:2px;">Full tech breakdown →</a>
+    </div>
+  </div>
+</div>
 
-/* ▸ Your REAL total review count. Update this as genuine reviews come in.
-   Do NOT inflate it — fabricated counts violate the FTC review rule and risk the store. */
-var REVIEW_COUNT=55;
-
-var state={reviews:[],fStar:0,sort:'helpful',pickedR:0,voted:{},expanded:false};
-var TARGET=REVIEW_COUNT;
-
-/* ── Scroll-reveal (respects prefers-reduced-motion via CSS) ── */
-var _io=('IntersectionObserver' in window)?new IntersectionObserver(function(es){
-  es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');_io.unobserve(e.target);}});
-},{threshold:.12,rootMargin:'0px 0px -6% 0px'}):null;
-window.aursReveal=function(el){if(!el)return;el.classList.add('aurs-reveal');if(_io){_io.observe(el);}else{el.classList.add('in');}};
-
-/* animate counter */
-function countUp(el,target){
-  var s=0,step=Math.ceil(target/80),t=setInterval(function(){
-    s=Math.min(s+step,target);
-    el.textContent=s.toLocaleString()+'+';
-    if(s>=target)clearInterval(t);
-  },18);
-}
-
-function load(){
-  try{
-    var u=JSON.parse(localStorage.getItem('aurs-reviews')||'[]');
-    state.reviews=SEED.concat(u);
-  }catch(e){state.reviews=SEED.slice();}
-  // Add user reviews to counter
-  var total=TARGET+state.reviews.filter(function(r){return r.id.indexOf('u-')===0;}).length;
-  var el=document.getElementById('aurs-counter');
-  if(el) countUp(el,total);
-  render();
-}
-
-function save(){
-  try{
-    var u=state.reviews.filter(function(r){return r.id.indexOf('u-')===0;});
-    localStorage.setItem('aurs-reviews',JSON.stringify(u));
-  }catch(e){}
-}
-
-function starsHtml(n,sz){
-  var s='';sz=sz||11;
-  for(var i=1;i<=5;i++)s+='<span style="color:'+(i<=n?'#f5b400':'#1a1a22')+';font-size:'+sz+'px;">&#9733;</span>';
-  return s;
-}
-
-function renderBars(){
-  var stats={5:0,4:0,3:0,2:0,1:0};
-  var sum=0;
-  state.reviews.forEach(function(r){stats[r.r]=(stats[r.r]||0)+1;sum+=r.r;});
-  var seen=state.reviews.length||1;
-  var avg=sum/seen;
-  /* Display the store's real review total; never less than what's rendered */
-  var total=Math.max(REVIEW_COUNT, state.reviews.length);
-  document.getElementById('aurs-avg').textContent=avg.toFixed(1);
-  document.getElementById('aurs-avg-top').textContent=avg.toFixed(1);
-  document.getElementById('aurs-total').textContent='Based on '+total+' reviews';
-  var b='';
-  [5,4,3,2,1].forEach(function(s){
-    var pct=Math.round((stats[s]||0)/seen*100);
-    var scaled=Math.round(pct/100*total);
-    b+='<div class="aurs-bar-row"><span class="aurs-bar-lbl">'+s+'</span>'
-      +'<div class="aurs-bar-track"><div class="aurs-bar-fill" style="width:0%" data-w="'+pct+'"></div></div>'
-      +'<span class="aurs-bar-n">'+scaled+'</span></div>';
-  });
-  document.getElementById('aurs-bars').innerHTML=b;
-  requestAnimationFrame(function(){
-    var fills=document.querySelectorAll('#aurs-bars .aurs-bar-fill');
-    for(var i=0;i<fills.length;i++){fills[i].style.width=fills[i].getAttribute('data-w')+'%';}
-  });
-}
-
-function renderGrid(){
-  var list=state.reviews.slice();
-  if(state.fStar)list=list.filter(function(r){return r.r===state.fStar;});
-  if(state.sort==='helpful')list.sort(function(a,b){return b.helpful-a.helpful;});
-  else list.sort(function(a,b){return a.date<b.date?1:-1;});
-  var grid=document.getElementById('aurs-grid');
-  var nores=document.getElementById('aurs-nores');
-  if(!list.length){grid.innerHTML='';nores.style.display='block';return;}
-  nores.style.display='none';
-  var limit=state.expanded?list.length:6;
-  grid.innerHTML=list.slice(0,limit).map(function(r){
-    var vt=state.voted[r.id];
-    return '<div class="aurs-card">'
-      +'<div class="aurs-card-top"><div>'
-        +'<div class="aurs-cname">'+r.name+'</div>'
-        +(r.v?'<div class="aurs-cver">&#10003; VERIFIED BUYER</div>':'')
-      +'</div><span class="aurs-cdate">'+r.dl+'</span></div>'
-      +'<div class="aurs-cstars">'+starsHtml(r.r)+'</div>'
-      +'<p class="aurs-ctitle">'+r.title+'</p>'
-      +'<p class="aurs-cbody">'+r.body+'</p>'
-      +'<div class="aurs-helpful"><span class="aurs-hlbl">Helpful?</span>'
-      +'<button class="aurs-hbtn'+(vt?' voted':'')+'"'+(vt?' disabled':'')+' onclick="aursHelpful(\''+r.id+'\')">'
-      +'&#128077; '+r.helpful+'</button></div></div>';
-  }).join('');
-  if(list.length>limit){
-    grid.insertAdjacentHTML('beforeend','<div class="aurs-showmore-wrap"><button class="aurs-showmore" onclick="aursShowMore()">Show more reviews</button></div>');
-  }
-  if(window.aursReveal){
-    var cards=grid.querySelectorAll('.aurs-card'),i=0;
-    for(;i<cards.length;i++){cards[i].setAttribute('data-d',(i%3)+1);window.aursReveal(cards[i]);}
-  }
-}
-
-function render(){renderBars();renderGrid();}
-
-window.aursShowMore=function(){state.expanded=true;renderGrid();};
-
-window.aursFilter=function(s,btn){
-  state.fStar=s;
-  document.querySelectorAll('.aurs-fb').forEach(function(b){
-    if(b.id!=='srt-h'&&b.id!=='srt-r')b.classList.remove('on');
-  });
-  btn.classList.add('on');
-  renderGrid();
-};
-window.aursSort=function(by,btn){
-  state.sort=by;
-  document.getElementById('srt-h').classList.toggle('on',by==='helpful');
-  document.getElementById('srt-r').classList.toggle('on',by==='recent');
-  renderGrid();
-};
-window.aursHelpful=function(id){
-  if(state.voted[id])return;
-  state.voted[id]=true;
-  var r=state.reviews.find(function(x){return x.id===id;});
-  if(r)r.helpful++;
-  save();renderGrid();
-};
-window.aursOpenForm=function(){
-  var f=document.getElementById('aurs-form-section');
-  f.classList.add('open');
-  f.scrollIntoView({behavior:'smooth',block:'start'});
-};
-window.aursScrollLeft=function(){
-  var t=document.getElementById('aurs-vscroll');
-  t.scrollBy({left:-310,behavior:'smooth'});
-};
-window.aursScrollRight=function(){
-  var t=document.getElementById('aurs-vscroll');
-  t.scrollBy({left:310,behavior:'smooth'});
-};
-
-/* Star picker */
-document.addEventListener('DOMContentLoaded',function(){
-  var sp=document.querySelectorAll('.aurs-sp');
-  sp.forEach(function(s){
-    s.addEventListener('click',function(){
-      state.pickedR=parseInt(s.getAttribute('data-v'));
-      var inp=document.getElementById('aurs-rat-val');
-      if(inp)inp.value=state.pickedR;
-      sp.forEach(function(x){x.classList.toggle('on',parseInt(x.getAttribute('data-v'))<=state.pickedR);});
-    });
-    s.addEventListener('mouseover',function(){
-      var v=parseInt(s.getAttribute('data-v'));
-      sp.forEach(function(x){x.classList.toggle('on',parseInt(x.getAttribute('data-v'))<=v);});
-    });
-    s.addEventListener('mouseout',function(){
-      sp.forEach(function(x){x.classList.toggle('on',parseInt(x.getAttribute('data-v'))<=state.pickedR);});
-    });
-  });
-
-  /* Show thank-you if Shopify redirected back after form submit */
-  if(window.location.search.indexOf('contact_posted=true')>-1){
-    var f=document.getElementById('aurs-form-section');
-    if(f){
-      f.classList.add('open');
-      f.innerHTML='<div style="text-align:center;padding:56px 0;">'
-        +'<div style="font-size:44px;margin-bottom:16px;">&#10003;</div>'
-        +'<h3 style="font-size:22px;font-weight:300;color:#fff;margin:0 0 8px;">Thank you!</h3>'
-        +'<p style="font-size:13px;color:#444;">Your review has been received and will appear shortly.</p>'
-        +'</div>';
-      f.scrollIntoView({behavior:'smooth'});
-    }
-  }
-
-  load();
-
-  /* Reveal the static summary + verified-strip cards as they enter view */
-  if(window.aursReveal){
-    var statics=document.querySelectorAll('#aurs .aurs-summary, #aurs .aurs-vcard');
-    for(var i=0;i<statics.length;i++){window.aursReveal(statics[i]);}
-  }
-});
-})();
-</script>
-
-
-      <!-- prettier-ignore -->
+<!-- prettier-ignore -->
   <script>(()=>{let t=window.Instant||{};if(!t.initializedAppEmbed&&!window.__instant_loading_core){window.__instant_loading_core=!0,t.initializedVersion="4.6.0",t.initialized=!0;let i=()=>{let i=(t,i)=>t.split(".").map(Number).reduce((t,e,n)=>t||e-i.split(".")[n],0),e=[...document.querySelectorAll(".__instant")].map(t=>t.getAttribute("data-instant-version")||"1.0.0").sort(i).pop()||"1.0.0",n=document.createElement("script");n.src="https://client.instant.so/scripts/instant-core.min.js?version="+e,document.body.appendChild(n),t.initializedVersion=e};"loading"!==document.readyState?i():document.addEventListener("DOMContentLoaded",i)}})();</script>
 </div>
 {% schema %}
@@ -1219,4 +435,3 @@ document.addEventListener('DOMContentLoaded',function(){
   color: #c8c8c8 !important;
 }
 </style>
-
