@@ -14,6 +14,9 @@
     {%- liquid
       assign product_i0RFdnEPQOvZNKbT_handle = 'aurora-ring'
       assign product_i0RFdnEPQOvZNKbT = section.settings.product_i0RFdnEPQOvZNKbT | default: all_products[product_i0RFdnEPQOvZNKbT_handle]
+      unless product_i0RFdnEPQOvZNKbT.id
+        assign product_i0RFdnEPQOvZNKbT = collections.all.products.first
+      endunless
       assign product_i0RFdnEPQOvZNKbT_variant = product_i0RFdnEPQOvZNKbT.selected_or_first_available_variant
 
       if product_i0RFdnEPQOvZNKbT.selected_variant
@@ -157,6 +160,9 @@
     {%- liquid
       assign product_d7ZK83gfclQvAJ1i_handle = 'aurora-ring'
       assign product_d7ZK83gfclQvAJ1i = section.settings.product_d7ZK83gfclQvAJ1i | default: all_products[product_d7ZK83gfclQvAJ1i_handle]
+      unless product_d7ZK83gfclQvAJ1i.id
+        assign product_d7ZK83gfclQvAJ1i = collections.all.products.first
+      endunless
       assign product_d7ZK83gfclQvAJ1i_variant = product_d7ZK83gfclQvAJ1i.selected_or_first_available_variant
 
       if product_d7ZK83gfclQvAJ1i.selected_variant
@@ -211,6 +217,9 @@
     {%- liquid
       assign product_odx5nQFmeIgzWwcB_handle = 'aurora-ring'
       assign product_odx5nQFmeIgzWwcB = section.settings.product_odx5nQFmeIgzWwcB | default: all_products[product_odx5nQFmeIgzWwcB_handle]
+      unless product_odx5nQFmeIgzWwcB.id
+        assign product_odx5nQFmeIgzWwcB = collections.all.products.first
+      endunless
       assign product_odx5nQFmeIgzWwcB_variant = product_odx5nQFmeIgzWwcB.selected_or_first_available_variant
 
       if product_odx5nQFmeIgzWwcB.selected_variant
@@ -271,6 +280,9 @@
     {%- liquid
       assign product_6PK7v1gjwgDMG864_handle = 'aurora-ring'
       assign product_6PK7v1gjwgDMG864 = section.settings.product_6PK7v1gjwgDMG864 | default: all_products[product_6PK7v1gjwgDMG864_handle]
+      unless product_6PK7v1gjwgDMG864.id
+        assign product_6PK7v1gjwgDMG864 = collections.all.products.first
+      endunless
       assign product_6PK7v1gjwgDMG864_variant = product_6PK7v1gjwgDMG864.selected_or_first_available_variant
 
       if product_6PK7v1gjwgDMG864.selected_variant
@@ -509,7 +521,7 @@
 .acmp-wrap{max-width:1040px;margin:0 auto;}
 .acmp-head{text-align:center;margin-bottom:48px;}
 .acmp-eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;color:#00e5c8;text-transform:uppercase;margin-bottom:16px;}
-.acmp-title{font-family:'Instrument Serif',serif;font-size:clamp(32px,5vw,52px);font-weight:400;color:#fff;line-height:1.08;letter-spacing:-.02em;margin:0 0 14px;}
+#aurora-compare .acmp-title{font-family:'Instrument Serif',serif !important;font-size:clamp(30px,5vw,50px) !important;font-weight:400 !important;color:#fff;line-height:1.1 !important;letter-spacing:-.02em;margin:0 0 14px;}
 .acmp-sub{font-family:'Inter',sans-serif;font-size:15px;color:#777;max-width:480px;margin:0 auto;line-height:1.6;}
 .acmp-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#2a2a36 transparent;}
 .acmp-table{width:100%;min-width:680px;border-collapse:separate;border-spacing:0;font-family:'Inter',sans-serif;}
@@ -638,12 +650,13 @@
 
 /* ── Hero bar ── */
 .aurs-hero{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:32px;margin-bottom:64px;}
-.aurs-headline h2{font-size:clamp(28px,4vw,48px);font-weight:300;color:#fff;margin:0 0 8px;line-height:1.1;}
-.aurs-headline p{font-size:14px;color:#555;margin:0;}
-.aurs-badges{display:flex;gap:24px;flex-wrap:wrap;}
+#aurs .aurs-headline h2{font-family:'Instrument Serif',serif !important;font-size:clamp(30px,4vw,46px) !important;font-weight:400 !important;color:#fff;margin:0 0 8px;line-height:1.08 !important;letter-spacing:-.01em;}
+.aurs-headline p{font-size:14px;color:#7a7a86;margin:0;}
+.aurs-badges{display:flex;gap:28px;flex-wrap:wrap;}
 .aurs-badge{text-align:center;}
-.aurs-badge-num{font-size:32px;font-weight:300;color:#fff;line-height:1;background:linear-gradient(90deg,#00e5c8,#7c3aed,#e0115f);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.aurs-badge-lbl{font-size:10px;letter-spacing:.14em;color:#666;margin-top:4px;text-transform:uppercase;}
+.aurs-badge-num{font-size:34px;font-weight:600;color:#fff;line-height:1;letter-spacing:-.01em;}
+.aurs-badge:first-child .aurs-badge-num{color:#00e5c8;}
+.aurs-badge-lbl{font-size:10px;letter-spacing:.14em;color:#666;margin-top:6px;text-transform:uppercase;}
 
 /* ── Summary row ── */
 .aurs-summary{display:flex;align-items:flex-start;gap:48px;margin-bottom:48px;padding-bottom:40px;border-bottom:1px solid #141418;flex-wrap:wrap;}
@@ -657,11 +670,10 @@
 .aurs-bar-track{flex:1;height:5px;background:#1a1a22;border-radius:3px;overflow:hidden;}
 .aurs-bar-fill{height:100%;background:#f5b400;border-radius:3px;transition:width .7s ease;}
 .aurs-bar-n{font-size:11px;color:#2e2e3e;width:18px;}
-.aurs-write-cta-inline{display:flex;flex-direction:column;gap:10px;justify-content:center;}
-.aurs-btn-grad{display:inline-block;padding:13px 28px;border-radius:999px;border:none;background:linear-gradient(135deg,#00e5c8,#7c3aed,#e0115f);background-size:300% 300%;animation:aurs-grad 5s ease infinite;color:#fff;font-size:12px;letter-spacing:.1em;font-family:inherit;cursor:pointer;text-transform:uppercase;transition:opacity .2s,transform .15s;text-align:center;text-decoration:none;}
-.aurs-btn-grad:hover{opacity:.88;transform:scale(1.02);}
-.aurs-btn-ghost{display:inline-block;padding:12px 28px;border-radius:999px;border:1px solid #1e1e1e;background:transparent;color:#555;font-size:12px;letter-spacing:.1em;font-family:inherit;cursor:pointer;text-transform:uppercase;transition:all .2s;text-align:center;}
-.aurs-btn-ghost:hover{border-color:#00e5c8;color:#00e5c8;}
+.aurs-write-cta-inline{display:flex;flex-direction:column;gap:10px;justify-content:center;align-self:center;}
+.aurs-btn-grad{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 30px;border-radius:999px;border:none;background:#fff;color:#0c0c10;font-size:12px;font-weight:600;letter-spacing:.08em;font-family:inherit;cursor:pointer;text-transform:uppercase;transition:opacity .2s,transform .15s;text-align:center;text-decoration:none;white-space:nowrap;}
+.aurs-btn-grad:hover{opacity:.9;transform:translateY(-1px);}
+.aurs-btn-ghost{display:none;}
 @keyframes aurs-grad{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
 /* ── Filters ── */
@@ -715,7 +727,7 @@
 /* ── Shopify contact form ── */
 .aurs-form-section{max-width:580px;margin:0 auto;padding:40px;background:#0d0d10;border:1px solid #1a1a22;border-radius:20px;display:none;}
 .aurs-form-section.open{display:block;}
-.aurs-form-title{font-size:24px;font-weight:300;color:#fff;margin:0 0 6px;}
+.aurs-form-title{font-size:24px !important;font-weight:500 !important;color:#fff;margin:0 0 6px;}
 .aurs-form-sub{font-size:13px;color:#444;margin:0 0 28px;}
 .aurs-flabel{display:block;font-size:10px;color:#3a3a4a;letter-spacing:.14em;margin-bottom:7px;text-transform:uppercase;}
 .aurs-fgroup{margin-bottom:16px;}
@@ -1295,14 +1307,14 @@ document.addEventListener('DOMContentLoaded',function(){
   font-family: 'JetBrains Mono', monospace;
   margin-bottom: 20px;
 }
-.aapp-headline {
-  font-family: 'Instrument Serif', serif;
-  font-size: clamp(36px, 4vw, 54px);
-  font-weight: 400;
+#aurora-app-section .aapp-headline {
+  font-family: 'Instrument Serif', serif !important;
+  font-size: clamp(34px, 4.4vw, 52px) !important;
+  font-weight: 400 !important;
   color: #fff;
-  line-height: 1.08;
+  line-height: 1.1 !important;
   letter-spacing: -.02em;
-  margin: 0 0 20px;
+  margin: 14px 0 20px !important;
 }
 .aapp-sub {
   font-size: 16px;
