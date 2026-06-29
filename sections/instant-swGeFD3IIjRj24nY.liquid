@@ -381,6 +381,16 @@
 
 .aued-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
 @media(max-width:880px){.aued-grid{grid-template-columns:1fr;}}
+
+/* Oura-style product gallery (auto-pulled from product media) */
+.aued-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;}
+.aued-shot{position:relative;margin:0;border-radius:18px;overflow:hidden;aspect-ratio:4/3;background:#0d0d12;border:1px solid rgba(255,255,255,.08);box-shadow:0 30px 60px -30px rgba(0,0,0,.9);
+  transition:transform .5s cubic-bezier(.16,1,.3,1),translate .8s cubic-bezier(.16,1,.3,1),opacity .8s cubic-bezier(.16,1,.3,1),box-shadow .4s,border-color .4s;}
+.aued-shot::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:inset 0 0 70px rgba(0,0,0,.14);}
+.aued-shot img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .7s cubic-bezier(.16,1,.3,1);}
+.aued-shot:hover{transform:translateY(-6px);border-color:rgba(0,229,200,.30);box-shadow:0 40px 80px -28px rgba(0,0,0,.95),0 0 50px -14px rgba(124,58,237,.30);}
+.aued-shot:hover img{transform:scale(1.06);}
+@media (prefers-reduced-motion: reduce){.aued-shot,.aued-shot img{transition:none !important;}.aued-shot{opacity:1 !important;translate:0 0 !important;}}
 .aued-panel{position:relative;border-radius:20px;padding:24px;min-height:380px;display:flex;flex-direction:column;justify-content:space-between;
   background:linear-gradient(158deg,rgba(255,255,255,.055),rgba(255,255,255,.012));
   -webkit-backdrop-filter:blur(22px) saturate(150%);backdrop-filter:blur(22px) saturate(150%);
@@ -447,6 +457,21 @@
       <p class="aued-sub">Titanium thin enough to forget you're wearing it. Intelligence deep enough to change how you live.</p>
     </div>
 
+    {%- assign aued_imgs = aued_p.images -%}
+    {%- if aued_imgs.size > 1 -%}
+    <div class="aued-gallery">
+      {%- for image in aued_imgs limit: 4 -%}
+        <figure class="aued-shot">
+          <img
+            src="{{ image | image_url: width: 800 }}"
+            srcset="{{ image | image_url: width: 480 }} 480w, {{ image | image_url: width: 800 }} 800w, {{ image | image_url: width: 1200 }} 1200w"
+            sizes="(max-width: 880px) 92vw, 32vw"
+            alt="{{ image.alt | default: aued_p.title | escape }}"
+            width="800" height="600" loading="lazy">
+        </figure>
+      {%- endfor -%}
+    </div>
+    {%- else -%}
     <div class="aued-grid">
       <article class="aued-panel aued-panel--media">
         <div class="aued-media">
@@ -491,6 +516,7 @@
         </div>
       </article>
     </div>
+    {%- endif -%}
   </div>
 </section>
 
@@ -504,7 +530,7 @@
     if(reduce){n.textContent=t;return;}
     var c=0,iv=setInterval(function(){c++;n.textContent=c;if(c>=t)clearInterval(iv);},90);
   }
-  var els=[].slice.call(sec.querySelectorAll('.aued-intro, .aued-panel'));
+  var els=[].slice.call(sec.querySelectorAll('.aued-intro, .aued-panel, .aued-shot'));
   if(!('IntersectionObserver' in window)){countStat();return;}
   var io=new IntersectionObserver(function(es){
     es.forEach(function(e){
