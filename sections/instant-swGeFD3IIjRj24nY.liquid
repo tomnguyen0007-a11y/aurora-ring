@@ -1169,82 +1169,76 @@ document.addEventListener('DOMContentLoaded',function(){
 }
 
 /* ═══════════════════════════════════════
-   AURORA HERO — Centered premium (reset)
-   Lighter, warmer, mobile-first.
+   AURORA HERO — Full-bleed three-ring image
+   Oura-style: image right, text left, blended
+   into the dark theme. Real asset, not product.
 ═══════════════════════════════════════ */
 
-/* 1. Premium ambient background — deep charcoal + warm glow,
-   not flat pure-black ("not too dark") */
+/* 1. Full-bleed three-ring background, scrimmed for the dark theme */
 .ii0RFdnEPQOvZNKbT {
   position: relative !important;
   overflow: hidden !important;
-  padding: clamp(110px, 14vh, 150px) 24px clamp(70px, 9vh, 110px) !important;
-  background:
-    radial-gradient(120% 80% at 50% 8%, rgba(245,180,0,.10) 0%, rgba(245,180,0,0) 46%),
-    radial-gradient(90% 70% at 50% 78%, rgba(0,229,200,.06) 0%, rgba(0,229,200,0) 60%),
-    linear-gradient(180deg, #101016 0%, #0a0a10 55%, #07070b 100%) !important;
+  padding: clamp(120px, 16vh, 170px) clamp(24px, 6vw, 96px) clamp(90px, 12vh, 130px) !important;
+  min-height: 100vh !important;
+  min-height: 100svh !important;
   justify-content: center !important;
   align-items: center !important;
+  background-color: #0a0a10 !important;
+  background-image:
+    linear-gradient(96deg, rgba(8,8,12,.95) 0%, rgba(8,8,12,.82) 30%, rgba(8,8,12,.42) 58%, rgba(8,8,12,.12) 82%, rgba(8,8,12,0) 100%),
+    linear-gradient(180deg, rgba(8,8,12,0) 52%, rgba(8,8,12,.55) 80%, #07070b 100%),
+    url('{{ 'aurora-hero.png' | asset_url }}') !important;
+  background-size: cover, cover, cover !important;
+  background-position: center, center, 72% center !important;
+  background-repeat: no-repeat !important;
 }
 
-/* 2. Centered content column */
+/* 2. Content column — left aligned within a centered max-width */
 .ifPUi9kocqDcLax0T {
-  width: 1100px !important;
+  position: relative !important;
+  z-index: 2 !important;
+  width: 1200px !important;
   max-width: 100% !important;
-  align-items: center !important;
-  row-gap: clamp(36px, 6vw, 56px) !important;
+  align-items: flex-start !important;
+  row-gap: clamp(28px, 4vw, 40px) !important;
 }
 .iDfxJnfkTrDb0NgZR {
-  align-items: center !important;
-  width: 760px !important;
+  align-items: flex-start !important;
+  width: 580px !important;
   max-width: 100% !important;
+  row-gap: 22px !important;
 }
 
-/* 3. Fluid, centered typography */
-.ir7TDqGbfQMsgTHkl { text-align: center !important; }
+/* 3. Left-aligned editorial typography */
+.ir7TDqGbfQMsgTHkl { text-align: left !important; color: #c9c9d2 !important; }
 .iTHFCsns6tXfoM2DK {
-  text-align: center !important;
-  font-size: clamp(44px, 8vw, 88px) !important;
-  line-height: 1.03 !important;
+  text-align: left !important;
+  font-size: clamp(46px, 6.4vw, 86px) !important;
+  line-height: 1.02 !important;
 }
-.iwCLSDMiumKdzhrX7 { text-align: center !important; }
-
-/* 4. Image stage — premium product shot on a soft pedestal glow */
-.iyv70324IBOYE6YFF {
-  width: 760px !important;
-  max-width: 100% !important;
-  margin: clamp(12px, 3vw, 40px) 0 !important;
-  position: relative !important;
-}
-/* warm pedestal halo behind the ring (three-rings hero feel) */
-.iLPBNiR9PnqoWKx5a {
-  display: flex !important;
-  background:
-    radial-gradient(60% 55% at 50% 52%, rgba(245,180,0,.14) 0%, rgba(245,180,0,0) 70%),
-    radial-gradient(closest-side, rgba(255,255,255,.05) 0%, rgba(255,255,255,0) 75%) !important;
-}
-.iF9xLyDKNs6T6k2FT {
-  max-width: 78% !important;
-  margin: 0 auto !important;
-  transition-delay: 0s !important;
-  box-shadow: 0 50px 90px -20px rgba(0,0,0,.75) !important;
-  border-radius: 18px !important;
-}
-.iF9xLyDKNs6T6k2FT .instant-image__main {
-  object-fit: contain !important;
-  filter: saturate(1.05) contrast(1.02) !important;
+.iwCLSDMiumKdzhrX7 {
+  text-align: left !important;
+  color: #c2c2cc !important;
+  max-width: 440px !important;
 }
 
-/* 5. Glass data card — centered, readable */
+/* 4. Hide the product <img> column — the background is the hero now */
+.iyv70324IBOYE6YFF { display: none !important; }
+
+/* 5. Glass data card — floats lower-left over the scrim, rings visible behind */
 .i9NvI8tYmkPF3PbKU {
-  width: 920px !important;
+  width: 560px !important;
   max-width: 100% !important;
   position: relative !important;
   z-index: 2 !important;
+  margin: 8px 0 0 !important;
+  background: linear-gradient(180deg, rgba(20,20,28,.72), rgba(12,12,18,.62)) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
 }
 
-/* 6. CTAs centered */
-.iAwrg3J55dmzVZwnF { justify-content: center !important; }
+/* 6. CTAs left-anchored */
+.iAwrg3J55dmzVZwnF { justify-content: flex-start !important; position: relative !important; z-index: 2 !important; }
 
 /* 7. Show hero immediately (no blank/delayed reveal) */
 .ii0RFdnEPQOvZNKbT .instant-scroll-trigger--hidden {
@@ -1253,21 +1247,35 @@ document.addEventListener('DOMContentLoaded',function(){
   pointer-events: auto !important;
 }
 
-/* ── Mobile-first polish ── */
+/* ── Tablet ── */
+@media only screen and (max-width: 1024px) {
+  .ii0RFdnEPQOvZNKbT { background-position: center, center, 80% center !important; }
+  .iDfxJnfkTrDb0NgZR { width: 520px !important; }
+}
+
+/* ── Mobile-first: rings sit behind a stronger scrim so text stays crisp ── */
 @media only screen and (max-width: 768px) {
-  .ii0RFdnEPQOvZNKbT { padding: 96px 18px 64px !important; min-height: auto !important; }
-  .iDfxJnfkTrDb0NgZR { row-gap: 18px !important; }
-  .iF9xLyDKNs6T6k2FT { max-width: 92% !important; }
-  .iyv70324IBOYE6YFF { margin: 8px 0 !important; }
-  .i9NvI8tYmkPF3PbKU { padding: 26px 20px !important; row-gap: 18px !important; border-radius: 18px !important; }
-  /* stack each data row label/value cleanly on small screens */
-  .i8giSpiIakVPdQ2CX, .iBxVRsajrcS0JwpVW, .i66ooT3x6CyabzDLB, .ichvuh1IWneJFTBih { padding: 16px 0 !important; }
+  .ii0RFdnEPQOvZNKbT {
+    padding: 104px 22px 72px !important;
+    min-height: 92vh !important;
+    align-items: flex-start !important;
+    background-image:
+      linear-gradient(180deg, rgba(8,8,12,.62) 0%, rgba(8,8,12,.40) 34%, rgba(8,8,12,.80) 72%, #07070b 100%),
+      url('{{ 'aurora-hero.png' | asset_url }}') !important;
+    background-size: cover, cover !important;
+    background-position: center, 62% 38% !important;
+  }
+  .ifPUi9kocqDcLax0T { row-gap: 26px !important; }
+  .iDfxJnfkTrDb0NgZR { width: 100% !important; row-gap: 16px !important; }
+  .iwCLSDMiumKdzhrX7 { max-width: 100% !important; }
+  .i9NvI8tYmkPF3PbKU { width: 100% !important; padding: 24px 18px !important; row-gap: 16px !important; border-radius: 18px !important; margin-top: 4px !important; }
+  .i8giSpiIakVPdQ2CX, .iBxVRsajrcS0JwpVW, .i66ooT3x6CyabzDLB, .ichvuh1IWneJFTBih { padding: 15px 0 !important; }
   .iAwrg3J55dmzVZwnF { width: 100% !important; flex-direction: column !important; }
   .iBx3i6t7vRVeEpyFj { width: 100% !important; }
 }
 @media only screen and (max-width: 420px) {
-  .iTHFCsns6tXfoM2DK { font-size: clamp(38px, 11vw, 52px) !important; }
-  .ir7TDqGbfQMsgTHkl { font-size: 11px !important; letter-spacing: .28em !important; }
+  .iTHFCsns6tXfoM2DK { font-size: clamp(40px, 12vw, 56px) !important; }
+  .ir7TDqGbfQMsgTHkl { font-size: 11px !important; letter-spacing: .26em !important; }
 }
 
 
