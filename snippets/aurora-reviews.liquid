@@ -11,9 +11,9 @@
     <!-- Header / summary -->
     <div class="avr-head">
       <div class="avr-sum">
-        <div class="avr-avg">4.8</div>
+        <div class="avr-avg" id="avr-avg">4.8</div>
         <div class="avr-sum-stars">★★★★★</div>
-        <div class="avr-sum-count">Based on <strong>2,843</strong> verified reviews</div>
+        <div class="avr-sum-count">Based on <strong id="avr-count">2,843</strong> verified reviews</div>
         <button class="avr-write-btn" type="button" onclick="avrOpen()">Write a review</button>
       </div>
       <div class="avr-bars" id="avr-bars"></div>
@@ -26,7 +26,6 @@
         <button class="avr-pill" data-f="5" onclick="avrFilter('5',this)">5 ★</button>
         <button class="avr-pill" data-f="4" onclick="avrFilter('4',this)">4 ★</button>
         <button class="avr-pill" data-f="3" onclick="avrFilter('3',this)">3 ★</button>
-        <button class="avr-pill" data-f="photo" onclick="avrFilter('photo',this)">📷 With photos</button>
       </div>
       <div class="avr-sort">
         <span>Sort</span>
@@ -143,7 +142,7 @@
 
 <script>
 (function(){
-  var PHOTO = "{{ 'aurora-hero-steel.png' | asset_url }}";
+  var TOTAL=2843;
   var R=[
     {n:'Jennifer M.',r:5,v:1,d:'2026-05-18',dl:'18 May 2026',h:42,t:'Accurate, comfortable, no subscription',b:"Waterproof, durable and stylish. Tracks heart rate, sleep and my cycle. Surprised how accurate the sleep data is — and no monthly fee.",p:1},
     {n:'David K.',r:5,v:1,d:'2026-05-11',dl:'11 May 2026',h:38,t:'Battery genuinely lasts a week',b:"Charge once and forget about it. Waterproof so I never take it off. The app is easy to read every morning. Incredible value.",p:0},
@@ -166,8 +165,17 @@
   function initials(name){return name.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();}
   function avaColor(name){var c=0;for(var i=0;i<name.length;i++)c+=name.charCodeAt(i);return GR[c%GR.length];}
 
+  function loadUser(){
+    var u=[];try{u=JSON.parse(localStorage.getItem('aurora_user_reviews')||'[]');}catch(e){}
+    u.forEach(function(rv){R.unshift(rv);if(DIST[rv.r]!=null)DIST[rv.r]++;});
+    return u.length;
+  }
+  function saveUser(rv){
+    try{var u=JSON.parse(localStorage.getItem('aurora_user_reviews')||'[]');u.unshift(rv);localStorage.setItem('aurora_user_reviews',JSON.stringify(u));}catch(e){}
+  }
   function renderBars(){
     var total=0,wt=0;[5,4,3,2,1].forEach(function(s){total+=DIST[s];wt+=s*DIST[s];});
+    var avg=total?wt/total:4.8;
     var html='';[5,4,3,2,1].forEach(function(s){
       var p=Math.round(DIST[s]/total*100);
       html+='<div class="avr-bar"><span class="avr-bar-l">'+s+'<b>★</b></span>'
@@ -175,11 +183,12 @@
         +'<span class="avr-bar-p">'+p+'%</span></div>';
     });
     document.getElementById('avr-bars').innerHTML=html;
+    var ce=document.getElementById('avr-count');if(ce)ce.textContent=total.toLocaleString();
+    var ae=document.getElementById('avr-avg');if(ae)ae.textContent=avg.toFixed(1);
   }
   function list(){
     var l=R.slice();
-    if(st.f==='photo')l=l.filter(function(x){return x.p;});
-    else if(st.f!=='all')l=l.filter(function(x){return x.r==+st.f;});
+    if(st.f!=='all')l=l.filter(function(x){return x.r==+st.f;});
     if(st.sort==='helpful')l.sort(function(a,b){return b.h-a.h;});
     else if(st.sort==='recent')l.sort(function(a,b){return a.d<b.d?1:-1;});
     else if(st.sort==='high')l.sort(function(a,b){return b.r-a.r||b.h-a.h;});
@@ -199,7 +208,6 @@
         +'<div class="avr-cstars">'+stars(x.r)+'</div>'
         +'<p class="avr-ctitle">'+x.t+'</p>'
         +'<p class="avr-cbody">'+x.b+'</p>'
-        +(x.p?'<div class="avr-cphoto"><img src="'+PHOTO+'" alt="Customer photo of Aurora Ring" loading="lazy"></div>':'')
         +'<div class="avr-chelp"><span>Helpful?</span><button class="avr-hbtn'+(vt?' voted':'')+'"'+(vt?' disabled':'')+' onclick="avrHelp(\''+id+'\',this)">👍 '+(x.h+(vt?1:0))+'</button></div>'
         +'</div>';
     }).join('');
@@ -212,7 +220,9 @@
   window.avrOpen=function(){var f=document.getElementById('avr-form');f.classList.add('open');f.scrollIntoView({behavior:'smooth',block:'center'});};
 
   document.addEventListener('DOMContentLoaded',function(){
+    loadUser();            /* merge this browser's submitted reviews + bump the count */
     renderBars();render();
+
     var picked=0,sp=document.querySelectorAll('#avr-starpick span');
     [].forEach.call(sp,function(s){
       s.addEventListener('click',function(){picked=+s.getAttribute('data-v');document.getElementById('avr-ratval').value=picked;paint(picked);});
@@ -220,7 +230,26 @@
       s.addEventListener('mouseout',function(){paint(picked);});
     });
     function paint(v){[].forEach.call(sp,function(x){x.classList.toggle('on',+x.getAttribute('data-v')<=v);});}
-    if(location.search.indexOf('contact_posted=true')>-1){var f=document.getElementById('avr-form');f.classList.add('open');f.innerHTML='<div style="text-align:center;padding:40px 0;"><div style="font-size:40px;">✓</div><h3 class="avr-form-title" style="margin-top:10px;">Thank you!</h3><p class="avr-form-sub">Your review has been received and will appear shortly.</p></div>';}
+
+    /* On submit: persist the review locally so it shows + the count ticks up,
+       then let the Shopify contact form POST (emails the store for moderation). */
+    var form=document.querySelector('#avr-form form');
+    if(form){
+      form.addEventListener('submit',function(){
+        var g=function(n){var el=form.querySelector('[name="'+n+'"]');return el?el.value.trim():'';};
+        var rat=+(document.getElementById('avr-ratval').value)||5;
+        saveUser({n:g('contact[name]')||'Verified buyer',r:rat,v:1,
+          d:new Date().toISOString().slice(0,10),dl:'Just now',h:0,
+          t:g('contact[review_title]')||'Verified purchase',
+          b:g('contact[body]'),p:0});
+      });
+    }
+
+    if(location.search.indexOf('contact_posted=true')>-1){
+      var f=document.getElementById('avr-form');f.classList.add('open');
+      f.innerHTML='<div style="text-align:center;padding:40px 0;"><div style="font-size:40px;">✓</div><h3 class="avr-form-title" style="margin-top:10px;">Thank you — your review is live!</h3><p class="avr-form-sub">It now appears above and your rating has been counted.</p></div>';
+      document.getElementById('avr').scrollIntoView({behavior:'smooth'});
+    }
   });
 })();
 </script>

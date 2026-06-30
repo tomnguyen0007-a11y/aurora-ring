@@ -68,7 +68,7 @@
 
 
     
-><div class="iyv70324IBOYE6YFF" data-instant-type="container"
+<div class="iyv70324IBOYE6YFF" data-instant-type="container"
           ><div class="iLPBNiR9PnqoWKx5a" data-instant-type="container"></div><div data-instant-scroll-into-view-replay="false" data-instant-type="media" class="iF9xLyDKNs6T6k2FT instant-scroll-trigger instant-scroll-trigger--hidden instant-reveal--transform-fade"><img alt="{{ product_i0RFdnEPQOvZNKbT_image.alt }}" src="{{ product_i0RFdnEPQOvZNKbT_image | image_url: width: 1280 }}" sizes="(max-width: 1280px) 100vw, 1280px" srcSet="{{ product_i0RFdnEPQOvZNKbT_image | image_url: width: 1080 }} 1080w, {{ product_i0RFdnEPQOvZNKbT_image | image_url: width: 828 }} 828w, {{ product_i0RFdnEPQOvZNKbT_image | image_url: width: 750 }} 750w, {{ product_i0RFdnEPQOvZNKbT_image | image_url: width: 640 }} 640w, {{ product_i0RFdnEPQOvZNKbT_image | image_url: width: 360 }} 360w, {{ product_i0RFdnEPQOvZNKbT_image | image_url: width: 1280 }} 1280w" data-instant-dynamic-content-source="FEATURED_IMAGE" decoding="async" loading="eager" fetchpriority="high" class="instant-media instant-image instant-image__main"></div></div
         ><div class="i9NvI8tYmkPF3PbKU instant-scroll-trigger instant-scroll-trigger--hidden instant-reveal--transform-fade" data-instant-scroll-into-view-replay="false" data-instant-type="container"
           ><div class="iA7vJhmTHkaeospEC" data-instant-type="container"
@@ -1157,8 +1157,7 @@ document.addEventListener('DOMContentLoaded',function(){
   <script>(()=>{let t=window.Instant||{};if(!t.initializedAppEmbed&&!window.__instant_loading_core){window.__instant_loading_core=!0,t.initializedVersion="4.6.0",t.initialized=!0;let i=()=>{let i=(t,i)=>t.split(".").map(Number).reduce((t,e,n)=>t||e-i.split(".")[n],0),e=[...document.querySelectorAll(".__instant")].map(t=>t.getAttribute("data-instant-version")||"1.0.0").sort(i).pop()||"1.0.0",n=document.createElement("script");n.src="https://client.instant.so/scripts/instant-core.min.js?version="+e,document.body.appendChild(n),t.initializedVersion=e};"loading"!==document.readyState?i():document.addEventListener("DOMContentLoaded",i)}})();</script>
 </div>
 
-{%- comment -%} Premium Vilgain-style reviews, rendered OUTSIDE the Instant root so its CSS reset can't shrink the headings {%- endcomment -%}
-{% render 'aurora-reviews' %}
+{%- comment -%} App section + reviews live on the PRODUCT page only (per request) {%- endcomment -%}
 
 {% schema %}
 {
@@ -1259,7 +1258,7 @@ document.addEventListener('DOMContentLoaded',function(){
       linear-gradient(180deg, rgba(8,8,12,.62) 0%, rgba(8,8,12,.40) 34%, rgba(8,8,12,.80) 72%, #07070b 100%),
       url('{{ 'aurora-hero.png' | asset_url }}') !important;
     background-size: cover, cover !important;
-    background-position: center, 62% 38% !important;
+    background-position: center, 50% 46% !important;
   }
   .ifPUi9kocqDcLax0T { row-gap: 26px !important; }
   .iDfxJnfkTrDb0NgZR { width: 100% !important; row-gap: 16px !important; }
@@ -1279,6 +1278,7 @@ document.addEventListener('DOMContentLoaded',function(){
    AURORA APP SECTION STYLES
 ═══════════════════════════════════════ */
 #aurora-app-section {
+  display: none !important; /* moved to the product page (snippets/aurora-app-section.liquid) */
   background: #050508;
   padding: 100px 40px;
   border-top: 1px solid #111118;
