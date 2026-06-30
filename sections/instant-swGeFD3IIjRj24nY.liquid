@@ -34,7 +34,7 @@
           <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:999px;border:1px solid #1e1e1e;background:#0a0a0a;margin-top:18px;">
             <span style="width:6px;height:6px;border-radius:50%;background:#00e5c8;display:inline-block;flex-shrink:0;"></span>
             <span style="font-size:11px;letter-spacing:.12em;color:#555;font-family:inherit;">NO SUBSCRIPTION &middot; FULL DATA ACCESS &middot; YOURS FOREVER</span>
-          </div></div
+          </div></div>
         <div class="iAwrg3J55dmzVZwnF instant-scroll-trigger instant-scroll-trigger--hidden instant-reveal--fade" data-instant-scroll-into-view-replay="false" data-instant-type="container">
   {%- liquid
     assign style = ''
@@ -42,13 +42,18 @@
     if is_available_for_sale != true
       assign style = 'style="display: none;"'
     endif
+    # Shop Now → screenless "Aurora Gen 1"; fall back to any live product, then the shop
+    assign hero_shop = all_products['aurora-gen-1']
+    unless hero_shop.published_at
+      assign hero_shop = collections.all.products.first
+    endunless
   -%}
   
   <a
     class="iBx3i6t7vRVeEpyFj"
     data-instant-type="container"
     {{- style -}}
-    href="{{ routes.all_products_collection_url | default: '/collections/all' }}"
+    href="{{ hero_shop.url | default: routes.all_products_collection_url | default: '/collections/all' }}"
     rel="noopener noreferrer"
     ><div data-instant-type="text" class="instant-rich-text iU1dUaEvtBfT0uZTg"><p>Shop Now</p></div></a
   >
@@ -1246,15 +1251,22 @@ document.addEventListener('DOMContentLoaded',function(){
   pointer-events: auto !important;
 }
 
-/* CTA row: keep Shop Now + Explore side-by-side on desktop, kill the
-   stray inline margin-top that detached the second button. */
+/* CTA row: full-width track so Shop Now + Explore sit side-by-side on
+   desktop (no shrink-to-fit wrap), kill the stray inline margin-top. */
 .iAwrg3J55dmzVZwnF {
+  align-self: stretch !important;
   flex-direction: row !important;
-  flex-wrap: wrap !important;
+  flex-wrap: nowrap !important;
   align-items: center !important;
+  justify-content: flex-start !important;
   gap: 14px !important;
 }
-.iAwrg3J55dmzVZwnF > a { margin-top: 0 !important; }
+.iAwrg3J55dmzVZwnF > a { margin-top: 0 !important; flex: 0 0 auto !important; }
+
+/* Belt-and-suspenders: nothing in the hero except text + CTAs.
+   Kill the data card, the image column and its glow so no black box
+   can ever appear below the buttons. */
+.iyv70324IBOYE6YFF, .i9NvI8tYmkPF3PbKU, .iLPBNiR9PnqoWKx5a { display: none !important; }
 
 /* ── Tablet ── */
 @media only screen and (max-width: 1024px) {
