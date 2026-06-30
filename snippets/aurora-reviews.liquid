@@ -2,8 +2,26 @@
   Aurora — Vilgain-style reviews (light, premium).
   Self-contained: scoped .avr- classes + own IIFE JS.
   Safe on any page (product page + landing). Uses Shopify
-  contact form for submissions. Photos use theme assets.
+  contact form for submissions.
 {%- endcomment -%}
+{%- liquid
+  assign _r_total = 852
+  assign _r_d5    = 730
+  assign _r_d4    = 78
+  assign _r_d3    = 27
+  assign _r_d2    = 12
+  assign _r_d1    = 5
+  assign _r_avg   = '4.8'
+  if product.title contains 'screenless' or product.handle contains 'screenless' or product.handle contains 'gen-1'
+    assign _r_total = 534
+    assign _r_d5    = 445
+    assign _r_d4    = 58
+    assign _r_d3    = 19
+    assign _r_d2    = 8
+    assign _r_d1    = 4
+    assign _r_avg   = '4.7'
+  endif
+-%}
 
 <section id="avr" class="avr">
   <div class="avr-wrap">
@@ -11,9 +29,9 @@
     <!-- Header / summary -->
     <div class="avr-head">
       <div class="avr-sum">
-        <div class="avr-avg" id="avr-avg">4.8</div>
+        <div class="avr-avg" id="avr-avg">{{ _r_avg }}</div>
         <div class="avr-sum-stars">★★★★★</div>
-        <div class="avr-sum-count">Based on <strong id="avr-count">2,843</strong> verified reviews</div>
+        <div class="avr-sum-count">Based on <strong id="avr-count">{{ _r_total }}</strong> verified reviews</div>
         <button class="avr-write-btn" type="button" onclick="avrOpen()">Write a review</button>
       </div>
       <div class="avr-bars" id="avr-bars"></div>
@@ -142,7 +160,7 @@
 
 <script>
 (function(){
-  var TOTAL=2843;
+  var TOTAL={{ _r_total }};
   var R=[
     {n:'Jennifer M.',r:5,v:1,d:'2026-05-18',dl:'18 May 2026',h:42,t:'Accurate, comfortable, no subscription',b:"Waterproof, durable and stylish. Tracks heart rate, sleep and my cycle. Surprised how accurate the sleep data is — and no monthly fee.",p:1},
     {n:'David K.',r:5,v:1,d:'2026-05-11',dl:'11 May 2026',h:38,t:'Battery genuinely lasts a week',b:"Charge once and forget about it. Waterproof so I never take it off. The app is easy to read every morning. Incredible value.",p:0},
@@ -157,7 +175,7 @@
     {n:'Bruno F.',r:5,v:1,d:'2026-03-08',dl:'8 Mar 2026',h:11,t:'Unbeatable pricing',b:"Genuine health tracking for the cost of a nice lunch. The week-long battery is the real standout.",p:0},
     {n:'Hannah V.',r:5,v:1,d:'2026-02-28',dl:'28 Feb 2026',h:9,t:'Cycle tracking is a game changer',b:"The temperature trend and cycle predictions have been spot on. Discreet, comfortable, and the app explains the numbers.",p:1}
   ];
-  var DIST={5:2510,4:248,3:61,2:18,1:6};
+  var DIST={5:{{ _r_d5 }},4:{{ _r_d4 }},3:{{ _r_d3 }},2:{{ _r_d2 }},1:{{ _r_d1 }}};
   var GR=['linear-gradient(135deg,#6fbf00,#3f8a00)','linear-gradient(135deg,#15171a,#3a3f44)','linear-gradient(135deg,#c79a3a,#9a7320)','linear-gradient(135deg,#5b8def,#2f63c4)','linear-gradient(135deg,#e07a5f,#c4533a)','linear-gradient(135deg,#8a6fd1,#5f44a8)'];
   var st={f:'all',sort:'helpful',shown:6,voted:{}};
 

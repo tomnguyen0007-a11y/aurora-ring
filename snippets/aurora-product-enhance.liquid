@@ -4,6 +4,12 @@
   pages beneath the native buy box. Light, clean, rounded,
   lime-accented — mirrors aktin.cz / Vilgain product layout.
 {%- endcomment -%}
+{%- liquid
+  assign _prod_total = 852
+  if product.title contains 'screenless' or product.handle contains 'screenless' or product.handle contains 'gen-1'
+    assign _prod_total = 534
+  endif
+-%}
 
 <section class="avg-band">
   <div class="avg-inner">
@@ -32,7 +38,7 @@
     <a href="#aurs" class="avg-rating">
       <span class="avg-stars">★★★★★</span>
       <strong>4.8</strong>
-      <span class="avg-rating-txt">2,843 verified reviews</span>
+      <span class="avg-rating-txt">{{ _prod_total }} verified reviews</span>
       <span class="avg-rating-link">Read reviews →</span>
     </a>
 
@@ -88,15 +94,6 @@
       </div>
     </div>
 
-    {%- comment -%} Guarantee band {%- endcomment -%}
-    <div class="avg-guarantee">
-      <div>
-        <h3>Try it for 30 nights</h3>
-        <p>Sleep on it — literally. If Aurora isn't for you, send it back within 30 days for a full refund. Shipping's on us both ways.</p>
-      </div>
-      <span class="avg-guarantee-seal">30<small>DAY</small></span>
-    </div>
-
   </div>
 </section>
 
@@ -130,12 +127,6 @@
   .avg-spec:first-child{border-top:none;}
   .avg-spec span{color:var(--vg-ink-soft,#5b6066);flex-shrink:0;}
   .avg-spec strong{color:var(--vg-ink,#15171a);font-weight:600;text-align:right;}
-  .avg-guarantee{display:flex;align-items:center;justify-content:space-between;gap:28px;background:linear-gradient(120deg,#1a1c18,#101210);border-radius:20px;padding:32px 36px;color:#fff;}
-  .avg-guarantee h3{font-size:22px;font-weight:700;margin:0 0 8px;letter-spacing:-.01em;}
-  .avg-guarantee p{font-size:14px;color:#b7bdb0;line-height:1.6;margin:0;max-width:520px;}
-  .avg-guarantee-seal{flex-shrink:0;width:88px;height:88px;border-radius:50%;border:2px solid var(--vg-lime,#6fbf00);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:30px;font-weight:800;color:var(--vg-lime,#6fbf00);line-height:1;}
-  .avg-guarantee-seal small{font-size:10px;letter-spacing:.18em;font-weight:600;margin-top:3px;}
-
   @media(max-width:860px){
     .avg-grid{grid-template-columns:repeat(2,1fr);}
     .avg-trust{grid-template-columns:repeat(2,1fr);}
@@ -147,7 +138,6 @@
     .avg-specs{padding:24px 20px;}
     .avg-spec{flex-direction:column;gap:2px;}
     .avg-spec strong{text-align:left;}
-    .avg-guarantee{flex-direction:column;text-align:center;padding:28px 22px;}
     .avg-rating{flex-wrap:wrap;}
   }
 </style>
