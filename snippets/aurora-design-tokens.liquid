@@ -55,4 +55,21 @@
     /* ── Layout ── */
     --aurora-maxw: 1180px;
   }
+
+  /* ── Kill the Instant builder watermark / section-name badge everywhere ── */
+  a[href*="instant.so"],
+  a[href*="getinstant"],
+  [class*="instant-watermark"],
+  [class*="instant-badge"],
+  [class*="instant-branding"],
+  [data-instant-watermark],
+  [data-instant-badge],
+  #instant-watermark,
+  .__instant__watermark,
+  div[data-instant-id][data-instant-label] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
 </style>

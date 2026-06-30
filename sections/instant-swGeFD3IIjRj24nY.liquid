@@ -14,7 +14,7 @@
     {%- liquid
       assign product_i0RFdnEPQOvZNKbT_handle = 'aurora-ring'
       assign product_i0RFdnEPQOvZNKbT = section.settings.product_i0RFdnEPQOvZNKbT | default: all_products[product_i0RFdnEPQOvZNKbT_handle]
-      unless product_i0RFdnEPQOvZNKbT.id
+      unless product_i0RFdnEPQOvZNKbT.published_at
         assign product_i0RFdnEPQOvZNKbT = collections.all.products.first
       endunless
       assign product_i0RFdnEPQOvZNKbT_variant = product_i0RFdnEPQOvZNKbT.selected_or_first_available_variant
@@ -48,7 +48,7 @@
     class="iBx3i6t7vRVeEpyFj"
     data-instant-type="container"
     {{- style -}}
-    href="{{ product_i0RFdnEPQOvZNKbT.url }}"
+    href="{{ product_i0RFdnEPQOvZNKbT.url | default: '/collections/all' }}"
     rel="noopener noreferrer"
     data-instant-action-type="open-page"
     ><div data-instant-type="text" class="instant-rich-text iU1dUaEvtBfT0uZTg"><p>Shop Now</p></div></a
@@ -160,7 +160,7 @@
     {%- liquid
       assign product_d7ZK83gfclQvAJ1i_handle = 'aurora-ring'
       assign product_d7ZK83gfclQvAJ1i = section.settings.product_d7ZK83gfclQvAJ1i | default: all_products[product_d7ZK83gfclQvAJ1i_handle]
-      unless product_d7ZK83gfclQvAJ1i.id
+      unless product_d7ZK83gfclQvAJ1i.published_at
         assign product_d7ZK83gfclQvAJ1i = collections.all.products.first
       endunless
       assign product_d7ZK83gfclQvAJ1i_variant = product_d7ZK83gfclQvAJ1i.selected_or_first_available_variant
@@ -217,7 +217,7 @@
     {%- liquid
       assign product_odx5nQFmeIgzWwcB_handle = 'aurora-ring'
       assign product_odx5nQFmeIgzWwcB = section.settings.product_odx5nQFmeIgzWwcB | default: all_products[product_odx5nQFmeIgzWwcB_handle]
-      unless product_odx5nQFmeIgzWwcB.id
+      unless product_odx5nQFmeIgzWwcB.published_at
         assign product_odx5nQFmeIgzWwcB = collections.all.products.first
       endunless
       assign product_odx5nQFmeIgzWwcB_variant = product_odx5nQFmeIgzWwcB.selected_or_first_available_variant
@@ -280,7 +280,7 @@
     {%- liquid
       assign product_6PK7v1gjwgDMG864_handle = 'aurora-ring'
       assign product_6PK7v1gjwgDMG864 = section.settings.product_6PK7v1gjwgDMG864 | default: all_products[product_6PK7v1gjwgDMG864_handle]
-      unless product_6PK7v1gjwgDMG864.id
+      unless product_6PK7v1gjwgDMG864.published_at
         assign product_6PK7v1gjwgDMG864 = collections.all.products.first
       endunless
       assign product_6PK7v1gjwgDMG864_variant = product_6PK7v1gjwgDMG864.selected_or_first_available_variant
@@ -1225,17 +1225,9 @@ document.addEventListener('DOMContentLoaded',function(){
 /* 4. Hide the product <img> column — the background is the hero now */
 .iyv70324IBOYE6YFF { display: none !important; }
 
-/* 5. Glass data card — floats lower-left over the scrim, rings visible behind */
-.i9NvI8tYmkPF3PbKU {
-  width: 560px !important;
-  max-width: 100% !important;
-  position: relative !important;
-  z-index: 2 !important;
-  margin: 8px 0 0 !important;
-  background: linear-gradient(180deg, rgba(20,20,28,.72), rgba(12,12,18,.62)) !important;
-  backdrop-filter: blur(18px) !important;
-  -webkit-backdrop-filter: blur(18px) !important;
-}
+/* 5. Hide the live-data card in the hero — keep the rings unobstructed.
+   (The same metrics live in the App section mockups below.) */
+.i9NvI8tYmkPF3PbKU { display: none !important; }
 
 /* 6. CTAs left-anchored */
 .iAwrg3J55dmzVZwnF { justify-content: flex-start !important; position: relative !important; z-index: 2 !important; }
