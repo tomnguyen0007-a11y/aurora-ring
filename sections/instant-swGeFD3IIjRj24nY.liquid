@@ -48,9 +48,8 @@
     class="iBx3i6t7vRVeEpyFj"
     data-instant-type="container"
     {{- style -}}
-    href="{{ product_i0RFdnEPQOvZNKbT.url | default: '/collections/all' }}"
+    href="{{ routes.all_products_collection_url | default: '/collections/all' }}"
     rel="noopener noreferrer"
-    data-instant-action-type="open-page"
     ><div data-instant-type="text" class="instant-rich-text iU1dUaEvtBfT0uZTg"><p>Shop Now</p></div></a
   >
 
@@ -1235,12 +1234,27 @@ document.addEventListener('DOMContentLoaded',function(){
 /* 6. CTAs left-anchored */
 .iAwrg3J55dmzVZwnF { justify-content: flex-start !important; position: relative !important; z-index: 2 !important; }
 
-/* 7. Show hero immediately (no blank/delayed reveal) */
-.ii0RFdnEPQOvZNKbT .instant-scroll-trigger--hidden {
+/* 7. SAFETY NET: the Instant app was removed, so the scroll-reveal
+   script may not run. Force every reveal element visible so no section
+   is ever stuck at opacity:0 / hidden. */
+.iswGeFD3IIjRj24nY .instant-scroll-trigger--hidden,
+.iswGeFD3IIjRj24nY .instant-reveal--fade,
+.iswGeFD3IIjRj24nY .instant-reveal--transform,
+.iswGeFD3IIjRj24nY .instant-reveal--transform-fade {
   opacity: 1 !important;
   transform: none !important;
   pointer-events: auto !important;
 }
+
+/* CTA row: keep Shop Now + Explore side-by-side on desktop, kill the
+   stray inline margin-top that detached the second button. */
+.iAwrg3J55dmzVZwnF {
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 14px !important;
+}
+.iAwrg3J55dmzVZwnF > a { margin-top: 0 !important; }
 
 /* ── Tablet ── */
 @media only screen and (max-width: 1024px) {
