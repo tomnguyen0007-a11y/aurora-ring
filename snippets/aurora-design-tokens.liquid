@@ -56,59 +56,20 @@
     --aurora-maxw: 1180px;
   }
 
-  /* ── Kill Instant builder watermark / badge — every known selector ── */
+  /* ── Kill the Instant builder watermark / section-name badge everywhere ── */
   a[href*="instant.so"],
   a[href*="getinstant"],
-  a[href*="tryinstant"],
   [class*="instant-watermark"],
   [class*="instant-badge"],
   [class*="instant-branding"],
-  [class*="instant-label"]:not([data-instant-id]),
-  [class*="instant-section-label"],
-  [class*="instant-pw"],
   [data-instant-watermark],
   [data-instant-badge],
   #instant-watermark,
-  #instant-badge,
   .__instant__watermark,
-  .__instant__badge,
-  .InstantWatermark,
-  .instant-pw,
-  /* Instant external/vimeo play-buttons that can appear as black squares */
-  .instant-external__button,
-  .instant-vimeo__button {
+  div[data-instant-id][data-instant-label] {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
     pointer-events: none !important;
-    width: 0 !important;
-    height: 0 !important;
-    overflow: hidden !important;
   }
 </style>
-<script>
-/* Permanent Instant badge / black-square kill — CSS alone can't catch JS-injected nodes */
-(function(){
-  var SELS=[
-    'a[href*="instant.so"]','a[href*="getinstant"]','a[href*="tryinstant"]',
-    '[class*="instant-watermark"]','[class*="instant-badge"]','[class*="instant-branding"]',
-    '[class*="instant-label"]:not([data-instant-id])','[class*="instant-section-label"]',
-    '[data-instant-watermark]','[data-instant-badge]',
-    '#instant-watermark','#instant-badge',
-    '.__instant__watermark','.__instant__badge','.InstantWatermark','.instant-pw',
-    '.instant-external__button','.instant-vimeo__button'
-  ];
-  function nuke(){
-    SELS.forEach(function(s){
-      try{document.querySelectorAll(s).forEach(function(el){
-        el.style.cssText='display:none!important;visibility:hidden!important;opacity:0!important;width:0!important;height:0!important;overflow:hidden!important;pointer-events:none!important;';
-      });}catch(e){}
-    });
-  }
-  nuke();
-  if(window.MutationObserver){
-    new MutationObserver(nuke).observe(document.documentElement,{childList:true,subtree:true});
-  }
-  document.addEventListener('DOMContentLoaded',nuke);
-})();
-</script>
