@@ -42,8 +42,11 @@
     if is_available_for_sale != true
       assign style = 'style="display: none;"'
     endif
-    # Shop Now → screenless "Aurora Gen 1"; fall back to any live product, then the shop
-    assign hero_shop = all_products['aurora-gen-1']
+    # Shop Now → try aurora-ring handle first, then aurora-gen-1, then any live product
+    assign hero_shop = all_products['aurora-ring']
+    unless hero_shop.published_at
+      assign hero_shop = all_products['aurora-gen-1']
+    endunless
     unless hero_shop.published_at
       assign hero_shop = collections.all.products.first
     endunless
