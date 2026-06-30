@@ -645,7 +645,7 @@
 ════════════════════════════════════════════ -->
 <style>
 /* ── Layout ── */
-#aurs{background:#0c0c10;padding:96px 24px 80px;border-top:1px solid #141418;}
+#aurs{display:none !important;/* replaced by the Vilgain-style aurora-reviews snippet rendered outside the Instant container */}
 .aurs-wrap{max-width:1120px;margin:0 auto;}
 
 /* ── Hero bar ── */
@@ -1156,6 +1156,10 @@ document.addEventListener('DOMContentLoaded',function(){
       <!-- prettier-ignore -->
   <script>(()=>{let t=window.Instant||{};if(!t.initializedAppEmbed&&!window.__instant_loading_core){window.__instant_loading_core=!0,t.initializedVersion="4.6.0",t.initialized=!0;let i=()=>{let i=(t,i)=>t.split(".").map(Number).reduce((t,e,n)=>t||e-i.split(".")[n],0),e=[...document.querySelectorAll(".__instant")].map(t=>t.getAttribute("data-instant-version")||"1.0.0").sort(i).pop()||"1.0.0",n=document.createElement("script");n.src="https://client.instant.so/scripts/instant-core.min.js?version="+e,document.body.appendChild(n),t.initializedVersion=e};"loading"!==document.readyState?i():document.addEventListener("DOMContentLoaded",i)}})();</script>
 </div>
+
+{%- comment -%} Premium Vilgain-style reviews, rendered OUTSIDE the Instant root so its CSS reset can't shrink the headings {%- endcomment -%}
+{% render 'aurora-reviews' %}
+
 {% schema %}
 {
   "name": "AURORA — Luxury Smart Rin"
