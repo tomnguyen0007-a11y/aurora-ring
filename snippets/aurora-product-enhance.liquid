@@ -56,12 +56,12 @@
     </a>
 
     {%- comment -%} Why Aurora — photo-led, minimal caption (Oura-style) {%- endcomment -%}
-    <h2 class="avg-h2">Why {{ product.title | default: 'Aurora' | escape }}</h2>
-    <p class="avg-lead">Clinical-grade tracking in a 2.8&nbsp;mm titanium band — without the monthly fee.</p>
+    <h2 class="avg-h2">Know what your body's telling you.</h2>
+    <p class="avg-lead">Clinical-grade tracking on your finger — without the monthly fee.</p>
 
     <div class="avg-photogrid">
       {%- liquid
-        assign _capset = 'Titanium. 4 grams.::Scratch-resistant and light enough to forget you are wearing it.|7-day battery.::One charge on the included dock covers a full week.|No subscription.::Every metric, every day — yours, forever.' | split: '|'
+        assign _capset = 'Stainless steel. 3.3 grams.::Scratch-resistant and light enough to forget you are wearing it.|7-day battery.::One charge on the included dock covers a full week.|No subscription.::Every metric, every day — yours, forever.' | split: '|'
       -%}
       {%- for cap in _capset -%}
         {%- assign _parts = cap | split: '::' -%}
@@ -84,8 +84,8 @@
     {%- comment -%} Spec strip — condensed, scannable {%- endcomment -%}
     <div class="avg-specs">
       <div class="avg-spec-strip">
-        <div class="avg-spec-chip"><span>Material</span><strong>Ti-5 + resin</strong></div>
-        <div class="avg-spec-chip"><span>Weight</span><strong>≈4g</strong></div>
+        <div class="avg-spec-chip"><span>Material</span><strong>Steel</strong></div>
+        <div class="avg-spec-chip"><span>Weight</span><strong>3.3g</strong></div>
         <div class="avg-spec-chip"><span>Battery</span><strong>7 days</strong></div>
         <div class="avg-spec-chip"><span>Water</span><strong>100m</strong></div>
         <div class="avg-spec-chip"><span>Sensors</span><strong>6</strong></div>
