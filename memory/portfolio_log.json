@@ -2,8 +2,52 @@
   "meta": {
     "version": "1.0",
     "description": "IBKR pre-market research log. Appended each weekday run. Read by next run to detect changes.",
-    "last_run": null,
+    "last_run": "2026-07-01T08:47:54Z",
     "created": "2026-06-25T00:00:00Z"
   },
-  "runs": []
+  "runs": [
+    {
+      "timestamp": "2026-07-01T08:47:54Z",
+      "account": {
+        "nav": 1278.82,
+        "navCurrency": "EUR",
+        "cash": 49.53,
+        "leverage": 0.96
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "qty": 65,
+          "avgCost": 14.38718308,
+          "livePrice": 14.67,
+          "priorClose": 14.76,
+          "mktValue": 948.369474,
+          "unrlzdPnl": 13.202574,
+          "concentration": 0.6506,
+          "catalystDate": null,
+          "newsBias": "BULLISH (REGAL AML trial at 78/80 events, unblind imminent)",
+          "flags": [
+            { "type": "CONCENTRATION", "detail": "65.06% of NAV exceeds 35.00% limit" }
+          ]
+        },
+        {
+          "ticker": "SPCX",
+          "qty": 2.6,
+          "avgCost": 171.12423077,
+          "livePrice": 173.93,
+          "priorClose": null,
+          "mktValue": 452.4259857,
+          "unrlzdPnl": 7.5029857,
+          "concentration": 0.3104,
+          "catalystDate": null,
+          "newsBias": "NEUTRAL (lockup-fear headlines vs. investment-grade $25B bond close; $175.50 = 10% unlock trigger)",
+          "flags": []
+        }
+      ],
+      "flags": [
+        { "ticker": "SLS", "type": "CONCENTRATION", "detail": "65.06% of NAV exceeds 35.00% limit" }
+      ],
+      "notes": "First tracked run (log was empty/never executed before today). CING is in the routine's ticker keyword list but is NOT currently held — that config is stale. IBKR Client Portal Gateway (localhost:5000) is unreachable in this sandbox; account/position/price data pulled directly from the connected IBKR MCP tools instead."
+    }
+  ]
 }
