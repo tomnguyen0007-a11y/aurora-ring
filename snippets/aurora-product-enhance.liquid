@@ -1,13 +1,23 @@
 {%- comment -%}
-  Aurora — Vilgain-style product enhancement band.
+  Aurora — premium product enhancement band.
   Self-contained (scoped .avg- classes). Rendered on product
-  pages beneath the native buy box. Light, clean, rounded,
-  lime-accented — mirrors aktin.cz / Vilgain product layout.
+  pages beneath the native buy box. Light, clean, editorial —
+  mirrors the Oura / Vilgain product-page reference standard.
 {%- endcomment -%}
 {%- liquid
-  assign _prod_total = 852
+  assign _is_alt = false
   if product.title contains 'screenless' or product.handle contains 'screenless' or product.handle contains 'gen-1'
+    assign _is_alt = true
+  endif
+
+  assign _prod_total = 852
+  if _is_alt
     assign _prod_total = 534
+  endif
+
+  assign _prod_avg = '4.8'
+  if _is_alt
+    assign _prod_avg = '4.7'
   endif
 -%}
 
@@ -17,27 +27,27 @@
     {%- comment -%} Trust / benefits row {%- endcomment -%}
     <div class="avg-trust">
       <div class="avg-trust-item">
-        <span class="avg-trust-ic">🚚</span>
+        <span class="avg-trust-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="10"></rect><path d="M15 9h4l3 3v4h-7z"></path><circle cx="6" cy="18" r="1.6"></circle><circle cx="17.5" cy="18" r="1.6"></circle></svg></span>
         <div><strong>Free shipping</strong><span>On every order</span></div>
       </div>
       <div class="avg-trust-item">
-        <span class="avg-trust-ic">↩️</span>
+        <span class="avg-trust-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11a9 9 0 1 1 2.6 6.3"></path><polyline points="3 5 3 11 9 11"></polyline></svg></span>
         <div><strong>30-day returns</strong><span>No questions asked</span></div>
       </div>
       <div class="avg-trust-item">
-        <span class="avg-trust-ic">🛡️</span>
+        <span class="avg-trust-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.7 8 11 4.6-2.3 8-6 8-11V5z"></path><path d="m9 12 2 2 4-4"></path></svg></span>
         <div><strong>2-year warranty</strong><span>Full coverage</span></div>
       </div>
       <div class="avg-trust-item">
-        <span class="avg-trust-ic">∞</span>
+        <span class="avg-trust-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><line x1="6" y1="18" x2="18" y2="6"></line></svg></span>
         <div><strong>No subscription</strong><span>Your data, forever</span></div>
       </div>
     </div>
 
     {%- comment -%} Rating strip {%- endcomment -%}
-    <a href="#aurs" class="avg-rating">
+    <a href="#avr" class="avg-rating">
       <span class="avg-stars">★★★★★</span>
-      <strong>4.8</strong>
+      <strong>{{ _prod_avg }}</strong>
       <span class="avg-rating-txt">{{ _prod_total }} verified reviews</span>
       <span class="avg-rating-link">Read reviews →</span>
     </a>
@@ -48,32 +58,32 @@
 
     <div class="avg-grid">
       <div class="avg-card">
-        <div class="avg-card-ic">◆</div>
+        <div class="avg-card-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9 8 3h8l5 6-9 12z"></path><path d="M3 9h18M8 3l1.5 6L12 21l2.5-12L16 3"></path></svg></div>
         <h3>Aerospace titanium</h3>
         <p>Grade 5 titanium shell. Scratch-resistant, hypoallergenic and feather-light at just 4&nbsp;grams.</p>
       </div>
       <div class="avg-card">
-        <div class="avg-card-ic">⚡</div>
+        <div class="avg-card-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" stroke="none"><path d="M13 2 4 14h6l-1 8 9-12h-6z"></path></svg></div>
         <h3>7-day battery</h3>
         <p>Charge once a week. A full top-up takes under 90 minutes on the included dock.</p>
       </div>
       <div class="avg-card">
-        <div class="avg-card-ic">❤</div>
+        <div class="avg-card-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-9.5-9C.7 7.6 2.6 4 6 4c2 0 3.5 1.1 4.3 2.6.2.4.8.4 1 0C12.1 5.1 13.6 4 15.6 4c3.4 0 5.3 3.6 3.5 7-2.5 4.6-9.1 9-9.1 9Z"></path></svg></div>
         <h3>6 biosensors</h3>
         <p>Heart rate, HRV, SpO₂, skin temperature, motion and more — sampled continuously, day and night.</p>
       </div>
       <div class="avg-card">
-        <div class="avg-card-ic">💧</div>
+        <div class="avg-card-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s7 8 7 13a7 7 0 0 1-14 0c0-5 7-13 7-13Z"></path></svg></div>
         <h3>Waterproof to 100m</h3>
         <p>Shower, swim and sweat in it. Built to stay on through every part of your day.</p>
       </div>
       <div class="avg-card">
-        <div class="avg-card-ic">🌙</div>
+        <div class="avg-card-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" stroke="none"><path d="M20 14.3A8.5 8.5 0 1 1 9.7 4a6.7 6.7 0 0 0 10.3 10.3Z"></path></svg></div>
         <h3>Sleep &amp; recovery</h3>
         <p>Stage-by-stage sleep analysis, nightly recovery grade and a morning readiness score.</p>
       </div>
       <div class="avg-card">
-        <div class="avg-card-ic">📱</div>
+        <div class="avg-card-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"></rect><line x1="11" y1="18" x2="13" y2="18"></line></svg></div>
         <h3>Free Aurora app</h3>
         <p>Q&nbsp;Ring Fitness (COLMI) turns raw data into clear insights. No paywall, no add-ons.</p>
       </div>
@@ -102,22 +112,22 @@
   .avg-inner{max-width:1080px;margin:0 auto;}
   .avg-trust{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:40px;}
   .avg-trust-item{display:flex;align-items:center;gap:12px;background:var(--vg-paper-2,#f5f6f3);border:1px solid var(--vg-line,#e6e8e3);border-radius:14px;padding:16px 18px;}
-  .avg-trust-ic{font-size:22px;line-height:1;flex-shrink:0;}
+  .avg-trust-ic{width:38px;height:38px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:10px;background:rgba(13,148,136,.08);color:#0d9488;}
   .avg-trust-item div{display:flex;flex-direction:column;}
   .avg-trust-item strong{font-size:14px;font-weight:600;color:var(--vg-ink,#15171a);}
   .avg-trust-item span{font-size:12px;color:var(--vg-ink-soft,#5b6066);}
   .avg-rating{display:inline-flex;align-items:center;gap:12px;text-decoration:none;background:var(--vg-paper-2,#f5f6f3);border:1px solid var(--vg-line,#e6e8e3);border-radius:999px;padding:10px 20px;margin-bottom:48px;transition:border-color .2s;}
-  .avg-rating:hover{border-color:var(--vg-lime,#6fbf00);}
+  .avg-rating:hover{border-color:var(--vg-star,#ffb400);}
   .avg-stars{color:var(--vg-star,#ffb400);font-size:15px;letter-spacing:1px;}
   .avg-rating strong{font-size:16px;color:var(--vg-ink,#15171a);}
   .avg-rating-txt{font-size:13px;color:var(--vg-ink-soft,#5b6066);}
-  .avg-rating-link{font-size:13px;color:var(--vg-lime-dark,#5aa400);font-weight:600;}
+  .avg-rating-link{font-size:13px;color:var(--vg-ink,#15171a);font-weight:600;}
   .avg-h2{font-size:clamp(26px,3.6vw,38px);font-weight:700;letter-spacing:-.02em;margin:0 0 10px;color:var(--vg-ink,#15171a);}
   .avg-lead{font-size:16px;color:var(--vg-ink-soft,#5b6066);line-height:1.6;max-width:560px;margin:0 0 36px;}
   .avg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:48px;}
   .avg-card{background:var(--vg-paper-2,#f5f6f3);border:1px solid var(--vg-line,#e6e8e3);border-radius:18px;padding:26px 24px;transition:transform .18s,box-shadow .18s;}
   .avg-card:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(0,0,0,.07);}
-  .avg-card-ic{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:rgba(111,191,0,.12);color:var(--vg-lime-dark,#5aa400);font-size:20px;margin-bottom:16px;}
+  .avg-card-ic{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:rgba(13,148,136,.08);color:#0d9488;margin-bottom:16px;}
   .avg-card h3{font-size:17px;font-weight:600;margin:0 0 8px;color:var(--vg-ink,#15171a);letter-spacing:-.01em;}
   .avg-card p{font-size:14px;color:var(--vg-ink-soft,#5b6066);line-height:1.6;margin:0;}
   .avg-specs{background:var(--vg-paper-2,#f5f6f3);border:1px solid var(--vg-line,#e6e8e3);border-radius:20px;padding:32px;margin-bottom:32px;}
