@@ -21,7 +21,6 @@
   endif
 
   assign _media_count = product.images.size
-  assign _img_alt = product.title | escape
 -%}
 
 <section class="avg-band">
@@ -56,26 +55,19 @@
     </a>
 
     {%- comment -%} Why Aurora — hero photo + bold headline overlay (Oura ad-style) {%- endcomment -%}
-    {%- liquid
-      assign _hero_img = blank
-      assign _sup_caps = '7-day battery.::One charge on the included dock covers a full week.|No subscription.::Every metric, every day — yours, forever.' | split: '|'
-      if _media_count > 0
-        assign _hero_img = product.images[0]
-      endif
-    -%}
     <div class="avg-hero">
-      {%- if _hero_img -%}
-        {{ _hero_img | image_url: width: 1400 | image_tag: loading: 'lazy', alt: _img_alt, sizes: '(min-width: 860px) 1080px, 100vw', class: 'avg-hero-img' }}
-      {%- else -%}
-        <div class="avg-photo-fallback avg-hero-img">{{ 'product-1' | placeholder_svg_tag }}</div>
-      {%- endif -%}
+      {{ 'aurora-hero-steel.png' | asset_url | image_tag: loading: 'lazy', alt: 'Aurora Ring in silver, rose gold, and black finishes', width: 1500, height: 1000, class: 'avg-hero-img' }}
       <div class="avg-hero-text">
-        <h2 class="avg-h2">Know what your body's telling you.</h2>
+        <h2 class="avg-h2">Know what your body's <em>telling</em> you.</h2>
         <p class="avg-lead">Clinical-grade tracking on your finger — without the monthly fee.</p>
       </div>
     </div>
 
+    {%- comment -%} 3-tile photo grid — bold stat + one short line, no paragraphs {%- endcomment -%}
     <div class="avg-photogrid">
+      {%- liquid
+        assign _sup_caps = '7-day battery.::One charge on the dock covers a full week.|100m water resistance.::Shower, swim, sleep — never think twice.|No subscription.::Every metric, every day, yours forever.' | split: '|'
+      -%}
       {%- for cap in _sup_caps -%}
         {%- assign _parts = cap | split: '::' -%}
         {%- assign _idx = forloop.index -%}
@@ -86,7 +78,7 @@
         {%- endif -%}
         <div class="avg-photo-tile">
           {%- if _img -%}
-            {{ _img | image_url: width: 700 | image_tag: loading: 'lazy', alt: _img_alt, sizes: '(min-width: 860px) 50vw, 100vw' }}
+            {{ _img | image_url: width: 700 | image_tag: loading: 'lazy', alt: _parts[0], sizes: '(min-width: 860px) 33vw, 100vw' }}
           {%- else -%}
             <div class="avg-photo-fallback">{{ 'product-1' | placeholder_svg_tag }}</div>
           {%- endif -%}
@@ -126,11 +118,12 @@
   .avg-rating-txt{font-size:13px;color:var(--vg-ink-soft,#5b6066);}
   .avg-rating-link{font-size:13px;color:var(--vg-ink,#15171a);font-weight:600;}
   .avg-hero{position:relative;border-radius:20px;overflow:hidden;background:#0c0c0f;margin-bottom:28px;}
-  .avg-hero-img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;}
-  .avg-hero-text{position:absolute;top:0;left:0;right:0;padding:36px 40px;background:linear-gradient(to bottom,rgba(0,0,0,.55),rgba(0,0,0,0) 65%);}
-  .avg-hero-text .avg-h2{color:#fff;font-size:clamp(24px,3.4vw,36px);margin:0 0 8px;}
-  .avg-hero-text .avg-lead{color:rgba(255,255,255,.82);margin:0;max-width:520px;}
-  .avg-photogrid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-bottom:48px;}
+  .avg-hero-img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;object-position:center 30%;}
+  .avg-hero-text{position:absolute;top:0;left:0;right:0;padding:40px 44px;background:linear-gradient(to bottom,rgba(0,0,0,.75) 0%,rgba(0,0,0,.6) 40%,rgba(0,0,0,0) 78%);}
+  .avg-hero-text .avg-h2{font-family:var(--aurora-serif,'Instrument Serif',serif);font-weight:400;color:#fff;font-size:clamp(26px,3.8vw,42px);line-height:1.1;letter-spacing:-.01em;margin:0 0 10px;}
+  .avg-hero-text .avg-h2 em{font-style:italic;color:var(--vg-star,#ffb400);}
+  .avg-hero-text .avg-lead{color:rgba(255,255,255,.82);margin:0;max-width:480px;font-size:15px;}
+  .avg-photogrid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:48px;}
   .avg-photo-tile img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:16px;background:var(--vg-paper-2,#f5f6f3);}
   .avg-photo-fallback{width:100%;aspect-ratio:4/5;border-radius:16px;background:var(--vg-paper-2,#f5f6f3);}
   .avg-photo-fallback svg{width:100%;height:100%;}
@@ -143,6 +136,7 @@
   .avg-spec-chip strong{font-size:15px;font-weight:700;color:var(--vg-ink,#15171a);}
   @media(max-width:860px){
     .avg-trust{grid-template-columns:repeat(2,1fr);}
+    .avg-photogrid{grid-template-columns:repeat(2,1fr);}
   }
   @media(max-width:560px){
     .avg-band{padding:48px 16px;}
