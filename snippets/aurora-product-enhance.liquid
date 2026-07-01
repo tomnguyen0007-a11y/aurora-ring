@@ -21,6 +21,7 @@
   endif
 
   assign _media_count = product.images.size
+  assign _img_alt = product.title | escape
 -%}
 
 <section class="avg-band">
@@ -71,7 +72,7 @@
         {%- endif -%}
         <div class="avg-photo-tile">
           {%- if _img -%}
-            {{ _img | image_url: width: 700 | image_tag: loading: 'lazy', alt: product.title | escape, sizes: '(min-width: 860px) 33vw, 100vw' }}
+            {{ _img | image_url: width: 700 | image_tag: loading: 'lazy', alt: _img_alt, sizes: '(min-width: 860px) 33vw, 100vw' }}
           {%- else -%}
             <div class="avg-photo-fallback">{{ 'product-1' | placeholder_svg_tag }}</div>
           {%- endif -%}
