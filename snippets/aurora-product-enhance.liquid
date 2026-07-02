@@ -3,6 +3,17 @@
   Self-contained (scoped .avg- classes). Rendered on product
   pages beneath the native buy box. Light, clean, editorial —
   mirrors the Oura / Vilgain product-page reference standard.
+
+  Model-aware: the flagship display ring ("screen") and the
+  minimalist band ("screenless" / gen-1) get their own lifestyle
+  image, headline and description.
+
+  LIFESTYLE IMAGES (swap in Shopify → Content → Files, or the theme
+  assets, keeping the exact filename):
+    • Screen ring     → assets/aurora-life-screen.png
+    • Screenless ring → assets/aurora-life-screenless.png
+  Placeholders ship with the theme so the layout never 404s; just
+  overwrite the file bytes with the real photo when it's ready.
 {%- endcomment -%}
 {%- liquid
   assign _is_alt = false
@@ -11,16 +22,22 @@
   endif
 
   assign _prod_total = 852
+  assign _prod_avg = '4.8'
+  assign _life_asset = 'aurora-life-screen.png'
+  assign _life_alt = 'A hand wearing the Aurora display ring'
+  assign _headline_a = 'Your health,'
+  assign _headline_b = 'at a glance.'
+  assign _desc = "The Aurora Ring reads your heart rate, sleep, blood oxygen and recovery around the clock — and surfaces the essentials right on the ring's built-in display. Full insight in the app, no monthly fee, no subscription."
+
   if _is_alt
     assign _prod_total = 534
-  endif
-
-  assign _prod_avg = '4.8'
-  if _is_alt
     assign _prod_avg = '4.7'
+    assign _life_asset = 'aurora-life-screenless.png'
+    assign _life_alt = 'A hand wearing the minimalist Aurora band'
+    assign _headline_a = "So light you'll"
+    assign _headline_b = "forget it's there."
+    assign _desc = "A featherlight 3.3-gram band that disappears on your finger while it tracks every heartbeat, every sleep stage and every step. Charge it once a week, sync whenever you like, and own your data forever."
   endif
-
-  assign _media_count = product.images.size
 -%}
 
 <section class="avg-band">
@@ -54,37 +71,53 @@
       <span class="avg-rating-link">Read reviews →</span>
     </a>
 
-    {%- comment -%} Why Aurora — hero photo + bold headline overlay (Oura ad-style) {%- endcomment -%}
-    <div class="avg-hero">
-      {{ 'aurora-hero-steel.png' | asset_url | image_tag: loading: 'lazy', alt: 'Aurora Ring in silver, rose gold, and black finishes', width: 1500, height: 1000, class: 'avg-hero-img' }}
-      <div class="avg-hero-text">
-        <h2 class="avg-h2">Know what your body's <em>telling</em> you.</h2>
-        <p class="avg-lead">Clinical-grade tracking on your finger — without the monthly fee.</p>
-      </div>
-    </div>
+    {%- comment -%} Lifestyle hero — photo + editorial caption below (Oura style) {%- endcomment -%}
+    <figure class="avg-life">
+      <img
+        class="avg-life-img"
+        src="{{ _life_asset | asset_url }}"
+        alt="{{ _life_alt }}"
+        width="1500"
+        height="1000"
+        loading="lazy">
+      <figcaption class="avg-life-cap">
+        <h2 class="avg-h2">{{ _headline_a }} <em>{{ _headline_b }}</em></h2>
+        <p class="avg-lead">{{ _desc }}</p>
+      </figcaption>
+    </figure>
 
-    {%- comment -%} 3-tile photo grid — bold stat + one short line, no paragraphs {%- endcomment -%}
-    <div class="avg-photogrid">
-      {%- liquid
-        assign _sup_caps = '7-day battery.::One charge on the dock covers a full week.|100m water resistance.::Shower, swim, sleep — never think twice.|No subscription.::Every metric, every day, yours forever.' | split: '|'
-      -%}
-      {%- for cap in _sup_caps -%}
-        {%- assign _parts = cap | split: '::' -%}
-        {%- assign _idx = forloop.index -%}
-        {%- assign _img = blank -%}
-        {%- if _media_count > 0 -%}
-          {%- assign _real_idx = _idx | modulo: _media_count -%}
-          {%- assign _img = product.images[_real_idx] -%}
-        {%- endif -%}
-        <div class="avg-photo-tile">
-          {%- if _img -%}
-            {{ _img | image_url: width: 700 | image_tag: loading: 'lazy', alt: _parts[0], sizes: '(min-width: 860px) 33vw, 100vw' }}
-          {%- else -%}
-            <div class="avg-photo-fallback">{{ 'product-1' | placeholder_svg_tag }}</div>
-          {%- endif -%}
-          <p class="avg-photo-cap"><strong>{{ _parts[0] }}</strong> {{ _parts[1] }}</p>
-        </div>
-      {%- endfor -%}
+    {%- comment -%} Benefit grid — line icons + short copy (Vilgain-style, no repeated photos) {%- endcomment -%}
+    <div class="avg-benefits">
+      <div class="avg-benefit">
+        <span class="avg-benefit-ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg></span>
+        <h3>Sleep like you mean it</h3>
+        <p>Automatic sleep-stage tracking, every single night.</p>
+      </div>
+      <div class="avg-benefit">
+        <span class="avg-benefit-ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l2-6 4 12 2-6h6"></path></svg></span>
+        <h3>Train with precision</h3>
+        <p>Real-time heart rate and recovery after every session.</p>
+      </div>
+      <div class="avg-benefit">
+        <span class="avg-benefit-ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"></circle><line x1="12" y1="2" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="22"></line><line x1="2" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="22" y2="12"></line></svg></span>
+        <h3>All-day awareness</h3>
+        <p>Continuous stress, energy and readiness scoring.</p>
+      </div>
+      <div class="avg-benefit">
+        <span class="avg-benefit-ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7S5 10 5 14.5a7 7 0 0 0 14 0C19 10 12 2.7 12 2.7z"></path></svg></span>
+        <h3>Never take it off</h3>
+        <p>100&nbsp;m water resistant — shower, swim, sleep.</p>
+      </div>
+      <div class="avg-benefit">
+        <span class="avg-benefit-ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="16" height="8" rx="2"></rect><line x1="22" y1="11" x2="22" y2="13"></line><line x1="6" y1="12" x2="10" y2="12"></line></svg></span>
+        <h3>A week per charge</h3>
+        <p>7-day battery, a full top-up in about 90 minutes.</p>
+      </div>
+      <div class="avg-benefit">
+        <span class="avg-benefit-ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2"></rect><path d="M8 10.5V7a4 4 0 0 1 8 0"></path></svg></span>
+        <h3>Yours forever</h3>
+        <p>Every metric, no subscription, no paywall.</p>
+      </div>
     </div>
 
     {%- comment -%} Spec strip — condensed, scannable {%- endcomment -%}
@@ -111,38 +144,42 @@
   .avg-trust-item div{display:flex;flex-direction:column;}
   .avg-trust-item strong{font-size:14px;font-weight:600;color:var(--vg-ink,#15171a);}
   .avg-trust-item span{font-size:12px;color:var(--vg-ink-soft,#5b6066);}
-  .avg-rating{display:inline-flex;align-items:center;gap:12px;text-decoration:none;background:var(--vg-paper-2,#f5f6f3);border:1px solid var(--vg-line,#e6e8e3);border-radius:999px;padding:10px 20px;margin-bottom:48px;transition:border-color .2s;}
+  .avg-rating{display:inline-flex;align-items:center;gap:12px;text-decoration:none;background:var(--vg-paper-2,#f5f6f3);border:1px solid var(--vg-line,#e6e8e3);border-radius:999px;padding:10px 20px;margin-bottom:52px;transition:border-color .2s;}
   .avg-rating:hover{border-color:var(--vg-star,#ffb400);}
   .avg-stars{color:var(--vg-star,#ffb400);font-size:15px;letter-spacing:1px;}
   .avg-rating strong{font-size:16px;color:var(--vg-ink,#15171a);}
   .avg-rating-txt{font-size:13px;color:var(--vg-ink-soft,#5b6066);}
   .avg-rating-link{font-size:13px;color:var(--vg-ink,#15171a);font-weight:600;}
-  .avg-hero{position:relative;border-radius:20px;overflow:hidden;background:#0c0c0f;margin-bottom:28px;}
-  .avg-hero-img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;object-position:center 30%;}
-  .avg-hero-text{position:absolute;top:0;left:0;right:0;padding:40px 44px;background:linear-gradient(to bottom,rgba(0,0,0,.75) 0%,rgba(0,0,0,.6) 40%,rgba(0,0,0,0) 78%);}
-  .avg-hero-text .avg-h2{font-family:var(--aurora-serif,'Instrument Serif',serif);font-weight:400;color:#fff;font-size:clamp(26px,3.8vw,42px);line-height:1.1;letter-spacing:-.01em;margin:0 0 10px;}
-  .avg-hero-text .avg-h2 em{font-style:italic;color:var(--vg-star,#ffb400);}
-  .avg-hero-text .avg-lead{color:rgba(255,255,255,.82);margin:0;max-width:480px;font-size:15px;}
-  .avg-photogrid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:48px;}
-  .avg-photo-tile img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:16px;background:var(--vg-paper-2,#f5f6f3);}
-  .avg-photo-fallback{width:100%;aspect-ratio:4/5;border-radius:16px;background:var(--vg-paper-2,#f5f6f3);}
-  .avg-photo-fallback svg{width:100%;height:100%;}
-  .avg-photo-cap{margin:14px 2px 0;font-size:14px;line-height:1.5;color:var(--vg-ink-soft,#5b6066);}
-  .avg-photo-cap strong{color:var(--vg-ink,#15171a);font-weight:600;}
+
+  /* Lifestyle hero */
+  .avg-life{margin:0 0 56px;}
+  .avg-life-img{display:block;width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:22px;background:var(--vg-paper-2,#f5f6f3);}
+  .avg-life-cap{margin:26px auto 0;max-width:640px;text-align:center;}
+  .avg-h2{font-family:var(--aurora-serif,'Instrument Serif',serif);font-weight:400;color:var(--vg-ink,#15171a);font-size:clamp(28px,4vw,44px);line-height:1.08;letter-spacing:-.01em;margin:0 0 14px;}
+  .avg-h2 em{font-style:italic;}
+  .avg-lead{color:var(--vg-ink-soft,#5b6066);margin:0;font-size:16px;line-height:1.6;}
+
+  /* Benefit grid (icons + copy) */
+  .avg-benefits{display:grid;grid-template-columns:repeat(3,1fr);gap:36px 40px;margin-bottom:52px;}
+  .avg-benefit{text-align:center;padding:0 6px;}
+  .avg-benefit-ic{display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:14px;background:rgba(13,148,136,.08);color:#0d9488;margin-bottom:16px;}
+  .avg-benefit h3{font-size:16px;font-weight:600;color:var(--vg-ink,#15171a);margin:0 0 7px;letter-spacing:-.01em;}
+  .avg-benefit p{font-size:13.5px;line-height:1.55;color:var(--vg-ink-soft,#5b6066);margin:0;}
+
   .avg-specs{background:var(--vg-paper-2,#f5f6f3);border:1px solid var(--vg-line,#e6e8e3);border-radius:20px;padding:20px 28px;margin-bottom:32px;}
   .avg-spec-strip{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;}
   .avg-spec-chip{display:flex;flex-direction:column;gap:3px;text-align:center;flex:1;min-width:80px;}
   .avg-spec-chip span{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--vg-ink-soft,#5b6066);}
   .avg-spec-chip strong{font-size:15px;font-weight:700;color:var(--vg-ink,#15171a);}
+
   @media(max-width:860px){
     .avg-trust{grid-template-columns:repeat(2,1fr);}
-    .avg-photogrid{grid-template-columns:repeat(2,1fr);}
+    .avg-benefits{grid-template-columns:repeat(2,1fr);gap:30px 28px;}
   }
   @media(max-width:560px){
     .avg-band{padding:48px 16px;}
-    .avg-hero-img{aspect-ratio:4/5;}
-    .avg-hero-text{padding:24px 22px;}
-    .avg-photogrid{grid-template-columns:1fr;}
+    .avg-life-img{aspect-ratio:4/5;}
+    .avg-life-cap{margin-top:20px;}
     .avg-trust{grid-template-columns:1fr;}
     .avg-specs{padding:20px;}
     .avg-spec-strip{justify-content:flex-start;}
