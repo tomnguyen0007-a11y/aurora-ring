@@ -42,10 +42,20 @@
     if is_available_for_sale != true
       assign style = 'style="display: none;"'
     endif
-    # Shop Now → try aurora-ring handle first, then aurora-gen-1, then any live product
-    assign hero_shop = all_products['aurora-ring']
+    # Shop Now → promote the screenless "Gen 1" model as the primary product.
+    # Try its handle first, then scan live products for a gen-1 / screenless match,
+    # then fall back to the flagship, then any live product.
+    assign hero_shop = all_products['aurora-gen-1']
     unless hero_shop.published_at
-      assign hero_shop = all_products['aurora-gen-1']
+      for _p in collections.all.products
+        if _p.handle contains 'gen-1' or _p.handle contains 'screenless' or _p.title contains 'GEN 1' or _p.title contains 'Gen 1'
+          assign hero_shop = _p
+          break
+        endif
+      endfor
+    endunless
+    unless hero_shop.published_at
+      assign hero_shop = all_products['aurora-ring']
     endunless
     unless hero_shop.published_at
       assign hero_shop = collections.all.products.first
