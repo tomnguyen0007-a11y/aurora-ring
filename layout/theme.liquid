@@ -142,5 +142,26 @@ document.addEventListener('DOMContentLoaded',function(){
       {% render 'quick-add-modal' %}
     {% endif %}
 
+    <style>
+  /* Force a containment context on the body that limits pointer events 
+     and clips the overflowing rogue element */
+  body {
+    overflow-x: hidden !important;
+  }
+  
+  /* Target by attribute selector */
+  a[href*="utm_source=instant"][href*="utm_medium=badge"] {
+    /* Mix-blend-mode can make elements entirely invisible regardless of opacity */
+    mix-blend-mode: color-burn !important;
+    opacity: 0 !important; /* Test if this layer can be caught by rendering engine */
+    
+    /* Forcing a scale of 0 via zoom or scale bypasses width/height overrides */
+    zoom: 0.0001 !important;
+    transform: scale(0) !important; 
+    
+    /* Ensure it cannot be clicked */
+    pointer-events: none !important;
+  }
+</style>
   </body>
 </html>
