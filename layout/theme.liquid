@@ -51,23 +51,12 @@ n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];
 s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '1010679018152899');
+fbq('init', '1543594193885306');
 fbq('track', 'PageView');
-{% if template.name == 'product' %}fbq('track', 'ViewContent', {content_ids:['{{ product.id }}'],content_type:'product',content_name:'{{ product.title | escape }}',value:{{ product.price | divided_by: 100.0 }},currency:'{{ shop.currency }}'});{% endif %}
-{% if template.name == 'cart' %}fbq('track', 'InitiateCheckout', {value:{{ cart.total_price | divided_by: 100.0 }},currency:'{{ cart.currency.iso_code }}',num_items:{{ cart.item_count }}});{% endif %}
 </script>
 <noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=1010679018152899&ev=PageView&noscript=1"
+src="https://www.facebook.com/tr?id=1543594193885306&ev=PageView&noscript=1"
 /></noscript>
-<script>
-document.addEventListener('DOMContentLoaded',function(){
-  var pid='{{ product.id | default: "" }}',val={{ product.price | default: 0 | divided_by: 100.0 }},cur='{{ shop.currency }}';
-  function atc(){if(typeof fbq!=='undefined')fbq('track','AddToCart',{content_ids:[pid],content_type:'product',value:val,currency:cur});}
-  document.addEventListener('click',function(e){var b=e.target.closest('[name="add"],.product-form__submit,[data-add-to-cart]');if(b)atc();});
-  var _f=window.fetch;window.fetch=function(){var u=(arguments[0]||'').toString();if(u.indexOf('/cart/add')>-1)return _f.apply(this,arguments).then(function(r){if(r.ok)atc();return r;});return _f.apply(this,arguments);};
-  var _x=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u){if(u&&u.toString().indexOf('/cart/add')>-1)this.addEventListener('load',function(){if(this.status<300)atc();});return _x.apply(this,arguments);};
-});
-</script>
 <!-- End Meta Pixel Code -->
   </head>
 
