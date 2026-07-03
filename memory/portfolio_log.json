@@ -1,0 +1,60 @@
+{
+  "meta": {
+    "last_run": "2026-07-03T08:04:00Z",
+    "note": "First recorded run. memory/portfolio_log.json and scripts/premarket-research.js did not exist in this repo (no git history for either) — this repo is 'aurora-ring', a Shopify ring-product marketing site, not a trading-bot repo. Substituted live IBKR MCP tools (get_account_positions, get_account_summary, get_price_snapshot, get_price_history, get_pa_performance_all_periods, get_account_orders) for the missing local script. Verified zero live/queued orders before and during this run — read-only throughout."
+  },
+  "runs": [
+    {
+      "run_at": "2026-07-03T08:04:00Z",
+      "account_summary": {
+        "currency": "EUR",
+        "net_liquidation": 1267.6,
+        "gross_position_value_eur": 1217.94,
+        "total_cash_value": 49.66,
+        "available_funds": 49.66
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "contract_id": 390872440,
+          "position": 65,
+          "average_price": 14.38718308,
+          "market_price": 15.4499998,
+          "market_value_usd": 1004.249987,
+          "unrealized_pnl": 69.083087,
+          "daily_pnl": 141.699987,
+          "pct_gross_position_value": 70.6,
+          "catalyst": "Phase 3 REGAL trial (galinpepimut-S, AML maintenance) at 78/80 pre-specified events as of May 11 2026 8-K; unblinding + topline data triggered at 80th event. No readout confirmed yet as of this run.",
+          "news_sentiment": "bullish momentum / high anticipation — stock up sharply (Simply Wall St cites +62.7% move) into the approaching unblinding; large volume spikes July 1"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "Space Exploration Technologies Corp (SpaceX)",
+          "contract_id": 890493863,
+          "position": 2.6,
+          "average_price": 171.12423077,
+          "market_price": 160.94999695,
+          "market_value_usd": 418.46999207,
+          "unrealized_pnl": -26.45300793,
+          "daily_pnl": 8.86599207,
+          "pct_gross_position_value": 29.4,
+          "catalyst": "$25B senior notes offering priced June 23 2026 (5.35%-6.65% coupons, 2031-2056 maturities), settled June 26; stock fell 7.8% July 1 to $157.54 on lockup/dilution overhang. First insider lockup tranche expected ~Aug 6 2026 (staggered through Dec 8 2026, largest single tranche ~late Oct/Nov tied to Q3 earnings).",
+          "news_sentiment": "mixed — bond demand reportedly strong (~$89B demand per one source) but lockup overhang pressuring price; partial recovery from July 1 close to ~$160.95"
+        }
+      ],
+      "watchlist_not_held": [
+        {
+          "ticker": "CING",
+          "company": "Cingulate Inc.",
+          "note": "Not currently a live position (confirmed via get_account_positions). FDA issued a Complete Response Letter for CTx-1301 (ADHD) citing CMC issues, no efficacy/safety concerns; original PDUFA was May 31 2026. Company now in CMC-driven resubmission process, ~$30M cash. No imminent PDUFA."
+        }
+      ],
+      "flags": [
+        "SLS is ~70.6% of gross position value / ~68% of NAV — far above the 35% NAV trim threshold — heading into a binary Phase 3 unblinding catalyst. Concentration + binary risk compounding.",
+        "No live or queued orders on the account at time of research (get_account_orders returned empty) — confirms zero trades placed.",
+        "Automation infrastructure (memory/portfolio_log.json, scripts/premarket-research.js) was missing from this repo; live IBKR MCP data used instead this run."
+      ]
+    }
+  ]
+}
