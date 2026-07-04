@@ -1,8 +1,13 @@
 import type {
+  Book,
   Goal,
+  GolfStats,
   MacroTargets,
+  Mantra,
   MealOption,
+  Profile,
   ScheduleBlock,
+  SupplementItem,
   WatchItem,
   Workout,
 } from './types'
@@ -241,3 +246,152 @@ export const seedWatchlist: WatchItem[] = [
 ]
 
 export const seedHandicap = { id: id('hcp'), date: '2026-07-01', value: 2.4 }
+
+export const seedProfile: Profile = {
+  name: 'Tom',
+  age: 17,
+  heightCm: null,
+  location: 'Austria',
+  inspiration: 'Ollie Duthie — gym, running, business & life. His free "Calibrate" guide is why this app exists.',
+  identity:
+    'Student at an Austrian gymnasium building the AURORA smart-ring business toward $1,000/day. Chasing an elite, aesthetic physique (87–90kg lean), a plus golf handicap, and a disciplined operating system for life.',
+  philosophy:
+    'Health, love, and mission — in that order. Earn with your mind, not your time. A calm mind, a fit body, a house full of love: earned, not bought. Expect nothing, appreciate everything. Mystery makes history. 1% better every day.',
+  facts: [
+    'Golf handicap 2.4, targeting a plus handicap by end of summer.',
+    'Weekly split: Tue Push/Arms, Wed Pull/Core, Fri Legs, Sat Whole Upper, Thu Zone 2 run, Sun on-course golf.',
+    'Lean-bulk target: 3,600–3,900 kcal, 190–220g protein, 3L water.',
+    'Strict 22:30 blackout → 06:30 wake (8h sleep) is non-negotiable.',
+    'Inspired by and following Ollie Duthie / CALIBRATE Training Club methodology.',
+    'Learning economics and building business acumen for AURORA.',
+  ],
+}
+
+export const seedGolfStats: GolfStats = {
+  fairwaysPct: 37,
+  girPct: 37,
+  scramblePct: 16,
+  puttsPerRound: 32,
+  lostBallsPerRound: 4,
+  avgScore: 78,
+  updated: '2026-07-01',
+  focus: 'Decouple self-worth from ball flight. Target execution, not results. Kill the 4 lost balls/round off the tee.',
+}
+
+const M = (text: string, tag: Mantra['tag'], author = ''): Mantra => ({ id: id('mantra'), text, author, tag })
+
+export const seedMantras: Mantra[] = [
+  M('When you’re born you look like your parents. When you die you look like your decisions.', 'mindset'),
+  M('Earn with your mind, not your time.', 'wealth', 'Naval Ravikant'),
+  M('Health, love, and your mission, in that order. Nothing else matters.', 'mindset', 'Naval Ravikant'),
+  M('Solitude vivifies; isolation kills.', 'stoic'),
+  M('You’re one person, one room, one conversation away from changing your life.', 'mindset'),
+  M('You’re only using 1% of your potential.', 'discipline'),
+  M('Expect nothing, appreciate everything.', 'stoic'),
+  M('Don’t kill your peace by thinking too much.', 'stoic'),
+  M('A calm mind, a fit body, and a house full of love. These cannot be bought — they must be earned.', 'mindset', 'Naval Ravikant'),
+  M('The three big ones in life are wealth, health, and happiness. We pursue them in that order, but their importance is reverse.', 'mindset', 'Naval Ravikant'),
+  M('Work harder on yourself than you do on your job. For things to change, you must change.', 'discipline', 'Jim Rohn'),
+  M('If two choices are relatively equal, take the path more difficult and more painful in the short term.', 'discipline'),
+  M('Happiness, love, and passion aren’t things you find — they’re choices you make.', 'mindset'),
+  M('The bar for winning has never been so low. Just one more step today.', 'discipline'),
+  M('Mystery makes history — keep people guessing what you’re up to.', 'custom'),
+  M('One day it’ll all make sense. Just not today. Better days are coming your way.', 'stoic'),
+  M('If it is meant to be, then it will. There’s peace in knowing that.', 'stoic'),
+  M('Money buys freedom in the material world — it won’t make you happy, fit, or calm. But it solves external problems. So go make it.', 'wealth', 'Naval Ravikant'),
+]
+
+const SUP = (name: string, dose: string, timing: string): SupplementItem => ({ id: id('sup'), name, dose, timing })
+
+export const seedSupplements: SupplementItem[] = [
+  SUP('Multivitamin', '1 daily', 'Morning with food'),
+  SUP('Omega-3 (EPA/DHA)', '500–1000mg', 'With a meal containing fat, AM'),
+  SUP('Vitamin D3', 'standard', 'Morning with food'),
+  SUP('Creatine Monohydrate', '3–5g', 'Any time, daily'),
+  SUP('Magnesium Glycinate', 'standard', 'Evening, pre-sleep'),
+]
+
+export const seedBooks: Book[] = [
+  { id: id('bk'), title: 'The Almanack of Naval Ravikant', author: 'Eric Jorgenson', status: 'reading', currentPage: 0, totalPages: 244, rating: null, notes: 'Wealth without luck: leverage + specific knowledge. Happiness as a skill.' },
+  { id: id('bk'), title: 'Atomic Habits', author: 'James Clear', status: 'queued', currentPage: 0, totalPages: 320, rating: null, notes: 'Systems > goals. 1% better daily. Identity-based habits.' },
+  { id: id('bk'), title: 'The Changing World Order', author: 'Ray Dalio', status: 'queued', currentPage: 0, totalPages: 560, rating: null, notes: 'Empire & reserve-currency cycles. Macro lens for AURORA.' },
+  { id: id('bk'), title: 'The 48 Laws of Power', author: 'Robert Greene', status: 'queued', currentPage: 0, totalPages: 452, rating: null, notes: 'Descriptive strategy of social power. Read critically.' },
+  { id: id('bk'), title: 'The 4-Hour Workweek', author: 'Tim Ferriss', status: 'queued', currentPage: 0, totalPages: 416, rating: null, notes: 'DEAL: Definition, Elimination, Automation, Liberation.' },
+]
+
+// Fuelling Framework — carbohydrate periodisation by day type (g/kg/day centre-of-band)
+export interface DayTypeMacro {
+  code: string
+  label: string
+  proteinGkg: string
+  carbGkg: string
+  fatGkg: string
+  example80kg: string
+}
+export const seedDayTypeMacros: DayTypeMacro[] = [
+  { code: 'R', label: 'Recovery / Rest', proteinGkg: '1.8–2.2', carbGkg: '2.5–3.5', fatGkg: '0.7–0.9', example80kg: 'P160 C240 F64 ≈ 2175 kcal' },
+  { code: 'L', label: 'Lift', proteinGkg: '1.8–2.2', carbGkg: '3.5–4.5', fatGkg: '0.6–0.8', example80kg: 'P160 C320 F56 ≈ 2425 kcal' },
+  { code: 'E', label: 'Easy Run', proteinGkg: '1.8–2.2', carbGkg: '4.0–5.0', fatGkg: '0.6–0.8', example80kg: 'P160 C360 F56 ≈ 2585 kcal' },
+  { code: 'Q', label: 'Quality Run', proteinGkg: '1.8–2.2', carbGkg: '5.0–6.5', fatGkg: '0.6–0.7', example80kg: 'P160 C440 F48 ≈ 2830 kcal' },
+  { code: 'D', label: 'Double Day', proteinGkg: '1.8–2.2', carbGkg: '6.0–7.5', fatGkg: '0.6–0.7', example80kg: 'P160 C520 F48 ≈ 3150 kcal' },
+  { code: 'LR', label: 'Long Run', proteinGkg: '1.8–2.2', carbGkg: '6.5–8.0', fatGkg: '0.6–0.7', example80kg: 'P152 C560 F48 ≈ 3280 kcal' },
+]
+
+// Ollie Duthie's 5-workout hybrid gym library (available to add alongside the Blueprint split)
+export const ollieWorkouts: Workout[] = [
+  {
+    id: 'o-pull', name: 'Ollie · Pull (Back/Biceps)', weekday: 1,
+    exercises: [
+      E('Pull-ups / Lat Pulldown', 4, '8-10', 'Control the rep; add load only when form is clean.'),
+      E('Chest-Supported Row', 4, '8-12', 'Squeeze mid-back; no yanking.'),
+      E('Cable Pullover', 3, '10-12', 'Controlled stretch + hard squeeze.'),
+      E('Rear Delt Fly', 3, '12-15', 'Posture + shoulder health.'),
+      E('Hammer Curl', 3, '10-12', 'Forearm + bicep thickness.'),
+      E('Preacher Curl', 3, '8-12', 'Finish the arms if energy is good.'),
+      E('Cable Crunches', 4, '12', 'Elite core — every other session.'),
+    ],
+  },
+  {
+    id: 'o-push', name: 'Ollie · Push (Chest/Delts/Tri)', weekday: 2,
+    exercises: [
+      E('Incline DB/BB Press', 4, '6-8', 'Main chest compound. Go heavy. No flat barbell.'),
+      E('DB / Machine Shoulder Press', 4, '8', 'Main shoulder compound. Heavy.'),
+      E('Pec Deck', 4, '12-15', 'Slow stretch, squeeze at peak. Elite for chest.'),
+      E('Lateral Raise', 3, '12-15', 'Shoulder width. Minimal swing.'),
+      E('Dips (close grip)', 3, '12-15', 'Great tricep/chest growth.'),
+      E('Rope Pushdown', 3, '10-15', 'Elbows tucked; control.'),
+    ],
+  },
+  {
+    id: 'o-legs', name: 'Ollie · Legs (No Run Day)', weekday: 3,
+    exercises: [
+      E('Leg Press', 4, '8-10', 'Warm up well. Controlled depth, 2 in reserve.'),
+      E('Romanian Deadlift', 4, '6-10', 'Hinge; stretch + strengthen hamstrings for running.'),
+      E('Bulgarian Split Squat', 3, '8-12', 'Slow; knee tracking; feel the glute.'),
+      E('Single-Leg Hamstring Curl', 3, '10', 'Game-changing for runners.'),
+      E('Calf Raises', 4, '12-20', 'Pause at stretch + squeeze.'),
+      E('Hanging Knee Raises', 3, '10-15', 'Core finisher.'),
+    ],
+  },
+  {
+    id: 'o-arms', name: 'Ollie · Arms (Supersets)', weekday: 4,
+    exercises: [
+      E('Close-Grip Dips', 3, '8-12', 'Activate upper body + triceps.'),
+      E('Alternating DB Curl', 4, '8-12', 'Strict reps.'),
+      E('Skull Crushers', 4, '8-12', 'Elbow-friendly option.'),
+      E('Hammer Curl × Rope Pressdown', 3, '10-12', 'Superset; go heavy on hammers.'),
+      E('Preacher × Overhead Extension', 3, '10-12', 'Superset; unlock chest/shoulders.'),
+      E('Cable Crunches', 4, '10-12', 'Heavier — to failure.'),
+    ],
+  },
+  {
+    id: 'o-sha', name: 'Ollie · Shoulders/Chest/Back', weekday: 5,
+    exercises: [
+      E('Seated DB Shoulder Press', 4, '6-10', 'Smooth reps; push hard up.'),
+      E('Incline Machine Chest Press', 4, '10', 'Squeeze at the top; control the weight.'),
+      E('Cable Lateral Raise', 4, '12-15', 'Keep tension; minimal swing.'),
+      E('Pec Dec × Reverse Pec Dec', 3, '10', 'Rear delts top off the physique.'),
+      E('Face Pulls × Shrugs', 3, '10-12', 'Neck relaxed.'),
+    ],
+  },
+]

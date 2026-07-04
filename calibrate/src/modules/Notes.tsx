@@ -115,7 +115,7 @@ export function Notes() {
         </div>
         <Panel>
           <input
-            className="w-full bg-transparent font-display text-2xl font-bold tracking-wide text-ice outline-none"
+            className="w-full bg-transparent h-lumen text-2xl font-bold tracking-wide outline-none"
             value={note.title}
             aria-label="Note title"
             onChange={(e) => s.updateNote(note.id, { title: e.target.value })}
@@ -152,7 +152,7 @@ export function Notes() {
         </div>
         <Panel>
           <input
-            className="mb-3 w-full bg-transparent font-display text-2xl font-bold tracking-wide text-ice outline-none"
+            className="mb-3 w-full bg-transparent h-lumen text-2xl font-bold tracking-wide outline-none"
             value={table.name}
             aria-label="Table name"
             onChange={(e) => s.updateTable(table.id, { name: e.target.value })}
@@ -167,7 +167,7 @@ export function Notes() {
     <div className="space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-3 px-1">
         <div>
-          <h1 className="font-display text-3xl font-bold tracking-wide text-ice">NOTES & TABLES</h1>
+          <h1 className="h-lumen text-3xl font-bold tracking-wide">NOTES & TABLES</h1>
           <p className="mt-1 text-sm text-haze">Thinking space. Jarvis can create notes for you from chat.</p>
         </div>
         <div className="flex gap-2">

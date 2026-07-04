@@ -2,11 +2,16 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { todayISO, uid } from '../lib/dates'
 import {
+  seedBooks,
   seedGoals,
+  seedGolfStats,
   seedHandicap,
   seedMacros,
+  seedMantras,
   seedMeals,
+  seedProfile,
   seedSchedule,
+  seedSupplements,
   seedWatchlist,
   seedWorkouts,
 } from './seed'
@@ -19,16 +24,20 @@ import type {
   FoodLog,
   Goal,
   GolfSession,
+  GolfStats,
   GroceryItem,
   HandicapEntry,
   MacroTargets,
+  Mantra,
   MealOption,
   Note,
+  Profile,
   RevenueEntry,
   RunLog,
   ScheduleBlock,
   SetEntry,
   Settings,
+  SupplementItem,
   TableDoc,
   ViewId,
   WatchItem,
@@ -134,6 +143,28 @@ export interface CalibrateState {
   pushChat: (m: Omit<ChatMsg, 'id' | 'ts'>) => void
   clearChat: () => void
 
+  // profile / memory
+  profile: Profile
+  setProfile: (patch: Partial<Profile>) => void
+  addFact: (fact: string) => void
+  removeFact: (idx: number) => void
+
+  // mindset
+  mantras: Mantra[]
+  addMantra: (text: string, author?: string) => void
+  removeMantra: (id: string) => void
+
+  // recovery
+  supplements: SupplementItem[]
+  supLog: Record<string, Record<string, boolean>> // date -> supId -> taken
+  toggleSupplement: (date: string, id: string) => void
+  addSupplement: (name: string, dose: string, timing: string) => void
+  removeSupplement: (id: string) => void
+
+  // golf diagnostic
+  golfStats: GolfStats
+  setGolfStats: (patch: Partial<GolfStats>) => void
+
   // settings
   settings: Settings
   setSettings: (patch: Partial<Settings>) => void
@@ -171,11 +202,16 @@ const seedState = () => ({
   tables: [],
   bizTasks: [],
   revenue: [],
-  books: [],
+  books: seedBooks,
   readingLog: {},
   checkIns: {},
   watchlist: seedWatchlist,
   chat: [],
+  profile: seedProfile,
+  mantras: seedMantras,
+  supplements: seedSupplements,
+  supLog: {},
+  golfStats: seedGolfStats,
   settings: defaultSettings,
 })
 
@@ -361,15 +397,48 @@ export const useStore = create<CalibrateState>()(
       pushChat: (m) => set((s) => ({ chat: [...s.chat.slice(-199), { ...m, id: uid('msg'), ts: Date.now() }] })),
       clearChat: () => set({ chat: [] }),
 
+      setProfile: (patch) => set((s) => ({ profile: { ...s.profile, ...patch } })),
+      addFact: (fact) => set((s) => ({ profile: { ...s.profile, facts: [...s.profile.facts, fact] } })),
+      removeFact: (idx) => set((s) => ({ profile: { ...s.profile, facts: s.profile.facts.filter((_, i) => i !== idx) } })),
+
+      addMantra: (text, author = '') =>
+        set((s) => ({ mantras: [{ id: uid('mantra'), text, author, tag: 'custom' }, ...s.mantras] })),
+      removeMantra: (id) => set((s) => ({ mantras: s.mantras.filter((m) => m.id !== id) })),
+
+      toggleSupplement: (date, id) =>
+        set((s) => {
+          const day = { ...(s.supLog[date] ?? {}) }
+          day[id] = !day[id]
+          return { supLog: { ...s.supLog, [date]: day } }
+        }),
+      addSupplement: (name, dose, timing) =>
+        set((s) => ({ supplements: [...s.supplements, { id: uid('sup'), name, dose, timing }] })),
+      removeSupplement: (id) => set((s) => ({ supplements: s.supplements.filter((x) => x.id !== id) })),
+
+      setGolfStats: (patch) => set((s) => ({ golfStats: { ...s.golfStats, ...patch } })),
+
       setSettings: (patch) => set((s) => ({ settings: { ...s.settings, ...patch } })),
 
       resetAll: () => set({ ...seedState(), view: get().view }),
     }),
     {
       name: 'calibrate-v1',
-      version: 1,
+      version: 2,
       // always wake up on Today — don't persist navigation
       partialize: (s) => Object.fromEntries(Object.entries(s).filter(([k]) => k !== 'view')) as CalibrateState,
+      // backfill new/preloaded collections for existing users without touching their data
+      migrate: (persisted, version) => {
+        const p = (persisted ?? {}) as Record<string, unknown>
+        if (version < 2) {
+          if (!p.profile) p.profile = seedProfile
+          if (!Array.isArray(p.mantras) || !(p.mantras as unknown[]).length) p.mantras = seedMantras
+          if (!Array.isArray(p.supplements) || !(p.supplements as unknown[]).length) p.supplements = seedSupplements
+          if (!p.supLog) p.supLog = {}
+          if (!p.golfStats) p.golfStats = seedGolfStats
+          if (!Array.isArray(p.books) || !(p.books as unknown[]).length) p.books = seedBooks
+        }
+        return p as unknown as CalibrateState
+      },
     },
   ),
 )

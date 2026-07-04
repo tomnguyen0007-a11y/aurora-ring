@@ -24,7 +24,7 @@ export function Business() {
   return (
     <div className="space-y-4">
       <header className="px-1">
-        <h1 className="font-display text-3xl font-bold tracking-wide text-ice">AURORA COMMAND</h1>
+        <h1 className="h-lumen text-3xl font-bold tracking-wide">AURORA COMMAND</h1>
         <p className="mt-1 text-sm text-haze">Smart Ring operations. Target: $1,000/day. Protect the deep work windows.</p>
       </header>
 

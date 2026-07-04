@@ -4,6 +4,24 @@ import { DAY_CODENAMES } from '../../store/seed'
 import { useStore } from '../../store/store'
 import { weekDates } from '../dates'
 
+/** Who Tom is — persistent memory Jarvis always carries. */
+export function buildProfile(): string {
+  const s = useStore.getState()
+  const p = s.profile
+  const g = s.golfStats
+  return [
+    `IDENTITY: ${p.name}${p.age ? `, age ${p.age}` : ''}${p.location ? `, ${p.location}` : ''}. ${p.identity}`,
+    `INSPIRATION: ${p.inspiration}`,
+    `OPERATING PHILOSOPHY: ${p.philosophy}`,
+    `GOLF SNAPSHOT: handicap-focus "${g.focus}" — fairways ${g.fairwaysPct}%, GIR ${g.girPct}%, scramble ${g.scramblePct}%, ~${g.lostBallsPerRound} lost balls/round, avg ${g.avgScore}.`,
+    `KEY FACTS ABOUT ${p.name.toUpperCase()}:`,
+    ...p.facts.map((f) => `  • ${f}`),
+    s.mantras.length ? `MANTRAS HE LIVES BY: ${s.mantras.slice(0, 6).map((m) => `"${m.text}"`).join(' ')}` : '',
+  ]
+    .filter(Boolean)
+    .join('\n')
+}
+
 /** Compact plain-text snapshot of the whole app state — Jarvis's situational awareness. */
 export function buildSnapshot(): string {
   const s = useStore.getState()

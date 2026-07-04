@@ -5,6 +5,7 @@ import { fmtHours, nowMinutes, todayISO, toMinutes, weekdayOf } from '../lib/dat
 import { dayProgress, golfTotalWeek, golfWeeklySeries, macrosForDate, revenueToday, streaks, workoutsThisWeek } from '../lib/stats'
 import { DAY_CODENAMES } from '../store/seed'
 import { useStore } from '../store/store'
+import { quoteOfDay } from '../lib/quote'
 import { CheckInCard } from './CheckInCard'
 
 export function Dashboard() {
@@ -44,7 +45,7 @@ export function Dashboard() {
           <div className="hud-label !mb-1">
             {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase()}
           </div>
-          <h1 className="font-display text-3xl font-bold leading-none tracking-wide text-ice sm:text-4xl">
+          <h1 className="h-lumen text-3xl font-bold leading-none tracking-wide sm:text-4xl">
             {DAY_CODENAMES[wd]}
           </h1>
           <p className="mt-1.5 text-sm text-haze">
@@ -56,6 +57,25 @@ export function Dashboard() {
           <span className="hud-label !mb-0 !text-[8px]">DAY</span>
         </Ring>
       </header>
+
+      {/* Signal of the day */}
+      {(() => {
+        const q = quoteOfDay(s.mantras)
+        if (!q) return null
+        return (
+          <button
+            onClick={() => s.setView('mindset')}
+            className="glass flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-colors hover:border-edge-strong"
+          >
+            <span className="text-arc text-glow-arc text-lg leading-none">◆</span>
+            <span className="min-w-0 flex-1">
+              <span className="text-sm italic text-ice/90">"{q.text}"</span>
+              {q.author && <span className="ml-2 text-xs text-fog">— {q.author}</span>}
+            </span>
+            <span className="hud-label !mb-0 hidden shrink-0 !text-[8px] sm:block">Mindset →</span>
+          </button>
+        )
+      })()}
 
       {/* Bento grid */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">

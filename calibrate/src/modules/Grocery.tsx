@@ -13,7 +13,7 @@ export function Grocery() {
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       <header className="px-1">
-        <h1 className="font-display text-3xl font-bold tracking-wide text-ice">SUPPLY RUN</h1>
+        <h1 className="h-lumen text-3xl font-bold tracking-wide">SUPPLY RUN</h1>
         <p className="mt-1 text-sm text-haze">
           Grocery list. Add here or tell Jarvis — “add 2kg chicken breast and jasmine rice to the list”.
         </p>

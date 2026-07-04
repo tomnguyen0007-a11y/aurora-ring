@@ -5,24 +5,29 @@
   --font-sans: 'Inter Variable', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
 
-  /* Wayne-tech HUD palette */
-  --color-void: #07090d; /* app background */
-  --color-carbon: #0c0f15; /* raised surface base */
-  --color-panel: #11151d; /* solid panel */
-  --color-edge: rgba(255, 255, 255, 0.07); /* hairline borders */
-  --color-edge-strong: rgba(255, 255, 255, 0.14);
+  /* Stark-HUD palette — illuminated dark, arc-reactor cyan + batsignal amber */
+  --color-void: #06080c; /* app background */
+  --color-carbon: #0b0e14; /* raised surface base */
+  --color-panel: #10141c; /* solid panel */
+  --color-edge: rgba(210, 232, 255, 0.09); /* hairline borders */
+  --color-edge-strong: rgba(210, 232, 255, 0.18);
 
-  --color-signal: #f6b83c; /* batsignal amber — active / attention */
-  --color-signal-dim: #b07f1e;
-  --color-steel: #7fb4d8; /* data / informational */
-  --color-affirm: #5dd39e; /* completion */
-  --color-alert: #e2604e; /* danger / behind-target */
-  --color-haze: #8b93a3; /* muted text */
-  --color-fog: #545b68; /* faint text */
-  --color-ice: #e8ebf0; /* primary text */
+  --color-signal: #f7bd45; /* batsignal amber — active / attention */
+  --color-signal-dim: #b78427;
+  --color-lumen: #eaf4ff; /* illuminated HUD text — near white, cyan-lit */
+  --color-arc: #58c7f0; /* arc-reactor cyan — data / live */
+  --color-steel: #8fc4e6; /* informational */
+  --color-affirm: #55e0a3; /* completion */
+  --color-alert: #ef6a54; /* danger / behind-target */
+  --color-haze: #9aa5b6; /* muted text */
+  --color-fog: #5c6472; /* faint text */
+  --color-ice: #f2f6fc; /* primary text — brighter */
 
-  --shadow-glass: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 16px 40px -20px rgba(0, 0, 0, 0.8);
-  --shadow-float: 0 24px 60px -24px rgba(0, 0, 0, 0.9), 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  --shadow-glass: 0 1px 0 rgba(230, 244, 255, 0.08) inset, 0 16px 44px -20px rgba(0, 0, 0, 0.85);
+  --shadow-float: 0 28px 70px -26px rgba(0, 0, 0, 0.92), 0 1px 0 rgba(230, 244, 255, 0.1) inset;
+  --glow-lumen: 0 0 18px rgba(210, 236, 255, 0.28);
+  --glow-arc: 0 0 16px rgba(88, 199, 240, 0.45);
+  --glow-signal: 0 0 16px rgba(247, 189, 69, 0.45);
 
   --animate-rise: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-pulse-soft: pulseSoft 2.4s ease-in-out infinite;
@@ -68,30 +73,41 @@ body {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(1200px 600px at 75% -10%, rgba(246, 184, 60, 0.05), transparent 60%),
-    radial-gradient(900px 500px at 10% 110%, rgba(127, 180, 216, 0.04), transparent 60%),
-    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+    radial-gradient(1200px 620px at 78% -12%, rgba(247, 189, 69, 0.06), transparent 60%),
+    radial-gradient(1000px 560px at 8% 112%, rgba(88, 199, 240, 0.06), transparent 60%),
+    linear-gradient(rgba(210, 232, 255, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(210, 232, 255, 0.022) 1px, transparent 1px);
   background-size:
     auto,
     auto,
-    44px 44px,
-    44px 44px;
+    46px 46px,
+    46px 46px;
 }
 .atmosphere::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(120% 90% at 50% 30%, transparent 55%, rgba(0, 0, 0, 0.55));
+  background: radial-gradient(125% 95% at 50% 28%, transparent 52%, rgba(0, 0, 0, 0.6));
 }
 
-/* Liquid glass panel */
+/* Liquid glass panel — lit top edge for the illuminated HUD feel */
 .glass {
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.012) 45%, rgba(255, 255, 255, 0.03));
-  backdrop-filter: blur(18px) saturate(1.15);
-  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+  position: relative;
+  background: linear-gradient(160deg, rgba(230, 244, 255, 0.055), rgba(230, 244, 255, 0.014) 45%, rgba(230, 244, 255, 0.035));
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
   border: 1px solid var(--color-edge);
   box-shadow: var(--shadow-glass);
+}
+.glass::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, rgba(210, 236, 255, 0.35) 30%, rgba(210, 236, 255, 0.35) 70%, transparent);
+  opacity: 0.6;
+  pointer-events: none;
 }
 .glass-strong {
   background: linear-gradient(160deg, rgba(22, 27, 37, 0.88), rgba(12, 15, 21, 0.92));
@@ -105,15 +121,32 @@ body {
 .hud-label {
   font-family: var(--font-display);
   font-weight: 600;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   font-size: 0.68rem;
-  color: var(--color-fog);
+  color: var(--color-haze);
 }
 
 .num {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+}
+
+/* Illuminated display headings — the "Stark" lit-glass look */
+.h-lumen {
+  font-family: var(--font-display);
+  color: var(--color-lumen);
+  text-shadow: var(--glow-lumen);
+  letter-spacing: 0.02em;
+}
+.text-glow-arc {
+  text-shadow: var(--glow-arc);
+}
+.text-glow-signal {
+  text-shadow: var(--glow-signal);
+}
+.lit {
+  box-shadow: 0 0 0 1px var(--color-edge-strong), 0 0 24px -6px rgba(88, 199, 240, 0.25);
 }
 
 /* Scrollbars */

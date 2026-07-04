@@ -1,10 +1,74 @@
-import { Pause, Play, Plus, Square, Trash2 } from 'lucide-react'
+import { Pause, Play, Plus, Square, Target, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Bars, Empty, HudLabel, Panel, Sparkline, StatTile } from '../components/ui'
 import { fmtDateShort, fmtHours, lastNDates, todayISO, weekDates } from '../lib/dates'
 import { GOLF_CATEGORIES, golfMinutes, golfWeeklySeries } from '../lib/stats'
 import { useStore } from '../store/store'
 import type { GolfCategory } from '../store/types'
+
+/** Coach diagnostic — the strokes-gained truth, editable, feeds Jarvis. */
+function GolfDiagnostic() {
+  const s = useStore()
+  const g = s.golfStats
+  const [edit, setEdit] = useState(false)
+  const metrics: { key: keyof typeof g; label: string; suffix: string; good: number; higher: boolean }[] = [
+    { key: 'fairwaysPct', label: 'Fairways', suffix: '%', good: 60, higher: true },
+    { key: 'girPct', label: 'GIR', suffix: '%', good: 60, higher: true },
+    { key: 'scramblePct', label: 'Scramble', suffix: '%', good: 50, higher: true },
+    { key: 'lostBallsPerRound', label: 'Lost balls', suffix: '/rd', good: 1, higher: false },
+  ]
+  return (
+    <Panel className="lit">
+      <div className="mb-3 flex items-center justify-between">
+        <HudLabel className="!mb-0">
+          <Target size={11} className="text-alert" /> Diagnostic — the strokes-gained truth
+        </HudLabel>
+        <button className="btn btn-ghost !py-1 !text-xs" onClick={() => setEdit(!edit)}>
+          {edit ? 'Done' : 'Edit'}
+        </button>
+      </div>
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+        {metrics.map((mtr) => {
+          const val = g[mtr.key] as number
+          const onTarget = mtr.higher ? val >= mtr.good : val <= mtr.good
+          return (
+            <div key={mtr.key} className="rounded-xl border border-edge bg-black/25 px-3 py-3">
+              {edit ? (
+                <input
+                  className="field num w-full !py-1 text-lg"
+                  inputMode="decimal"
+                  aria-label={mtr.label}
+                  value={val}
+                  onChange={(e) => s.setGolfStats({ [mtr.key]: parseFloat(e.target.value) || 0 })}
+                />
+              ) : (
+                <div className={`num text-2xl font-bold ${onTarget ? 'text-affirm' : 'text-alert'}`}>
+                  {val}
+                  <span className="text-xs text-fog">{mtr.suffix}</span>
+                </div>
+              )}
+              <div className="hud-label !mb-0 mt-1 !text-[8px]">{mtr.label}</div>
+            </div>
+          )
+        })}
+      </div>
+      <div className="mt-3 rounded-lg border border-alert/20 bg-alert/[0.05] p-3">
+        <div className="hud-label !mb-1 !text-[8px] text-alert">Current Focus</div>
+        {edit ? (
+          <textarea
+            className="field w-full text-sm"
+            rows={2}
+            value={g.focus}
+            aria-label="Golf focus"
+            onChange={(e) => s.setGolfStats({ focus: e.target.value })}
+          />
+        ) : (
+          <p className="text-sm leading-relaxed text-ice">{g.focus}</p>
+        )}
+      </div>
+    </Panel>
+  )
+}
 
 const CAT_COLORS: Record<GolfCategory, string> = {
   putting: '#5dd39e',
@@ -110,7 +174,7 @@ export function Golf() {
     <div className="space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-3 px-1">
         <div>
-          <h1 className="font-display text-3xl font-bold tracking-wide text-ice">ELITE GOLF MASTERY</h1>
+          <h1 className="h-lumen text-3xl font-bold tracking-wide">ELITE GOLF MASTERY</h1>
           <p className="mt-1 text-sm text-haze">From 2.4 to plus. Every minute of practice, accounted for.</p>
         </div>
         <div className="flex items-center gap-3">
@@ -118,6 +182,8 @@ export function Golf() {
           <StatTile label="This week" value={fmtHours(totalWeek)} sub={`${fmtHours(totalMonth)} / 30d`} accent="text-ice" />
         </div>
       </header>
+
+      <GolfDiagnostic />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <PracticeTimer />
