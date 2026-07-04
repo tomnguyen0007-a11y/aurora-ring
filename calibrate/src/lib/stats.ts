@@ -86,6 +86,63 @@ export function revenueSeries(s: CalibrateState, days = 30): { date: string; val
   }))
 }
 
+// ——— Progressive overload coaching ———
+
+/** Epley estimated 1RM */
+export function est1RM(weight: number, reps: number): number {
+  if (!weight || !reps) return 0
+  return Math.round(weight * (1 + reps / 30))
+}
+
+export interface ExerciseInsight {
+  best: { weight: number; reps: number; e1rm: number } | null
+  last: { date: string; weight: number; reps: number } | null
+  sessions: number
+  trend: number[] // e1rm per session, chronological
+  suggestion: string
+}
+
+/** Aggregate a single exercise across all logged sessions for the coach. */
+export function exerciseInsight(s: CalibrateState, exerciseId: string, repLow: number, repHigh: number): ExerciseInsight {
+  const logs = s.workoutLogs
+    .filter((l) => l.entries[exerciseId]?.some((set) => set.weight != null && set.reps != null))
+    .sort((a, b) => (a.date < b.date ? -1 : 1))
+
+  let best: ExerciseInsight['best'] = null
+  const trend: number[] = []
+  let last: ExerciseInsight['last'] = null
+
+  for (const log of logs) {
+    let sessionBest = 0
+    let sessionTop: { weight: number; reps: number } | null = null
+    for (const set of log.entries[exerciseId]) {
+      if (set.weight == null || set.reps == null) continue
+      const e = est1RM(set.weight, set.reps)
+      if (e > sessionBest) {
+        sessionBest = e
+        sessionTop = { weight: set.weight, reps: set.reps }
+      }
+      const e1rm = est1RM(set.weight, set.reps)
+      if (!best || e1rm > best.e1rm) best = { weight: set.weight, reps: set.reps, e1rm }
+    }
+    if (sessionBest) trend.push(sessionBest)
+    if (sessionTop) last = { date: log.date, ...sessionTop }
+  }
+
+  let suggestion = 'Log a set to start tracking progression.'
+  if (last) {
+    if (last.reps >= repHigh) {
+      suggestion = `Hit ${last.reps} reps at ${last.weight}kg — top of the range. Add load next session.`
+    } else if (last.reps < repLow) {
+      suggestion = `${last.reps} reps is below ${repLow}. Repeat ${last.weight}kg until you clear ${repLow}+ clean.`
+    } else {
+      suggestion = `Repeat ${last.weight}kg and push for ${repHigh} reps to earn the load increase.`
+    }
+  }
+
+  return { best, last, sessions: logs.length, trend, suggestion }
+}
+
 export function golfWeeklySeries(s: CalibrateState, weeks = 8): { label: string; value: number }[] {
   const out: { label: string; value: number }[] = []
   const now = new Date()

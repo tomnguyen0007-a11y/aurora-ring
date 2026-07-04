@@ -63,7 +63,7 @@ export function Schedule() {
   return (
     <div className="space-y-4">
       <header className="px-1">
-        <h1 className="font-display text-3xl font-bold tracking-wide text-ice">WEEKLY BLUEPRINT</h1>
+        <h1 className="h-lumen text-3xl font-bold tracking-wide">WEEKLY BLUEPRINT</h1>
         <p className="mt-1 text-sm text-haze">Your operating schedule. Edit blocks, or tell Jarvis to do it.</p>
       </header>
 

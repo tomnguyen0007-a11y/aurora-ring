@@ -60,7 +60,7 @@ export function Markets() {
     <div className="space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-3 px-1">
         <div>
-          <h1 className="font-display text-3xl font-bold tracking-wide text-ice">MARKET INTELLIGENCE</h1>
+          <h1 className="h-lumen text-3xl font-bold tracking-wide">MARKET INTELLIGENCE</h1>
           <p className="mt-1 text-sm text-haze">
             Crypto is live and free. Stocks + news need a free Finnhub key —{' '}
             <button className="text-signal underline-offset-2 hover:underline" onClick={() => s.setView('settings')}>

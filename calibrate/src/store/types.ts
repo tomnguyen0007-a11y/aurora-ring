@@ -203,6 +203,42 @@ export interface ChatMsg {
   acted?: string[] // human-readable list of actions Jarvis executed
 }
 
+export interface Profile {
+  name: string
+  age: number | null
+  heightCm: number | null
+  location: string
+  inspiration: string
+  identity: string // free-form "who I am / what I'm building"
+  philosophy: string // core operating philosophy
+  facts: string[] // discrete memory facts Jarvis should always know
+}
+
+export interface Mantra {
+  id: string
+  text: string
+  author: string // "" if unattributed
+  tag: 'mindset' | 'wealth' | 'discipline' | 'stoic' | 'love' | 'custom'
+}
+
+export interface SupplementItem {
+  id: string
+  name: string
+  dose: string
+  timing: string
+}
+
+export interface GolfStats {
+  fairwaysPct: number
+  girPct: number
+  scramblePct: number
+  puttsPerRound: number
+  lostBallsPerRound: number
+  avgScore: number
+  updated: string
+  focus: string // current mental/technical focus
+}
+
 export type LlmProvider = 'none' | 'anthropic' | 'gemini'
 
 export interface Settings {
@@ -223,10 +259,12 @@ export type ViewId =
   | 'training'
   | 'golf'
   | 'nutrition'
+  | 'recovery'
   | 'grocery'
   | 'notes'
   | 'business'
   | 'books'
+  | 'mindset'
   | 'markets'
   | 'schedule'
   | 'settings'

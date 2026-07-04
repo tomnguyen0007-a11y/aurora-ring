@@ -1,9 +1,49 @@
-import { CheckCircle2, Footprints, Plus, Trash2 } from 'lucide-react'
+import { CheckCircle2, Footprints, Plus, Sparkles, Trash2, TrendingUp } from 'lucide-react'
 import { useState } from 'react'
-import { Empty, HudLabel, Panel, StatTile } from '../components/ui'
+import { Empty, HudLabel, Panel, Sparkline, StatTile } from '../components/ui'
 import { fmtDateShort, todayISO, WEEKDAY_NAMES, weekdayOf } from '../lib/dates'
-import { workoutsThisWeek } from '../lib/stats'
+import { exerciseInsight, workoutsThisWeek } from '../lib/stats'
+import { ollieWorkouts } from '../store/seed'
 import { useStore } from '../store/store'
+
+/** parse "8-10", "10", "8-12/leg" → [low, high] */
+function parseReps(reps: string): [number, number] {
+  const nums = reps.match(/\d+/g)?.map(Number) ?? [8, 12]
+  return nums.length >= 2 ? [nums[0], nums[1]] : [nums[0], nums[0]]
+}
+
+function ExerciseCoach({ exerciseId, reps }: { exerciseId: string; reps: string }) {
+  const s = useStore()
+  const [lo, hi] = parseReps(reps)
+  const ins = exerciseInsight(s, exerciseId, lo, hi)
+  if (!ins.last) return null
+  return (
+    <div className="mt-2.5 rounded-lg border border-arc/20 bg-arc/[0.04] p-2.5">
+      <div className="mb-1.5 flex items-center gap-1.5">
+        <TrendingUp size={11} className="text-arc" />
+        <span className="hud-label !mb-0 !text-[8px] text-arc">Overload Coach</span>
+      </div>
+      <div className="flex items-center justify-between gap-3">
+        <div className="grid grid-cols-3 gap-3">
+          <div>
+            <div className="num text-base font-bold text-ice">{ins.best?.e1rm ?? '—'}<span className="text-[10px] text-fog">kg</span></div>
+            <div className="hud-label !mb-0 !text-[7px]">Est 1RM</div>
+          </div>
+          <div>
+            <div className="num text-base font-bold text-ice">{ins.best ? `${ins.best.weight}×${ins.best.reps}` : '—'}</div>
+            <div className="hud-label !mb-0 !text-[7px]">Best Set</div>
+          </div>
+          <div>
+            <div className="num text-base font-bold text-ice">{ins.sessions}</div>
+            <div className="hud-label !mb-0 !text-[7px]">Sessions</div>
+          </div>
+        </div>
+        {ins.trend.length > 1 && <Sparkline points={ins.trend} width={90} height={30} color="var(--color-arc)" />}
+      </div>
+      <p className="mt-2 text-xs leading-snug text-steel">{ins.suggestion}</p>
+    </div>
+  )
+}
 
 export function Training() {
   const s = useStore()
@@ -25,7 +65,7 @@ export function Training() {
     <div className="space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-3 px-1">
         <div>
-          <h1 className="font-display text-3xl font-bold tracking-wide text-ice">TRAINING</h1>
+          <h1 className="h-lumen text-3xl font-bold tracking-wide">TRAINING</h1>
           <p className="mt-1 text-sm text-haze">The strategic split: Tue Push · Wed Pull · Fri Legs · Sat Upper. Thu is engine work.</p>
         </div>
         <StatTile label="This week" value={`${wk.done}/${wk.planned}`} sub="sessions complete" accent="text-signal" />
@@ -46,6 +86,17 @@ export function Training() {
             <div className="hud-label !mb-0 !text-[8px]">{WEEKDAY_NAMES[w.weekday]}</div>
           </button>
         ))}
+        {!s.workouts.some((w) => w.id.startsWith('o-')) && (
+          <button
+            onClick={() => ollieWorkouts.forEach((w) => useStore.setState((st) => ({ workouts: [...st.workouts, w] })))}
+            className="shrink-0 rounded-xl border border-dashed border-arc/40 px-3.5 py-2 text-left text-arc transition-all hover:bg-arc/5"
+          >
+            <div className="flex items-center gap-1.5 font-display text-sm font-bold tracking-wide">
+              <Sparkles size={13} /> Add Ollie's Hybrid
+            </div>
+            <div className="hud-label !mb-0 !text-[8px] text-arc/70">5 workouts A–E</div>
+          </button>
+        )}
       </div>
 
       {workout && (
@@ -103,6 +154,7 @@ export function Training() {
                       </div>
                     ))}
                   </div>
+                  <ExerciseCoach exerciseId={ex.id} reps={ex.reps} />
                 </div>
               )
             })}

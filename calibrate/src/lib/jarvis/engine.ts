@@ -39,10 +39,12 @@ const VIEW_WORDS: [RegExp, ViewId][] = [
   [/\b(training|gym|workout)s?\b/i, 'training'],
   [/\bgolf\b/i, 'golf'],
   [/\b(nutrition|food|macros?|meals?)\b/i, 'nutrition'],
+  [/\b(recovery|supplements?|sleep|caffeine|hydration)\b/i, 'recovery'],
   [/\b(grocery|groceries|shopping)\b/i, 'grocery'],
   [/\bnotes?\b/i, 'notes'],
   [/\b(business|aurora)\b/i, 'business'],
   [/\bbooks?|reading\b/i, 'books'],
+  [/\b(mindset|quotes?|mantras?|philosophy)\b/i, 'mindset'],
   [/\b(markets?|stocks?|crypto)\b/i, 'markets'],
   [/\bschedule|blueprint|week\b/i, 'schedule'],
   [/\bsettings?|config\b/i, 'settings'],
@@ -172,6 +174,12 @@ export function runLocalEngine(input: string): EngineResult | null {
       const prog = dayProgress(useStore.getState(), todayISO(), weekdayOf())
       return { ...res, reply: `Done. ${prog.done}/${prog.total} blocks executed today.` }
     }
+  }
+
+  // ——— memory: "remember (that) X" ———
+  m = t.match(/^remember(?:\s+that)?[:\s]+(.+)/is)
+  if (m) {
+    return act([{ type: 'remember', fact: m[1].trim() }], `Locked into memory, ${name}. I won't forget that.`)
   }
 
   // ——— notes: "note: ..." / "take a note ..." ———

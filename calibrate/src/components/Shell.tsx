@@ -2,11 +2,13 @@ import {
   Activity,
   BookOpen,
   Bot,
+  Brain,
   Briefcase,
   CalendarRange,
   CandlestickChart,
   Crosshair,
   Dumbbell,
+  HeartPulse,
   LayoutGrid,
   MoreHorizontal,
   Settings2,
@@ -27,10 +29,12 @@ const NAV: { id: ViewId; label: string; icon: typeof Activity }[] = [
   { id: 'training', label: 'Training', icon: Dumbbell },
   { id: 'golf', label: 'Golf', icon: Crosshair },
   { id: 'nutrition', label: 'Nutrition', icon: UtensilsCrossed },
+  { id: 'recovery', label: 'Recovery', icon: HeartPulse },
   { id: 'grocery', label: 'Grocery', icon: ShoppingCart },
   { id: 'business', label: 'AURORA', icon: Briefcase },
   { id: 'notes', label: 'Notes', icon: StickyNote },
   { id: 'books', label: 'Books', icon: BookOpen },
+  { id: 'mindset', label: 'Mindset', icon: Brain },
   { id: 'markets', label: 'Markets', icon: CandlestickChart },
   { id: 'schedule', label: 'Schedule', icon: CalendarRange },
   { id: 'settings', label: 'Settings', icon: Settings2 },
@@ -49,8 +53,8 @@ function Brand() {
         </svg>
       </div>
       <div>
-        <div className="font-display text-lg font-bold leading-none tracking-[0.18em] text-ice">CALIBRATE</div>
-        <div className="hud-label !mb-0 mt-1 !text-[8px] !tracking-[0.3em] text-signal-dim">PERSONAL OS</div>
+        <div className="h-lumen text-lg font-bold leading-none tracking-[0.2em]">CALIBRATE</div>
+        <div className="hud-label !mb-0 mt-1 !text-[8px] !tracking-[0.3em] text-arc">PERSONAL OS</div>
       </div>
     </div>
   )

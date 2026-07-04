@@ -8,8 +8,10 @@ import { Golf } from './modules/Golf'
 import { Grocery } from './modules/Grocery'
 import { Jarvis } from './modules/Jarvis'
 import { Markets } from './modules/Markets'
+import { Mindset } from './modules/Mindset'
 import { Notes } from './modules/Notes'
 import { Nutrition } from './modules/Nutrition'
+import { Recovery } from './modules/Recovery'
 import { Schedule } from './modules/Schedule'
 import { Settings } from './modules/Settings'
 import { Training } from './modules/Training'
@@ -27,10 +29,12 @@ export default function App() {
         {view === 'training' && <Training />}
         {view === 'golf' && <Golf />}
         {view === 'nutrition' && <Nutrition />}
+        {view === 'recovery' && <Recovery />}
         {view === 'grocery' && <Grocery />}
         {view === 'notes' && <Notes />}
         {view === 'business' && <Business />}
         {view === 'books' && <Books />}
+        {view === 'mindset' && <Mindset />}
         {view === 'markets' && <Markets />}
         {view === 'schedule' && <Schedule />}
         {view === 'settings' && <Settings />}

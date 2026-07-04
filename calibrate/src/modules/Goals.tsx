@@ -20,7 +20,7 @@ export function Goals() {
   return (
     <div className="space-y-4">
       <header className="px-1">
-        <h1 className="font-display text-3xl font-bold tracking-wide text-ice">STRATEGIC PILLARS</h1>
+        <h1 className="h-lumen text-3xl font-bold tracking-wide">STRATEGIC PILLARS</h1>
         <p className="mt-1 text-sm text-haze">The four pillars from the Blueprint, plus anything you add. Jarvis can update these.</p>
       </header>
 

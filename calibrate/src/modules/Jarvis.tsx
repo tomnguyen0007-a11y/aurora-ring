@@ -8,10 +8,10 @@ import { useStore } from '../store/store'
 const SUGGESTIONS = [
   'log 30 min putting',
   "what's next?",
-  'protein today?',
-  'add eggs and oats to the list',
+  'fix my 37% fairways',
+  'macros for a lift day?',
   'plan my golf week',
-  'weight 84.6',
+  'remember I prefer morning runs',
 ]
 
 export function useJarvis() {
@@ -103,7 +103,7 @@ export function Jarvis() {
             {(busy || listening) && <span className="absolute inset-0 animate-ping rounded-full border border-signal/50" />}
           </div>
           <div>
-            <h1 className="font-display text-2xl font-bold leading-none tracking-wide text-ice">JARVIS</h1>
+            <h1 className="h-lumen text-2xl font-bold leading-none tracking-wide">JARVIS</h1>
             <p className="hud-label !mb-0 mt-1 !text-[8px]">
               {listening ? 'LISTENING…' : busy ? 'THINKING…' : llmConfigured() ? 'FULL BRAIN ONLINE' : 'BUILT-IN ENGINE · FREE'}
             </p>
@@ -130,8 +130,8 @@ export function Jarvis() {
         {!s.chat.length && (
           <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
             <p className="max-w-sm text-sm leading-relaxed text-haze">
-              At your service, {s.settings.userName}. I see every stat in your system — I can log, edit, plan and
-              answer. Speak or type.
+              At your service, {s.settings.userName}. I know your plan, your philosophy and your numbers — golf,
+              training, fuel, AURORA. I can log, edit, strategise and remember. Speak or type.
             </p>
             <div className="flex max-w-md flex-wrap justify-center gap-1.5">
               {SUGGESTIONS.map((sg) => (

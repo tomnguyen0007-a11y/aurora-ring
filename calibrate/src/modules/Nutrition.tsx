@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Empty, HudLabel, Meter, Panel } from '../components/ui'
 import { todayISO } from '../lib/dates'
 import { macrosForDate } from '../lib/stats'
+import { seedDayTypeMacros } from '../store/seed'
 import { useStore } from '../store/store'
 
 export function Nutrition() {
@@ -22,7 +23,7 @@ export function Nutrition() {
   return (
     <div className="space-y-4">
       <header className="px-1">
-        <h1 className="font-display text-3xl font-bold tracking-wide text-ice">FUEL ARCHITECTURE</h1>
+        <h1 className="h-lumen text-3xl font-bold tracking-wide">FUEL ARCHITECTURE</h1>
         <p className="mt-1 text-sm text-haze">Food is direct fuel for lean hypertrophy and cognitive output. Lean bulk framework.</p>
       </header>
 
@@ -129,6 +130,41 @@ export function Nutrition() {
           </Panel>
         </div>
       </div>
+
+      {/* Fuelling Framework — carbs periodised by day type (Ollie Duthie) */}
+      <Panel>
+        <HudLabel>Fuelling Framework — Carbs by Day Type</HudLabel>
+        <p className="mb-3 text-xs text-fog">
+          Protein stays stable (1.8–2.2 g/kg). Carbs are the dial — scale to the day's demand. Example column is for 80kg.
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[560px] border-collapse text-sm">
+            <thead>
+              <tr className="text-left">
+                <th className="hud-label !mb-0 py-2 !text-[8px]">Day Type</th>
+                <th className="hud-label !mb-0 py-2 !text-[8px]">Protein g/kg</th>
+                <th className="hud-label !mb-0 py-2 !text-[8px]">Carbs g/kg</th>
+                <th className="hud-label !mb-0 py-2 !text-[8px]">Fat g/kg</th>
+                <th className="hud-label !mb-0 py-2 !text-[8px]">Example (80kg)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {seedDayTypeMacros.map((d) => (
+                <tr key={d.code} className="border-t border-edge">
+                  <td className="py-2">
+                    <span className="num mr-2 rounded bg-signal/15 px-1.5 py-0.5 text-[10px] font-bold text-signal">{d.code}</span>
+                    <span className="text-ice">{d.label}</span>
+                  </td>
+                  <td className="num py-2 text-haze">{d.proteinGkg}</td>
+                  <td className="num py-2 text-arc">{d.carbGkg}</td>
+                  <td className="num py-2 text-haze">{d.fatGkg}</td>
+                  <td className="num py-2 text-fog">{d.example80kg}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Panel>
     </div>
   )
 }

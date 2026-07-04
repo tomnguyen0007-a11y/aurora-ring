@@ -1,4 +1,4 @@
-import { Download, KeyRound, RotateCcw, Upload, Volume2 } from 'lucide-react'
+import { BrainCircuit, Download, KeyRound, Plus, RotateCcw, Trash2, Upload, Volume2 } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { HudLabel, Panel } from '../components/ui'
 import { useStore } from '../store/store'
@@ -36,16 +36,86 @@ export function Settings() {
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       <header className="px-1">
-        <h1 className="font-display text-3xl font-bold tracking-wide text-ice">SYSTEM CONFIG</h1>
+        <h1 className="h-lumen text-3xl font-bold tracking-wide">SYSTEM CONFIG</h1>
         <p className="mt-1 text-sm text-haze">Keys, voice, and data control. Everything is stored on this device only.</p>
       </header>
 
       <Panel>
-        <HudLabel>Identity</HudLabel>
-        <label className="block">
-          <span className="hud-label !mb-1 !text-[8px]">Your name (how Jarvis addresses you)</span>
-          <input className="field w-full" value={s.settings.userName} onChange={(e) => s.setSettings({ userName: e.target.value })} />
-        </label>
+        <HudLabel>
+          <BrainCircuit size={11} className="text-arc" /> Jarvis Memory — Who You Are
+        </HudLabel>
+        <p className="mb-3 text-xs text-fog">Everything here is fed to Jarvis so it knows you deeply. Edit freely — this is your memory, not a form.</p>
+        <div className="space-y-2.5">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <label className="col-span-2 block sm:col-span-1">
+              <span className="hud-label !mb-1 !text-[8px]">Name</span>
+              <input
+                className="field w-full"
+                value={s.profile.name}
+                onChange={(e) => {
+                  s.setProfile({ name: e.target.value })
+                  s.setSettings({ userName: e.target.value })
+                }}
+              />
+            </label>
+            <label className="block">
+              <span className="hud-label !mb-1 !text-[8px]">Age</span>
+              <input
+                className="field num w-full"
+                inputMode="numeric"
+                value={s.profile.age ?? ''}
+                onChange={(e) => s.setProfile({ age: e.target.value ? parseInt(e.target.value) : null })}
+              />
+            </label>
+            <label className="col-span-2 block sm:col-span-2">
+              <span className="hud-label !mb-1 !text-[8px]">Location</span>
+              <input className="field w-full" value={s.profile.location} onChange={(e) => s.setProfile({ location: e.target.value })} />
+            </label>
+          </div>
+          <label className="block">
+            <span className="hud-label !mb-1 !text-[8px]">Identity — who you are & what you're building</span>
+            <textarea className="field w-full" rows={2} value={s.profile.identity} onChange={(e) => s.setProfile({ identity: e.target.value })} />
+          </label>
+          <label className="block">
+            <span className="hud-label !mb-1 !text-[8px]">Operating philosophy</span>
+            <textarea className="field w-full" rows={2} value={s.profile.philosophy} onChange={(e) => s.setProfile({ philosophy: e.target.value })} />
+          </label>
+          <label className="block">
+            <span className="hud-label !mb-1 !text-[8px]">Inspiration</span>
+            <input className="field w-full" value={s.profile.inspiration} onChange={(e) => s.setProfile({ inspiration: e.target.value })} />
+          </label>
+
+          <div>
+            <span className="hud-label !mb-1.5 !text-[8px]">Facts Jarvis always remembers</span>
+            <ul className="space-y-1.5">
+              {s.profile.facts.map((f, i) => (
+                <li key={i} className="group flex items-center gap-2 rounded-lg bg-black/25 px-3 py-2">
+                  <span className="text-arc">•</span>
+                  <span className="flex-1 text-sm text-ice">{f}</span>
+                  <button className="opacity-0 transition-opacity group-hover:opacity-100" aria-label="Remove fact" onClick={() => s.removeFact(i)}>
+                    <Trash2 size={13} className="text-alert/70" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <form
+              className="mt-2 flex gap-2"
+              onSubmit={(e) => {
+                e.preventDefault()
+                const form = e.currentTarget as HTMLFormElement
+                const inp = form.elements.namedItem('fact') as HTMLInputElement
+                if (!inp.value.trim()) return
+                s.addFact(inp.value.trim())
+                form.reset()
+              }}
+            >
+              <input name="fact" className="field flex-1 !py-1.5 text-sm" placeholder="Add a fact Jarvis should know…" />
+              <button className="btn !px-3" type="submit" aria-label="Add fact">
+                <Plus size={15} />
+              </button>
+            </form>
+          </div>
+        </div>
       </Panel>
 
       <Panel>

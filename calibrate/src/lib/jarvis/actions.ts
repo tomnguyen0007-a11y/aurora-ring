@@ -25,9 +25,11 @@ export type JarvisAction =
   | { type: 'complete_block'; title: string }
   | { type: 'complete_workout' }
   | { type: 'update_goal_progress'; goal: string; progress: number }
+  | { type: 'remember'; fact: string }
+  | { type: 'add_mantra'; text: string; author?: string }
   | { type: 'navigate'; view: ViewId }
 
-const VIEWS: ViewId[] = ['today', 'jarvis', 'goals', 'training', 'golf', 'nutrition', 'grocery', 'notes', 'business', 'books', 'markets', 'schedule', 'settings']
+const VIEWS: ViewId[] = ['today', 'jarvis', 'goals', 'training', 'golf', 'nutrition', 'recovery', 'grocery', 'notes', 'business', 'books', 'mindset', 'markets', 'schedule', 'settings']
 
 /** Apply actions to the store; returns human-readable receipts. */
 export function applyActions(actions: JarvisAction[]): string[] {
@@ -169,6 +171,20 @@ export function applyActions(actions: JarvisAction[]): string[] {
           if (g) {
             s.updateGoal(g.id, { progress: Math.max(0, Math.min(100, a.progress)) })
             receipts.push(`“${g.title}” progress → ${a.progress}%`)
+          }
+          break
+        }
+        case 'remember': {
+          if (a.fact.trim()) {
+            s.addFact(a.fact.trim())
+            receipts.push(`Remembered: ${a.fact.trim()}`)
+          }
+          break
+        }
+        case 'add_mantra': {
+          if (a.text.trim()) {
+            s.addMantra(a.text.trim(), a.author)
+            receipts.push(`Added to your mindset library`)
           }
           break
         }
