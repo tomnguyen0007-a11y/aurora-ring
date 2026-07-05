@@ -1,6 +1,7 @@
-import { BrainCircuit, Download, KeyRound, Plus, RotateCcw, Trash2, Upload, Volume2 } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { BrainCircuit, Download, KeyRound, Play, Plus, RotateCcw, Trash2, Upload, Volume2 } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { HudLabel, Panel } from '../components/ui'
+import { englishVoices, speak } from '../lib/speech'
 import { useStore } from '../store/store'
 import type { LlmProvider } from '../store/types'
 
@@ -196,21 +197,36 @@ export function Settings() {
             />
           </button>
         </label>
-        <p className="mt-2 text-[11px] text-fog">Voice input uses your browser's speech recognition (mic button in chat). Works best in Chrome.</p>
+        <VoicePicker />
+        <p className="mt-2 text-[11px] text-fog">
+          For the most authentic JARVIS, pick a British male voice. On iPhone, install "Daniel (Enhanced)" via Settings → Accessibility → Spoken Content → Voices. Voice input uses your browser's speech recognition (works best in Chrome).
+        </p>
       </Panel>
 
       <Panel>
-        <HudLabel>Markets</HudLabel>
-        <label className="block">
-          <span className="hud-label !mb-1 !text-[8px]">Finnhub API key — free at finnhub.io (stocks + news)</span>
-          <input
-            className="field num w-full"
-            type="password"
-            placeholder="optional"
-            value={s.settings.finnhubKey}
-            onChange={(e) => s.setSettings({ finnhubKey: e.target.value.trim() })}
-          />
-        </label>
+        <HudLabel>Markets & News</HudLabel>
+        <div className="space-y-3">
+          <label className="block">
+            <span className="hud-label !mb-1 !text-[8px]">Finnhub API key — free at finnhub.io (stocks + market news)</span>
+            <input
+              className="field num w-full"
+              type="password"
+              placeholder="optional"
+              value={s.settings.finnhubKey}
+              onChange={(e) => s.setSettings({ finnhubKey: e.target.value.trim() })}
+            />
+          </label>
+          <label className="block">
+            <span className="hud-label !mb-1 !text-[8px]">GNews API key — free at gnews.io (world / politics / local news)</span>
+            <input
+              className="field num w-full"
+              type="password"
+              placeholder="optional — 100 requests/day free"
+              value={s.settings.gnewsKey}
+              onChange={(e) => s.setSettings({ gnewsKey: e.target.value.trim() })}
+            />
+          </label>
+        </div>
       </Panel>
 
       <Panel>
@@ -250,6 +266,52 @@ export function Settings() {
           your other devices to move data between phone and desktop.
         </p>
       </Panel>
+    </div>
+  )
+}
+
+function VoicePicker() {
+  const s = useStore()
+  const [voices, setVoices] = useState(() => englishVoices())
+
+  useEffect(() => {
+    const refresh = () => setVoices(englishVoices())
+    refresh()
+    // voices load asynchronously in most browsers
+    if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = refresh
+    return () => {
+      if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = null
+    }
+  }, [])
+
+  if (!voices.length) return null
+
+  return (
+    <div className="mt-3 flex items-end gap-2">
+      <label className="block flex-1">
+        <span className="hud-label !mb-1 !text-[8px]">JARVIS voice</span>
+        <select
+          className="field w-full"
+          value={s.settings.voiceURI}
+          onChange={(e) => s.setSettings({ voiceURI: e.target.value })}
+          aria-label="Choose voice"
+        >
+          <option value="" className="bg-panel">
+            Auto — best British male
+          </option>
+          {voices.map((v) => (
+            <option key={v.voiceURI} value={v.voiceURI} className="bg-panel">
+              {v.name} ({v.lang})
+            </option>
+          ))}
+        </select>
+      </label>
+      <button
+        className="btn"
+        onClick={() => speak('Good evening, sir. All systems are calibrated and standing by.', s.settings.voiceURI)}
+      >
+        <Play size={14} /> Test
+      </button>
     </div>
   )
 }

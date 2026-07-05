@@ -54,6 +54,45 @@ export async function fetchNews(key: string): Promise<NewsItem[]> {
   return data.slice(0, 12)
 }
 
+// World / politics / business / local news via GNews (gnews.io) — free tier, CORS-friendly.
+export interface Article {
+  title: string
+  description: string
+  url: string
+  image: string | null
+  source: string
+  publishedAt: string
+}
+
+export const NEWS_CATEGORIES = ['general', 'world', 'nation', 'business', 'technology', 'science', 'health', 'sports'] as const
+export type NewsCategory = (typeof NEWS_CATEGORIES)[number]
+
+export async function fetchWorldNews(
+  key: string,
+  category: NewsCategory,
+  country: string,
+  query: string,
+): Promise<Article[]> {
+  if (!key) return []
+  const base = query.trim()
+    ? `https://gnews.io/api/v4/search?q=${encodeURIComponent(query.trim())}&lang=en&max=12&sortby=publishedAt`
+    : `https://gnews.io/api/v4/top-headlines?category=${category}&lang=en&country=${country}&max=12`
+  const res = await fetch(`${base}&apikey=${key}`)
+  if (!res.ok) {
+    const body = await res.text().catch(() => '')
+    throw new Error(`GNews ${res.status}${body ? `: ${body.slice(0, 120)}` : ''}`)
+  }
+  const data: { articles?: { title: string; description: string; url: string; image: string; publishedAt: string; source: { name: string } }[] } = await res.json()
+  return (data.articles ?? []).map((a) => ({
+    title: a.title,
+    description: a.description,
+    url: a.url,
+    image: a.image || null,
+    source: a.source?.name ?? '',
+    publishedAt: a.publishedAt,
+  }))
+}
+
 // Trending coins — CoinGecko, free, no key.
 export interface Trending {
   name: string

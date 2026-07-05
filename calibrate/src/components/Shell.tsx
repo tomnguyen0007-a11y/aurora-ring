@@ -8,6 +8,7 @@ import {
   CandlestickChart,
   Crosshair,
   Dumbbell,
+  Globe,
   HeartPulse,
   LayoutGrid,
   MoreHorizontal,
@@ -36,6 +37,7 @@ const NAV: { id: ViewId; label: string; icon: typeof Activity }[] = [
   { id: 'books', label: 'Books', icon: BookOpen },
   { id: 'mindset', label: 'Mindset', icon: Brain },
   { id: 'markets', label: 'Markets', icon: CandlestickChart },
+  { id: 'news', label: 'News', icon: Globe },
   { id: 'schedule', label: 'Schedule', icon: CalendarRange },
   { id: 'settings', label: 'Settings', icon: Settings2 },
 ]

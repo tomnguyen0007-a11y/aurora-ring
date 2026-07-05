@@ -9,6 +9,7 @@ import { Grocery } from './modules/Grocery'
 import { Jarvis } from './modules/Jarvis'
 import { Markets } from './modules/Markets'
 import { Mindset } from './modules/Mindset'
+import { News } from './modules/News'
 import { Notes } from './modules/Notes'
 import { Nutrition } from './modules/Nutrition'
 import { Recovery } from './modules/Recovery'
@@ -36,6 +37,7 @@ export default function App() {
         {view === 'books' && <Books />}
         {view === 'mindset' && <Mindset />}
         {view === 'markets' && <Markets />}
+        {view === 'news' && <News />}
         {view === 'schedule' && <Schedule />}
         {view === 'settings' && <Settings />}
       </Shell>

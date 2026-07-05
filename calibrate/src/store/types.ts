@@ -201,6 +201,7 @@ export interface ChatMsg {
   text: string
   ts: number
   acted?: string[] // human-readable list of actions Jarvis executed
+  image?: string // data URL of an attached reference photo (user messages)
 }
 
 export interface Profile {
@@ -249,7 +250,10 @@ export interface Settings {
   anthropicModel: string
   geminiModel: string
   finnhubKey: string
+  gnewsKey: string
+  newsCountry: string
   speakReplies: boolean
+  voiceURI: string // chosen speech-synthesis voice
 }
 
 export type ViewId =
@@ -266,5 +270,6 @@ export type ViewId =
   | 'books'
   | 'mindset'
   | 'markets'
+  | 'news'
   | 'schedule'
   | 'settings'

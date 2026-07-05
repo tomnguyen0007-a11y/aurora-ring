@@ -38,31 +38,67 @@ export function createRecognizer(onFinal: (text: string) => void, onEnd: () => v
   return rec
 }
 
-let voiceCache: SpeechSynthesisVoice | null = null
-
-function pickVoice(): SpeechSynthesisVoice | null {
-  if (voiceCache) return voiceCache
-  const voices = speechSynthesis.getVoices()
-  // Prefer a UK male-ish voice for the Jarvis feel, fall back gracefully
-  voiceCache =
-    voices.find((v) => /en-GB/i.test(v.lang) && /male|daniel|arthur|george/i.test(v.name)) ??
-    voices.find((v) => /en-GB/i.test(v.lang)) ??
-    voices.find((v) => v.lang.startsWith('en')) ??
-    null
-  return voiceCache
+/** All available English voices, British first — for the Settings picker. */
+export function englishVoices(): SpeechSynthesisVoice[] {
+  if (!('speechSynthesis' in window)) return []
+  const all = speechSynthesis.getVoices().filter((v) => /^en/i.test(v.lang))
+  return all.sort((a, b) => {
+    const score = (v: SpeechSynthesisVoice) => (/en-GB/i.test(v.lang) ? 0 : /en-US/i.test(v.lang) ? 1 : 2)
+    return score(a) - score(b)
+  })
 }
 
-export function speak(text: string) {
+// Best-guess "JARVIS" voice: a refined British male. Ranked preference list.
+const JARVIS_VOICE_PREFS = [
+  /daniel/i, // Apple UK male (great match)
+  /arthur/i,
+  /oliver/i,
+  /george/i,
+  /google uk english male/i,
+  /uk english male/i,
+  /en-GB.*male/i,
+]
+
+function autoPick(): SpeechSynthesisVoice | null {
+  const voices = englishVoices()
+  for (const pref of JARVIS_VOICE_PREFS) {
+    const hit = voices.find((v) => pref.test(v.name) || pref.test(`${v.lang} ${v.name}`))
+    if (hit) return hit
+  }
+  return voices.find((v) => /en-GB/i.test(v.lang)) ?? voices[0] ?? null
+}
+
+/** Resolve the voice to use: user's chosen URI, else the best British male. */
+export function resolveVoice(preferredURI?: string): SpeechSynthesisVoice | null {
+  if (!('speechSynthesis' in window)) return null
+  if (preferredURI) {
+    const chosen = speechSynthesis.getVoices().find((v) => v.voiceURI === preferredURI)
+    if (chosen) return chosen
+  }
+  return autoPick()
+}
+
+export function speak(text: string, preferredURI?: string) {
   if (!('speechSynthesis' in window)) return
   speechSynthesis.cancel()
-  // Strip markdown-ish noise before speaking
-  const clean = text.replace(/[*_#`>]/g, '').replace(/\s+/g, ' ').slice(0, 600)
-  const u = new SpeechSynthesisUtterance(clean)
-  const v = pickVoice()
-  if (v) u.voice = v
-  u.rate = 1.04
-  u.pitch = 0.92
-  speechSynthesis.speak(u)
+  // Strip markdown/emoji noise, and pace with commas for a smoother, less robotic read.
+  const clean = text
+    .replace(/[*_#`>~|]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 700)
+  // Split into sentence-ish chunks so the engine breathes naturally between clauses.
+  const chunks = clean.match(/[^.!?]+[.!?]?/g) ?? [clean]
+  const v = resolveVoice(preferredURI)
+  chunks.forEach((chunk, i) => {
+    const u = new SpeechSynthesisUtterance(chunk.trim())
+    if (v) u.voice = v
+    u.rate = 0.98 // measured, deliberate — the JARVIS cadence
+    u.pitch = 0.9 // lower, composed
+    u.volume = 1
+    if (i > 0) u.text = ' ' + u.text
+    speechSynthesis.speak(u)
+  })
 }
 
 export function stopSpeaking() {
