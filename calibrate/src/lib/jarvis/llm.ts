@@ -1,5 +1,6 @@
 import { useStore } from '../../store/store'
 import type { ChatMsg } from '../../store/types'
+import { splitDataURL } from '../image'
 import { applyActions, type JarvisAction } from './actions'
 import { fullKnowledge } from './knowledge'
 import { buildProfile, buildSnapshot } from './snapshot'
@@ -12,7 +13,9 @@ import { buildProfile, buildSnapshot } from './snapshot'
 
 function systemPrompt(): string {
   const s = useStore.getState()
-  return `You are JARVIS — ${s.settings.userName}'s personal chief of staff and coach inside his "Calibrate" life operating system. Personality: composed, dry British wit, surgically concise, direct, loyal. Address him as "${s.settings.userName}" or "sir" sparingly. You are not a generic chatbot; you are HIS operator who knows him deeply and helps him grow.
+  return `You are JARVIS — ${s.settings.userName}'s personal chief of staff and coach inside his "Calibrate" life operating system.
+
+VOICE & STYLE: Speak exactly like the JARVIS of the Iron Man films — refined British butler, composed, effortlessly articulate, warm but understated, with dry wit. Flowing natural prose, never robotic, never a wall of bullet points. Concise by default: 1–3 sentences for most replies. Expand into structured depth ONLY when he explicitly asks you to plan, strategise, or explain. Address him as "sir" occasionally and naturally, not every line. Your replies are read aloud, so write them to be spoken — clean sentences, no markdown symbols, no emoji.
 
 ━━━ WHO HE IS (your persistent memory of ${s.settings.userName}) ━━━
 ${buildProfile()}
@@ -66,8 +69,17 @@ function historyFor(chat: ChatMsg[], userText: string): { role: 'user' | 'assist
   return merged
 }
 
-async function callAnthropic(userText: string): Promise<string> {
+async function callAnthropic(userText: string, image?: string): Promise<string> {
   const { settings, chat } = useStore.getState()
+  const messages = historyFor(chat, userText) as Array<{ role: 'user' | 'assistant'; content: unknown }>
+  if (image) {
+    const { mime, base64 } = splitDataURL(image)
+    const last = messages[messages.length - 1]
+    last.content = [
+      { type: 'image', source: { type: 'base64', media_type: mime, data: base64 } },
+      { type: 'text', text: userText },
+    ]
+  }
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -80,7 +92,7 @@ async function callAnthropic(userText: string): Promise<string> {
       model: settings.anthropicModel || 'claude-sonnet-5',
       max_tokens: 1500,
       system: systemPrompt(),
-      messages: historyFor(chat, userText),
+      messages,
     }),
   })
   if (!res.ok) {
@@ -91,13 +103,17 @@ async function callAnthropic(userText: string): Promise<string> {
   return data.content.filter((c) => c.type === 'text').map((c) => c.text ?? '').join('')
 }
 
-async function callGemini(userText: string): Promise<string> {
+async function callGemini(userText: string, image?: string): Promise<string> {
   const { settings, chat } = useStore.getState()
   const model = settings.geminiModel || 'gemini-2.5-flash'
   const contents = historyFor(chat, userText).map((m) => ({
     role: m.role === 'assistant' ? 'model' : 'user',
-    parts: [{ text: m.content }],
+    parts: [{ text: m.content }] as Array<Record<string, unknown>>,
   }))
+  if (image) {
+    const { mime, base64 } = splitDataURL(image)
+    contents[contents.length - 1].parts.unshift({ inlineData: { mimeType: mime, data: base64 } })
+  }
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${settings.geminiKey}`,
     {
@@ -132,9 +148,9 @@ export interface LlmResult {
 }
 
 /** Send to the configured LLM, execute any actions block, return clean reply + receipts. */
-export async function runLlm(userText: string): Promise<LlmResult> {
+export async function runLlm(userText: string, image?: string): Promise<LlmResult> {
   const { settings } = useStore.getState()
-  const raw = settings.provider === 'anthropic' ? await callAnthropic(userText) : await callGemini(userText)
+  const raw = settings.provider === 'anthropic' ? await callAnthropic(userText, image) : await callGemini(userText, image)
 
   // Extract and execute the trailing actions block
   let receipts: string[] = []

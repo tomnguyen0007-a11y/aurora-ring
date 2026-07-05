@@ -180,7 +180,10 @@ const defaultSettings: Settings = {
   anthropicModel: 'claude-sonnet-5',
   geminiModel: 'gemini-2.5-flash',
   finnhubKey: '',
+  gnewsKey: '',
+  newsCountry: 'us',
   speakReplies: true,
+  voiceURI: '',
 }
 
 const seedState = () => ({
@@ -424,8 +427,13 @@ export const useStore = create<CalibrateState>()(
     {
       name: 'calibrate-v1',
       version: 2,
-      // always wake up on Today — don't persist navigation
-      partialize: (s) => Object.fromEntries(Object.entries(s).filter(([k]) => k !== 'view')) as CalibrateState,
+      // always wake up on Today — don't persist navigation; strip heavy chat images from storage
+      partialize: (s) =>
+        Object.fromEntries(
+          Object.entries(s)
+            .filter(([k]) => k !== 'view')
+            .map(([k, v]) => (k === 'chat' ? [k, (v as ChatMsg[]).map(({ image: _img, ...m }) => m)] : [k, v])),
+        ) as CalibrateState,
       // backfill new/preloaded collections for existing users without touching their data
       migrate: (persisted, version) => {
         const p = (persisted ?? {}) as Record<string, unknown>
