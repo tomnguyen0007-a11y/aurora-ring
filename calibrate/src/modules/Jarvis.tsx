@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createRecognizer, speak, speechSupported, stopSpeaking } from '../lib/speech'
 import { runLocalEngine } from '../lib/jarvis/engine'
 import { llmConfigured, runLlm } from '../lib/jarvis/llm'
+import { buildJarvisContext } from '../lib/jarvis/context'
 import { useStore } from '../store/store'
 
 const SUGGESTIONS = [
@@ -23,41 +24,65 @@ export function useJarvis() {
     if (speakReplies) speak(text, voiceURI, elevenKey ? { key: elevenKey, voiceId: elevenVoiceId } : undefined)
   }
 
+  /**
+   * UNIFIED JARVIS PIPELINE (Phase 1)
+   * 
+   * Entry point for all user queries. Routes through:
+   * 1. Build unified context (once, shared across all paths)
+   * 2. Try local engine with full context
+   * 3. If local match → execute + respond immediately
+   * 4. If no local match → forward to LLM with same context (consistent reasoning)
+   * 5. Execute any LLM actions + speak response
+   *
+   * NO branching logic between local and LLM paths.
+   * ALL responses use full profile + memory + knowledge + snapshot.
+   */
   const send = async (text: string, image?: string) => {
     const t = text.trim()
     if ((!t && !image) || busy) return
+
+    // User message always goes to chat
     pushChat({ role: 'user', text: t || '(photo)', image })
 
-    // A photo always needs the vision brain — skip the local engine.
+    // Build unified context ONCE for this query
+    const ctx = buildJarvisContext(t)
+
+    // Try local engine with full context
     if (!image) {
-      // 1) Free local engine first — instant, offline
-      const local = runLocalEngine(t)
-      if (local) {
-        pushChat({ role: 'jarvis', text: local.reply, acted: local.receipts })
-        say(local.reply)
+      // Photos always need LLM for vision
+      const localResult = runLocalEngine(t, ctx.userName)
+
+      if (localResult) {
+        // Local engine handled it
+        pushChat({ role: 'jarvis', text: localResult.reply, acted: localResult.receipts })
+        say(localResult.reply)
         return
       }
     }
 
-    // 2) LLM brain if configured
+    // If no local match (or has image), escalate to LLM
     if (!llmConfigured()) {
+      // No LLM available
       const fallback = image
-        ? 'I need my full brain to see photos, sir. Add a free Gemini key or an Anthropic key in Settings and I can read images for you.'
-        : "That one needs my full brain, sir. The built-in engine handles logging, lists and stats — for strategy, planning and open conversation, add a free Gemini key or an Anthropic key in Settings. Meanwhile, try 'help' for everything I can do offline."
+        ? `I need my full brain to see photos, sir. Add a free Gemini key or an Anthropic key in Settings and I can read images for you.`
+        : `That one needs my full brain, sir. The built-in engine handles logging, lists and stats — for strategy, planning and open conversation, add a free Gemini key or an Anthropic key in Settings.`
+
       pushChat({ role: 'jarvis', text: fallback })
       say(fallback)
       return
     }
 
+    // Call LLM with same context
     setBusy(true)
     try {
       const res = await runLlm(t || 'What do you make of this?', image)
       pushChat({ role: 'jarvis', text: res.reply, acted: res.receipts })
       say(res.reply)
     } catch (e) {
+      const errorMsg = `Connection issue with the advanced brain: ${e instanceof Error ? e.message : 'unknown error'}. Check the API key in Settings.`
       pushChat({
         role: 'jarvis',
-        text: `Connection issue with the advanced brain: ${e instanceof Error ? e.message : 'unknown error'}. Check the API key in Settings.`,
+        text: errorMsg,
       })
     } finally {
       setBusy(false)
@@ -96,12 +121,16 @@ export function Jarvis() {
       setListening(false)
       return
     }
+
     stopSpeaking()
+
     const rec = createRecognizer(
       (text) => send(text),
       () => setListening(false),
     )
+
     if (!rec) return
+
     recRef.current = rec
     setListening(true)
     rec.start()
@@ -118,21 +147,26 @@ export function Jarvis() {
     <div className="mx-auto flex h-[calc(100dvh-10.5rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] max-w-3xl flex-col lg:h-[calc(100dvh-5rem)]">
       <header className="mb-3 flex items-center justify-between px-1">
         <div className="flex items-center gap-3">
-          <div className={`relative flex h-11 w-11 items-center justify-center rounded-full border ${busy || listening ? 'border-signal shadow-[0_0_20px_rgba(246,184,60,0.45)]' : 'border-edge-strong'}`}>
+          <div
+            className={`relative flex h-11 w-11 items-center justify-center rounded-full border ${
+              busy || listening ? 'border-signal shadow-[0_0_20px_rgba(246,184,60,0.45)]' : 'border-edge-strong'
+            }`}
+          >
             <Bot size={20} className={busy || listening ? 'text-signal' : 'text-haze'} />
             {(busy || listening) && <span className="absolute inset-0 animate-ping rounded-full border border-signal/50" />}
           </div>
           <div>
             <h1 className="h-lumen text-2xl font-bold leading-none tracking-wide">JARVIS</h1>
             <p className="hud-label !mb-0 mt-1 !text-[8px]">
-              {listening ? 'LISTENING…' : busy ? 'THINKING…' : llmConfigured() ? 'FULL BRAIN ONLINE' : 'BUILT-IN ENGINE · FREE'}
+              {listening ? 'LISTENING…' : busy ? 'THINKING…' : llmConfigured() ? 'UNIFIED BRAIN' : 'LOCAL ENGINE · FREE'}
             </p>
           </div>
         </div>
+
         <div className="flex gap-1">
           {!llmConfigured() && (
             <button className="btn !py-1.5 !text-xs" onClick={() => s.setView('settings')}>
-              <KeyRound size={13} /> Upgrade brain
+              <KeyRound size={13} /> Unlock brain
             </button>
           )}
           <button className="btn btn-ghost !px-2.5" aria-label="Stop speaking" onClick={stopSpeaking}>
@@ -162,6 +196,7 @@ export function Jarvis() {
             </div>
           </div>
         )}
+
         {s.chat.map((m) => (
           <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div
@@ -171,9 +206,7 @@ export function Jarvis() {
                   : 'rounded-bl-md bg-black/35 text-ice/95 ring-1 ring-edge'
               }`}
             >
-              {m.image && (
-                <img src={m.image} alt="attached reference" className="mb-2 max-h-56 w-full rounded-lg object-cover" />
-              )}
+              {m.image && <img src={m.image} alt="attached reference" className="mb-2 max-h-56 w-full rounded-lg object-cover" />}
               <div className="whitespace-pre-wrap">{m.text}</div>
               {m.acted && m.acted.length > 0 && (
                 <ul className="mt-2 space-y-0.5 border-t border-edge pt-2">
@@ -187,6 +220,7 @@ export function Jarvis() {
             </div>
           </div>
         ))}
+
         {busy && (
           <div className="flex justify-start">
             <div className="rounded-2xl rounded-bl-md bg-black/35 px-4 py-3 ring-1 ring-edge">
@@ -202,6 +236,7 @@ export function Jarvis() {
             </div>
           </div>
         )}
+
         <div ref={bottomRef} />
       </div>
 
@@ -230,18 +265,18 @@ export function Jarvis() {
             {listening ? <MicOff size={18} /> : <Mic size={18} />}
           </button>
         )}
+
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
           aria-label="Attach a photo"
           className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-all ${
-            image
-              ? 'border-arc bg-arc/20 text-arc'
-              : 'border-edge-strong bg-black/30 text-haze hover:border-arc/50 hover:text-ice'
+            image ? 'border-arc bg-arc/20 text-arc' : 'border-edge-strong bg-black/30 text-haze hover:border-arc/50 hover:text-ice'
           }`}
         >
           <ImagePlus size={18} />
         </button>
+
         <input
           ref={fileRef}
           type="file"
@@ -249,6 +284,7 @@ export function Jarvis() {
           className="hidden"
           onChange={(e) => e.target.files?.[0] && attachPhoto(e.target.files[0])}
         />
+
         <input
           className="field h-11 flex-1 !rounded-full !px-4"
           placeholder={listening ? 'Listening…' : image ? 'Ask about the photo…' : 'Speak or type to Jarvis…'}
@@ -256,11 +292,12 @@ export function Jarvis() {
           onChange={(e) => setInput(e.target.value)}
           aria-label="Message Jarvis"
         />
+
         <button
           type="submit"
           aria-label="Send"
           disabled={(!input.trim() && !image) || busy}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-[#f6b83c] to-[#dd9224] text-[#141004] shadow-[0_6px_20px_-6px_rgba(246,184,60,0.6)] transition-transform active:scale-95 disabled:opacity-40"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-[#f6b83c] to-[#dd9224] text-[#141004] shadow-[0_6px_20px_-6px_rgba(246,184,60,0.6)] transition-all disabled:opacity-50"
         >
           <SendHorizonal size={18} />
         </button>
