@@ -331,6 +331,25 @@ function IntegrationsPanel() {
   const hevyRef = useRef<HTMLInputElement>(null)
   const golfRef = useRef<HTMLInputElement>(null)
   const [msg, setMsg] = useState('')
+  const [syncing, setSyncing] = useState(false)
+
+  const syncHevy = async () => {
+    if (!s.settings.hevyKey) return setMsg('Paste your Hevy API key first (Hevy app → Settings → Developer → API key).')
+    setSyncing(true)
+    setMsg('')
+    try {
+      const { fetchHevyWorkouts } = await import('../lib/imports')
+      const sessions = await fetchHevyWorkouts(s.settings.hevyKey)
+      s.setHevySessions(sessions)
+      setMsg(`Synced ${sessions.length} workouts live from Hevy. They count toward your weekly lifts.`)
+    } catch (e) {
+      setMsg(
+        `${e instanceof Error ? e.message : 'Sync failed'}. If this keeps happening, use the CSV import below — same data, always works.`,
+      )
+    } finally {
+      setSyncing(false)
+    }
+  }
 
   const importHevy = async (file: File) => {
     const { parseHevyCSV } = await import('../lib/imports')
@@ -343,7 +362,7 @@ function IntegrationsPanel() {
   const importGolfshot = async (file: File) => {
     const { parseGolfshotCSV } = await import('../lib/imports')
     const rounds = parseGolfshotCSV(await file.text())
-    if (!rounds.length) return setMsg('Could not find rounds in that file — export rounds as CSV from Golfshot.')
+    if (!rounds.length) return setMsg('Could not find rounds in that file — export rounds as CSV from Golfshot (golfshot.com → Rounds → Export).')
     s.setGolfRounds(rounds)
     const avg = Math.round(rounds.slice(0, 20).reduce((a, r) => a + r.score, 0) / Math.min(rounds.length, 20))
     s.setGolfStats({ avgScore: avg })
@@ -353,19 +372,38 @@ function IntegrationsPanel() {
   return (
     <Panel>
       <HudLabel>Integrations — Hevy & Golfshot</HudLabel>
-      <p className="mb-3 text-[11px] leading-relaxed text-fog">
-        Neither app offers a free browser-accessible live API, so syncing works via their official CSV exports —
-        takes 30 seconds. <span className="text-haze">Hevy:</span> Profile → Settings → Export Data.{' '}
-        <span className="text-haze">Golfshot:</span> golfshot.com → Rounds → Export. Re-import any time; it replaces
-        the previous import.
+
+      <span className="hud-label !mb-1 block !text-[8px] text-arc">Hevy — live sync (official API)</span>
+      <p className="mb-2 text-[11px] leading-relaxed text-fog">
+        In the Hevy app: Settings → Developer → generate API key (requires Hevy Pro). Paste it and hit Sync — your
+        workouts pull straight in.
+      </p>
+      <div className="mb-4 flex gap-2">
+        <input
+          className="field num flex-1"
+          type="password"
+          placeholder="Hevy API key"
+          value={s.settings.hevyKey}
+          onChange={(e) => s.setSettings({ hevyKey: e.target.value.trim() })}
+        />
+        <button className="btn btn-signal" onClick={syncHevy} disabled={syncing}>
+          {syncing ? 'Syncing…' : 'Sync now'}
+        </button>
+      </div>
+
+      <span className="hud-label !mb-1 block !text-[8px]">CSV imports (no subscription needed)</span>
+      <p className="mb-2 text-[11px] leading-relaxed text-fog">
+        <span className="text-haze">Hevy:</span> Profile → Settings → Export Data.{' '}
+        <span className="text-haze">Golfshot:</span> golfshot.com → Rounds → Export (no public API exists).
+        Re-import any time; it replaces the previous import.
       </p>
       <div className="flex flex-wrap gap-2">
         <button className="btn" onClick={() => hevyRef.current?.click()}>
-          <Upload size={15} /> Import Hevy CSV
+          <Upload size={15} /> Hevy CSV
           {s.hevySessions.length > 0 && <span className="num text-xs text-affirm">({s.hevySessions.length})</span>}
         </button>
         <button className="btn" onClick={() => golfRef.current?.click()}>
-          <Upload size={15} /> Import Golfshot CSV
+          <Upload size={15} /> Golfshot CSV
           {s.golfRounds.length > 0 && <span className="num text-xs text-affirm">({s.golfRounds.length})</span>}
         </button>
         <input ref={hevyRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => e.target.files?.[0] && importHevy(e.target.files[0])} />

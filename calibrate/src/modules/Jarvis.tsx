@@ -115,7 +115,7 @@ export function Jarvis() {
   }
 
   return (
-    <div className="mx-auto flex h-[calc(100dvh-9.5rem)] max-w-3xl flex-col lg:h-[calc(100dvh-5rem)]">
+    <div className="mx-auto flex h-[calc(100dvh-10.5rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] max-w-3xl flex-col lg:h-[calc(100dvh-5rem)]">
       <header className="mb-3 flex items-center justify-between px-1">
         <div className="flex items-center gap-3">
           <div className={`relative flex h-11 w-11 items-center justify-center rounded-full border ${busy || listening ? 'border-signal shadow-[0_0_20px_rgba(246,184,60,0.45)]' : 'border-edge-strong'}`}>

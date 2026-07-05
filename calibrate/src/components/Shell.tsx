@@ -130,7 +130,10 @@ export function Shell({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Main */}
-      <main className="min-w-0 flex-1 px-3 pb-28 pt-4 sm:px-6 sm:pt-6 lg:pb-10">
+      <main
+        className="min-w-0 flex-1 px-3 pb-32 sm:px-6 lg:pb-10 lg:pt-6"
+        style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
+      >
         {/* Mobile top bar */}
         <div className="mb-4 flex items-center justify-between lg:hidden">
           <Brand />
@@ -144,8 +147,8 @@ export function Shell({ children }: { children: ReactNode }) {
       {/* Mobile bottom nav */}
       <nav
         aria-label="Primary mobile"
-        className="glass-strong fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-2xl px-1 py-1.5 lg:hidden"
-        style={{ paddingBottom: 'max(0.375rem, env(safe-area-inset-bottom))' }}
+        className="glass-strong fixed inset-x-3 z-40 flex items-center justify-around rounded-2xl px-1 py-2 lg:hidden"
+        style={{ bottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
       >
         {MOBILE_PRIMARY.map((id) => {
           const item = NAV.find((x) => x.id === id)!
@@ -185,7 +188,8 @@ export function Shell({ children }: { children: ReactNode }) {
       {moreOpen && (
         <div className="fixed inset-0 z-50 flex items-end bg-black/60 backdrop-blur-sm lg:hidden" onClick={() => setMoreOpen(false)}>
           <div
-            className="glass-strong w-full rounded-t-3xl p-5 pb-8 animate-rise"
+            className="glass-strong w-full rounded-t-3xl p-5 animate-rise"
+            style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-label="All sections"
