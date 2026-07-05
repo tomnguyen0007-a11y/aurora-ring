@@ -257,6 +257,7 @@ export interface Settings {
   elevenKey: string // ElevenLabs — the real JARVIS voice
   elevenVoiceId: string
   notifyEnabled: boolean // nutrition/recovery reminders
+  hevyKey: string // Hevy official API — live workout sync
 }
 
 export interface HevySession {

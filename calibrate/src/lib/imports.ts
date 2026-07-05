@@ -1,6 +1,45 @@
 import { uid } from './dates'
 import type { GolfRound, HevySession } from '../store/types'
 
+// ——— Live Hevy sync (official API, api.hevyapp.com — key from Hevy app: Settings → Developer / API) ———
+
+interface HevyApiWorkout {
+  title?: string
+  start_time?: string
+  exercises?: { sets?: { weight_kg?: number | null; reps?: number | null }[] }[]
+}
+
+export async function fetchHevyWorkouts(apiKey: string): Promise<HevySession[]> {
+  const sessions: HevySession[] = []
+  for (let page = 1; page <= 5; page++) {
+    const res = await fetch(`https://api.hevyapp.com/v1/workouts?page=${page}&pageSize=10`, {
+      headers: { 'api-key': apiKey, accept: 'application/json' },
+    })
+    if (!res.ok) throw new Error(`Hevy API ${res.status}${res.status === 401 ? ' — check the API key' : ''}`)
+    const data: { workouts?: HevyApiWorkout[]; page_count?: number } = await res.json()
+    for (const w of data.workouts ?? []) {
+      const parsed = new Date(w.start_time ?? '')
+      if (isNaN(parsed.getTime())) continue
+      let sets = 0
+      let volumeKg = 0
+      for (const ex of w.exercises ?? [])
+        for (const st of ex.sets ?? []) {
+          sets++
+          if (st.weight_kg && st.reps) volumeKg += st.weight_kg * st.reps
+        }
+      sessions.push({
+        id: uid('hevy'),
+        date: `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}-${String(parsed.getDate()).padStart(2, '0')}`,
+        title: w.title || 'Workout',
+        sets,
+        volumeKg,
+      })
+    }
+    if (!data.page_count || page >= data.page_count) break
+  }
+  return sessions.sort((a, b) => (a.date < b.date ? 1 : -1))
+}
+
 /** Tolerant CSV parser: handles quoted fields and commas inside quotes. */
 export function parseCSV(text: string): string[][] {
   const rows: string[][] = []

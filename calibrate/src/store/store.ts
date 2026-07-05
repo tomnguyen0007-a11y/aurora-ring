@@ -195,6 +195,7 @@ const defaultSettings: Settings = {
   elevenKey: '',
   elevenVoiceId: 'onwK4e9ZLuTAKqWW03F9', // "Daniel" — deep, composed British
   notifyEnabled: false,
+  hevyKey: '',
 }
 
 const seedState = () => ({
