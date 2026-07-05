@@ -44,9 +44,30 @@ const NAV: { id: ViewId; label: string; icon: typeof Activity }[] = [
 
 const MOBILE_PRIMARY: ViewId[] = ['today', 'golf', 'jarvis', 'training', 'nutrition']
 
+/** Tap the wordmark to force-refresh the app: clears the offline cache and reloads. */
+async function hardRefresh() {
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations()
+      await Promise.all(regs.map((r) => r.unregister()))
+    }
+    if ('caches' in window) {
+      const keys = await caches.keys()
+      await Promise.all(keys.map((k) => caches.delete(k)))
+    }
+  } finally {
+    location.reload()
+  }
+}
+
 function Brand() {
   return (
-    <div className="flex items-center gap-3 px-2">
+    <button
+      onClick={hardRefresh}
+      title="Tap to refresh the app to the latest version"
+      aria-label="Refresh Calibrate"
+      className="flex items-center gap-3 px-2 text-left transition-opacity active:opacity-60"
+    >
       <div className="relative flex h-9 w-9 items-center justify-center">
         <svg viewBox="0 0 36 36" className="h-9 w-9">
           <circle cx="18" cy="18" r="14" fill="none" stroke="#2a3140" strokeWidth="2.5" />
@@ -58,7 +79,7 @@ function Brand() {
         <div className="h-lumen text-lg font-bold leading-none tracking-[0.2em]">CALIBRATE</div>
         <div className="hud-label !mb-0 mt-1 !text-[8px] !tracking-[0.3em] text-arc">PERSONAL OS</div>
       </div>
-    </div>
+    </button>
   )
 }
 

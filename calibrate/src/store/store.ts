@@ -25,8 +25,10 @@ import type {
   Goal,
   GolfSession,
   GolfStats,
+  GolfRound,
   GroceryItem,
   HandicapEntry,
+  HevySession,
   MacroTargets,
   Mantra,
   MealOption,
@@ -165,6 +167,12 @@ export interface CalibrateState {
   golfStats: GolfStats
   setGolfStats: (patch: Partial<GolfStats>) => void
 
+  // integrations
+  hevySessions: HevySession[]
+  setHevySessions: (sessions: HevySession[]) => void
+  golfRounds: GolfRound[]
+  setGolfRounds: (rounds: GolfRound[]) => void
+
   // settings
   settings: Settings
   setSettings: (patch: Partial<Settings>) => void
@@ -184,6 +192,9 @@ const defaultSettings: Settings = {
   newsCountry: 'us',
   speakReplies: true,
   voiceURI: '',
+  elevenKey: '',
+  elevenVoiceId: 'onwK4e9ZLuTAKqWW03F9', // "Daniel" — deep, composed British
+  notifyEnabled: false,
 }
 
 const seedState = () => ({
@@ -215,6 +226,8 @@ const seedState = () => ({
   supplements: seedSupplements,
   supLog: {},
   golfStats: seedGolfStats,
+  hevySessions: [],
+  golfRounds: [],
   settings: defaultSettings,
 })
 
@@ -420,13 +433,16 @@ export const useStore = create<CalibrateState>()(
 
       setGolfStats: (patch) => set((s) => ({ golfStats: { ...s.golfStats, ...patch } })),
 
+      setHevySessions: (hevySessions) => set({ hevySessions }),
+      setGolfRounds: (golfRounds) => set({ golfRounds }),
+
       setSettings: (patch) => set((s) => ({ settings: { ...s.settings, ...patch } })),
 
       resetAll: () => set({ ...seedState(), view: get().view }),
     }),
     {
       name: 'calibrate-v1',
-      version: 2,
+      version: 3,
       // always wake up on Today — don't persist navigation; strip heavy chat images from storage
       partialize: (s) =>
         Object.fromEntries(
@@ -444,6 +460,10 @@ export const useStore = create<CalibrateState>()(
           if (!p.supLog) p.supLog = {}
           if (!p.golfStats) p.golfStats = seedGolfStats
           if (!Array.isArray(p.books) || !(p.books as unknown[]).length) p.books = seedBooks
+        }
+        if (version < 3) {
+          if (!p.hevySessions) p.hevySessions = []
+          if (!p.golfRounds) p.golfRounds = []
         }
         return p as unknown as CalibrateState
       },

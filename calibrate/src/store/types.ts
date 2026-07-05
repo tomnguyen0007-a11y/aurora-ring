@@ -254,6 +254,24 @@ export interface Settings {
   newsCountry: string
   speakReplies: boolean
   voiceURI: string // chosen speech-synthesis voice
+  elevenKey: string // ElevenLabs — the real JARVIS voice
+  elevenVoiceId: string
+  notifyEnabled: boolean // nutrition/recovery reminders
+}
+
+export interface HevySession {
+  id: string
+  date: string
+  title: string
+  sets: number
+  volumeKg: number
+}
+
+export interface GolfRound {
+  id: string
+  date: string
+  course: string
+  score: number
 }
 
 export type ViewId =

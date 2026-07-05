@@ -1,6 +1,4 @@
-import '@fontsource/rajdhani/500.css'
-import '@fontsource/rajdhani/600.css'
-import '@fontsource/rajdhani/700.css'
+import '@fontsource-variable/space-grotesk/index.css'
 import '@fontsource-variable/inter/index.css'
 import '@fontsource-variable/jetbrains-mono/index.css'
 import './theme.css'

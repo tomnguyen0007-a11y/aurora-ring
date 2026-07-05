@@ -78,29 +78,69 @@ export function resolveVoice(preferredURI?: string): SpeechSynthesisVoice | null
   return autoPick()
 }
 
-export function speak(text: string, preferredURI?: string) {
-  if (!('speechSynthesis' in window)) return
-  speechSynthesis.cancel()
-  // Strip markdown/emoji noise, and pace with commas for a smoother, less robotic read.
-  const clean = text
+function cleanForSpeech(text: string): string {
+  return text
     .replace(/[*_#`>~|]/g, '')
     .replace(/\s+/g, ' ')
     .trim()
-    .slice(0, 700)
-  // Split into sentence-ish chunks so the engine breathes naturally between clauses.
-  const chunks = clean.match(/[^.!?]+[.!?]?/g) ?? [clean]
+    .slice(0, 900)
+}
+
+let currentAudio: HTMLAudioElement | null = null
+
+/**
+ * The real JARVIS voice — ElevenLabs neural TTS (user's key, free tier works).
+ * Falls back to browser speech if the request fails.
+ */
+async function speakEleven(text: string, key: string, voiceId: string): Promise<boolean> {
+  try {
+    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_64`, {
+      method: 'POST',
+      headers: { 'xi-api-key': key, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        text: cleanForSpeech(text),
+        model_id: 'eleven_turbo_v2_5',
+        voice_settings: { stability: 0.55, similarity_boost: 0.8, style: 0.25 },
+      }),
+    })
+    if (!res.ok) return false
+    const blob = await res.blob()
+    stopSpeaking()
+    currentAudio = new Audio(URL.createObjectURL(blob))
+    await currentAudio.play()
+    return true
+  } catch {
+    return false
+  }
+}
+
+function speakBrowser(text: string, preferredURI?: string) {
+  if (!('speechSynthesis' in window)) return
+  speechSynthesis.cancel()
+  // One single utterance — chunking causes stutter/gaps on most engines.
+  const u = new SpeechSynthesisUtterance(cleanForSpeech(text))
   const v = resolveVoice(preferredURI)
-  chunks.forEach((chunk, i) => {
-    const u = new SpeechSynthesisUtterance(chunk.trim())
-    if (v) u.voice = v
-    u.rate = 0.98 // measured, deliberate — the JARVIS cadence
-    u.pitch = 0.9 // lower, composed
-    u.volume = 1
-    if (i > 0) u.text = ' ' + u.text
-    speechSynthesis.speak(u)
-  })
+  if (v) u.voice = v
+  u.rate = 1.0
+  u.pitch = 0.92
+  u.volume = 1
+  speechSynthesis.speak(u)
+}
+
+export function speak(text: string, preferredURI?: string, eleven?: { key: string; voiceId: string }) {
+  if (eleven?.key) {
+    speakEleven(text, eleven.key, eleven.voiceId || 'onwK4e9ZLuTAKqWW03F9').then((ok) => {
+      if (!ok) speakBrowser(text, preferredURI)
+    })
+    return
+  }
+  speakBrowser(text, preferredURI)
 }
 
 export function stopSpeaking() {
   if ('speechSynthesis' in window) speechSynthesis.cancel()
+  if (currentAudio) {
+    currentAudio.pause()
+    currentAudio = null
+  }
 }

@@ -198,10 +198,66 @@ export function Settings() {
           </button>
         </label>
         <VoicePicker />
+        <div className="mt-4 border-t border-edge pt-4">
+          <span className="hud-label !mb-1 block !text-[8px] text-signal">
+            The REAL movie voice — ElevenLabs (free tier: ~10 min speech/month)
+          </span>
+          <p className="mb-2 text-[11px] leading-relaxed text-fog">
+            Get a free key at elevenlabs.io → paste below. Jarvis switches to a cinematic neural British voice
+            ("Daniel"). Falls back to the browser voice if the quota runs out.
+          </p>
+          <div className="flex gap-2">
+            <input
+              className="field num flex-1"
+              type="password"
+              placeholder="ElevenLabs API key (optional)"
+              value={s.settings.elevenKey}
+              onChange={(e) => s.setSettings({ elevenKey: e.target.value.trim() })}
+            />
+            <button
+              className="btn"
+              onClick={() =>
+                speak(
+                  'Good evening, sir. All systems are calibrated and standing by.',
+                  s.settings.voiceURI,
+                  s.settings.elevenKey ? { key: s.settings.elevenKey, voiceId: s.settings.elevenVoiceId } : undefined,
+                )
+              }
+            >
+              <Play size={14} /> Test
+            </button>
+          </div>
+        </div>
+        <div className="mt-4 border-t border-edge pt-4">
+          <label className="flex items-center justify-between">
+            <span className="text-sm text-haze">Reminders when nutrition / audit is behind (while app is open)</span>
+            <button
+              role="switch"
+              aria-checked={s.settings.notifyEnabled}
+              onClick={async () => {
+                if (!s.settings.notifyEnabled && 'Notification' in window && Notification.permission === 'default') {
+                  await Notification.requestPermission()
+                }
+                s.setSettings({ notifyEnabled: !s.settings.notifyEnabled })
+              }}
+              className={`relative h-6 w-11 rounded-full border transition-colors ${
+                s.settings.notifyEnabled ? 'border-signal/60 bg-signal/30' : 'border-edge-strong bg-black/40'
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 rounded-full bg-ice transition-all ${s.settings.notifyEnabled ? 'left-[calc(100%-1.25rem)]' : 'left-0.5'}`}
+                style={{ height: '1.125rem', width: '1.125rem' }}
+              />
+            </button>
+          </label>
+        </div>
         <p className="mt-2 text-[11px] text-fog">
-          For the most authentic JARVIS, pick a British male voice. On iPhone, install "Daniel (Enhanced)" via Settings → Accessibility → Spoken Content → Voices. Voice input uses your browser's speech recognition (works best in Chrome).
+          For the browser voice, pick a British male above. On iPhone, install "Daniel (Enhanced)" via Settings →
+          Accessibility → Spoken Content → Voices. Voice input works best in Chrome.
         </p>
       </Panel>
+
+      <IntegrationsPanel />
 
       <Panel>
         <HudLabel>Markets & News</HudLabel>
@@ -267,6 +323,56 @@ export function Settings() {
         </p>
       </Panel>
     </div>
+  )
+}
+
+function IntegrationsPanel() {
+  const s = useStore()
+  const hevyRef = useRef<HTMLInputElement>(null)
+  const golfRef = useRef<HTMLInputElement>(null)
+  const [msg, setMsg] = useState('')
+
+  const importHevy = async (file: File) => {
+    const { parseHevyCSV } = await import('../lib/imports')
+    const sessions = parseHevyCSV(await file.text())
+    if (!sessions.length) return setMsg('Could not find workouts in that file — export the CSV from Hevy → Settings → Export Data.')
+    s.setHevySessions(sessions)
+    setMsg(`Imported ${sessions.length} Hevy workouts. They now count toward your weekly lifts.`)
+  }
+
+  const importGolfshot = async (file: File) => {
+    const { parseGolfshotCSV } = await import('../lib/imports')
+    const rounds = parseGolfshotCSV(await file.text())
+    if (!rounds.length) return setMsg('Could not find rounds in that file — export rounds as CSV from Golfshot.')
+    s.setGolfRounds(rounds)
+    const avg = Math.round(rounds.slice(0, 20).reduce((a, r) => a + r.score, 0) / Math.min(rounds.length, 20))
+    s.setGolfStats({ avgScore: avg })
+    setMsg(`Imported ${rounds.length} rounds. Average score updated to ${avg}.`)
+  }
+
+  return (
+    <Panel>
+      <HudLabel>Integrations — Hevy & Golfshot</HudLabel>
+      <p className="mb-3 text-[11px] leading-relaxed text-fog">
+        Neither app offers a free browser-accessible live API, so syncing works via their official CSV exports —
+        takes 30 seconds. <span className="text-haze">Hevy:</span> Profile → Settings → Export Data.{' '}
+        <span className="text-haze">Golfshot:</span> golfshot.com → Rounds → Export. Re-import any time; it replaces
+        the previous import.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <button className="btn" onClick={() => hevyRef.current?.click()}>
+          <Upload size={15} /> Import Hevy CSV
+          {s.hevySessions.length > 0 && <span className="num text-xs text-affirm">({s.hevySessions.length})</span>}
+        </button>
+        <button className="btn" onClick={() => golfRef.current?.click()}>
+          <Upload size={15} /> Import Golfshot CSV
+          {s.golfRounds.length > 0 && <span className="num text-xs text-affirm">({s.golfRounds.length})</span>}
+        </button>
+        <input ref={hevyRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => e.target.files?.[0] && importHevy(e.target.files[0])} />
+        <input ref={golfRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => e.target.files?.[0] && importGolfshot(e.target.files[0])} />
+      </div>
+      {msg && <p className="mt-3 rounded-lg bg-black/25 px-3 py-2 text-xs text-steel">{msg}</p>}
+    </Panel>
   )
 }
 

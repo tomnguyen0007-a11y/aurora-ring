@@ -201,6 +201,23 @@ export function Training() {
           </button>
         </form>
 
+        {s.hevySessions.length > 0 && (
+          <div className="mt-4 border-t border-edge pt-4">
+            <HudLabel>Hevy — imported sessions</HudLabel>
+            <ul className="space-y-1.5">
+              {s.hevySessions.slice(0, 6).map((h) => (
+                <li key={h.id} className="flex items-center justify-between rounded-lg bg-black/25 px-3 py-2 text-sm">
+                  <span className="num text-xs text-fog">{fmtDateShort(h.date)}</span>
+                  <span className="min-w-0 flex-1 truncate px-3 text-ice">{h.title}</span>
+                  <span className="num text-xs text-arc">
+                    {h.sets} sets · {Math.round(h.volumeKg).toLocaleString()}kg
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {s.runLogs.length ? (
           <ul className="mt-4 space-y-1.5">
             {s.runLogs.slice(0, 8).map((r) => (
