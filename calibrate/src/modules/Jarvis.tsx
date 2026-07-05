@@ -19,8 +19,8 @@ export function useJarvis() {
   const [busy, setBusy] = useState(false)
 
   const say = (text: string) => {
-    const { speakReplies, voiceURI } = useStore.getState().settings
-    if (speakReplies) speak(text, voiceURI)
+    const { speakReplies, voiceURI, elevenKey, elevenVoiceId } = useStore.getState().settings
+    if (speakReplies) speak(text, voiceURI, elevenKey ? { key: elevenKey, voiceId: elevenVoiceId } : undefined)
   }
 
   const send = async (text: string, image?: string) => {

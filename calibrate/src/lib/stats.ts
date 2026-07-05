@@ -64,8 +64,11 @@ export function streaks(s: CalibrateState) {
 
 export function workoutsThisWeek(s: CalibrateState) {
   const dates = new Set(weekDates())
-  const done = s.workoutLogs.filter((l) => dates.has(l.date) && l.completed).length
-  return { done, planned: s.workouts.length }
+  const logged = s.workoutLogs.filter((l) => dates.has(l.date) && l.completed).length
+  const imported = s.hevySessions.filter((h) => dates.has(h.date)).length
+  // planned = the Blueprint split (exclude the optional Ollie library)
+  const planned = s.workouts.filter((w) => !w.id.startsWith('o-')).length
+  return { done: logged + imported, planned }
 }
 
 export function weightSeries(s: CalibrateState, days = 60): { date: string; value: number }[] {

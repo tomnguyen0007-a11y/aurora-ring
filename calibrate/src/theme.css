@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-display: 'Rajdhani', 'Inter Variable', system-ui, sans-serif;
+  --font-display: 'Space Grotesk Variable', 'Inter Variable', system-ui, sans-serif;
   --font-sans: 'Inter Variable', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
 
@@ -19,9 +19,9 @@
   --color-steel: #8fc4e6; /* informational */
   --color-affirm: #55e0a3; /* completion */
   --color-alert: #ef6a54; /* danger / behind-target */
-  --color-haze: #9aa5b6; /* muted text */
-  --color-fog: #5c6472; /* faint text */
-  --color-ice: #f2f6fc; /* primary text — brighter */
+  --color-haze: #a6b0c0; /* muted text — brighter for readability */
+  --color-fog: #67707f; /* faint text */
+  --color-ice: #f7fafd; /* primary text — near-white premium */
 
   --shadow-glass: 0 1px 0 rgba(230, 244, 255, 0.08) inset, 0 16px 44px -20px rgba(0, 0, 0, 0.85);
   --shadow-float: 0 28px 70px -26px rgba(0, 0, 0, 0.92), 0 1px 0 rgba(230, 244, 255, 0.1) inset;
@@ -136,8 +136,8 @@ body {
 .h-lumen {
   font-family: var(--font-display);
   color: var(--color-lumen);
-  text-shadow: var(--glow-lumen);
-  letter-spacing: 0.02em;
+  text-shadow: 0 0 22px rgba(220, 240, 255, 0.35), 0 0 60px rgba(180, 220, 255, 0.12);
+  letter-spacing: -0.01em;
 }
 .text-glow-arc {
   text-shadow: var(--glow-arc);

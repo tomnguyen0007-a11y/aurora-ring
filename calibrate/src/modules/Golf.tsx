@@ -52,6 +52,19 @@ function GolfDiagnostic() {
           )
         })}
       </div>
+      {s.golfRounds.length > 0 && (
+        <div className="mt-3">
+          <div className="hud-label !mb-1.5 !text-[8px]">Recent rounds (Golfshot)</div>
+          <div className="flex flex-wrap gap-1.5">
+            {s.golfRounds.slice(0, 8).map((r) => (
+              <span key={r.id} className="num rounded-lg border border-edge bg-black/25 px-2.5 py-1.5 text-sm text-ice" title={`${r.course} · ${r.date}`}>
+                {r.score}
+              </span>
+            ))}
+            <span className="self-center text-[10px] text-fog">latest first</span>
+          </div>
+        </div>
+      )}
       <div className="mt-3 rounded-lg border border-alert/20 bg-alert/[0.05] p-3">
         <div className="hud-label !mb-1 !text-[8px] text-alert">Current Focus</div>
         {edit ? (

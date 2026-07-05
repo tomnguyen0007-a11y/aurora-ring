@@ -1,11 +1,12 @@
-import { ArrowRight, Droplets, Flame, Moon, Timer } from 'lucide-react'
-import { useMemo } from 'react'
-import { Bars, CheckDot, HudLabel, Meter, Panel, Ring, StatTile, TAG_COLORS } from '../components/ui'
+import { AlertTriangle, ArrowRight, Droplets, Flame, Moon, Timer } from 'lucide-react'
+import { useEffect, useMemo } from 'react'
+import { Bars, CheckDot, HudLabel, Meter, Panel, Ring, TAG_COLORS } from '../components/ui'
+import { computeAlerts, notifyAlerts } from '../lib/alerts'
 import { fmtHours, nowMinutes, todayISO, toMinutes, weekdayOf } from '../lib/dates'
 import { dayProgress, golfTotalWeek, golfWeeklySeries, macrosForDate, revenueToday, streaks, workoutsThisWeek } from '../lib/stats'
+import { quoteOfDay } from '../lib/quote'
 import { DAY_CODENAMES } from '../store/seed'
 import { useStore } from '../store/store'
-import { quoteOfDay } from '../lib/quote'
 import { CheckInCard } from './CheckInCard'
 
 export function Dashboard() {
@@ -24,7 +25,7 @@ export function Dashboard() {
   const next = blocks.find((b) => toMinutes(b.start) > now)
 
   const macros = macrosForDate(s, date)
-  const workout = s.workouts.find((w) => w.weekday === wd)
+  const workout = s.workouts.find((w) => w.weekday === wd && !w.id.startsWith('o-'))
   const workoutLog = s.workoutLogs.find((l) => l.date === date && l.workoutId === workout?.id)
   const st = streaks(s)
   const wk = workoutsThisWeek(s)
@@ -34,106 +35,167 @@ export function Dashboard() {
     .filter((c) => c.weightKg != null)
     .sort((a, b) => (a.date < b.date ? 1 : -1))[0]?.weightKg
 
-  const hour = new Date().getHours()
-  const greeting = hour < 11 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
+  const alerts = computeAlerts(s)
+  const notify = s.settings.notifyEnabled
+
+  // surface reminders as browser notifications while the app is open
+  useEffect(() => {
+    if (!notify) return
+    notifyAlerts(alerts)
+    const t = setInterval(() => notifyAlerts(computeAlerts(useStore.getState())), 5 * 60_000)
+    return () => clearInterval(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notify])
+
+  const quote = quoteOfDay(s.mantras)
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <header className="flex flex-wrap items-end justify-between gap-3 px-1">
-        <div>
-          <div className="hud-label !mb-1">
-            {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase()}
-          </div>
-          <h1 className="h-lumen text-3xl font-bold leading-none tracking-wide sm:text-4xl">
-            {DAY_CODENAMES[wd]}
-          </h1>
-          <p className="mt-1.5 text-sm text-haze">
-            {greeting}, {s.settings.userName}. {prog.done}/{prog.total} blocks executed.
-          </p>
+      {/* ——— Command header: the day at a glance ——— */}
+      <header className="px-1">
+        <div className="hud-label !mb-1.5">
+          {new Date().toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short' }).toUpperCase()}
+          <span className="mx-2 text-signal">·</span>
+          <span className="text-signal">{DAY_CODENAMES[wd]}</span>
         </div>
-        <Ring pct={prog.pct} size={92} stroke={7}>
-          <span className="num text-xl font-bold text-signal">{prog.pct}%</span>
-          <span className="hud-label !mb-0 !text-[8px]">DAY</span>
-        </Ring>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div className="flex items-baseline gap-3">
+              <span className="h-lumen num text-6xl font-bold leading-none sm:text-7xl">
+                {prog.done}
+                <span className="text-fog/70">/{prog.total}</span>
+              </span>
+              <span className="hud-label !mb-0 !text-[10px]">complete</span>
+            </div>
+            <p className="mt-2 text-sm text-haze">
+              {current ? (
+                <>
+                  Now: <span className="font-medium text-ice">{current.title}</span>
+                </>
+              ) : next ? (
+                <>
+                  Up next: <span className="font-medium text-ice">{next.title}</span>{' '}
+                  <span className="num text-fog">at {next.start}</span>
+                </>
+              ) : (
+                'Day complete. Blackout at 22:30.'
+              )}
+            </p>
+          </div>
+          <Ring pct={prog.pct} size={88} stroke={7}>
+            <span className="num text-lg font-bold text-signal">{prog.pct}%</span>
+          </Ring>
+        </div>
+
+        {/* Vital strip — one glance, everything that matters */}
+        <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-6">
+          {[
+            { label: 'Weight', value: weightLatest ? `${weightLatest}` : '—', unit: 'kg', tone: 'text-ice' },
+            { label: 'Protein', value: `${Math.round(macros.protein)}`, unit: `/${s.macros.protein[0]}g`, tone: macros.protein >= s.macros.protein[0] ? 'text-affirm' : 'text-ice' },
+            { label: 'Water', value: (macros.water / 1000).toFixed(1), unit: '/3L', tone: 'text-arc' },
+            { label: 'Golf wk', value: fmtHours(golfWeek), unit: '', tone: 'text-affirm' },
+            { label: 'Lifts', value: `${wk.done}`, unit: `/${wk.planned}`, tone: 'text-signal' },
+            { label: 'AURORA', value: `$${rev.toFixed(0)}`, unit: '/1k', tone: rev >= 1000 ? 'text-affirm' : 'text-steel' },
+          ].map((v) => (
+            <div key={v.label} className="glass rounded-xl px-3 py-2.5">
+              <div className={`num text-lg font-bold leading-none ${v.tone}`}>
+                {v.value}
+                <span className="text-[10px] font-normal text-fog">{v.unit}</span>
+              </div>
+              <div className="hud-label !mb-0 mt-1 !text-[8px]">{v.label}</div>
+            </div>
+          ))}
+        </div>
       </header>
 
-      {/* Signal of the day */}
-      {(() => {
-        const q = quoteOfDay(s.mantras)
-        if (!q) return null
-        return (
-          <button
-            onClick={() => s.setView('mindset')}
-            className="glass flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-colors hover:border-edge-strong"
-          >
-            <span className="text-arc text-glow-arc text-lg leading-none">◆</span>
-            <span className="min-w-0 flex-1">
-              <span className="text-sm italic text-ice/90">"{q.text}"</span>
-              {q.author && <span className="ml-2 text-xs text-fog">— {q.author}</span>}
-            </span>
-            <span className="hud-label !mb-0 hidden shrink-0 !text-[8px] sm:block">Mindset →</span>
-          </button>
-        )
-      })()}
-
-      {/* Bento grid */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        {/* Timeline — spans 2 cols, 2 rows */}
-        <Panel className="lg:col-span-2 lg:row-span-2">
-          <HudLabel>Today's Execution Timeline</HudLabel>
-          <ol className="space-y-1">
-            {blocks.map((b) => {
-              const active = current?.id === b.id
-              const past = toMinutes(b.end || '24:00') <= now
-              const done = !!checks[b.id]
-              return (
-                <li
-                  key={b.id}
-                  className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 transition-all ${
-                    active
-                      ? 'border-signal/40 bg-signal/[0.07] shadow-[0_0_24px_-8px_rgba(246,184,60,0.4)]'
-                      : done
-                        ? 'border-transparent opacity-55'
-                        : past
-                          ? 'border-transparent bg-black/20'
-                          : 'border-transparent'
-                  }`}
-                >
-                  <span
-                    className="h-9 w-1 shrink-0 rounded-full"
-                    style={{ background: TAG_COLORS[b.tag], opacity: done ? 0.4 : 0.9 }}
-                  />
-                  <div className="num w-[86px] shrink-0 text-[11px] leading-tight text-fog">
-                    {b.start}
-                    {b.end && (
-                      <>
-                        <br />
-                        {b.end}
-                      </>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className={`truncate font-display text-[0.95rem] font-semibold tracking-wide ${done ? 'text-fog line-through' : 'text-ice'}`}>
-                      {b.title}
-                      {active && <span className="ml-2 inline-block h-1.5 w-1.5 animate-pulse-soft rounded-full bg-signal align-middle" />}
-                    </div>
-                    {b.detail && <div className="truncate text-xs text-fog">{b.detail}</div>}
-                  </div>
-                  <CheckDot checked={done} onToggle={() => s.toggleBlock(date, b.id)} label={b.title} />
-                </li>
-              )
-            })}
-          </ol>
-          {next && (
-            <div className="mt-3 flex items-center gap-2 rounded-lg bg-black/25 px-3 py-2 text-xs text-haze">
-              <ArrowRight size={14} className="text-signal" />
-              Up next: <span className="font-medium text-ice">{next.title}</span>
-              <span className="num text-fog">at {next.start}</span>
-            </div>
-          )}
+      {/* Attention required */}
+      {alerts.length > 0 && (
+        <Panel className="!border-alert/25">
+          <HudLabel>
+            <AlertTriangle size={11} className="text-alert" /> Attention Required
+          </HudLabel>
+          <ul className="space-y-1.5">
+            {alerts.map((a) => (
+              <li key={a.id} className={`flex items-start gap-2 text-sm ${a.severity === 'warn' ? 'text-ice' : 'text-haze'}`}>
+                <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${a.severity === 'warn' ? 'bg-alert' : 'bg-signal'}`} />
+                {a.text}
+              </li>
+            ))}
+          </ul>
         </Panel>
+      )}
 
+      {/* Signal of the day */}
+      {quote && (
+        <button
+          onClick={() => s.setView('mindset')}
+          className="glass flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition-colors hover:border-edge-strong"
+        >
+          <span className="text-arc text-glow-arc text-lg leading-none">◆</span>
+          <span className="min-w-0 flex-1">
+            <span className="text-sm italic text-ice/90">"{quote.text}"</span>
+            {quote.author && <span className="ml-2 text-xs text-fog">— {quote.author}</span>}
+          </span>
+          <span className="hud-label !mb-0 hidden shrink-0 !text-[8px] sm:block">Mindset →</span>
+        </button>
+      )}
+
+      {/* ——— Execution timeline (the spine of the day) ——— */}
+      <Panel>
+        <HudLabel>Execution Timeline</HudLabel>
+        <ol className="space-y-1">
+          {blocks.map((b) => {
+            const active = current?.id === b.id
+            const past = toMinutes(b.end || '24:00') <= now
+            const done = !!checks[b.id]
+            return (
+              <li
+                key={b.id}
+                className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 transition-all ${
+                  active
+                    ? 'border-signal/40 bg-signal/[0.07] shadow-[0_0_24px_-8px_rgba(246,184,60,0.4)]'
+                    : done
+                      ? 'border-transparent opacity-55'
+                      : past
+                        ? 'border-transparent bg-black/20'
+                        : 'border-transparent'
+                }`}
+              >
+                <span
+                  className="h-9 w-1 shrink-0 rounded-full"
+                  style={{ background: TAG_COLORS[b.tag], opacity: done ? 0.4 : 0.9 }}
+                />
+                <div className="num w-[86px] shrink-0 text-[11px] leading-tight text-fog">
+                  {b.start}
+                  {b.end && (
+                    <>
+                      <br />
+                      {b.end}
+                    </>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className={`truncate font-display text-[0.95rem] font-semibold tracking-wide ${done ? 'text-fog line-through' : 'text-ice'}`}>
+                    {b.title}
+                    {active && <span className="ml-2 inline-block h-1.5 w-1.5 animate-pulse-soft rounded-full bg-signal align-middle" />}
+                  </div>
+                  {b.detail && <div className="truncate text-xs text-fog">{b.detail}</div>}
+                </div>
+                <CheckDot checked={done} onToggle={() => s.toggleBlock(date, b.id)} label={b.title} />
+              </li>
+            )
+          })}
+        </ol>
+        {next && (
+          <div className="mt-3 flex items-center gap-2 rounded-lg bg-black/25 px-3 py-2 text-xs text-haze">
+            <ArrowRight size={14} className="text-signal" />
+            Up next: <span className="font-medium text-ice">{next.title}</span>
+            <span className="num text-fog">at {next.start}</span>
+          </div>
+        )}
+      </Panel>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {/* Today's session */}
         <Panel glow>
           <HudLabel>Today's Session</HudLabel>
@@ -190,37 +252,18 @@ export function Dashboard() {
             <Meter label="Protein" value={macros.protein} min={s.macros.protein[0]} max={s.macros.protein[1]} unit="g" color="var(--color-steel)" />
             <div className="flex items-center justify-between rounded-lg bg-black/25 px-3 py-2">
               <span className="flex items-center gap-1.5 text-xs text-haze">
-                <Droplets size={13} className="text-steel" /> Water
+                <Droplets size={13} className="text-arc" /> Water
               </span>
               <div className="flex items-center gap-2">
                 <span className="num text-sm text-ice">
-                  {(macros.water / 1000).toFixed(1)}<span className="text-fog">/{(s.macros.waterMl / 1000).toFixed(1)}L</span>
+                  {(macros.water / 1000).toFixed(1)}
+                  <span className="text-fog">/{(s.macros.waterMl / 1000).toFixed(1)}L</span>
                 </span>
                 <button className="btn !px-2 !py-1 !text-xs" onClick={() => s.addWater(date, 500)}>
                   +500ml
                 </button>
               </div>
             </div>
-          </div>
-        </Panel>
-
-        {/* Stat row */}
-        <Panel className="lg:col-span-2">
-          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-            <StatTile
-              label="Weight"
-              value={weightLatest ? `${weightLatest}` : '—'}
-              sub={weightLatest ? 'kg · target 87–90' : 'log tonight'}
-              accent="text-ice"
-            />
-            <StatTile label="Golf / week" value={fmtHours(golfWeek)} sub="all categories" accent="text-affirm" />
-            <StatTile label="Lifts / week" value={`${wk.done}/${wk.planned}`} sub="sessions complete" accent="text-signal" />
-            <StatTile
-              label="AURORA today"
-              value={`$${rev.toFixed(0)}`}
-              sub="of $1,000/day target"
-              accent={rev >= 1000 ? 'text-affirm' : 'text-steel'}
-            />
           </div>
         </Panel>
 
