@@ -42,7 +42,10 @@ const NAV: { id: ViewId; label: string; icon: typeof Activity }[] = [
   { id: 'settings', label: 'Settings', icon: Settings2 },
 ]
 
-const MOBILE_PRIMARY: ViewId[] = ['today', 'golf', 'jarvis', 'training', 'nutrition']
+// 5 symmetric slots so Jarvis sits dead-center: 2 tabs, Jarvis, then Training + "More".
+// Nutrition drops off the primary row but stays reachable via the More sheet / desktop sidebar.
+const MOBILE_LEFT: ViewId[] = ['today', 'golf']
+const MOBILE_RIGHT: ViewId[] = ['training']
 
 /** Tap the wordmark to force-refresh the app: clears the offline cache and reloads. */
 async function hardRefresh() {
@@ -79,6 +82,24 @@ function Brand() {
         <div className="h-lumen text-lg font-bold leading-none tracking-[0.2em]">CALIBRATE</div>
         <div className="hud-label !mb-0 mt-1 !text-[8px] !tracking-[0.3em] text-arc">PERSONAL OS</div>
       </div>
+    </button>
+  )
+}
+
+/** Regular (non-Jarvis) bottom-nav tab — near-white glow when active, matching the ice/glass palette. */
+function NavTab({ item, active, onClick }: { item: (typeof NAV)[number]; active: boolean; onClick: () => void }) {
+  const Icon = item.icon
+  return (
+    <button
+      onClick={onClick}
+      aria-label={item.label}
+      aria-current={active ? 'page' : undefined}
+      className={`flex flex-col items-center justify-self-center gap-0.5 rounded-xl px-3 py-1.5 transition-all ${
+        active ? 'text-ice drop-shadow-[0_0_8px_rgba(234,244,255,0.65)]' : 'text-fog'
+      }`}
+    >
+      <Icon size={19} strokeWidth={active ? 2.4 : 2} />
+      <span className="font-display text-[9px] font-semibold tracking-wider">{item.label}</span>
     </button>
   )
 }
@@ -144,40 +165,41 @@ export function Shell({ children }: { children: ReactNode }) {
         {children}
       </main>
 
-      {/* Mobile bottom nav */}
+      {/* Mobile bottom nav — 5 equal columns, Jarvis dead-center, monochrome ice glow */}
       <nav
         aria-label="Primary mobile"
-        className="glass-strong fixed inset-x-3 z-40 flex items-center justify-around rounded-2xl px-1 py-2 lg:hidden"
+        className="glass-strong fixed inset-x-3 z-40 grid grid-cols-5 items-center rounded-2xl px-1 py-2 lg:hidden"
         style={{ bottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
       >
-        {MOBILE_PRIMARY.map((id) => {
-          const item = NAV.find((x) => x.id === id)!
-          const Icon = item.icon
-          const active = view === id
-          const isJarvis = id === 'jarvis'
-          return (
-            <button
-              key={id}
-              onClick={() => go(id)}
-              aria-label={item.label}
-              aria-current={active ? 'page' : undefined}
-              className={`flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 transition-all ${
-                isJarvis
-                  ? 'relative -mt-6 rounded-full border border-signal/50 bg-gradient-to-b from-[#f6b83c] to-[#dd9224] p-3.5 text-[#141004] shadow-[0_8px_24px_-6px_rgba(246,184,60,0.6)]'
-                  : active
-                    ? 'text-signal'
-                    : 'text-fog'
-              }`}
-            >
-              <Icon size={isJarvis ? 22 : 19} strokeWidth={active || isJarvis ? 2.4 : 2} />
-              {!isJarvis && <span className="font-display text-[9px] font-semibold tracking-wider">{item.label}</span>}
-            </button>
-          )
-        })}
+        {MOBILE_LEFT.map((id) => (
+          <NavTab key={id} item={NAV.find((x) => x.id === id)!} active={view === id} onClick={() => go(id)} />
+        ))}
+
+        <button
+          onClick={() => go('jarvis')}
+          aria-label="Jarvis"
+          aria-current={view === 'jarvis' ? 'page' : undefined}
+          className="relative -mt-7 flex flex-col items-center justify-self-center"
+        >
+          <span
+            className={`flex h-14 w-14 items-center justify-center rounded-full border transition-all ${
+              view === 'jarvis'
+                ? 'border-ice/40 bg-gradient-to-b from-[#2a2f38] to-[#05070a] text-ice shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_0_28px_rgba(234,244,255,0.55),0_10px_26px_-10px_rgba(0,0,0,0.9)]'
+                : 'border-white/15 bg-gradient-to-b from-[#20242c] to-[#08090d] text-haze shadow-[0_0_16px_rgba(234,244,255,0.18),0_10px_22px_-10px_rgba(0,0,0,0.85)]'
+            }`}
+          >
+            <Bot size={23} strokeWidth={2.2} />
+          </span>
+        </button>
+
+        {MOBILE_RIGHT.map((id) => (
+          <NavTab key={id} item={NAV.find((x) => x.id === id)!} active={view === id} onClick={() => go(id)} />
+        ))}
+
         <button
           onClick={() => setMoreOpen(true)}
           aria-label="More sections"
-          className="flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-fog"
+          className="flex flex-col items-center justify-self-center gap-0.5 rounded-xl px-3 py-1.5 text-fog"
         >
           <MoreHorizontal size={19} />
           <span className="font-display text-[9px] font-semibold tracking-wider">More</span>
@@ -205,8 +227,10 @@ export function Shell({ children }: { children: ReactNode }) {
                 <button
                   key={id}
                   onClick={() => go(id)}
-                  className={`flex flex-col items-center gap-2 rounded-xl border border-edge px-2 py-3.5 transition-colors ${
-                    view === id ? 'bg-signal/10 text-signal' : 'bg-black/20 text-haze active:bg-white/5'
+                  className={`flex flex-col items-center gap-2 rounded-xl border px-2 py-3.5 transition-colors ${
+                    view === id
+                      ? 'border-white/20 bg-white/[0.06] text-ice shadow-[0_0_14px_rgba(234,244,255,0.25)]'
+                      : 'border-edge bg-black/20 text-haze active:bg-white/5'
                   }`}
                 >
                   <Icon size={20} />
