@@ -148,7 +148,6 @@ const syncQueue = new SyncQueue()
 async function syncOperation(op: SyncOperation): Promise<void> {
   if (!supabaseClient) return
 
-  const endpoint = `/rest/v1/sync_entries`
   const deviceId = getDeviceId()
 
   const payload = {
@@ -319,13 +318,13 @@ function syncStateChanges(before: any, after: any): void {
     })
   }
 
-  // Profile facts (memory)
+  // Profile facts (memory) — facts are structured MemoryFact objects, not raw strings
   if (before.profile.facts !== after.profile.facts) {
     const newFacts = after.profile.facts.slice(before.profile.facts.length)
-    newFacts.forEach((fact: string, idx: number) => {
-      SyncService.queue('memory', `fact-${idx}`, 'create', {
+    newFacts.forEach((fact: { id: string; text: string }) => {
+      SyncService.queue('memory', fact.id, 'create', {
         type: 'fact',
-        content: fact,
+        content: fact.text,
       })
     })
   }

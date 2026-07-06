@@ -1,168 +1,85 @@
-/**
- * MEMORY UPGRADE (Phase 3) - SEMANTIC RETRIEVAL
- * 
- * Enhances the memory system from simple key-value storage to semantic-relevant retrieval.
- * Provides structured memory objects with relevance scoring.
- * Automatically injected into every LLM prompt when relevant.
- */
+import { useStore } from '../../store/store'
+import type { MemoryFact } from '../../store/types'
 
-export type MemoryCategory = 'golf' | 'fitness' | 'nutrition' | 'life' | 'business' | 'recovery'
+export { inferCategory, inferImportance } from './memoryCategorize'
 
-export interface MemoryEntry {
-  id: string
-  category: MemoryCategory
-  content: string
-  importance: number // 1-10
-  timestamp: number // creation time
-  lastAccessed: number // updated when retrieved
-  accessCount: number // tracks how often this memory is used
+// ————————————————————————————————————————————————————————
+// SEMANTIC MEMORY RETRIEVAL
+// Facts persist in the Zustand store (src/store/store.ts, profile.facts),
+// so they survive reloads and sync the same way the rest of the app data does.
+// This module is purely the scoring/retrieval layer on top of that store.
+// ————————————————————————————————————————————————————————
+
+const STOPWORDS = new Set(['the', 'a', 'an', 'is', 'are', 'was', 'were', 'to', 'of', 'and', 'for', 'my', 'me', 'i'])
+
+function tokens(text: string): string[] {
+  return text
+    .toLowerCase()
+    .split(/\W+/)
+    .filter((t) => t.length > 1 && !STOPWORDS.has(t))
 }
 
 /**
- * Semantic relevance score calculation.
- * Combines:
- * - Token overlap between query and memory content
- * - Recency (newer memories weighted higher)
- * - Importance flag (user-marked important memories boost score)
- * - Frequency of use (often-accessed memories stay relevant)
+ * Semantic relevance score: token overlap between the query and a fact,
+ * boosted by recency, user-marked importance, and how often it's been surfaced.
  */
-export function scoreMemoryRelevance(
-  memory: MemoryEntry,
-  query: string,
-  now: number = Date.now(),
-): number {
-  const queryTokens = query.toLowerCase().split(/\W+/).filter((t) => t.length > 1)
-  const contentTokens = memory.content.toLowerCase().split(/\W+/).filter((t) => t.length > 1)
+export function scoreMemoryRelevance(fact: MemoryFact, query: string, now: number = Date.now()): number {
+  const queryTokens = tokens(query)
+  const factTokens = tokens(fact.text)
+  const overlap = queryTokens.filter((t) => factTokens.includes(t)).length
 
-  // Token overlap: count matching words
-  const tokenOverlap = queryTokens.filter((t) => contentTokens.includes(t)).length
-
-  // Recency weight: memories used recently stay more relevant
-  // Decay over 30 days
-  const ageMs = now - memory.lastAccessed
-  const ageDays = ageMs / (1000 * 60 * 60 * 24)
+  const ageDays = (now - fact.lastAccessed) / (1000 * 60 * 60 * 24)
   const recencyScore = Math.max(0, 1 - ageDays / 30)
 
-  // Importance boost: high-importance memories (7+) get stronger signal
-  const importanceBoost = memory.importance >= 7 ? 0.3 : memory.importance >= 5 ? 0.15 : 0
+  const importanceBoost = fact.importance >= 8 ? 0.4 : fact.importance >= 6 ? 0.2 : 0
+  const frequencyBoost = Math.min(0.2, fact.accessCount * 0.02)
 
-  // Frequency boost: memories accessed often stay relevant
-  const frequencyBoost = Math.min(0.2, memory.accessCount * 0.02)
-
-  return tokenOverlap + recencyScore * 0.5 + importanceBoost + frequencyBoost
+  return overlap + recencyScore * 0.5 + importanceBoost + frequencyBoost
 }
 
 /**
- * Simple in-memory cache for memories.
- * In production, this would read from Supabase.
+ * Retrieve the facts most relevant to a query, ranked by semantic score.
+ * Returns [] if the query has no meaningful overlap with anything stored —
+ * callers should not inject an empty/noisy memory section in that case.
  */
-class MemoryCache {
-  private memories: Map<string, MemoryEntry> = new Map()
+export function retrieveRelevantMemories(query: string, limit = 5): MemoryFact[] {
+  const facts = useStore.getState().profile.facts
+  if (!facts.length || !query.trim()) return []
 
-  add(entry: MemoryEntry): void {
-    this.memories.set(entry.id, entry)
-  }
-
-  retrieve(category?: MemoryCategory): MemoryEntry[] {
-    const all = Array.from(this.memories.values())
-    return category ? all.filter((m) => m.category === category) : all
-  }
-
-  search(query: string, category?: MemoryCategory, limit = 5): MemoryEntry[] {
-    const candidates = this.retrieve(category)
-    const scored = candidates.map((m) => ({
-      memory: m,
-      score: scoreMemoryRelevance(m, query),
-    }))
-
-    return scored
-      .filter((x) => x.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, limit)
-      .map((x) => x.memory)
-  }
-
-  updateAccess(id: string): void {
-    const mem = this.memories.get(id)
-    if (mem) {
-      mem.lastAccessed = Date.now()
-      mem.accessCount += 1
-    }
-  }
+  const now = Date.now()
+  return facts
+    .map((f) => ({ fact: f, score: scoreMemoryRelevance(f, query, now) }))
+    .filter((x) => x.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map((x) => x.fact)
 }
 
-// Global instance (will be replaced by Supabase middleware in Phase 4)
-let cache = new MemoryCache()
-
-/**
- * Public API for memory management
- */
-export const MemorySystem = {
-  /**
-   * Add a new memory entry
-   */
-  add(id: string, category: MemoryCategory, content: string, importance = 5): void {
-    const now = Date.now()
-    cache.add({
-      id,
-      category,
-      content,
-      importance,
-      timestamp: now,
-      lastAccessed: now,
-      accessCount: 0,
-    })
-  },
-
-  /**
-   * Search for relevant memories by query
-   */
-  search(query: string, category?: MemoryCategory, limit = 5): MemoryEntry[] {
-    return cache.search(query, category, limit)
-  },
-
-  /**
-   * Get all memories in a category
-   */
-  getByCategory(category: MemoryCategory): MemoryEntry[] {
-    return cache.retrieve(category)
-  },
-
-  /**
-   * Mark a memory as accessed (updates recency)
-   */
-  touch(id: string): void {
-    cache.updateAccess(id)
-  },
-
-  /**
-   * Replace cache (used by Supabase sync in Phase 4)
-   */
-  setCache(newCache: MemoryCache): void {
-    cache = newCache
-  },
-}
-
-/**
- * Format memories for LLM injection
- */
-export function formatMemoriesForPrompt(memories: MemoryEntry[]): string {
-  if (!memories.length) return ''
-
-  const grouped = memories.reduce(
-    (acc, m) => {
-      if (!acc[m.category]) acc[m.category] = []
-      acc[m.category].push(m)
-      return acc
+/** Mark facts as accessed — keeps frequently-useful memories surfacing more readily. */
+export function touchMemories(ids: string[]): void {
+  if (!ids.length) return
+  useStore.setState((s) => ({
+    profile: {
+      ...s.profile,
+      facts: s.profile.facts.map((f) =>
+        ids.includes(f.id) ? { ...f, lastAccessed: Date.now(), accessCount: f.accessCount + 1 } : f,
+      ),
     },
-    {} as Record<MemoryCategory, MemoryEntry[]>,
+  }))
+}
+
+/** Format retrieved facts for LLM/local-engine injection, grouped by category. */
+export function formatMemoriesForPrompt(facts: MemoryFact[]): string {
+  if (!facts.length) return ''
+
+  const grouped = facts.reduce<Record<string, MemoryFact[]>>((acc, f) => {
+    ;(acc[f.category] ??= []).push(f)
+    return acc
+  }, {})
+
+  const sections = Object.entries(grouped).map(
+    ([cat, items]) => `${cat.toUpperCase()}:\n${items.map((f) => `  • ${f.text}`).join('\n')}`,
   )
 
-  const sections = Object.entries(grouped).map(([cat, mems]) => {
-    const title = cat.toUpperCase()
-    const items = mems.map((m) => `  • ${m.content}`)
-    return `${title}:\n${items.join('\n')}`
-  })
-
-  return `CONTEXTUAL MEMORIES:\n${sections.join('\n\n')}`
+  return sections.join('\n\n')
 }

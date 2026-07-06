@@ -75,7 +75,7 @@ export function useJarvis() {
     // Call LLM with same context
     setBusy(true)
     try {
-      const res = await runLlm(t || 'What do you make of this?', image)
+      const res = await runLlm(t || 'What do you make of this?', ctx, image)
       pushChat({ role: 'jarvis', text: res.reply, acted: res.receipts })
       say(res.reply)
     } catch (e) {
@@ -149,11 +149,11 @@ export function Jarvis() {
         <div className="flex items-center gap-3">
           <div
             className={`relative flex h-11 w-11 items-center justify-center rounded-full border ${
-              busy || listening ? 'border-signal shadow-[0_0_20px_rgba(246,184,60,0.45)]' : 'border-edge-strong'
+              busy || listening ? 'border-ice/50 shadow-[0_0_20px_rgba(234,244,255,0.45)]' : 'border-edge-strong'
             }`}
           >
-            <Bot size={20} className={busy || listening ? 'text-signal' : 'text-haze'} />
-            {(busy || listening) && <span className="absolute inset-0 animate-ping rounded-full border border-signal/50" />}
+            <Bot size={20} className={busy || listening ? 'text-ice' : 'text-haze'} />
+            {(busy || listening) && <span className="absolute inset-0 animate-ping rounded-full border border-ice/40" />}
           </div>
           <div>
             <h1 className="h-lumen text-2xl font-bold leading-none tracking-wide">JARVIS</h1>
@@ -202,7 +202,7 @@ export function Jarvis() {
             <div
               className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[0.925rem] leading-relaxed ${
                 m.role === 'user'
-                  ? 'rounded-br-md bg-signal/15 text-ice ring-1 ring-signal/25'
+                  ? 'rounded-br-md bg-white/[0.08] text-ice ring-1 ring-white/15'
                   : 'rounded-bl-md bg-black/35 text-ice/95 ring-1 ring-edge'
               }`}
             >
@@ -228,7 +228,7 @@ export function Jarvis() {
                 {[0, 1, 2].map((i) => (
                   <span
                     key={i}
-                    className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-signal"
+                    className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-ice"
                     style={{ animationDelay: `${i * 0.25}s` }}
                   />
                 ))}
@@ -258,8 +258,8 @@ export function Jarvis() {
             aria-label={listening ? 'Stop listening' : 'Speak to Jarvis'}
             className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-all ${
               listening
-                ? 'border-signal bg-signal/20 text-signal shadow-[0_0_18px_rgba(246,184,60,0.5)]'
-                : 'border-edge-strong bg-black/30 text-haze hover:border-signal/50 hover:text-ice'
+                ? 'border-ice/50 bg-white/10 text-ice shadow-[0_0_18px_rgba(234,244,255,0.5)]'
+                : 'border-edge-strong bg-black/30 text-haze hover:border-ice/40 hover:text-ice'
             }`}
           >
             {listening ? <MicOff size={18} /> : <Mic size={18} />}
@@ -297,7 +297,7 @@ export function Jarvis() {
           type="submit"
           aria-label="Send"
           disabled={(!input.trim() && !image) || busy}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-[#f6b83c] to-[#dd9224] text-[#141004] shadow-[0_6px_20px_-6px_rgba(246,184,60,0.6)] transition-all disabled:opacity-50"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/15 bg-gradient-to-b from-[#2a2f38] to-[#08090d] text-ice shadow-[0_0_18px_rgba(234,244,255,0.3),0_6px_20px_-6px_rgba(0,0,0,0.8)] transition-all disabled:opacity-50"
         >
           <SendHorizonal size={18} />
         </button>

@@ -1,6 +1,7 @@
 import { todayISO, weekdayOf } from '../dates'
 import { useStore } from '../../store/store'
 import type { GolfCategory, Pillar, ViewId } from '../../store/types'
+import { inferCategory, inferImportance } from './memoryCategorize'
 
 // Structured actions Jarvis can execute against the app.
 // Emitted by the local engine directly, or by the LLM as a ```json actions block.
@@ -175,9 +176,10 @@ export function applyActions(actions: JarvisAction[]): string[] {
           break
         }
         case 'remember': {
-          if (a.fact.trim()) {
-            s.addFact(a.fact.trim())
-            receipts.push(`Remembered: ${a.fact.trim()}`)
+          const text = a.fact.trim()
+          if (text) {
+            s.addFact(text, inferCategory(text), inferImportance(text))
+            receipts.push(`Remembered: ${text}`)
           }
           break
         }

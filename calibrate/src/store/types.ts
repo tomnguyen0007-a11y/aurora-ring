@@ -204,6 +204,18 @@ export interface ChatMsg {
   image?: string // data URL of an attached reference photo (user messages)
 }
 
+export type MemoryCategory = 'golf' | 'fitness' | 'nutrition' | 'life' | 'business' | 'recovery'
+
+export interface MemoryFact {
+  id: string
+  text: string
+  category: MemoryCategory
+  importance: number // 1-10, higher surfaces more readily in retrieval
+  createdAt: number
+  lastAccessed: number
+  accessCount: number
+}
+
 export interface Profile {
   name: string
   age: number | null
@@ -212,7 +224,7 @@ export interface Profile {
   inspiration: string
   identity: string // free-form "who I am / what I'm building"
   philosophy: string // core operating philosophy
-  facts: string[] // discrete memory facts Jarvis should always know
+  facts: MemoryFact[] // discrete memory facts Jarvis should always know, ranked by semantic relevance at query time
 }
 
 export interface Mantra {

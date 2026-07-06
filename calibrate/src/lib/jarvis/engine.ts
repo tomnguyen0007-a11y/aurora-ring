@@ -1,9 +1,9 @@
-import { fmtHours, todayISO, weekdayOf } from '../dates'
-import { dayProgress, golfMinutes, golfTotalWeek, macrosForDate, revenueToday, streaks, workoutsThisWeek } from '../stats'
+import { fmtHours, todayISO, weekDates, weekdayOf } from '../dates'
+import { dayProgress, golfMinutes, golfTotalWeek, macrosForDate, revenueToday, streaks, weightSeries, workoutsThisWeek } from '../stats'
 import { useStore } from '../../store/store'
 import type { GolfCategory } from '../../store/types'
 import { applyActions, type JarvisAction } from './actions'
-import { buildJarvisContext, getContextForLocalEngine } from './context'
+import { lookupFood } from './foodDb'
 
 // ————————————————————————————————————————————————————————
 // UNIFIED JARVIS LOCAL ENGINE (PHASE 1)
@@ -132,7 +132,7 @@ export function runLocalEngine(input: string, contextUserName?: string): EngineR
     const hours = num(m[1])
     return act(
       [{ type: 'log_sleep', hours }],
-      `${hours}h of recovery logged. ${hours >= 8 ? 'CNS fully serviced. ' : 'Under the 8h standard — protect tonight's 22:30 blackout. '}`,
+      `${hours}h of recovery logged. ${hours >= 8 ? 'CNS fully serviced. ' : 'Under the 8h standard — protect tonight’s 22:30 blackout. '}`,
     )
   }
 
@@ -168,7 +168,7 @@ export function runLocalEngine(input: string, contextUserName?: string): EngineR
     )
   }
 
-  // ——— food: "log food chicken bowl 750 kcal 55 protein" / "ate ..." ———
+  // ——— food WITH explicit numbers: "log food chicken bowl 750 kcal 55 protein" / "ate ... 800 kcal" ———
   m = t.match(/(?:log |ate |had |eat )(?:food )?(.+?)(?:[,;]|\s[-–])?\s*(\d{2,4})\s*(?:k?cal(?:ories)?)?(?:\D+(\d{1,3})\s*(?:g\s*)?protein)?/i)
   if (m && /kcal|cal|protein|ate|had|food|meal/i.test(t)) {
     const foodName = m[1]
@@ -182,6 +182,28 @@ export function runLocalEngine(input: string, contextUserName?: string): EngineR
       return act(
         [{ type: 'log_food', name: foodName, kcal, protein }],
         `Fuel logged: ${foodName}, ${kcal} kcal${protein ? ` / ${protein}g protein` : ''}. Running total ${after.kcal + kcal} kcal.`,
+      )
+    }
+  }
+
+  // ——— food WITHOUT numbers: "ate a banana", "had chicken breast", "log my protein shake" ———
+  // Anti-hallucination: only intercept when the item is a confirmed hit in the local food
+  // database (real figures) — log it immediately without ever going near the LLM.
+  // If it's NOT a hit, fall through (return null) rather than guess here: could be casual
+  // conversation ("had a great day"), and the LLM's system prompt is instructed to ask
+  // for the label instead of inventing a number for anything outside the food database.
+  m =
+    t.match(/^(?:ate|had|eat|eating)\s+(?:my |a |an |the )?(.+)/i) ??
+    t.match(/^(?:log|add|track|record)\s+(?:my |a |an |the )?(.+?(?:shake|smoothie|meal|snack|breakfast|lunch|dinner|protein|whey|yogurt|yoghurt))\b.*/i)
+  if (m) {
+    const foodName = m[1].trim()
+    const found = lookupFood(foodName)
+
+    if (found) {
+      const after = macrosForDate(s, todayISO())
+      return act(
+        [{ type: 'log_food', name: foodName || found.matchedAlias, kcal: found.kcal, protein: found.protein, carbs: found.carbs, fat: found.fat }],
+        `Logged: ${foodName || found.matchedAlias} (${found.serving}) — ${found.kcal} kcal / ${found.protein}g protein from my food database. Running total ${after.kcal + found.kcal} kcal.`,
       )
     }
   }
@@ -271,7 +293,7 @@ export function runLocalEngine(input: string, contextUserName?: string): EngineR
 
   // ——— golf analytics ———
   if (/golf.*(hours?|time|week|stats?)|how much.*(golf|practi[cs]e)|practi[cs]e.*(week|hours?)/i.test(t)) {
-    const wk = golfMinutes(s, require('../dates').weekDates())
+    const wk = golfMinutes(s, weekDates())
     const total = Object.values(wk).reduce((a, b) => a + b, 0)
     const parts = Object.entries(wk)
       .filter(([, v]) => v > 0)
@@ -296,7 +318,6 @@ export function runLocalEngine(input: string, contextUserName?: string): EngineR
 
   // ——— weight trend ———
   if (/weight|weigh/i.test(t) && /\?|trend|how|what/i.test(t)) {
-    const { weightSeries } = require('../stats')
     const ws = weightSeries(s, 30)
 
     if (!ws.length) {

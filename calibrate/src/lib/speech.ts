@@ -39,7 +39,7 @@ interface SpeechChunk {
  * - Keep contractions and quoted text intact
  * - Minimum chunk length to avoid fragmentation
  */
-function chunkText(text: string, minLength = 15): SpeechChunk[] {
+function chunkText(text: string): SpeechChunk[] {
   // Remove excessive whitespace
   const cleaned = text.replace(/\s+/g, ' ').trim()
 
@@ -283,9 +283,16 @@ async function speakViaBrowserAPI(text: string, voiceURI: string): Promise<void>
 // UNIFIED VOICE CONTROL
 // ————————————————————————————————————————————————————————
 
+/** English browser voices available for the Web Speech API fallback picker in Settings. */
+export function englishVoices(): SpeechSynthesisVoice[] {
+  const synth = getSpeechSynthesis()
+  if (!synth) return []
+  return synth.getVoices().filter((v) => v.lang.toLowerCase().startsWith('en'))
+}
+
 export function speechSupported(): boolean {
   return (
-    (typeof window !== 'undefined' && (window.speechSynthesis || (window as any).webkitSpeechSynthesis)) ||
+    (typeof window !== 'undefined' && !!(window.speechSynthesis || (window as any).webkitSpeechSynthesis)) ||
     typeof AudioContext !== 'undefined' ||
     typeof (window as any).webkitAudioContext !== 'undefined'
   )

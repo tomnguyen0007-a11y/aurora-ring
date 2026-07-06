@@ -7,6 +7,8 @@
 // personal-development library. Keep this factual; opinions belong in the prompt.
 // ————————————————————————————————————————————————————————
 
+import { foodDbForPrompt } from './foodDb'
+
 export const KNOWLEDGE_GOLF = `GOLF DIAGNOSTIC (current, from coach analysis):
 - Fairways hit: ~37% (leaks tee shots — ~4 lost balls/round driving compounding errors)
 - Greens in regulation (GIR): ~37%
@@ -72,5 +74,6 @@ export function fullKnowledge(): string {
     KNOWLEDGE_RECOVERY,
     KNOWLEDGE_ECON,
     KNOWLEDGE_BOOKS,
+    foodDbForPrompt(),
   ].join('\n\n')
 }

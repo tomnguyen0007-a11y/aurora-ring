@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { todayISO, uid } from '../lib/dates'
+import { inferCategory, inferImportance } from '../lib/jarvis/memory'
 import {
   seedBooks,
   seedGoals,
@@ -31,6 +32,7 @@ import type {
   HevySession,
   MacroTargets,
   Mantra,
+  MemoryCategory,
   MealOption,
   Note,
   Profile,
@@ -148,8 +150,8 @@ export interface CalibrateState {
   // profile / memory
   profile: Profile
   setProfile: (patch: Partial<Profile>) => void
-  addFact: (fact: string) => void
-  removeFact: (idx: number) => void
+  addFact: (text: string, category?: MemoryCategory, importance?: number) => void
+  removeFact: (id: string) => void
 
   // mindset
   mantras: Mantra[]
@@ -415,8 +417,20 @@ export const useStore = create<CalibrateState>()(
       clearChat: () => set({ chat: [] }),
 
       setProfile: (patch) => set((s) => ({ profile: { ...s.profile, ...patch } })),
-      addFact: (fact) => set((s) => ({ profile: { ...s.profile, facts: [...s.profile.facts, fact] } })),
-      removeFact: (idx) => set((s) => ({ profile: { ...s.profile, facts: s.profile.facts.filter((_, i) => i !== idx) } })),
+      addFact: (text, category = 'life', importance = 5) =>
+        set((s) => {
+          const now = Date.now()
+          return {
+            profile: {
+              ...s.profile,
+              facts: [
+                ...s.profile.facts,
+                { id: uid('fact'), text, category, importance, createdAt: now, lastAccessed: now, accessCount: 0 },
+              ],
+            },
+          }
+        }),
+      removeFact: (id) => set((s) => ({ profile: { ...s.profile, facts: s.profile.facts.filter((f) => f.id !== id) } })),
 
       addMantra: (text, author = '') =>
         set((s) => ({ mantras: [{ id: uid('mantra'), text, author, tag: 'custom' }, ...s.mantras] })),
@@ -443,7 +457,7 @@ export const useStore = create<CalibrateState>()(
     }),
     {
       name: 'calibrate-v1',
-      version: 3,
+      version: 4,
       // always wake up on Today — don't persist navigation; strip heavy chat images from storage
       partialize: (s) =>
         Object.fromEntries(
@@ -465,6 +479,22 @@ export const useStore = create<CalibrateState>()(
         if (version < 3) {
           if (!p.hevySessions) p.hevySessions = []
           if (!p.golfRounds) p.golfRounds = []
+        }
+        if (version < 4) {
+          // profile.facts upgraded from string[] to structured MemoryFact[] (semantic retrieval)
+          const profile = p.profile as { facts?: unknown } | undefined
+          if (profile && Array.isArray(profile.facts) && typeof profile.facts[0] === 'string') {
+            const now = Date.now()
+            profile.facts = (profile.facts as string[]).map((text, i) => ({
+              id: uid('fact'),
+              text,
+              category: inferCategory(text),
+              importance: inferImportance(text),
+              createdAt: now - i, // preserve original ordering as a tie-breaker
+              lastAccessed: now - i,
+              accessCount: 0,
+            }))
+          }
         }
         return p as unknown as CalibrateState
       },
