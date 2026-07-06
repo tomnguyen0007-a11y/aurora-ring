@@ -4,6 +4,7 @@ import { DAY_CODENAMES } from '../../store/seed'
 import { useStore } from '../../store/store'
 import { weekDates } from '../dates'
 import { fullKnowledge } from './knowledge'
+import { formatMemoriesForPrompt, retrieveRelevantMemories, touchMemories } from './memory'
 
 /**
  * Unified context object that Jarvis always carries.
@@ -42,7 +43,7 @@ function buildProfile(): string {
     `OPERATING PHILOSOPHY: ${p.philosophy}`,
     `GOLF SNAPSHOT: handicap-focus "${g.focus}" — fairways ${g.fairwaysPct}%, GIR ${g.girPct}%, scramble ${g.scramblePct}%, ~${g.lostBallsPerRound} lost balls/round, avg ${g.avgScore}.`,
     `KEY FACTS ABOUT ${p.name.toUpperCase()}:`,
-    ...p.facts.map((f) => `  • ${f}`),
+    ...p.facts.map((f) => `  • ${f.text}`),
     s.mantras.length ? `MANTRAS HE LIVES BY: ${s.mantras.slice(0, 6).map((m) => `"${m.text}"`).join(' ')}` : '',
   ]
     .filter(Boolean)
@@ -51,46 +52,15 @@ function buildProfile(): string {
 
 /**
  * Semantic memory retrieval: rank stored facts by relevance to the current query.
- * Uses simple BM25-like scoring (token overlap + recency boost).
- *
- * Scoring logic:
- * - Token overlap: count matching words between query and fact
- * - Recency bonus: newer facts weighted slightly higher (carry more context weight)
- * - Threshold: only return facts with score > 0 (at least 1 token match)
- * - Limit: top 5 most relevant facts (prevents prompt bloat)
+ * Delegates scoring to memory.ts (token overlap + recency + importance + frequency)
+ * and marks whatever surfaces as accessed, so useful memories keep resurfacing.
  */
 function retrieveRelevantMemory(query: string): string {
-  const s = useStore.getState()
-
-  if (!s.profile.facts.length) return ''
-
-  const queryTokens = query.toLowerCase().split(/\W+/).filter((t) => t.length > 1)
-
-  // Score each fact by relevance to this query
-  const scored = s.profile.facts.map((fact, idx) => {
-    const factTokens = fact.toLowerCase().split(/\W+/).filter((t) => t.length > 1)
-
-    // Count token matches (simple intersection)
-    const overlap = queryTokens.filter((t) => factTokens.includes(t)).length
-
-    // Recency bonus: newer facts (higher index) get slightly higher score
-    // This ensures recently-added context carries forward
-    const recencyBonus = (idx / Math.max(1, s.profile.facts.length - 1)) * 0.5
-
-    const score = overlap + recencyBonus
-
-    return { fact, score, idx }
-  })
-
-  // Filter and sort: only facts with at least one token match, top 5 by score
-  const relevant = scored
-    .filter((x) => x.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 5)
-
+  const relevant = retrieveRelevantMemories(query, 5)
   if (!relevant.length) return ''
 
-  return 'RELEVANT MEMORIES:\n' + relevant.map((x) => `  • ${x.fact}`).join('\n')
+  touchMemories(relevant.map((f) => f.id))
+  return 'RELEVANT MEMORIES:\n' + formatMemoriesForPrompt(relevant)
 }
 
 /**
@@ -139,7 +109,7 @@ function buildSnapshot(): string {
     workout
       ? `TODAY'S WORKOUT: ${workout.name} (${workout.exercises.map((e) => `${e.name} ${e.sets}x${e.reps}`).join(', ')})`
       : `TODAY'S WORKOUT: none scheduled${wd === 3 ? ' — Thursday is the Zone 2 engine run.' : ''}`,
-    `NUTRITION TODAY: ${m.kcal}/${s.macros.kcal[0]}-${s.macros.kcal[1]} kcal, protein ${m.protein}/${s.macros.protein[0]}-${s.macros.protein[1]}g, carbs ${m.carbs}g, fat ${m.fat}g, water ${(m.water / 1000).toFixed(1)}/${s.macros.waterMl / 1000}L${kcalRemaining > 0 ? ` — ${kcalRemaining} kcal & ${proteinRemaining}g protein still needed` : ' — targets hit'}`,
+    `NUTRITION TODAY: ${m.kcal}/${s.macros.kcal[0]}-${s.macros.kcal[1]} kcal, protein ${m.protein}/${s.macros.protein[0]}-${s.macros.protein[1]}g, carbs ${m.carbs}g, fat ${m.fat}g, water ${(m.water / 1000).toFixed(1)}/${s.macros.waterMl / 1000}L${kcalRemaining > 0 ? ` — ${kcalRemaining} kcal & ${proteinRemaining}g protein still needed` : ' — targets hit'}${waterRemaining > 0 ? `, ${(waterRemaining / 1000).toFixed(1)}L water still needed` : ''}`,
     `WEIGHT: ${latestW ? `${latestW.value} kg (logged ${latestW.date})` : 'no recent log'} — target 87-90 kg lean`,
     `GOLF THIS WEEK: ${fmtHours(golfTotalWeek(s))} total — ${Object.entries(golfWeek)
       .filter(([, v]) => v > 0)

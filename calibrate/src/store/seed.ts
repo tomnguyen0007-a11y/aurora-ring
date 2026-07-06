@@ -5,12 +5,14 @@ import type {
   MacroTargets,
   Mantra,
   MealOption,
+  MemoryFact,
   Profile,
   ScheduleBlock,
   SupplementItem,
   WatchItem,
   Workout,
 } from './types'
+import { inferCategory, inferImportance } from '../lib/jarvis/memoryCategorize'
 
 // ————————————————————————————————————————————————
 // The Blueprint — Executive Operating System (V5)
@@ -257,14 +259,24 @@ export const seedProfile: Profile = {
     'Student at an Austrian gymnasium building the AURORA smart-ring business toward $1,000/day. Chasing an elite, aesthetic physique (87–90kg lean), a plus golf handicap, and a disciplined operating system for life.',
   philosophy:
     'Health, love, and mission — in that order. Earn with your mind, not your time. A calm mind, a fit body, a house full of love: earned, not bought. Expect nothing, appreciate everything. Mystery makes history. 1% better every day.',
-  facts: [
-    'Golf handicap 2.4, targeting a plus handicap by end of summer.',
-    'Weekly split: Tue Push/Arms, Wed Pull/Core, Fri Legs, Sat Whole Upper, Thu Zone 2 run, Sun on-course golf.',
-    'Lean-bulk target: 3,600–3,900 kcal, 190–220g protein, 3L water.',
-    'Strict 22:30 blackout → 06:30 wake (8h sleep) is non-negotiable.',
-    'Inspired by and following Ollie Duthie / CALIBRATE Training Club methodology.',
-    'Learning economics and building business acumen for AURORA.',
-  ],
+  facts: (
+    [
+      'Golf handicap 2.4, targeting a plus handicap by end of summer.',
+      'Weekly split: Tue Push/Arms, Wed Pull/Core, Fri Legs, Sat Whole Upper, Thu Zone 2 run, Sun on-course golf.',
+      'Lean-bulk target: 3,600–3,900 kcal, 190–220g protein, 3L water.',
+      'Strict 22:30 blackout → 06:30 wake (8h sleep) is non-negotiable.',
+      'Inspired by and following Ollie Duthie / CALIBRATE Training Club methodology.',
+      'Learning economics and building business acumen for AURORA.',
+    ] as string[]
+  ).map((text, i): MemoryFact => ({
+    id: id('fact'),
+    text,
+    category: inferCategory(text),
+    importance: inferImportance(text),
+    createdAt: Date.now() - i,
+    lastAccessed: Date.now() - i,
+    accessCount: 0,
+  })),
 }
 
 export const seedGolfStats: GolfStats = {

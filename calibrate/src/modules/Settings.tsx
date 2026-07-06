@@ -89,11 +89,11 @@ export function Settings() {
           <div>
             <span className="hud-label !mb-1.5 !text-[8px]">Facts Jarvis always remembers</span>
             <ul className="space-y-1.5">
-              {s.profile.facts.map((f, i) => (
-                <li key={i} className="group flex items-center gap-2 rounded-lg bg-black/25 px-3 py-2">
+              {s.profile.facts.map((f) => (
+                <li key={f.id} className="group flex items-center gap-2 rounded-lg bg-black/25 px-3 py-2">
                   <span className="text-arc">•</span>
-                  <span className="flex-1 text-sm text-ice">{f}</span>
-                  <button className="opacity-0 transition-opacity group-hover:opacity-100" aria-label="Remove fact" onClick={() => s.removeFact(i)}>
+                  <span className="flex-1 text-sm text-ice">{f.text}</span>
+                  <button className="opacity-0 transition-opacity group-hover:opacity-100" aria-label="Remove fact" onClick={() => s.removeFact(f.id)}>
                     <Trash2 size={13} className="text-alert/70" />
                   </button>
                 </li>

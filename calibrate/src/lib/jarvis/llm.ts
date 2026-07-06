@@ -2,7 +2,7 @@ import { useStore } from '../../store/store'
 import type { ChatMsg } from '../../store/types'
 import { splitDataURL } from '../image'
 import { applyActions, type JarvisAction } from './actions'
-import { buildJarvisContext, formatContextForLlm } from './context'
+import { formatContextForLlm, type JarvisContext } from './context'
 
 // ————————————————————————————————————————————————————————
 // UNIFIED LLM BRAIN (PHASE 1)
@@ -20,8 +20,7 @@ import { buildJarvisContext, formatContextForLlm } from './context'
 // 6. Return clean reply + receipts
 // ————————————————————————————————————————————————————————
 
-function buildSystemPrompt(userQuery: string): string {
-  const ctx = buildJarvisContext(userQuery)
+function buildSystemPrompt(ctx: JarvisContext): string {
   const basePrompt = formatContextForLlm(ctx)
 
   // Add action documentation and rules
@@ -76,6 +75,10 @@ EXECUTION RULES:
 - Keep replies under 120 words unless the user asks for deep strategy/planning
 - Always cite relevant KNOWLEDGE when giving training/nutrition/golf/recovery/business advice
 - If you don't have a specific, ask clarifying questions rather than inventing
+- FOOD LOGGING IS ZERO-TOLERANCE FOR HALLUCINATION: when the user names a food without giving kcal/macros,
+  use the exact figures from the KNOWN FOOD DATABASE in KNOWLEDGE if it matches. If it does NOT match anything
+  in that database and the user gave no numbers, do NOT emit a log_food action with a guessed number — instead
+  ask what's on the label ("how many kcal/protein on the label?"). A wrong invented number is worse than asking.
 `
 
   return basePrompt + '\n' + actionDocs
@@ -107,7 +110,7 @@ function historyFor(chat: ChatMsg[], userText: string): { role: 'user' | 'assist
   return merged
 }
 
-async function callAnthropic(userText: string, image?: string): Promise<string> {
+async function callAnthropic(userText: string, ctx: JarvisContext, image?: string): Promise<string> {
   const { settings, chat } = useStore.getState()
   const messages = historyFor(chat, userText) as Array<{ role: 'user' | 'assistant'; content: unknown }>
 
@@ -141,7 +144,7 @@ async function callAnthropic(userText: string, image?: string): Promise<string> 
     body: JSON.stringify({
       model: settings.anthropicModel || 'claude-sonnet-5',
       max_tokens: 1500,
-      system: buildSystemPrompt(userText),
+      system: buildSystemPrompt(ctx),
       messages,
     }),
   })
@@ -158,7 +161,7 @@ async function callAnthropic(userText: string, image?: string): Promise<string> 
     .join('')
 }
 
-async function callGemini(userText: string, image?: string): Promise<string> {
+async function callGemini(userText: string, ctx: JarvisContext, image?: string): Promise<string> {
   const { settings, chat } = useStore.getState()
   const model = settings.geminiModel || 'gemini-2.5-flash'
 
@@ -181,7 +184,7 @@ async function callGemini(userText: string, image?: string): Promise<string> {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: buildSystemPrompt(userText) }] },
+        systemInstruction: { parts: [{ text: buildSystemPrompt(ctx) }] },
         contents,
         generationConfig: { maxOutputTokens: 1500 },
       }),
@@ -215,7 +218,9 @@ export interface LlmResult {
 
 /**
  * Unified LLM pipeline:
- * 1. Build shared context (already done in buildSystemPrompt)
+ * 1. Receive the context already built once by the caller (Jarvis.tsx) —
+ *    never rebuilt here, so memory-access bookkeeping isn't double-counted
+ *    and the local engine + LLM always reason from the exact same snapshot.
  * 2. Call configured provider
  * 3. Parse and execute action blocks
  * 4. Return clean reply + receipts
@@ -223,7 +228,7 @@ export interface LlmResult {
  * This is the ONLY LLM entry point in the app.
  * No branching logic — single consistent flow.
  */
-export async function runLlm(userText: string, image?: string): Promise<LlmResult> {
+export async function runLlm(userText: string, ctx: JarvisContext, image?: string): Promise<LlmResult> {
   const { settings } = useStore.getState()
 
   if (!llmConfigured()) {
@@ -233,8 +238,8 @@ export async function runLlm(userText: string, image?: string): Promise<LlmResul
   // Call the configured provider
   const raw =
     settings.provider === 'anthropic'
-      ? await callAnthropic(userText, image)
-      : await callGemini(userText, image)
+      ? await callAnthropic(userText, ctx, image)
+      : await callGemini(userText, ctx, image)
 
   // Extract and execute trailing action blocks
   let receipts: string[] = []

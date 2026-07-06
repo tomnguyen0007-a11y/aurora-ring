@@ -75,7 +75,7 @@ export function useJarvis() {
     // Call LLM with same context
     setBusy(true)
     try {
-      const res = await runLlm(t || 'What do you make of this?', image)
+      const res = await runLlm(t || 'What do you make of this?', ctx, image)
       pushChat({ role: 'jarvis', text: res.reply, acted: res.receipts })
       say(res.reply)
     } catch (e) {
