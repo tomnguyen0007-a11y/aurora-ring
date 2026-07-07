@@ -271,6 +271,49 @@ async function callGroq(userText: string, ctx: JarvisContext): Promise<string> {
   return data.choices?.[0]?.message?.content ?? ''
 }
 
+// OpenRouter: one key routes to 35+ models, several genuinely free (":free" suffix).
+// A resilient backup — if one free model is rate-limited, switch the model string
+// without switching providers. Default model (Qwen 2.5 VL 72B) supports vision.
+// Web search would need OpenRouter's paid ":online" plugin, so — like Groq — the
+// prompt doesn't claim search on this provider.
+function openRouterMessages(userText: string, image: string | undefined, chat: ChatMsg[]) {
+  const history = historyFor(chat, userText) as { role: 'user' | 'assistant'; content: string | unknown }[]
+  if (image) {
+    const last = history[history.length - 1]
+    const content = [
+      { type: 'text', text: userText },
+      { type: 'image_url', image_url: { url: image } },
+    ]
+    if (last && last.role === 'user') last.content = content
+    else history.push({ role: 'user', content })
+  }
+  return history
+}
+
+async function callOpenRouter(userText: string, ctx: JarvisContext, image?: string): Promise<string> {
+  const { settings, chat } = useStore.getState()
+  const messages = [{ role: 'system', content: buildSystemPrompt(ctx, { webSearch: false }) }, ...openRouterMessages(userText, image, chat)]
+
+  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${settings.openrouterKey}`,
+      'HTTP-Referer': typeof location !== 'undefined' ? location.origin : 'https://calibrate.app',
+      'X-Title': 'Calibrate',
+    },
+    body: JSON.stringify({ model: settings.openrouterModel || 'qwen/qwen2.5-vl-72b-instruct:free', max_tokens: 2500, messages }),
+  })
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => '')
+    throw new Error(`OpenRouter ${res.status}: ${body.slice(0, 180)}`)
+  }
+
+  const data: { choices?: { message?: { content?: string } }[] } = await res.json()
+  return data.choices?.[0]?.message?.content ?? ''
+}
+
 /**
  * Check if an LLM provider is configured and ready.
  */
@@ -279,7 +322,8 @@ export function llmConfigured(): boolean {
   return (
     (settings.provider === 'anthropic' && !!settings.anthropicKey) ||
     (settings.provider === 'gemini' && !!settings.geminiKey) ||
-    (settings.provider === 'groq' && !!settings.groqKey)
+    (settings.provider === 'groq' && !!settings.groqKey) ||
+    (settings.provider === 'openrouter' && !!settings.openrouterKey)
   )
 }
 
@@ -370,7 +414,9 @@ export async function runLlm(userText: string, ctx: JarvisContext, image?: strin
       ? await callAnthropic(userText, ctx, image)
       : settings.provider === 'groq'
         ? await callGroq(userText, ctx)
-        : await callGemini(userText, ctx, image)
+        : settings.provider === 'openrouter'
+          ? await callOpenRouter(userText, ctx, image)
+          : await callGemini(userText, ctx, image)
 
   return extractAndApplyActions(raw)
 }
@@ -543,6 +589,47 @@ async function streamGroq(userText: string, ctx: JarvisContext, onText: (delta: 
   return full
 }
 
+async function streamOpenRouter(userText: string, ctx: JarvisContext, image: string | undefined, onText: (delta: string) => void): Promise<string> {
+  const { settings, chat } = useStore.getState()
+  const messages = [{ role: 'system', content: buildSystemPrompt(ctx, { webSearch: false }) }, ...openRouterMessages(userText, image, chat)]
+
+  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${settings.openrouterKey}`,
+      'HTTP-Referer': typeof location !== 'undefined' ? location.origin : 'https://calibrate.app',
+      'X-Title': 'Calibrate',
+    },
+    body: JSON.stringify({
+      model: settings.openrouterModel || 'qwen/qwen2.5-vl-72b-instruct:free',
+      max_tokens: 2500,
+      stream: true,
+      messages,
+    }),
+  })
+
+  if (!res.ok || !res.body) {
+    const body = await res.text().catch(() => '')
+    throw new Error(`OpenRouter ${res.status}: ${body.slice(0, 180)}`)
+  }
+
+  let full = ''
+  await consumeSSE(res, (payload) => {
+    try {
+      const ev: { choices?: { delta?: { content?: string } }[] } = JSON.parse(payload)
+      const text = ev.choices?.[0]?.delta?.content ?? ''
+      if (text) {
+        full += text
+        onText(text)
+      }
+    } catch {
+      /* ignore malformed frames (OpenRouter sends occasional keep-alive comments) */
+    }
+  })
+  return full
+}
+
 export interface StreamHandlers {
   /**
    * Called as visible reply text grows (action JSON is never included).
@@ -580,7 +667,9 @@ export async function runLlmStream(userText: string, ctx: JarvisContext, image: 
       ? await streamAnthropic(userText, ctx, image, collect)
       : settings.provider === 'groq'
         ? await streamGroq(userText, ctx, collect)
-        : await streamGemini(userText, ctx, image, collect)
+        : settings.provider === 'openrouter'
+          ? await streamOpenRouter(userText, ctx, image, collect)
+          : await streamGemini(userText, ctx, image, collect)
 
   return extractAndApplyActions(full)
 }

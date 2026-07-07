@@ -252,7 +252,7 @@ export interface GolfStats {
   focus: string // current mental/technical focus
 }
 
-export type LlmProvider = 'none' | 'anthropic' | 'gemini' | 'groq'
+export type LlmProvider = 'none' | 'anthropic' | 'gemini' | 'groq' | 'openrouter'
 
 export interface Settings {
   userName: string
@@ -263,6 +263,8 @@ export interface Settings {
   geminiModel: string
   groqKey: string // groq.com — genuinely free tier, no card, no web search
   groqModel: string
+  openrouterKey: string // openrouter.ai — free model router, resilient backup, vision on the right model
+  openrouterModel: string
   finnhubKey: string
   gnewsKey: string
   newsCountry: string
