@@ -42,7 +42,7 @@ export function CheckInCard() {
             aria-label={`${label} ${v}`}
             onClick={() => onChange(v === value ? 0 : v)}
             className={`h-4 w-4 rounded-full border transition-all ${
-              v <= value ? 'border-signal bg-signal/70 shadow-[0_0_6px_rgba(246,184,60,0.5)]' : 'border-edge-strong bg-black/30 hover:border-signal/50'
+              v <= value ? 'border-signal bg-signal/70 shadow-[0_0_6px_rgba(233,237,242,0.4)]' : 'border-edge-strong bg-black/30 hover:border-signal/50'
             }`}
           />
         ))}

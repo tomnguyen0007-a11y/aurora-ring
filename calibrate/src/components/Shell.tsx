@@ -73,9 +73,9 @@ function Brand() {
     >
       <div className="relative flex h-9 w-9 items-center justify-center">
         <svg viewBox="0 0 36 36" className="h-9 w-9">
-          <circle cx="18" cy="18" r="14" fill="none" stroke="#2a3140" strokeWidth="2.5" />
-          <path d="M 18 4 A 14 14 0 1 1 5.9 11" fill="none" stroke="#f6b83c" strokeWidth="2.5" strokeLinecap="round" />
-          <circle cx="18" cy="18" r="3" fill="#f6b83c" />
+          <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="2.5" />
+          <path d="M 18 4 A 14 14 0 1 1 5.9 11" fill="none" stroke="#e9edf2" strokeWidth="2.5" strokeLinecap="round" />
+          <circle cx="18" cy="18" r="3" fill="#e9edf2" />
         </svg>
       </div>
       <div>
@@ -135,7 +135,7 @@ export function Shell({ children }: { children: ReactNode }) {
                 }`}
               >
                 {active && (
-                  <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-signal shadow-[0_0_10px_rgba(246,184,60,0.7)]" />
+                  <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-signal shadow-[0_0_10px_rgba(233,237,242,0.55)]" />
                 )}
                 <Icon size={17} strokeWidth={active ? 2.4 : 2} className="shrink-0" />
                 {label}
@@ -144,7 +144,7 @@ export function Shell({ children }: { children: ReactNode }) {
           })}
         </nav>
         <div className="px-3 pt-3 text-[10px] leading-relaxed text-fog">
-          <span className="text-signal-dim">◆</span> THE BLUEPRINT V5
+          <span className="text-signal-dim">◆</span> THE BLUEPRINT V6
           <br />
           Executive Operating System
         </div>

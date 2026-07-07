@@ -196,6 +196,7 @@ const defaultSettings: Settings = {
   voiceURI: '',
   elevenKey: '',
   elevenVoiceId: 'onwK4e9ZLuTAKqWW03F9', // "Daniel" — deep, composed British
+  openaiKey: '',
   notifyEnabled: false,
   hevyKey: '',
 }

@@ -7,7 +7,7 @@ import { useStore } from '../store/store'
 const GUIDE = [
   {
     icon: Coffee,
-    color: '#f7bd45',
+    color: '#ff7e47',
     title: 'Caffeine',
     lines: [
       '3–6 mg/kg ~60 min pre key session (≤400mg/day).',

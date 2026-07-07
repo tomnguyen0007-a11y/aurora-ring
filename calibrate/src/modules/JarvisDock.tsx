@@ -38,7 +38,7 @@ export function JarvisDock() {
             onClick={() => setView('jarvis')}
             aria-label="Open Jarvis"
             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all ${
-              busy ? 'border-signal text-signal shadow-[0_0_14px_rgba(246,184,60,0.5)]' : 'border-edge-strong text-haze hover:text-signal hover:border-signal/50'
+              busy ? 'border-signal text-signal shadow-[0_0_14px_rgba(233,237,242,0.4)]' : 'border-edge-strong text-haze hover:text-signal hover:border-signal/50'
             }`}
           >
             <Bot size={17} />
@@ -54,7 +54,7 @@ export function JarvisDock() {
             type="submit"
             aria-label="Send to Jarvis"
             disabled={!input.trim() || busy}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-[#f6b83c] to-[#dd9224] text-[#141004] transition-transform active:scale-95 disabled:opacity-35"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-b border border-white/15 from-[#2a2f38] to-[#08090d] text-ice transition-transform active:scale-95 disabled:opacity-35"
           >
             <SendHorizonal size={15} />
           </button>

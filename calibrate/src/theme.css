@@ -5,29 +5,31 @@
   --font-sans: 'Inter Variable', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
 
-  /* Stark-HUD palette — illuminated dark, arc-reactor cyan + batsignal amber */
-  --color-void: #06080c; /* app background */
-  --color-carbon: #0b0e14; /* raised surface base */
-  --color-panel: #10141c; /* solid panel */
-  --color-edge: rgba(210, 232, 255, 0.09); /* hairline borders */
-  --color-edge-strong: rgba(210, 232, 255, 0.18);
+  /* Obsidian palette — WHOOP-dark luxury: true black, platinum chrome, one ember data accent */
+  --color-void: #000000; /* app background — true black */
+  --color-carbon: #0a0a0b; /* raised surface base */
+  --color-panel: #0e0f11; /* solid panel */
+  --color-edge: rgba(255, 255, 255, 0.07); /* hairline borders — neutral, no blue cast */
+  --color-edge-strong: rgba(255, 255, 255, 0.14);
 
-  --color-signal: #f7bd45; /* batsignal amber — active / attention */
-  --color-signal-dim: #b78427;
-  --color-lumen: #eaf4ff; /* illuminated HUD text — near white, cyan-lit */
-  --color-arc: #58c7f0; /* arc-reactor cyan — data / live */
-  --color-steel: #8fc4e6; /* informational */
-  --color-affirm: #55e0a3; /* completion */
+  --color-signal: #e9edf2; /* platinum — active / attention (monochrome glow) */
+  --color-signal-dim: #7e848c;
+  --color-lumen: #f2f5f8; /* illuminated HUD text — near white */
+  --color-arc: #7fa7c4; /* muted slate blue — data / live (sleep-tone) */
+  --color-steel: #93a7b8; /* informational */
+  --color-ember: #ff7e47; /* warm ember — effort/strain data, charts */
+  --color-affirm: #4ade8f; /* completion / recovery green */
   --color-alert: #ef6a54; /* danger / behind-target */
-  --color-haze: #a6b0c0; /* muted text — brighter for readability */
-  --color-fog: #67707f; /* faint text */
-  --color-ice: #f7fafd; /* primary text — near-white premium */
+  --color-haze: #9aa1aa; /* muted text */
+  --color-fog: #5c6167; /* faint text */
+  --color-ice: #f7f9fb; /* primary text — near-white premium */
 
-  --shadow-glass: 0 1px 0 rgba(230, 244, 255, 0.08) inset, 0 16px 44px -20px rgba(0, 0, 0, 0.85);
-  --shadow-float: 0 28px 70px -26px rgba(0, 0, 0, 0.92), 0 1px 0 rgba(230, 244, 255, 0.1) inset;
-  --glow-lumen: 0 0 18px rgba(210, 236, 255, 0.28);
-  --glow-arc: 0 0 16px rgba(88, 199, 240, 0.45);
-  --glow-signal: 0 0 16px rgba(247, 189, 69, 0.45);
+  --shadow-glass: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 16px 44px -20px rgba(0, 0, 0, 0.9);
+  --shadow-float: 0 28px 70px -26px rgba(0, 0, 0, 0.95), 0 1px 0 rgba(255, 255, 255, 0.07) inset;
+  --glow-lumen: 0 0 18px rgba(240, 246, 252, 0.25);
+  --glow-arc: 0 0 16px rgba(127, 167, 196, 0.4);
+  --glow-signal: 0 0 16px rgba(233, 237, 242, 0.4);
+  --glow-ember: 0 0 16px rgba(255, 126, 71, 0.45);
 
   --animate-rise: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-pulse-soft: pulseSoft 2.4s ease-in-out infinite;
@@ -66,36 +68,29 @@ body {
   overscroll-behavior-y: none;
 }
 
-/* Atmospheric layer: faint blueprint grid + vignette, fixed behind everything */
+/* Atmospheric layer: pure black with the faintest warm breath at the horizon — no grid, no noise */
 .atmosphere {
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(1200px 620px at 78% -12%, rgba(247, 189, 69, 0.06), transparent 60%),
-    radial-gradient(1000px 560px at 8% 112%, rgba(88, 199, 240, 0.06), transparent 60%),
-    linear-gradient(rgba(210, 232, 255, 0.022) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(210, 232, 255, 0.022) 1px, transparent 1px);
-  background-size:
-    auto,
-    auto,
-    46px 46px,
-    46px 46px;
+    radial-gradient(140% 70% at 50% 118%, rgba(255, 126, 71, 0.045), transparent 55%),
+    radial-gradient(120% 60% at 50% -18%, rgba(240, 246, 252, 0.03), transparent 55%);
 }
 .atmosphere::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(125% 95% at 50% 28%, transparent 52%, rgba(0, 0, 0, 0.6));
+  background: radial-gradient(130% 100% at 50% 30%, transparent 60%, rgba(0, 0, 0, 0.55));
 }
 
-/* Liquid glass panel — lit top edge for the illuminated HUD feel */
+/* Matte obsidian panel — flat near-black card with a hairline lit top edge */
 .glass {
   position: relative;
-  background: linear-gradient(160deg, rgba(230, 244, 255, 0.055), rgba(230, 244, 255, 0.014) 45%, rgba(230, 244, 255, 0.035));
-  backdrop-filter: blur(18px) saturate(1.2);
-  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  background: linear-gradient(172deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.008) 40%, rgba(255, 255, 255, 0.015));
+  backdrop-filter: blur(14px) saturate(1.05);
+  -webkit-backdrop-filter: blur(14px) saturate(1.05);
   border: 1px solid var(--color-edge);
   box-shadow: var(--shadow-glass);
 }
@@ -105,14 +100,14 @@ body {
   inset: 0 0 auto 0;
   height: 1px;
   border-radius: inherit;
-  background: linear-gradient(90deg, transparent, rgba(210, 236, 255, 0.35) 30%, rgba(210, 236, 255, 0.35) 70%, transparent);
-  opacity: 0.6;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22) 30%, rgba(255, 255, 255, 0.22) 70%, transparent);
+  opacity: 0.55;
   pointer-events: none;
 }
 .glass-strong {
-  background: linear-gradient(160deg, rgba(22, 27, 37, 0.88), rgba(12, 15, 21, 0.92));
-  backdrop-filter: blur(24px) saturate(1.2);
-  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  background: linear-gradient(172deg, rgba(16, 17, 19, 0.92), rgba(6, 6, 7, 0.96));
+  backdrop-filter: blur(24px) saturate(1.05);
+  -webkit-backdrop-filter: blur(24px) saturate(1.05);
   border: 1px solid var(--color-edge-strong);
   box-shadow: var(--shadow-float);
 }
@@ -132,11 +127,11 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Illuminated display headings — the "Stark" lit-glass look */
+/* Illuminated display headings — soft platinum halo */
 .h-lumen {
   font-family: var(--font-display);
   color: var(--color-lumen);
-  text-shadow: 0 0 22px rgba(220, 240, 255, 0.35), 0 0 60px rgba(180, 220, 255, 0.12);
+  text-shadow: 0 0 22px rgba(240, 246, 252, 0.28), 0 0 60px rgba(240, 246, 252, 0.08);
   letter-spacing: -0.01em;
 }
 .text-glow-arc {
@@ -146,20 +141,20 @@ body {
   text-shadow: var(--glow-signal);
 }
 .lit {
-  box-shadow: 0 0 0 1px var(--color-edge-strong), 0 0 24px -6px rgba(88, 199, 240, 0.25);
+  box-shadow: 0 0 0 1px var(--color-edge-strong), 0 0 24px -6px rgba(240, 246, 252, 0.18);
 }
 
 /* Scrollbars */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #2a3140 transparent;
+  scrollbar-color: #26282b transparent;
 }
 *::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 *::-webkit-scrollbar-thumb {
-  background: #2a3140;
+  background: #26282b;
   border-radius: 8px;
 }
 
@@ -180,8 +175,8 @@ body {
   color: var(--color-fog);
 }
 .field:focus {
-  border-color: rgba(246, 184, 60, 0.55);
-  box-shadow: 0 0 0 3px rgba(246, 184, 60, 0.12);
+  border-color: rgba(240, 246, 252, 0.45);
+  box-shadow: 0 0 0 3px rgba(240, 246, 252, 0.08);
 }
 
 .btn {
@@ -218,13 +213,13 @@ body {
   outline-offset: 2px;
 }
 .btn-signal {
-  background: linear-gradient(160deg, #f6b83c, #dd9224);
-  border-color: rgba(246, 184, 60, 0.6);
-  color: #141004;
-  box-shadow: 0 6px 24px -8px rgba(246, 184, 60, 0.5);
+  background: linear-gradient(172deg, #f7f9fb, #d4d9df);
+  border-color: rgba(255, 255, 255, 0.7);
+  color: #0a0a0b;
+  box-shadow: 0 6px 24px -8px rgba(240, 246, 252, 0.45);
 }
 .btn-signal:hover {
-  background: linear-gradient(160deg, #ffc75a, #eda032);
+  background: linear-gradient(172deg, #ffffff, #e4e8ec);
 }
 .btn-ghost {
   border-color: transparent;

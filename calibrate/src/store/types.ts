@@ -266,8 +266,9 @@ export interface Settings {
   newsCountry: string
   speakReplies: boolean
   voiceURI: string // chosen speech-synthesis voice
-  elevenKey: string // ElevenLabs — the real JARVIS voice
+  elevenKey: string // ElevenLabs — the real JARVIS voice (primary TTS)
   elevenVoiceId: string
+  openaiKey?: string // OpenAI TTS — secondary voice fallback
   notifyEnabled: boolean // nutrition/recovery reminders
   hevyKey: string // Hevy official API — live workout sync
 }

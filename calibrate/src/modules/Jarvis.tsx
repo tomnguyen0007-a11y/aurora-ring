@@ -1,8 +1,8 @@
 import { Bot, ImagePlus, KeyRound, Mic, MicOff, SendHorizonal, Trash2, VolumeX, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { createRecognizer, speak, speechSupported, stopSpeaking } from '../lib/speech'
+import { createRecognizer, createSpeechStream, speak, speechSupported, stopSpeaking, type SpeechProviders } from '../lib/speech'
 import { runLocalEngine } from '../lib/jarvis/engine'
-import { llmConfigured, runLlm } from '../lib/jarvis/llm'
+import { llmConfigured, runLlm, runLlmStream } from '../lib/jarvis/llm'
 import { buildJarvisContext } from '../lib/jarvis/context'
 import { useStore } from '../store/store'
 
@@ -15,86 +15,102 @@ const SUGGESTIONS = [
   'remember I prefer morning runs',
 ]
 
+function speechProviders(): SpeechProviders | null {
+  const { speakReplies, voiceURI, elevenKey, elevenVoiceId, openaiKey } = useStore.getState().settings
+  if (!speakReplies) return null
+  return {
+    voiceURI,
+    eleven: elevenKey ? { key: elevenKey, voiceId: elevenVoiceId } : undefined,
+    openaiKey,
+  }
+}
+
 export function useJarvis() {
   const pushChat = useStore((s) => s.pushChat)
   const [busy, setBusy] = useState(false)
+  // Live streaming reply — rendered as a growing bubble before it's committed to the store
+  const [draft, setDraft] = useState<string | null>(null)
 
   const say = (text: string) => {
-    const { speakReplies, voiceURI, elevenKey, elevenVoiceId } = useStore.getState().settings
-    if (speakReplies) speak(text, voiceURI, elevenKey ? { key: elevenKey, voiceId: elevenVoiceId } : undefined)
+    const p = speechProviders()
+    if (p) void speak(text, p.voiceURI, p.eleven, p.openaiKey)
   }
 
   /**
-   * UNIFIED JARVIS PIPELINE (Phase 1)
-   * 
-   * Entry point for all user queries. Routes through:
-   * 1. Build unified context (once, shared across all paths)
-   * 2. Try local engine with full context
-   * 3. If local match → execute + respond immediately
-   * 4. If no local match → forward to LLM with same context (consistent reasoning)
-   * 5. Execute any LLM actions + speak response
+   * UNIFIED JARVIS PIPELINE
    *
-   * NO branching logic between local and LLM paths.
-   * ALL responses use full profile + memory + knowledge + snapshot.
+   * 1. Build unified context (once, shared across all paths)
+   * 2. Local engine first — instant, grounded, free
+   * 3. Otherwise stream from the LLM: text renders token-by-token and is
+   *    SPOKEN sentence-by-sentence while the model is still thinking.
+   * 4. Actions execute after the stream completes; receipts attach to the reply.
    */
   const send = async (text: string, image?: string) => {
     const t = text.trim()
     if ((!t && !image) || busy) return
 
-    // User message always goes to chat
+    stopSpeaking() // barge-in: a new query silences the previous reply
+
     pushChat({ role: 'user', text: t || '(photo)', image })
 
-    // Build unified context ONCE for this query
     const ctx = buildJarvisContext(t)
 
-    // Try local engine with full context
     if (!image) {
-      // Photos always need LLM for vision
       const localResult = runLocalEngine(t, ctx.userName)
-
       if (localResult) {
-        // Local engine handled it
         pushChat({ role: 'jarvis', text: localResult.reply, acted: localResult.receipts })
         say(localResult.reply)
         return
       }
     }
 
-    // If no local match (or has image), escalate to LLM
     if (!llmConfigured()) {
-      // No LLM available
       const fallback = image
         ? `I need my full brain to see photos, sir. Add a free Gemini key or an Anthropic key in Settings and I can read images for you.`
         : `That one needs my full brain, sir. The built-in engine handles logging, lists and stats — for strategy, planning and open conversation, add a free Gemini key or an Anthropic key in Settings.`
-
       pushChat({ role: 'jarvis', text: fallback })
       say(fallback)
       return
     }
 
-    // Call LLM with same context
     setBusy(true)
+    const providers = speechProviders()
+    const voice = providers ? createSpeechStream(providers) : null
+
     try {
-      const res = await runLlm(t || 'What do you make of this?', ctx, image)
-      pushChat({ role: 'jarvis', text: res.reply, acted: res.receipts })
-      say(res.reply)
-    } catch (e) {
-      const errorMsg = `Connection issue with the advanced brain: ${e instanceof Error ? e.message : 'unknown error'}. Check the API key in Settings.`
-      pushChat({
-        role: 'jarvis',
-        text: errorMsg,
+      const res = await runLlmStream(t || 'What do you make of this?', ctx, image, {
+        onDelta: (delta, full) => {
+          setDraft(full)
+          voice?.push(delta)
+        },
       })
+      pushChat({ role: 'jarvis', text: res.reply, acted: res.receipts })
+      void voice?.end()
+    } catch {
+      voice?.cancel()
+      // Streaming failed (proxy/CORS/transient) — retry once via the non-streaming path
+      try {
+        const res = await runLlm(t || 'What do you make of this?', ctx, image)
+        pushChat({ role: 'jarvis', text: res.reply, acted: res.receipts })
+        say(res.reply)
+      } catch (e) {
+        pushChat({
+          role: 'jarvis',
+          text: `Connection issue with the advanced brain: ${e instanceof Error ? e.message : 'unknown error'}. Check the API key in Settings.`,
+        })
+      }
     } finally {
+      setDraft(null)
       setBusy(false)
     }
   }
 
-  return { send, busy }
+  return { send, busy, draft }
 }
 
 export function Jarvis() {
   const s = useStore()
-  const { send, busy } = useJarvis()
+  const { send, busy, draft } = useJarvis()
   const [input, setInput] = useState('')
   const [image, setImage] = useState<string | null>(null)
   const [listening, setListening] = useState(false)
@@ -113,7 +129,7 @@ export function Jarvis() {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
-  }, [s.chat.length, busy])
+  }, [s.chat.length, busy, draft])
 
   const toggleMic = () => {
     if (listening) {
@@ -221,7 +237,18 @@ export function Jarvis() {
           </div>
         ))}
 
-        {busy && (
+        {busy && draft && (
+          <div className="flex justify-start">
+            <div className="max-w-[85%] rounded-2xl rounded-bl-md bg-black/35 px-4 py-2.5 text-[0.925rem] leading-relaxed text-ice/95 ring-1 ring-edge">
+              <div className="whitespace-pre-wrap">
+                {draft}
+                <span className="ml-0.5 inline-block h-4 w-[2px] animate-pulse-soft rounded-full bg-ice/80 align-middle" />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {busy && !draft && (
           <div className="flex justify-start">
             <div className="rounded-2xl rounded-bl-md bg-black/35 px-4 py-3 ring-1 ring-edge">
               <span className="flex gap-1.5">
