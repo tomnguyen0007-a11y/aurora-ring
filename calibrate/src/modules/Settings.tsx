@@ -130,13 +130,21 @@ export function Settings() {
           browser to the provider.
         </p>
         <div className="mb-3 flex flex-wrap gap-1.5">
-          {(['none', 'anthropic', 'gemini', 'groq'] as LlmProvider[]).map((p) => (
+          {(['none', 'anthropic', 'gemini', 'groq', 'openrouter'] as LlmProvider[]).map((p) => (
             <button
               key={p}
               onClick={() => s.setSettings({ provider: p })}
               className={`btn flex-1 !text-xs ${s.settings.provider === p ? '!border-signal/60 !bg-signal/15 !text-signal' : ''}`}
             >
-              {p === 'none' ? 'Built-in only' : p === 'anthropic' ? 'Claude' : p === 'gemini' ? 'Gemini (free tier)' : 'Groq (free, no card)'}
+              {p === 'none'
+                ? 'Built-in only'
+                : p === 'anthropic'
+                  ? 'Claude'
+                  : p === 'gemini'
+                    ? 'Gemini (free tier)'
+                    : p === 'groq'
+                      ? 'Groq (free, no card)'
+                      : 'OpenRouter (free backup)'}
             </button>
           ))}
         </div>
@@ -195,6 +203,28 @@ export function Settings() {
               Runs on Groq's LPU hardware — extremely fast responses, genuinely free (no card, no credits system,
               just rate limits). Best pick if you keep hitting Anthropic/Gemini limits. Trade-off: no live web search
               and no photo vision on this provider.
+            </p>
+          </div>
+        )}
+        {s.settings.provider === 'openrouter' && (
+          <div className="space-y-2">
+            <input
+              className="field num w-full"
+              type="password"
+              placeholder="sk-or-…  (openrouter.ai/keys — free, no card)"
+              value={s.settings.openrouterKey}
+              onChange={(e) => s.setSettings({ openrouterKey: e.target.value.trim() })}
+            />
+            <input
+              className="field num w-full"
+              placeholder="Model (default supports photos)"
+              value={s.settings.openrouterModel}
+              onChange={(e) => s.setSettings({ openrouterModel: e.target.value.trim() })}
+            />
+            <p className="text-[11px] text-fog">
+              One key routes to 35+ models — several genuinely free (":free" suffix). Good resilient backup: if a
+              free model gets rate-limited, just swap the model name above without switching providers. The default
+              model (Qwen 2.5 VL) reads photos. Trade-off: no live web search on the free models.
             </p>
           </div>
         )}

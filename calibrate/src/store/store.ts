@@ -193,6 +193,8 @@ const defaultSettings: Settings = {
   geminiModel: 'gemini-2.5-flash',
   groqKey: '',
   groqModel: 'llama-3.3-70b-versatile',
+  openrouterKey: '',
+  openrouterModel: 'qwen/qwen2.5-vl-72b-instruct:free',
   finnhubKey: '',
   gnewsKey: '',
   newsCountry: 'us',
