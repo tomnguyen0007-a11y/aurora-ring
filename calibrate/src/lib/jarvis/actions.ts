@@ -1,6 +1,6 @@
 import { todayISO, weekdayOf } from '../dates'
 import { useStore } from '../../store/store'
-import type { GolfCategory, Pillar, ViewId } from '../../store/types'
+import type { BlockTag, GolfCategory, Pillar, ViewId, Weekday } from '../../store/types'
 import { inferCategory, inferImportance } from './memoryCategorize'
 
 // Structured actions Jarvis can execute against the app.
@@ -29,6 +29,21 @@ export type JarvisAction =
   | { type: 'remember'; fact: string }
   | { type: 'add_mantra'; text: string; author?: string }
   | { type: 'navigate'; view: ViewId }
+  // ——— editing & deleting (Jarvis can fix mistakes, not just add) ———
+  | { type: 'update_food'; name: string; newName?: string; kcal?: number; protein?: number; carbs?: number; fat?: number }
+  | { type: 'delete_food'; name?: string } // today's matching entry, or the most recent if no name
+  | { type: 'delete_golf' } // most recent golf session today
+  | { type: 'delete_run' } // most recent run today
+  | { type: 'check_grocery'; name: string }
+  | { type: 'remove_grocery'; name: string }
+  | { type: 'remove_note'; title: string }
+  | { type: 'toggle_milestone'; goal: string; milestone: string }
+  | { type: 'complete_biz_task'; title: string }
+  | { type: 'remove_goal'; title: string }
+  | { type: 'forget'; fact: string } // remove a stored memory fact by fragment
+  | { type: 'add_block'; title: string; start: string; end?: string; weekday?: Weekday; detail?: string; tag?: BlockTag }
+  | { type: 'move_block'; title: string; start: string; end?: string }
+  | { type: 'remove_block'; title: string }
 
 const VIEWS: ViewId[] = ['today', 'jarvis', 'goals', 'training', 'golf', 'nutrition', 'recovery', 'grocery', 'notes', 'business', 'books', 'mindset', 'markets', 'schedule', 'settings']
 
@@ -194,6 +209,138 @@ export function applyActions(actions: JarvisAction[]): string[] {
           if (VIEWS.includes(a.view)) {
             s.setView(a.view)
             receipts.push(`Opened ${a.view}`)
+          }
+          break
+        }
+
+        // ——— editing & deleting ———
+        case 'update_food': {
+          const q = a.name.toLowerCase()
+          const hit = s.foodLogs.find((f) => f.date === date && f.name.toLowerCase().includes(q))
+          if (hit) {
+            s.removeFood(hit.id)
+            s.addFood({
+              date,
+              name: a.newName ?? hit.name,
+              kcal: a.kcal ?? hit.kcal,
+              protein: a.protein ?? hit.protein,
+              carbs: a.carbs ?? hit.carbs,
+              fat: a.fat ?? hit.fat,
+            })
+            receipts.push(`Updated: ${a.newName ?? hit.name}${a.kcal != null ? ` → ${a.kcal} kcal` : ''}`)
+          }
+          break
+        }
+        case 'delete_food': {
+          const todays = s.foodLogs.filter((f) => f.date === date)
+          const hit = a.name
+            ? todays.find((f) => f.name.toLowerCase().includes(a.name!.toLowerCase()))
+            : todays[0] // addFood prepends, so index 0 is the most recent
+          if (hit) {
+            s.removeFood(hit.id)
+            receipts.push(`Removed food log: ${hit.name}`)
+          }
+          break
+        }
+        case 'delete_golf': {
+          const hit = s.golfSessions.find((g) => g.date === date)
+          if (hit) {
+            s.removeGolfSession(hit.id)
+            receipts.push(`Removed golf session: ${hit.minutes} min ${hit.category}`)
+          }
+          break
+        }
+        case 'delete_run': {
+          const hit = s.runLogs.find((r) => r.date === date)
+          if (hit) {
+            s.removeRun(hit.id)
+            receipts.push(`Removed run: ${hit.minutes} min`)
+          }
+          break
+        }
+        case 'check_grocery': {
+          const q = a.name.toLowerCase()
+          const hit = s.grocery.find((g) => !g.done && g.name.toLowerCase().includes(q))
+          if (hit) {
+            s.toggleGrocery(hit.id)
+            receipts.push(`Checked off: ${hit.name}`)
+          }
+          break
+        }
+        case 'remove_grocery': {
+          const q = a.name.toLowerCase()
+          const hit = s.grocery.find((g) => g.name.toLowerCase().includes(q))
+          if (hit) {
+            s.removeGrocery(hit.id)
+            receipts.push(`Removed from list: ${hit.name}`)
+          }
+          break
+        }
+        case 'remove_note': {
+          const q = a.title.toLowerCase()
+          const hit = s.notes.find((n) => n.title.toLowerCase().includes(q))
+          if (hit) {
+            s.removeNote(hit.id)
+            receipts.push(`Deleted note: “${hit.title}”`)
+          }
+          break
+        }
+        case 'toggle_milestone': {
+          const g = s.goals.find((x) => x.title.toLowerCase().includes(a.goal.toLowerCase()))
+          const ms = g?.milestones.find((m) => m.title.toLowerCase().includes(a.milestone.toLowerCase()))
+          if (g && ms) {
+            s.toggleMilestone(g.id, ms.id)
+            receipts.push(`Milestone ${ms.done ? 'reopened' : 'completed'}: ${ms.title}`)
+          }
+          break
+        }
+        case 'complete_biz_task': {
+          const q = a.title.toLowerCase()
+          const hit = s.bizTasks.find((t) => !t.done && t.title.toLowerCase().includes(q))
+          if (hit) {
+            s.toggleBizTask(hit.id)
+            receipts.push(`AURORA task done: ${hit.title}`)
+          }
+          break
+        }
+        case 'remove_goal': {
+          const hit = s.goals.find((g) => g.title.toLowerCase().includes(a.title.toLowerCase()))
+          if (hit) {
+            s.removeGoal(hit.id)
+            receipts.push(`Goal removed: ${hit.title}`)
+          }
+          break
+        }
+        case 'forget': {
+          const q = a.fact.toLowerCase()
+          const hit = s.profile.facts.find((f) => f.text.toLowerCase().includes(q))
+          if (hit) {
+            s.removeFact(hit.id)
+            receipts.push(`Forgotten: ${hit.text}`)
+          }
+          break
+        }
+        case 'add_block': {
+          const wd = (a.weekday ?? weekdayOf()) as Weekday
+          s.addBlock({ weekday: wd, start: a.start, end: a.end ?? '', title: a.title, detail: a.detail, tag: a.tag ?? 'study' })
+          receipts.push(`Scheduled: ${a.title} at ${a.start}`)
+          break
+        }
+        case 'move_block': {
+          const q = a.title.toLowerCase()
+          const hit = s.schedule.find((b) => b.weekday === weekdayOf() && b.title.toLowerCase().includes(q))
+          if (hit) {
+            s.updateBlock(hit.id, { start: a.start, ...(a.end !== undefined ? { end: a.end } : {}) })
+            receipts.push(`Moved “${hit.title}” to ${a.start}`)
+          }
+          break
+        }
+        case 'remove_block': {
+          const q = a.title.toLowerCase()
+          const hit = s.schedule.find((b) => b.weekday === weekdayOf() && b.title.toLowerCase().includes(q))
+          if (hit) {
+            s.removeBlock(hit.id)
+            receipts.push(`Removed from schedule: ${hit.title}`)
           }
           break
         }
