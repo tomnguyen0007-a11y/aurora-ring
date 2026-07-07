@@ -85,8 +85,8 @@ EXECUTION RULES:
 }
 
 function historyFor(chat: ChatMsg[], userText: string): { role: 'user' | 'assistant'; content: string }[] {
-  // Include last 12 messages for context window efficiency
-  const recent = chat.slice(-12).map((m) => ({
+  // Deep conversational context — the last 24 turns ride along with every query
+  const recent = chat.slice(-24).map((m) => ({
     role: m.role === 'user' ? ('user' as const) : ('assistant' as const),
     content: m.text,
   }))
@@ -216,32 +216,8 @@ export interface LlmResult {
   receipts: string[]
 }
 
-/**
- * Unified LLM pipeline:
- * 1. Receive the context already built once by the caller (Jarvis.tsx) —
- *    never rebuilt here, so memory-access bookkeeping isn't double-counted
- *    and the local engine + LLM always reason from the exact same snapshot.
- * 2. Call configured provider
- * 3. Parse and execute action blocks
- * 4. Return clean reply + receipts
- *
- * This is the ONLY LLM entry point in the app.
- * No branching logic — single consistent flow.
- */
-export async function runLlm(userText: string, ctx: JarvisContext, image?: string): Promise<LlmResult> {
-  const { settings } = useStore.getState()
-
-  if (!llmConfigured()) {
-    throw new Error('LLM not configured. Add an API key in Settings.')
-  }
-
-  // Call the configured provider
-  const raw =
-    settings.provider === 'anthropic'
-      ? await callAnthropic(userText, ctx, image)
-      : await callGemini(userText, ctx, image)
-
-  // Extract and execute trailing action blocks
+/** Parse trailing ```json action blocks out of a raw LLM reply; execute them. */
+function extractAndApplyActions(raw: string): LlmResult {
   let receipts: string[] = []
   let reply = raw
 
@@ -266,4 +242,201 @@ export async function runLlm(userText: string, ctx: JarvisContext, image?: strin
     reply: reply.trim() || (receipts.length ? 'Done.' : '…'),
     receipts,
   }
+}
+
+/** The user-visible part of a partially-streamed reply (everything before the action block). */
+function displayPortion(raw: string): string {
+  const cut = raw.indexOf('```')
+  return (cut === -1 ? raw : raw.slice(0, cut)).trimEnd()
+}
+
+/**
+ * Unified LLM pipeline (non-streaming):
+ * 1. Receive the context already built once by the caller (Jarvis.tsx) —
+ *    never rebuilt here, so memory-access bookkeeping isn't double-counted
+ *    and the local engine + LLM always reason from the exact same snapshot.
+ * 2. Call configured provider
+ * 3. Parse and execute action blocks
+ * 4. Return clean reply + receipts
+ */
+export async function runLlm(userText: string, ctx: JarvisContext, image?: string): Promise<LlmResult> {
+  const { settings } = useStore.getState()
+
+  if (!llmConfigured()) {
+    throw new Error('LLM not configured. Add an API key in Settings.')
+  }
+
+  const raw =
+    settings.provider === 'anthropic'
+      ? await callAnthropic(userText, ctx, image)
+      : await callGemini(userText, ctx, image)
+
+  return extractAndApplyActions(raw)
+}
+
+// ————————————————————————————————————————————————————————
+// STREAMING PIPELINE — the reply renders and speaks as it's generated
+// ————————————————————————————————————————————————————————
+
+/** Consume an SSE fetch body, invoking onData for each `data: {...}` payload. */
+async function consumeSSE(res: Response, onData: (json: string) => void): Promise<void> {
+  const reader = res.body!.getReader()
+  const decoder = new TextDecoder()
+  let pending = ''
+
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    pending += decoder.decode(value, { stream: true })
+
+    const lines = pending.split('\n')
+    pending = lines.pop() ?? '' // keep the trailing partial line
+
+    for (const line of lines) {
+      const trimmed = line.trim()
+      if (!trimmed.startsWith('data:')) continue
+      const payload = trimmed.slice(5).trim()
+      if (payload && payload !== '[DONE]') onData(payload)
+    }
+  }
+}
+
+async function streamAnthropic(userText: string, ctx: JarvisContext, image: string | undefined, onText: (delta: string) => void): Promise<string> {
+  const { settings, chat } = useStore.getState()
+  const messages = historyFor(chat, userText) as Array<{ role: 'user' | 'assistant'; content: unknown }>
+
+  if (image) {
+    const { mime, base64 } = splitDataURL(image)
+    const last = messages[messages.length - 1]
+    const content = [
+      { type: 'image', source: { type: 'base64', media_type: mime, data: base64 } },
+      { type: 'text', text: userText },
+    ]
+    if (last) last.content = content
+    else messages.push({ role: 'user', content })
+  }
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': settings.anthropicKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: settings.anthropicModel || 'claude-sonnet-5',
+      max_tokens: 2000,
+      stream: true,
+      system: buildSystemPrompt(ctx),
+      messages,
+    }),
+  })
+
+  if (!res.ok || !res.body) {
+    const body = await res.text().catch(() => '')
+    throw new Error(`Anthropic ${res.status}: ${body.slice(0, 180)}`)
+  }
+
+  let full = ''
+  await consumeSSE(res, (payload) => {
+    try {
+      const ev: { type?: string; delta?: { type?: string; text?: string } } = JSON.parse(payload)
+      if (ev.type === 'content_block_delta' && ev.delta?.type === 'text_delta' && ev.delta.text) {
+        full += ev.delta.text
+        onText(ev.delta.text)
+      }
+    } catch {
+      /* ignore malformed frames */
+    }
+  })
+  return full
+}
+
+async function streamGemini(userText: string, ctx: JarvisContext, image: string | undefined, onText: (delta: string) => void): Promise<string> {
+  const { settings, chat } = useStore.getState()
+  const model = settings.geminiModel || 'gemini-2.5-flash'
+
+  const contents = historyFor(chat, userText).map((m) => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }] as Array<Record<string, unknown>>,
+  }))
+
+  if (image) {
+    const { mime, base64 } = splitDataURL(image)
+    contents[contents.length - 1]?.parts.unshift({ inlineData: { mimeType: mime, data: base64 } })
+  }
+
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse&key=${settings.geminiKey}`,
+    {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: buildSystemPrompt(ctx) }] },
+        contents,
+        generationConfig: { maxOutputTokens: 2000 },
+      }),
+    },
+  )
+
+  if (!res.ok || !res.body) {
+    const body = await res.text().catch(() => '')
+    throw new Error(`Gemini ${res.status}: ${body.slice(0, 180)}`)
+  }
+
+  let full = ''
+  await consumeSSE(res, (payload) => {
+    try {
+      const ev: { candidates?: { content?: { parts?: { text?: string }[] } }[] } = JSON.parse(payload)
+      const text = ev.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? ''
+      if (text) {
+        full += text
+        onText(text)
+      }
+    } catch {
+      /* ignore malformed frames */
+    }
+  })
+  return full
+}
+
+export interface StreamHandlers {
+  /**
+   * Called as visible reply text grows (action JSON is never included).
+   * `displayDelta` is the newly-arrived visible text; `displayFull` the whole visible reply so far.
+   */
+  onDelta: (displayDelta: string, displayFull: string) => void
+}
+
+/**
+ * Streaming LLM pipeline: text renders and can be spoken sentence-by-sentence
+ * while the model is still generating. Falls back to the caller for
+ * non-streaming retry on failure. Action blocks are executed after the
+ * stream completes, exactly like the non-streaming path.
+ */
+export async function runLlmStream(userText: string, ctx: JarvisContext, image: string | undefined, handlers: StreamHandlers): Promise<LlmResult> {
+  const { settings } = useStore.getState()
+
+  if (!llmConfigured()) {
+    throw new Error('LLM not configured. Add an API key in Settings.')
+  }
+
+  let rawText = ''
+  let shown = ''
+  const collect = (delta: string) => {
+    rawText += delta
+    const display = displayPortion(rawText)
+    if (display.length > shown.length) {
+      handlers.onDelta(display.slice(shown.length), display)
+      shown = display
+    }
+  }
+
+  const full =
+    settings.provider === 'anthropic'
+      ? await streamAnthropic(userText, ctx, image, collect)
+      : await streamGemini(userText, ctx, image, collect)
+
+  return extractAndApplyActions(full)
 }

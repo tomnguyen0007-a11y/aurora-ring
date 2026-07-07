@@ -113,7 +113,7 @@ export function Meter({
             width: `${pct}%`,
             background: inBand ? 'var(--color-affirm)' : color,
             transition: 'width 0.5s cubic-bezier(0.22,1,0.36,1)',
-            boxShadow: `0 0 8px ${inBand ? 'rgba(93,211,158,0.4)' : 'rgba(246,184,60,0.35)'}`,
+            boxShadow: `0 0 8px ${inBand ? 'rgba(93,211,158,0.4)' : 'rgba(255,126,71,0.35)'}`,
           }}
         />
       </div>
@@ -255,7 +255,7 @@ export function Empty({ children }: { children: ReactNode }) {
 export const TAG_COLORS: Record<string, string> = {
   morning: '#7fb4d8',
   school: '#8b93a3',
-  gym: '#f6b83c',
+  gym: '#ff7e47',
   golf: '#5dd39e',
   run: '#5dd39e',
   business: '#e0a458',

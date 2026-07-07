@@ -221,12 +221,27 @@ export function Settings() {
                   'Good evening, sir. All systems are calibrated and standing by.',
                   s.settings.voiceURI,
                   s.settings.elevenKey ? { key: s.settings.elevenKey, voiceId: s.settings.elevenVoiceId } : undefined,
+                  s.settings.openaiKey,
                 )
               }
             >
               <Play size={14} /> Test
             </button>
           </div>
+        </div>
+        <div className="mt-4 border-t border-edge pt-4">
+          <span className="hud-label !mb-1 block !text-[8px]">Backup neural voice — OpenAI TTS (optional)</span>
+          <p className="mb-2 text-[11px] leading-relaxed text-fog">
+            Used automatically when ElevenLabs is unset or out of quota, before falling back to the robotic browser
+            voice. Any OpenAI API key works.
+          </p>
+          <input
+            className="field num w-full"
+            type="password"
+            placeholder="OpenAI API key (optional)"
+            value={s.settings.openaiKey ?? ''}
+            onChange={(e) => s.setSettings({ openaiKey: e.target.value.trim() })}
+          />
         </div>
         <div className="mt-4 border-t border-edge pt-4">
           <label className="flex items-center justify-between">

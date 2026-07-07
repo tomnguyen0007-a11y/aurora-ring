@@ -61,9 +61,9 @@ export function Dashboard() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <div className="flex items-baseline gap-3">
-              <span className="h-lumen num text-6xl font-bold leading-none sm:text-7xl">
+              <span className="h-lumen num text-6xl font-extralight leading-none tracking-tight sm:text-7xl">
                 {prog.done}
-                <span className="text-fog/70">/{prog.total}</span>
+                <span className="text-fog/60">/{prog.total}</span>
               </span>
               <span className="hud-label !mb-0 !text-[10px]">complete</span>
             </div>
@@ -82,8 +82,8 @@ export function Dashboard() {
               )}
             </p>
           </div>
-          <Ring pct={prog.pct} size={88} stroke={7}>
-            <span className="num text-lg font-bold text-signal">{prog.pct}%</span>
+          <Ring pct={prog.pct} size={88} stroke={4}>
+            <span className="num text-lg font-light text-signal">{prog.pct}%</span>
           </Ring>
         </div>
 
@@ -98,7 +98,7 @@ export function Dashboard() {
             { label: 'AURORA', value: `$${rev.toFixed(0)}`, unit: '/1k', tone: rev >= 1000 ? 'text-affirm' : 'text-steel' },
           ].map((v) => (
             <div key={v.label} className="glass rounded-xl px-3 py-2.5">
-              <div className={`num text-lg font-bold leading-none ${v.tone}`}>
+              <div className={`num text-lg font-medium leading-none ${v.tone}`}>
                 {v.value}
                 <span className="text-[10px] font-normal text-fog">{v.unit}</span>
               </div>
@@ -153,7 +153,7 @@ export function Dashboard() {
                 key={b.id}
                 className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 transition-all ${
                   active
-                    ? 'border-signal/40 bg-signal/[0.07] shadow-[0_0_24px_-8px_rgba(246,184,60,0.4)]'
+                    ? 'border-signal/40 bg-signal/[0.07] shadow-[0_0_24px_-8px_rgba(233,237,242,0.25)]'
                     : done
                       ? 'border-transparent opacity-55'
                       : past
@@ -279,7 +279,7 @@ export function Dashboard() {
               { label: 'Check-in', v: st.checkin },
             ].map((x) => (
               <div key={x.label} className="rounded-xl border border-edge bg-black/25 px-2 py-3 text-center">
-                <div className={`num text-2xl font-bold ${x.v > 0 ? 'text-signal' : 'text-fog'}`}>{x.v}</div>
+                <div className={`num text-2xl font-light ${x.v > 0 ? "text-signal" : "text-fog"}`}>{x.v}</div>
                 <div className="hud-label !mb-0 mt-1 !text-[8px]">{x.label}</div>
               </div>
             ))}

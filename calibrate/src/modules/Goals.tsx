@@ -5,7 +5,7 @@ import { useStore } from '../store/store'
 import type { Pillar } from '../store/types'
 
 const PILLAR_META: Record<Pillar, { label: string; color: string; icon: typeof Dumbbell }> = {
-  physique: { label: 'Physique', color: '#f6b83c', icon: Dumbbell },
+  physique: { label: 'Physique', color: '#ff7e47', icon: Dumbbell },
   golf: { label: 'Golf', color: '#5dd39e', icon: Crosshair },
   business: { label: 'Business', color: '#e0a458', icon: Briefcase },
   recovery: { label: 'Recovery', color: '#7f8fd8', icon: Moon },

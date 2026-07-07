@@ -86,7 +86,7 @@ function GolfDiagnostic() {
 const CAT_COLORS: Record<GolfCategory, string> = {
   putting: '#5dd39e',
   chipping: '#7fd8c9',
-  'long-game': '#f6b83c',
+  'long-game': '#ff7e47',
   drills: '#e0a458',
   simulator: '#7fb4d8',
   'on-course': '#c9a3d4',

@@ -15,7 +15,7 @@ const TAG_LABEL: Record<Mantra['tag'], string> = {
 }
 const TAG_COLOR: Record<Mantra['tag'], string> = {
   mindset: '#58c7f0',
-  wealth: '#f7bd45',
+  wealth: '#ff7e47',
   discipline: '#ef6a54',
   stoic: '#8fc4e6',
   love: '#c9a3d4',
