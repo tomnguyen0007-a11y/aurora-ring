@@ -101,6 +101,23 @@ export function runLocalEngine(input: string, contextUserName?: string): EngineR
     }
   }
 
+  // ——— water corrections FIRST (they'd otherwise be swallowed by the additive pattern):
+  // "set water to 1l", "remove 500ml water", "correct my water to 1500ml" ———
+  m = t.match(/(?:set|correct|fix|make)\s+(?:my\s+)?water\s*(?:to|at)?\s*(\d+(?:[.,]\d+)?)\s*(ml|l|liter|litre)s?/i)
+  if (m) {
+    const v = num(m[1])
+    const ml = (m[2] ?? 'l').toLowerCase() === 'ml' ? v : v * 1000
+    return act([{ type: 'set_water', ml }], `Water corrected to ${(ml / 1000).toFixed(1)}L today, ${name}.`)
+  }
+  m = t.match(/(?:remove|subtract|minus|take off|undo)\s.*?(\d+(?:[.,]\d+)?)\s*(ml|l|liter|litre)s?\b.*water|water.*?(?:remove|subtract|minus)\s*(\d+(?:[.,]\d+)?)\s*(ml|l|liter|litre)s?/i)
+  if (m) {
+    const v = num(m[1] ?? m[3])
+    const unit = (m[2] ?? m[4] ?? 'ml').toLowerCase()
+    const ml = unit === 'ml' ? v : v * 1000
+    const after = Math.max(0, macrosForDate(s, todayISO()).water - ml)
+    return act([{ type: 'log_water', ml: -ml }], `Removed ${ml >= 1000 ? `${(ml / 1000).toFixed(1)}L` : `${Math.round(ml)}ml`} — ${(after / 1000).toFixed(1)}L on the books today.`)
+  }
+
   // ——— water: "500ml water", "log water", "drank a liter" ———
   m = t.match(
     /(\d+(?:[.,]\d+)?)\s*(ml|l|liter|litre)s?\b.*(water|hydrat)|(?:water|hydrat).*?(\d+(?:[.,]\d+)?)\s*(ml|l|liter|litre)s?\b/i,

@@ -46,6 +46,15 @@ export type JarvisAction =
   | { type: 'add_block'; title: string; start: string; end?: string; weekday?: Weekday; detail?: string; tag?: BlockTag }
   | { type: 'move_block'; title: string; start: string; end?: string }
   | { type: 'remove_block'; title: string }
+  // ——— corrections & fine-grained control ———
+  | { type: 'set_water'; ml: number } // overwrite today's total (undo an accidental log)
+  | { type: 'toggle_supplement'; name: string } // mark taken/untaken today
+  | { type: 'add_supplement'; name: string; dose?: string; timing?: string }
+  | { type: 'remove_supplement'; name: string }
+  | { type: 'move_supplement'; name: string; position: number } // 1 = top of the stack
+  | { type: 'update_exercise'; workout: string; exercise: string; name?: string; sets?: number; reps?: string; cue?: string }
+  | { type: 'add_exercise'; workout: string; name: string; sets: number; reps: string; cue?: string }
+  | { type: 'remove_exercise'; workout: string; exercise: string }
 
 const VIEWS: ViewId[] = ['today', 'jarvis', 'goals', 'training', 'golf', 'nutrition', 'recovery', 'grocery', 'notes', 'business', 'books', 'mindset', 'markets', 'schedule', 'settings']
 
@@ -385,6 +394,79 @@ export function applyActions(actions: JarvisAction[]): string[] {
           if (hit) {
             s.removeBlock(hit.id)
             receipts.push(`Removed from schedule: ${hit.title}`)
+          }
+          break
+        }
+
+        // ——— corrections & fine-grained control ———
+        case 'set_water': {
+          s.setWater(date, a.ml)
+          receipts.push(`Water corrected to ${(Math.max(0, a.ml) / 1000).toFixed(1)}L today`)
+          break
+        }
+        case 'toggle_supplement': {
+          const q = a.name.toLowerCase()
+          const hit = s.supplements.find((x) => x.name.toLowerCase().includes(q))
+          if (hit) {
+            s.toggleSupplement(date, hit.id)
+            const takenNow = !!useStore.getState().supLog[date]?.[hit.id]
+            receipts.push(`${hit.name}: ${takenNow ? 'taken' : 'unmarked'}`)
+          }
+          break
+        }
+        case 'add_supplement': {
+          if (a.name.trim()) {
+            s.addSupplement(a.name.trim(), a.dose ?? '', a.timing ?? '')
+            receipts.push(`Added to stack: ${a.name.trim()}`)
+          }
+          break
+        }
+        case 'remove_supplement': {
+          const q = a.name.toLowerCase()
+          const hit = s.supplements.find((x) => x.name.toLowerCase().includes(q))
+          if (hit) {
+            s.removeSupplement(hit.id)
+            receipts.push(`Removed from stack: ${hit.name}`)
+          }
+          break
+        }
+        case 'move_supplement': {
+          const q = a.name.toLowerCase()
+          const hit = s.supplements.find((x) => x.name.toLowerCase().includes(q))
+          if (hit) {
+            s.moveSupplement(hit.id, Math.round(a.position) - 1)
+            receipts.push(`${hit.name} → position ${Math.max(1, Math.round(a.position))}`)
+          }
+          break
+        }
+        case 'update_exercise': {
+          const w = s.workouts.find((x) => x.name.toLowerCase().includes(a.workout.toLowerCase()))
+          const ex = w?.exercises.find((e) => e.name.toLowerCase().includes(a.exercise.toLowerCase()))
+          if (w && ex) {
+            s.updateExercise(w.id, ex.id, {
+              ...(a.name ? { name: a.name } : {}),
+              ...(a.sets != null ? { sets: a.sets } : {}),
+              ...(a.reps ? { reps: a.reps } : {}),
+              ...(a.cue ? { cue: a.cue } : {}),
+            })
+            receipts.push(`Updated ${w.name}: ${a.name ?? ex.name}${a.sets != null || a.reps ? ` ${a.sets ?? ex.sets}×${a.reps ?? ex.reps}` : ''}`)
+          }
+          break
+        }
+        case 'add_exercise': {
+          const w = s.workouts.find((x) => x.name.toLowerCase().includes(a.workout.toLowerCase()))
+          if (w && a.name.trim()) {
+            s.addExercise(w.id, { name: a.name.trim(), sets: a.sets, reps: a.reps, cue: a.cue ?? '' })
+            receipts.push(`Added to ${w.name}: ${a.name.trim()} ${a.sets}×${a.reps}`)
+          }
+          break
+        }
+        case 'remove_exercise': {
+          const w = s.workouts.find((x) => x.name.toLowerCase().includes(a.workout.toLowerCase()))
+          const ex = w?.exercises.find((e) => e.name.toLowerCase().includes(a.exercise.toLowerCase()))
+          if (w && ex) {
+            s.removeExercise(w.id, ex.id)
+            receipts.push(`Removed from ${w.name}: ${ex.name}`)
           }
           break
         }

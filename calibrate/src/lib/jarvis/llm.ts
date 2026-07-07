@@ -81,6 +81,15 @@ Editing & deleting (fix mistakes, don't just add):
   - {"type":"move_block","title":"<today's block fragment>","start":"HH:MM","end":"HH:MM"}
   - {"type":"remove_block","title":"<today's block fragment>"}
 
+Corrections & fine-grained control:
+  - {"type":"set_water","ml":N}  ← overwrite today's TOTAL (e.g. accidental over-log: "make it 1 liter" → 1000)
+  - {"type":"log_water","ml":-N}  ← negative values subtract
+  - {"type":"toggle_supplement","name":"<fragment>"} · {"type":"add_supplement","name":"...","dose":"...","timing":"..."}
+  - {"type":"remove_supplement","name":"<fragment>"} · {"type":"move_supplement","name":"<fragment>","position":1}  (1 = top)
+  - {"type":"update_exercise","workout":"<name fragment>","exercise":"<fragment>","name":"...","sets":N,"reps":"8-10","cue":"..."}
+  - {"type":"add_exercise","workout":"<fragment>","name":"...","sets":N,"reps":"8-10","cue":"..."}
+  - {"type":"remove_exercise","workout":"<fragment>","exercise":"<fragment>"}
+
 Memory:
   - {"type":"remember","fact":"<durable fact to store in memory>"}
 

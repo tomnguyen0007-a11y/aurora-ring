@@ -1,4 +1,4 @@
-import { Coffee, Droplets, Moon, Pill, Plus, Trash2, Wine } from 'lucide-react'
+import { ChevronDown, ChevronUp, Coffee, Droplets, Moon, Pill, Plus, Trash2, Wine } from 'lucide-react'
 import { CheckDot, HudLabel, Panel, StatTile } from '../components/ui'
 import { todayISO } from '../lib/dates'
 import { streaks } from '../lib/stats'
@@ -66,7 +66,7 @@ export function Recovery() {
             <Pill size={11} className="text-affirm" /> Daily Supplement Stack
           </HudLabel>
           <ul className="space-y-1.5">
-            {s.supplements.map((sup) => {
+            {s.supplements.map((sup, i) => {
               const on = !!taken[sup.id]
               return (
                 <li key={sup.id} className="group flex items-center gap-3 rounded-xl bg-black/25 px-3.5 py-2.5">
@@ -77,13 +77,27 @@ export function Recovery() {
                       {sup.dose} · {sup.timing}
                     </div>
                   </div>
-                  <button
-                    className="opacity-0 transition-opacity group-hover:opacity-100"
-                    aria-label={`Remove ${sup.name}`}
-                    onClick={() => s.removeSupplement(sup.id)}
-                  >
-                    <Trash2 size={14} className="text-alert/70" />
-                  </button>
+                  <div className="flex items-center gap-0.5 transition-opacity lg:opacity-0 lg:group-hover:opacity-100">
+                    <button
+                      aria-label={`Move ${sup.name} up`}
+                      disabled={i === 0}
+                      onClick={() => s.moveSupplement(sup.id, i - 1)}
+                      className="rounded p-1 text-haze hover:text-ice disabled:opacity-25"
+                    >
+                      <ChevronUp size={14} />
+                    </button>
+                    <button
+                      aria-label={`Move ${sup.name} down`}
+                      disabled={i === s.supplements.length - 1}
+                      onClick={() => s.moveSupplement(sup.id, i + 1)}
+                      className="rounded p-1 text-haze hover:text-ice disabled:opacity-25"
+                    >
+                      <ChevronDown size={14} />
+                    </button>
+                    <button aria-label={`Remove ${sup.name}`} onClick={() => s.removeSupplement(sup.id)} className="rounded p-1">
+                      <Trash2 size={14} className="text-alert/70" />
+                    </button>
+                  </div>
                 </li>
               )
             })}
@@ -106,12 +120,23 @@ export function Recovery() {
               style={{ width: `${Math.min(100, (water / s.macros.waterMl) * 100)}%`, boxShadow: '0 0 10px rgba(88,199,240,0.5)' }}
             />
           </div>
-          <div className="mb-3 flex gap-2">
+          <div className="mb-2 flex gap-2">
             {[250, 500, 750].map((ml) => (
               <button key={ml} className="btn flex-1 !py-1.5 !text-xs" onClick={() => s.addWater(date, ml)}>
                 +{ml}
               </button>
             ))}
+          </div>
+          <div className="mb-3 flex gap-2">
+            <button className="btn flex-1 !py-1.5 !text-xs text-haze" onClick={() => s.addWater(date, -250)} disabled={water <= 0}>
+              −250
+            </button>
+            <button className="btn flex-1 !py-1.5 !text-xs text-haze" onClick={() => s.addWater(date, -500)} disabled={water <= 0}>
+              −500
+            </button>
+            <button className="btn flex-1 !py-1.5 !text-xs text-alert/80" onClick={() => s.setWater(date, 0)} disabled={water <= 0}>
+              Reset
+            </button>
           </div>
           <ul className="space-y-1 text-xs text-haze">
             <li>· Front-load early — 1L on waking + electrolytes</li>

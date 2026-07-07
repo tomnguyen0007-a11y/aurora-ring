@@ -164,6 +164,8 @@ export interface CalibrateState {
   toggleSupplement: (date: string, id: string) => void
   addSupplement: (name: string, dose: string, timing: string) => void
   removeSupplement: (id: string) => void
+  moveSupplement: (id: string, position: number) => void // reorder within the stack
+  setWater: (date: string, ml: number) => void // overwrite a day's total (corrections)
 
   // golf diagnostic
   golfStats: GolfStats
@@ -449,6 +451,18 @@ export const useStore = create<CalibrateState>()(
       addSupplement: (name, dose, timing) =>
         set((s) => ({ supplements: [...s.supplements, { id: uid('sup'), name, dose, timing }] })),
       removeSupplement: (id) => set((s) => ({ supplements: s.supplements.filter((x) => x.id !== id) })),
+      moveSupplement: (id, position) =>
+        set((s) => {
+          const idx = s.supplements.findIndex((x) => x.id === id)
+          if (idx === -1) return {}
+          const target = Math.max(0, Math.min(s.supplements.length - 1, position))
+          if (target === idx) return {}
+          const next = [...s.supplements]
+          const [item] = next.splice(idx, 1)
+          next.splice(target, 0, item)
+          return { supplements: next }
+        }),
+      setWater: (date, ml) => set((s) => ({ water: { ...s.water, [date]: Math.max(0, Math.round(ml)) } })),
 
       setGolfStats: (patch) => set((s) => ({ golfStats: { ...s.golfStats, ...patch } })),
 
