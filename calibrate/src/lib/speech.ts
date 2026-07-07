@@ -325,6 +325,176 @@ export async function speak(
 type RecognizerCallback = (text: string) => void
 type RecognizerEndCallback = () => void
 
+/** True when the browser has native speech recognition (desktop Chrome/Edge — NOT iOS). */
+export function recognitionSupported(): boolean {
+  const w = window as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown }
+  return !!(w.SpeechRecognition || w.webkitSpeechRecognition)
+}
+
+export interface DictationKeys {
+  openaiKey?: string
+  elevenKey?: string
+  geminiKey?: string
+}
+
+/** True when voice input can work at all: native recognition OR recorder + a transcription key. */
+export function dictationSupported(keys: DictationKeys): boolean {
+  if (recognitionSupported()) return true
+  const hasRecorder = typeof MediaRecorder !== 'undefined' && !!navigator.mediaDevices?.getUserMedia
+  return hasRecorder && !!(keys.openaiKey || keys.elevenKey || keys.geminiKey)
+}
+
+// ——— recorder-based dictation (iOS has NO native speech recognition) ———
+
+async function transcribeAudio(blob: Blob, keys: DictationKeys): Promise<string> {
+  // OpenAI Whisper — most reliable transcription path
+  if (keys.openaiKey) {
+    const form = new FormData()
+    form.append('file', blob, blob.type.includes('mp4') ? 'audio.mp4' : 'audio.webm')
+    form.append('model', 'whisper-1')
+    const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: { authorization: `Bearer ${keys.openaiKey}` },
+      body: form,
+    })
+    if (res.ok) {
+      const data: { text?: string } = await res.json()
+      if (data.text?.trim()) return data.text.trim()
+    }
+  }
+
+  // ElevenLabs Scribe
+  if (keys.elevenKey) {
+    const form = new FormData()
+    form.append('file', blob, blob.type.includes('mp4') ? 'audio.mp4' : 'audio.webm')
+    form.append('model_id', 'scribe_v1')
+    const res = await fetch('https://api.elevenlabs.io/v1/speech-to-text', {
+      method: 'POST',
+      headers: { 'xi-api-key': keys.elevenKey },
+      body: form,
+    })
+    if (res.ok) {
+      const data: { text?: string } = await res.json()
+      if (data.text?.trim()) return data.text.trim()
+    }
+  }
+
+  // Gemini audio understanding
+  if (keys.geminiKey) {
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve((reader.result as string).split(',')[1] ?? '')
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${keys.geminiKey}`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                { inlineData: { mimeType: blob.type || 'audio/webm', data: base64 } },
+                { text: 'Transcribe this audio verbatim. Output ONLY the transcribed words, nothing else.' },
+              ],
+            },
+          ],
+        }),
+      },
+    )
+    if (res.ok) {
+      const data: { candidates?: { content?: { parts?: { text?: string }[] } }[] } = await res.json()
+      const text = data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? ''
+      if (text.trim()) return text.trim()
+    }
+  }
+
+  throw new Error('transcription failed')
+}
+
+export interface Dictation {
+  start: () => void
+  stop: () => void
+}
+
+/**
+ * Unified voice input. Uses native browser speech recognition where it exists
+ * (desktop Chrome/Edge); everywhere else — critically, iPhone — records with
+ * MediaRecorder and transcribes via Whisper / ElevenLabs / Gemini.
+ * Tap once to start, tap again to stop; the transcript arrives via onResult.
+ */
+export function createDictation(
+  keys: DictationKeys,
+  onResult: RecognizerCallback,
+  onEnd: RecognizerEndCallback,
+  onError: (message: string) => void,
+): Dictation | null {
+  if (recognitionSupported()) {
+    return createRecognizer(onResult, onEnd)
+  }
+
+  if (typeof MediaRecorder === 'undefined' || !navigator.mediaDevices?.getUserMedia) return null
+  if (!keys.openaiKey && !keys.elevenKey && !keys.geminiKey) return null
+
+  let recorder: MediaRecorder | null = null
+  let stream: MediaStream | null = null
+  const chunks: Blob[] = []
+
+  const cleanup = () => {
+    stream?.getTracks().forEach((t) => t.stop())
+    stream = null
+    recorder = null
+  }
+
+  return {
+    start: () => {
+      void navigator.mediaDevices
+        .getUserMedia({ audio: true })
+        .then((s) => {
+          stream = s
+          const mime = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4'
+          recorder = new MediaRecorder(s, { mimeType: mime })
+          recorder.ondataavailable = (e) => {
+            if (e.data.size > 0) chunks.push(e.data)
+          }
+          recorder.onstop = () => {
+            const blob = new Blob(chunks, { type: recorder?.mimeType || 'audio/webm' })
+            chunks.length = 0
+            cleanup()
+            if (blob.size < 1000) {
+              onEnd()
+              return
+            }
+            transcribeAudio(blob, keys)
+              .then((text) => {
+                if (text) onResult(text)
+                onEnd()
+              })
+              .catch(() => {
+                onError('I heard you, but transcription failed — check the OpenAI/ElevenLabs/Gemini key in Settings.')
+                onEnd()
+              })
+          }
+          recorder.start()
+        })
+        .catch(() => {
+          onError('Microphone access was denied. Allow the mic for this site in your browser settings and try again.')
+          onEnd()
+        })
+    },
+    stop: () => {
+      if (recorder && recorder.state !== 'inactive') recorder.stop()
+      else {
+        cleanup()
+        onEnd()
+      }
+    },
+  }
+}
+
 export function createRecognizer(onResult: RecognizerCallback, onEnd: RecognizerEndCallback) {
   const w = window as unknown as { SpeechRecognition?: new () => unknown; webkitSpeechRecognition?: new () => unknown }
   const SpeechRecognitionCtor = w.SpeechRecognition || w.webkitSpeechRecognition

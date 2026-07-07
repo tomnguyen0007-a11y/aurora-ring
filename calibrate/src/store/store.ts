@@ -199,6 +199,9 @@ const defaultSettings: Settings = {
   openaiKey: '',
   notifyEnabled: false,
   hevyKey: '',
+  supabaseUrl: '',
+  supabaseKey: '',
+  syncCode: '',
 }
 
 const seedState = () => ({
