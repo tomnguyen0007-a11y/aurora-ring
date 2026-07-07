@@ -19,7 +19,8 @@ import {
   UtensilsCrossed,
   X,
 } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
+import { useState, useSyncExternalStore, type ReactNode } from 'react'
+import { getSyncStatus, subscribeSyncStatus } from '../lib/supabase'
 import { useStore } from '../store/store'
 import type { ViewId } from '../store/types'
 
@@ -86,6 +87,37 @@ function Brand() {
   )
 }
 
+/**
+ * Live sync indicator — tap to open Settings. Green dot = synced, amber = pushing,
+ * red = error, grey = not configured (local-only). Makes "why is my phone different
+ * from my desktop" answerable at a glance.
+ */
+function SyncBadge() {
+  const status = useSyncExternalStore(subscribeSyncStatus, getSyncStatus)
+  const setView = useStore((s) => s.setView)
+  const configured = status.enabled
+  const color = !configured
+    ? 'bg-fog/60'
+    : status.error
+      ? 'bg-alert shadow-[0_0_8px_rgba(239,106,84,0.7)]'
+      : status.pendingPush
+        ? 'bg-signal shadow-[0_0_8px_rgba(233,237,242,0.6)]'
+        : 'bg-affirm shadow-[0_0_8px_rgba(74,222,143,0.7)]'
+  const label = !configured ? 'Sync off — local only. Tap to set up.' : status.error ? `Sync error: ${status.error}` : status.pendingPush ? 'Syncing…' : 'Synced'
+
+  return (
+    <button
+      onClick={() => setView('settings')}
+      title={label}
+      aria-label={label}
+      className="flex items-center gap-1.5 rounded-full px-2 py-1"
+    >
+      <span className={`inline-block h-2 w-2 rounded-full ${color}`} />
+      <span className="hud-label !mb-0 !text-[8px] !tracking-[0.2em]">{!configured ? 'LOCAL' : status.error ? 'SYNC ERR' : 'SYNC'}</span>
+    </button>
+  )
+}
+
 /** Regular (non-Jarvis) bottom-nav tab — near-white glow when active, matching the ice/glass palette. */
 function NavTab({ item, active, onClick }: { item: (typeof NAV)[number]; active: boolean; onClick: () => void }) {
   const Icon = item.icon
@@ -143,10 +175,13 @@ export function Shell({ children }: { children: ReactNode }) {
             )
           })}
         </nav>
-        <div className="px-3 pt-3 text-[10px] leading-relaxed text-fog">
-          <span className="text-signal-dim">◆</span> THE BLUEPRINT V6
-          <br />
-          Executive Operating System
+        <div className="flex items-center justify-between px-3 pt-3 text-[10px] leading-relaxed text-fog">
+          <span>
+            <span className="text-signal-dim">◆</span> THE BLUEPRINT V7
+            <br />
+            Executive Operating System
+          </span>
+          <SyncBadge />
         </div>
       </aside>
 
@@ -158,9 +193,12 @@ export function Shell({ children }: { children: ReactNode }) {
         {/* Mobile top bar */}
         <div className="mb-4 flex items-center justify-between lg:hidden">
           <Brand />
-          <button className="btn btn-ghost !px-2.5" aria-label="Settings" onClick={() => go('settings')}>
-            <Settings2 size={18} />
-          </button>
+          <div className="flex items-center gap-1">
+            <SyncBadge />
+            <button className="btn btn-ghost !px-2.5" aria-label="Settings" onClick={() => go('settings')}>
+              <Settings2 size={18} />
+            </button>
+          </div>
         </div>
         {children}
       </main>

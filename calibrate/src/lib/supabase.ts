@@ -214,13 +214,20 @@ export function initSync(): void {
   // Push on any data mutation (navigation-only changes don't count)
   useStore.subscribe((state, prev) => {
     if (applyingRemote) return
+
+    // Credentials just completed → connect immediately, don't wait for the poll
+    const wasEnabled = status.enabled
+    status.enabled = !!currentConfig()
+    if (!wasEnabled && status.enabled) {
+      notify()
+      void pullState()
+      return
+    }
+
     const changed = (Object.keys(state) as (keyof CalibrateState)[]).some(
       (k) => k !== 'view' && typeof state[k] !== 'function' && state[k] !== prev[k],
     )
-    if (changed) {
-      status.enabled = !!currentConfig()
-      schedulePush()
-    }
+    if (changed) schedulePush()
   })
 
   // Pull on launch, tab focus, reconnect, and a slow poll
