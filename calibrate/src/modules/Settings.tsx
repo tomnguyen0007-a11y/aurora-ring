@@ -129,14 +129,14 @@ export function Settings() {
           unlock deep conversation, planning and strategy. Keys never leave this device — calls go directly from your
           browser to the provider.
         </p>
-        <div className="mb-3 flex gap-1.5">
-          {(['none', 'anthropic', 'gemini'] as LlmProvider[]).map((p) => (
+        <div className="mb-3 flex flex-wrap gap-1.5">
+          {(['none', 'anthropic', 'gemini', 'groq'] as LlmProvider[]).map((p) => (
             <button
               key={p}
               onClick={() => s.setSettings({ provider: p })}
               className={`btn flex-1 !text-xs ${s.settings.provider === p ? '!border-signal/60 !bg-signal/15 !text-signal' : ''}`}
             >
-              {p === 'none' ? 'Built-in only' : p === 'anthropic' ? 'Claude' : 'Gemini (free tier)'}
+              {p === 'none' ? 'Built-in only' : p === 'anthropic' ? 'Claude' : p === 'gemini' ? 'Gemini (free tier)' : 'Groq (free, no card)'}
             </button>
           ))}
         </div>
@@ -174,6 +174,28 @@ export function Settings() {
               onChange={(e) => s.setSettings({ geminiModel: e.target.value.trim() })}
             />
             <p className="text-[11px] text-fog">Google's free tier: generous daily quota at no cost — the free way to give Jarvis a real brain.</p>
+          </div>
+        )}
+        {s.settings.provider === 'groq' && (
+          <div className="space-y-2">
+            <input
+              className="field num w-full"
+              type="password"
+              placeholder="gsk_…  (console.groq.com — free, no card)"
+              value={s.settings.groqKey}
+              onChange={(e) => s.setSettings({ groqKey: e.target.value.trim() })}
+            />
+            <input
+              className="field num w-full"
+              placeholder="Model"
+              value={s.settings.groqModel}
+              onChange={(e) => s.setSettings({ groqModel: e.target.value.trim() })}
+            />
+            <p className="text-[11px] text-fog">
+              Runs on Groq's LPU hardware — extremely fast responses, genuinely free (no card, no credits system,
+              just rate limits). Best pick if you keep hitting Anthropic/Gemini limits. Trade-off: no live web search
+              and no photo vision on this provider.
+            </p>
           </div>
         )}
       </Panel>
