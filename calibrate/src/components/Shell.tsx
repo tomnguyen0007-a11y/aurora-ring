@@ -73,10 +73,9 @@ function Brand() {
       className="flex items-center gap-3 px-2 text-left transition-opacity active:opacity-60"
     >
       <div className="relative flex h-9 w-9 items-center justify-center">
-        <svg viewBox="0 0 36 36" className="h-9 w-9">
-          <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="2.5" />
-          <path d="M 18 4 A 14 14 0 1 1 5.9 11" fill="none" stroke="#e9edf2" strokeWidth="2.5" strokeLinecap="round" />
-          <circle cx="18" cy="18" r="3" fill="#e9edf2" />
+        <svg viewBox="0 0 100 100" className="h-8 w-8" fill="#f4f2ee">
+          <path transform="translate(38,18) scale(1.9)" d="M12,1 C13,8 16,11 23,12 C16,13 13,16 12,23 C11,16 8,13 1,12 C8,11 11,8 12,1 Z" />
+          <path transform="translate(18,38) scale(1.9)" d="M12,1 C13,8 16,11 23,12 C16,13 13,16 12,23 C11,16 8,13 1,12 C8,11 11,8 12,1 Z" />
         </svg>
       </div>
       <div>
