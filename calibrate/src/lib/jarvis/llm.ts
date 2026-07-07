@@ -20,6 +20,11 @@ import { formatContextForLlm, type JarvisContext } from './context'
 // 6. Return clean reply + receipts
 // ————————————————————————————————————————————————————————
 
+// Provider-native web search tools — no backend required.
+// Anthropic: server-side web_search tool; Gemini: Google Search grounding.
+const ANTHROPIC_WEB_SEARCH = { type: 'web_search_20250305', name: 'web_search', max_uses: 3 }
+const GEMINI_SEARCH_TOOLS = [{ google_search: {} }]
+
 function buildSystemPrompt(ctx: JarvisContext): string {
   const basePrompt = formatContextForLlm(ctx)
 
@@ -61,6 +66,19 @@ Completing:
 Updates:
   - {"type":"update_goal_progress","goal":"<fragment>","progress":0-100}
 
+Editing & deleting (fix mistakes, don't just add):
+  - {"type":"update_food","name":"<today's entry fragment>","newName":"...","kcal":N,"protein":N,"carbs":N,"fat":N}
+  - {"type":"delete_food","name":"<fragment, omit for most recent>"}
+  - {"type":"delete_golf"} · {"type":"delete_run"}  (most recent today)
+  - {"type":"check_grocery","name":"..."} · {"type":"remove_grocery","name":"..."}
+  - {"type":"remove_note","title":"<fragment>"}
+  - {"type":"toggle_milestone","goal":"<fragment>","milestone":"<fragment>"}
+  - {"type":"complete_biz_task","title":"<fragment>"} · {"type":"remove_goal","title":"<fragment>"}
+  - {"type":"forget","fact":"<memory fragment to erase>"}
+  - {"type":"add_block","title":"...","start":"HH:MM","end":"HH:MM","weekday":0-6,"detail":"...","tag":"morning|school|gym|golf|run|business|meal|study|recovery|social|language"}
+  - {"type":"move_block","title":"<today's block fragment>","start":"HH:MM","end":"HH:MM"}
+  - {"type":"remove_block","title":"<today's block fragment>"}
+
 Memory:
   - {"type":"remember","fact":"<durable fact to store in memory>"}
 
@@ -69,16 +87,22 @@ Navigation:
 
 EXECUTION RULES:
 - Only emit actions the user clearly asked for or explicitly confirmed
-- Never invent data values — use exact numbers from the user's input
-- Ground all advice in the KNOWLEDGE section above, never invent specifics
+- Ground advice about HIS data (his plans, his numbers, his history) in KNOWLEDGE and LIVE STATE — never invent those
 - Use "remember" when user shares durable preferences, plans, or insights
 - Keep replies under 120 words unless the user asks for deep strategy/planning
-- Always cite relevant KNOWLEDGE when giving training/nutrition/golf/recovery/business advice
-- If you don't have a specific, ask clarifying questions rather than inventing
-- FOOD LOGGING IS ZERO-TOLERANCE FOR HALLUCINATION: when the user names a food without giving kcal/macros,
-  use the exact figures from the KNOWN FOOD DATABASE in KNOWLEDGE if it matches. If it does NOT match anything
-  in that database and the user gave no numbers, do NOT emit a log_food action with a guessed number — instead
-  ask what's on the label ("how many kcal/protein on the label?"). A wrong invented number is worse than asking.
+- When he corrects a mistake ("that was wrong", "actually it was 600 kcal"), FIX it with an edit action — don't apologise and do nothing
+
+FOOD LOGGING POLICY (accurate, never a dead end):
+1. If the item matches the KNOWN FOOD DATABASE in KNOWLEDGE → use those exact figures.
+2. If the user gave numbers → use exactly those.
+3. Otherwise → estimate from your solid nutrition knowledge (or a quick web search for restaurant/branded items),
+   LOG IT with the estimate, and say it's an estimate — e.g. "Logged pho bo at roughly 450 kcal / 30g protein for a
+   typical bowl — correct me if the portion was bigger." An honest labeled estimate beats refusing to help.
+   NEVER present an estimate as an exact fact, and NEVER refuse to log because you lack the label.
+
+WEB SEARCH: You have live web search. Use it when current or specific facts matter — branded/restaurant nutrition,
+golf course info, prices, news, weather, anything beyond your training data. Never claim you are a closed system
+or cannot access the internet. Search silently; report the answer, not the search process.
 `
 
   return basePrompt + '\n' + actionDocs
@@ -146,6 +170,7 @@ async function callAnthropic(userText: string, ctx: JarvisContext, image?: strin
       max_tokens: 1500,
       system: buildSystemPrompt(ctx),
       messages,
+      tools: [ANTHROPIC_WEB_SEARCH],
     }),
   })
 
@@ -186,6 +211,7 @@ async function callGemini(userText: string, ctx: JarvisContext, image?: string):
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: buildSystemPrompt(ctx) }] },
         contents,
+        tools: GEMINI_SEARCH_TOOLS,
         generationConfig: { maxOutputTokens: 1500 },
       }),
     },
@@ -330,6 +356,7 @@ async function streamAnthropic(userText: string, ctx: JarvisContext, image: stri
       stream: true,
       system: buildSystemPrompt(ctx),
       messages,
+      tools: [ANTHROPIC_WEB_SEARCH],
     }),
   })
 
@@ -375,6 +402,7 @@ async function streamGemini(userText: string, ctx: JarvisContext, image: string 
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: buildSystemPrompt(ctx) }] },
         contents,
+        tools: GEMINI_SEARCH_TOOLS,
         generationConfig: { maxOutputTokens: 2000 },
       }),
     },
