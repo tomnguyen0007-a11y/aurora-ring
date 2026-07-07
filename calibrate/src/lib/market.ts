@@ -54,7 +54,11 @@ export async function fetchNews(key: string): Promise<NewsItem[]> {
   return data.slice(0, 12)
 }
 
-// World / politics / business / local news via GNews (gnews.io) — free tier, CORS-friendly.
+// World / politics / business / local news via GNews (gnews.io).
+// GNews's API sends no Access-Control-Allow-Origin header, so a direct browser
+// fetch() is blocked outright ("Failed to fetch" — the request never completes,
+// not even an HTTP error). There's no backend in this static app to proxy through,
+// so route via a public CORS relay; try a second one if the first is down.
 export interface Article {
   title: string
   description: string
@@ -67,6 +71,25 @@ export interface Article {
 export const NEWS_CATEGORIES = ['general', 'world', 'nation', 'business', 'technology', 'science', 'health', 'sports'] as const
 export type NewsCategory = (typeof NEWS_CATEGORIES)[number]
 
+const CORS_RELAYS = [
+  (url: string) => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+  (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+]
+
+async function fetchViaRelay(url: string): Promise<Response> {
+  let lastErr: unknown
+  for (const relay of CORS_RELAYS) {
+    try {
+      const res = await fetch(relay(url))
+      if (res.ok) return res
+      lastErr = new Error(`relay ${res.status}`)
+    } catch (e) {
+      lastErr = e
+    }
+  }
+  throw lastErr instanceof Error ? lastErr : new Error('all CORS relays failed')
+}
+
 export async function fetchWorldNews(
   key: string,
   category: NewsCategory,
@@ -77,7 +100,14 @@ export async function fetchWorldNews(
   const base = query.trim()
     ? `https://gnews.io/api/v4/search?q=${encodeURIComponent(query.trim())}&lang=en&max=12&sortby=publishedAt`
     : `https://gnews.io/api/v4/top-headlines?category=${category}&lang=en&country=${country}&max=12`
-  const res = await fetch(`${base}&apikey=${key}`)
+
+  let res: Response
+  try {
+    res = await fetchViaRelay(`${base}&apikey=${key}`)
+  } catch {
+    throw new Error('Could not reach GNews (relay unavailable) — try Refresh in a moment.')
+  }
+
   if (!res.ok) {
     const body = await res.text().catch(() => '')
     throw new Error(`GNews ${res.status}${body ? `: ${body.slice(0, 120)}` : ''}`)
