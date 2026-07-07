@@ -4,6 +4,7 @@ import { useStore } from '../../store/store'
 import type { GolfCategory } from '../../store/types'
 import { applyActions, type JarvisAction } from './actions'
 import { lookupFood } from './foodDb'
+import { llmConfigured } from './llm'
 
 // ————————————————————————————————————————————————————————
 // UNIFIED JARVIS LOCAL ENGINE (PHASE 1)
@@ -259,7 +260,17 @@ export function runLocalEngine(input: string, contextUserName?: string): EngineR
     return act([{ type: 'add_book', title: m[1].trim(), author: m[2]?.trim() }], `"${m[1].trim()}" added to the library.`)
   }
 
-  // ——— queries: context-aware questions ———
+  // ————————————————————————————————————————————————————
+  // Q&A handlers below are FALLBACK-ONLY. When an LLM brain is configured,
+  // questions route to it — it has the same live snapshot plus real reasoning
+  // and web search. The regex handlers here once hijacked general-knowledge
+  // questions ("how many calories does a big mac have" → answered with the
+  // user's daily macro summary), which made Jarvis look broken.
+  // Logging/action commands above this line stay local always: instant + free.
+  // ————————————————————————————————————————————————————————
+  if (llmConfigured()) return null
+
+  // ——— queries: context-aware questions (no-LLM fallback) ———
   if (/what'?s next|next block|what now|next up/i.test(t)) {
     const wd = weekdayOf()
     const nowMin = new Date().getHours() * 60 + new Date().getMinutes()

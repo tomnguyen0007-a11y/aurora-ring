@@ -1,6 +1,6 @@
 import { Bot, ImagePlus, KeyRound, Mic, MicOff, SendHorizonal, Trash2, VolumeX, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { createRecognizer, createSpeechStream, speak, speechSupported, stopSpeaking, type SpeechProviders } from '../lib/speech'
+import { createDictation, createSpeechStream, speak, stopSpeaking, type Dictation, type SpeechProviders } from '../lib/speech'
 import { runLocalEngine } from '../lib/jarvis/engine'
 import { llmConfigured, runLlm, runLlmStream } from '../lib/jarvis/llm'
 import { buildJarvisContext } from '../lib/jarvis/context'
@@ -116,7 +116,7 @@ export function Jarvis() {
   const [listening, setListening] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
-  const recRef = useRef<ReturnType<typeof createRecognizer>>(null)
+  const recRef = useRef<Dictation | null>(null)
 
   const attachPhoto = async (file: File) => {
     try {
@@ -124,6 +124,16 @@ export function Jarvis() {
       setImage(await fileToDataURL(file))
     } catch {
       /* ignore bad files */
+    }
+  }
+
+  // Paste a screenshot straight into the conversation (desktop: Cmd/Ctrl+V)
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const item = Array.from(e.clipboardData.items).find((i) => i.type.startsWith('image/'))
+    const file = item?.getAsFile()
+    if (file) {
+      e.preventDefault()
+      void attachPhoto(file)
     }
   }
 
@@ -140,12 +150,22 @@ export function Jarvis() {
 
     stopSpeaking()
 
-    const rec = createRecognizer(
+    const { openaiKey, elevenKey, geminiKey } = useStore.getState().settings
+    const rec = createDictation(
+      { openaiKey, elevenKey, geminiKey },
       (text) => send(text),
       () => setListening(false),
+      (message) => s.pushChat({ role: 'jarvis', text: message }),
     )
 
-    if (!rec) return
+    if (!rec) {
+      // No native recognition (iPhone) and no transcription key configured
+      s.pushChat({
+        role: 'jarvis',
+        text: 'Voice input needs a transcription brain on this device, sir. Add an OpenAI, ElevenLabs or Gemini key in Settings and I will hear you perfectly.',
+      })
+      return
+    }
 
     recRef.current = rec
     setListening(true)
@@ -278,20 +298,18 @@ export function Jarvis() {
       )}
 
       <form onSubmit={submit} className="mt-3 flex items-center gap-2">
-        {speechSupported() && (
-          <button
-            type="button"
-            onClick={toggleMic}
-            aria-label={listening ? 'Stop listening' : 'Speak to Jarvis'}
-            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-all ${
-              listening
-                ? 'border-ice/50 bg-white/10 text-ice shadow-[0_0_18px_rgba(234,244,255,0.5)]'
-                : 'border-edge-strong bg-black/30 text-haze hover:border-ice/40 hover:text-ice'
-            }`}
-          >
-            {listening ? <MicOff size={18} /> : <Mic size={18} />}
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={toggleMic}
+          aria-label={listening ? 'Stop listening' : 'Speak to Jarvis'}
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-all ${
+            listening
+              ? 'border-ice/50 bg-white/10 text-ice shadow-[0_0_18px_rgba(234,244,255,0.5)] animate-pulse-soft'
+              : 'border-edge-strong bg-black/30 text-haze hover:border-ice/40 hover:text-ice'
+          }`}
+        >
+          {listening ? <MicOff size={18} /> : <Mic size={18} />}
+        </button>
 
         <button
           type="button"
@@ -317,6 +335,7 @@ export function Jarvis() {
           placeholder={listening ? 'Listening…' : image ? 'Ask about the photo…' : 'Speak or type to Jarvis…'}
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          onPaste={handlePaste}
           aria-label="Message Jarvis"
         />
 

@@ -1,398 +1,239 @@
-/**
- * CROSS-DEVICE SYNC (Phase 4 - CRITICAL FIX)
- *
- * Replace localStorage-only persistence with Supabase for real-time sync.
- * Keeps local cache for offline-first behavior.
- * Auto-syncs on every state change.
- *
- * Entities synced:
- * - Water intake (nutrition tracking)
- * - Workouts (training logs)
- * - Meals (food logs)
- * - Golf sessions (practice tracking)
- * - Chat messages (Jarvis conversation history)
- * - Jarvis memory (profile facts, learnings)
- * - Settings (preferences, API keys)
- *
- * Architecture:
- * 1. Client setup: Initialize Supabase with anonymous/session auth
- * 2. Local cache: Zustand store continues working offline
- * 3. Sync service: Queue changes, push to Supabase when online
- * 4. Conflict resolution: Last-write-wins (simple version)
- * 5. Middleware: Hook into Zustand to auto-sync on mutations
- */
+import { useStore } from '../store/store'
+import type { CalibrateState } from '../store/store'
 
 // ————————————————————————————————————————————————————————
-// SUPABASE CLIENT SETUP
-// —��——————��———————————————————————————————————————————————
+// CROSS-DEVICE SYNC — Supabase as source of truth, offline-first
+//
+// The whole app state lives in ONE row of the user's own (free) Supabase
+// project, keyed by a private sync code shared across their devices.
+// localStorage (zustand persist) keeps working offline; this layer pushes
+// local changes up (debounced) and pulls remote changes down on launch,
+// tab-focus, reconnect, and a slow poll. Last write wins — fine for one
+// human using one device at a time.
+//
+// Setup (once, ~2 minutes): see calibrate/SUPABASE.md — create a free
+// project, run the SQL snippet, paste URL + anon key + a sync code into
+// Settings on every device.
+// ————————————————————————————————————————————————————————
 
-/**
- * Initialize Supabase client.
- * Requires environment variables:
- * - VITE_SUPABASE_URL
- * - VITE_SUPABASE_ANON_KEY
- *
- * Uses anonymous auth + row-level security.
- */
-export interface SupabaseConfig {
+const TABLE = 'calibrate_state'
+const STAMP_KEY = 'calibrate-sync-stamp'
+const PUSH_DEBOUNCE_MS = 2500
+const POLL_MS = 45_000
+
+export interface SyncStatus {
+  enabled: boolean
+  lastSyncAt: number | null
+  pendingPush: boolean
+  error: string | null
+}
+
+const status: SyncStatus = { enabled: false, lastSyncAt: null, pendingPush: false, error: null }
+const listeners = new Set<() => void>()
+
+// Cached snapshot — useSyncExternalStore requires a stable reference between notifications
+let snapshot: SyncStatus = { ...status }
+
+function notify() {
+  snapshot = { ...status }
+  for (const l of listeners) l()
+}
+
+export function getSyncStatus(): SyncStatus {
+  return snapshot
+}
+
+export function subscribeSyncStatus(cb: () => void): () => void {
+  listeners.add(cb)
+  return () => listeners.delete(cb)
+}
+
+interface SyncConfig {
   url: string
-  anonKey: string
+  key: string
+  code: string
 }
 
-let supabaseClient: any = null
-let syncEnabled = false
-
-export function initSupabase(config: SupabaseConfig): void {
-  // Import dynamically to avoid breaking without Supabase
-  try {
-    // In production, use: import { createClient } from '@supabase/supabase-js'
-    // For now, this is a stub that will be filled in by the app
-    console.log('Supabase sync initialized:', config.url)
-    syncEnabled = true
-  } catch (err) {
-    console.warn('Supabase not available, using local cache only:', err)
-    syncEnabled = false
-  }
+function currentConfig(): SyncConfig | null {
+  const { supabaseUrl, supabaseKey, syncCode } = useStore.getState().settings
+  if (!supabaseUrl || !supabaseKey || !syncCode) return null
+  return { url: supabaseUrl.replace(/\/+$/, ''), key: supabaseKey, code: syncCode }
 }
 
-// ————————————————————————————————————————————————————————
-// SYNC QUEUE (Online/Offline Handling)
-// ————————————————————————————————————————————————————————
-
-export type SyncEntity = 'water' | 'workout' | 'meal' | 'golf' | 'chat' | 'memory' | 'settings'
-
-interface SyncOperation {
-  id: string
-  entity: SyncEntity
-  operation: 'create' | 'update' | 'delete'
-  data: unknown
-  timestamp: number
-  retries: number
-}
-
-class SyncQueue {
-  private queue: Map<string, SyncOperation> = new Map()
-  private isOnline = navigator.onLine ?? true
-
-  constructor() {
-    window.addEventListener('online', () => {
-      this.isOnline = true
-      this.flush()
-    })
-
-    window.addEventListener('offline', () => {
-      this.isOnline = false
-    })
-  }
-
-  add(op: SyncOperation): void {
-    const key = `${op.entity}:${op.id}:${op.operation}`
-    this.queue.set(key, op)
-
-    // Try to sync immediately if online
-    if (this.isOnline) {
-      this.flush()
-    }
-  }
-
-  async flush(): Promise<void> {
-    if (!this.isOnline || !syncEnabled) return
-
-    const ops = Array.from(this.queue.values())
-
-    for (const op of ops) {
-      try {
-        await syncOperation(op)
-        this.queue.delete(`${op.entity}:${op.id}:${op.operation}`)
-      } catch (err) {
-        op.retries += 1
-        if (op.retries > 3) {
-          console.warn('Sync failed after 3 retries:', op)
-          this.queue.delete(`${op.entity}:${op.id}:${op.operation}`)
-        }
-      }
-    }
-  }
-
-  getStatus(): { queued: number; online: boolean } {
-    return {
-      queued: this.queue.size,
-      online: this.isOnline,
-    }
-  }
-}
-
-const syncQueue = new SyncQueue()
-
-// ————————————————————————————————————————————————————————
-// SYNC OPERATIONS
-// ————————————————————————————————————————————————————————
-
-/**
- * Execute a single sync operation.
- * In production, this would call Supabase REST API.
- *
- * Example Supabase schema:
- *
- * sync_entries (
- *   id uuid primary key,
- *   user_id uuid,
- *   entity text,
- *   operation text,
- *   data jsonb,
- *   device_id text,
- *   created_at timestamp,
- *   updated_at timestamp
- * );
- */
-async function syncOperation(op: SyncOperation): Promise<void> {
-  if (!supabaseClient) return
-
-  const deviceId = getDeviceId()
-
-  const payload = {
-    user_id: 'anonymous', // Will be set by RLS policies
-    entity: op.entity,
-    operation: op.operation,
-    data: op.data,
-    device_id: deviceId,
-    updated_at: new Date().toISOString(),
-  }
-
-  // In production, use Supabase client:
-  // const { error } = await supabaseClient
-  //   .from('sync_entries')
-  //   .insert([payload])
-
-  // For now, just log
-  console.log('Sync operation:', payload)
-}
-
-/**
- * Generate unique device ID (stored in localStorage).
- * Used to handle conflicts and track sync sources.
- */
-function getDeviceId(): string {
-  const key = 'calibrate-device-id'
-  let id = localStorage.getItem(key)
-
-  if (!id) {
-    id = `device-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
-    localStorage.setItem(key, id)
-  }
-
-  return id
-}
-
-// ————————————————————————————————————————————————————————
-// SYNC SERVICE (Public API)
-// ————————————————————————————————————————————————————————
-
-export const SyncService = {
-  /**
-   * Queue a new sync operation
-   */
-  queue(entity: SyncEntity, id: string, operation: 'create' | 'update' | 'delete', data: unknown): void {
-    syncQueue.add({
-      id,
-      entity,
-      operation,
-      data,
-      timestamp: Date.now(),
-      retries: 0,
-    })
-  },
-
-  /**
-   * Manually trigger sync flush (useful for testing)
-   */
-  async flush(): Promise<void> {
-    await syncQueue.flush()
-  },
-
-  /**
-   * Get sync status
-   */
-  getStatus(): { queued: number; online: boolean } {
-    return syncQueue.getStatus()
-  },
-
-  /**
-   * Initialize Supabase
-   */
-  init(config: SupabaseConfig): void {
-    initSupabase(config)
-  },
-}
-
-// ————————————————————————————————————————————————————————
-// ZUSTAND MIDDLEWARE (Auto-Sync on State Changes)
-// ————————————————————————————————————————————————————————
-
-/**
- * Middleware for Zustand that auto-syncs on state mutations.
- * Tracks which entities changed and queues appropriate sync operations.
- *
- * Usage:
- * const useStore = create<CalibrateState>()(
- *   persist(
- *     withSyncMiddleware((set, get) => ({ ... })),
- *     { name: 'calibrate-v1' }
- *   )
- * )
- */
-export function withSyncMiddleware(
-  createState: (set: any, get: any) => any,
-): (set: any, get: any) => any {
-  return (set, get) => {
-    const state = createState(
-      (update: any) => {
-        const before = get()
-
-        // Apply the update
-        set(update)
-
-        const after = get()
-
-        // Track what changed and sync
-        syncStateChanges(before, after)
-      },
-      get,
-    )
-
-    return state
-  }
-}
-
-/**
- * Detect state changes and queue sync operations.
- * Compares before/after and emits appropriate sync ops.
- */
-function syncStateChanges(before: any, after: any): void {
-  if (!syncEnabled) return
-
-  // Water intake
-  if (before.water !== after.water) {
-    for (const [date, ml] of Object.entries(after.water)) {
-      if ((before.water as any)?.[date] !== ml) {
-        SyncService.queue('water', `water-${date}`, 'update', {
-          date,
-          ml,
-        })
-      }
-    }
-  }
-
-  // Workouts
-  if (before.workoutLogs !== after.workoutLogs) {
-    after.workoutLogs.forEach((log: any) => {
-      if (!before.workoutLogs.find((l: any) => l.id === log.id)) {
-        SyncService.queue('workout', log.id, 'create', log)
-      }
-    })
-  }
-
-  // Food logs
-  if (before.foodLogs !== after.foodLogs) {
-    after.foodLogs.forEach((log: any) => {
-      if (!before.foodLogs.find((l: any) => l.id === log.id)) {
-        SyncService.queue('meal', log.id, 'create', log)
-      }
-    })
-  }
-
-  // Golf sessions
-  if (before.golfSessions !== after.golfSessions) {
-    after.golfSessions.forEach((session: any) => {
-      if (!before.golfSessions.find((s: any) => s.id === session.id)) {
-        SyncService.queue('golf', session.id, 'create', session)
-      }
-    })
-  }
-
-  // Chat messages
-  if (before.chat !== after.chat) {
-    const newMessages = after.chat.slice(before.chat.length)
-    newMessages.forEach((msg: any) => {
-      SyncService.queue('chat', msg.id, 'create', msg)
-    })
-  }
-
-  // Profile facts (memory) — facts are structured MemoryFact objects, not raw strings
-  if (before.profile.facts !== after.profile.facts) {
-    const newFacts = after.profile.facts.slice(before.profile.facts.length)
-    newFacts.forEach((fact: { id: string; text: string }) => {
-      SyncService.queue('memory', fact.id, 'create', {
-        type: 'fact',
-        content: fact.text,
-      })
-    })
-  }
-
-  // Settings
-  if (before.settings !== after.settings) {
-    SyncService.queue('settings', 'user-settings', 'update', after.settings)
-  }
-}
-
-// ————————————————————————————————————————————————————————
-// CONFLICT RESOLUTION (Last-Write-Wins)
-// ————————————————————————————————————————————————————————
-
-/**
- * Simple conflict resolution: last write wins.
- * In production, could implement:
- * - Vector clocks for causal consistency
- * - Custom merge strategies per entity
- * - User-driven conflict resolution UI
- */
-export interface ConflictResolution {
-  keep: 'local' | 'remote'
-  timestamp: number
-  deviceId: string
-}
-
-export function resolveConflict(local: any, remote: any, _context?: any): ConflictResolution {
-  // Last-write-wins by timestamp
-  const localTime = local?.updated_at ? new Date(local.updated_at).getTime() : 0
-  const remoteTime = remote?.updated_at ? new Date(remote.updated_at).getTime() : 0
-
+function headers(cfg: SyncConfig): Record<string, string> {
   return {
-    keep: remoteTime > localTime ? 'remote' : 'local',
-    timestamp: Math.max(localTime, remoteTime),
-    deviceId: getDeviceId(),
+    apikey: cfg.key,
+    authorization: `Bearer ${cfg.key}`,
+    'content-type': 'application/json',
   }
 }
 
-// ————————————————————————————————————————————————————————
-// OFFLINE SUPPORT
-// —————————————————————————————————————————————————���——————
-
 /**
- * Detect if app is online.
- * Returns true if has network connectivity.
+ * The synced snapshot: every data key, no functions, no `view` (navigation is
+ * per-device), no chat images (megabytes of base64 don't belong in a sync row).
  */
-export function isOnline(): boolean {
-  return navigator.onLine ?? true
+function serializeState(): Record<string, unknown> {
+  const s = useStore.getState()
+  const plain = JSON.parse(
+    JSON.stringify(s, (key, value) => (typeof value === 'function' ? undefined : key === 'image' ? undefined : value)),
+  ) as Record<string, unknown>
+  delete plain.view
+  return plain
 }
 
-/**
- * Wait for network to come back online.
- * Useful for retrying sync operations.
- */
-export async function waitForOnline(maxWaitMs = 30000): Promise<boolean> {
-  if (navigator.onLine) return true
+let applyingRemote = false
+let pushTimer: ReturnType<typeof setTimeout> | null = null
 
-  return new Promise((resolve) => {
-    const timeout = setTimeout(() => resolve(false), maxWaitMs)
+function getStamp(): string {
+  return localStorage.getItem(STAMP_KEY) ?? ''
+}
 
-    window.addEventListener(
-      'online',
-      () => {
-        clearTimeout(timeout)
-        resolve(true)
-      },
-      { once: true },
+function setStamp(v: string) {
+  localStorage.setItem(STAMP_KEY, v)
+}
+
+async function pushState(): Promise<void> {
+  const cfg = currentConfig()
+  if (!cfg || !navigator.onLine) return
+
+  try {
+    const res = await fetch(`${cfg.url}/rest/v1/${TABLE}?on_conflict=id`, {
+      method: 'POST',
+      headers: { ...headers(cfg), prefer: 'resolution=merge-duplicates,return=representation' },
+      body: JSON.stringify([{ id: cfg.code, data: serializeState() }]),
+    })
+    if (!res.ok) throw new Error(`Supabase ${res.status}: ${(await res.text()).slice(0, 120)}`)
+
+    const rows: { updated_at?: string }[] = await res.json()
+    if (rows[0]?.updated_at) setStamp(rows[0].updated_at)
+
+    status.pendingPush = false
+    status.lastSyncAt = Date.now()
+    status.error = null
+  } catch (e) {
+    status.error = e instanceof Error ? e.message : 'push failed'
+  }
+  notify()
+}
+
+function schedulePush(): void {
+  if (!currentConfig()) return
+  status.pendingPush = true
+  notify()
+  if (pushTimer) clearTimeout(pushTimer)
+  pushTimer = setTimeout(() => {
+    pushTimer = null
+    void pushState()
+  }, PUSH_DEBOUNCE_MS)
+}
+
+async function pullState(): Promise<void> {
+  const cfg = currentConfig()
+  if (!cfg || !navigator.onLine) return
+
+  try {
+    const res = await fetch(
+      `${cfg.url}/rest/v1/${TABLE}?id=eq.${encodeURIComponent(cfg.code)}&select=data,updated_at`,
+      { headers: headers(cfg) },
     )
+    if (!res.ok) throw new Error(`Supabase ${res.status}: ${(await res.text()).slice(0, 120)}`)
+
+    const rows: { data: Record<string, unknown>; updated_at: string }[] = await res.json()
+
+    if (!rows.length) {
+      // First device online — seed the remote row with local state
+      await pushState()
+      return
+    }
+
+    const row = rows[0]
+    const known = getStamp()
+
+    if (row.updated_at !== known) {
+      if (status.pendingPush) {
+        // We have unpushed local edits — let our push win (last write wins)
+        await pushState()
+      } else {
+        applyRemote(row.data)
+        setStamp(row.updated_at)
+        status.lastSyncAt = Date.now()
+        status.error = null
+      }
+    } else {
+      status.lastSyncAt = Date.now()
+      status.error = null
+    }
+  } catch (e) {
+    status.error = e instanceof Error ? e.message : 'pull failed'
+  }
+  notify()
+}
+
+function applyRemote(data: Record<string, unknown>): void {
+  applyingRemote = true
+  try {
+    const cur = useStore.getState()
+    const remoteSettings = (data.settings ?? {}) as Record<string, unknown>
+    useStore.setState({
+      ...(data as Partial<CalibrateState>),
+      view: cur.view, // navigation is per-device
+      settings: {
+        ...cur.settings,
+        ...remoteSettings,
+        // never let a stale remote wipe the credentials that make sync work
+        supabaseUrl: cur.settings.supabaseUrl,
+        supabaseKey: cur.settings.supabaseKey,
+        syncCode: cur.settings.syncCode,
+      },
+    } as Partial<CalibrateState>)
+  } finally {
+    applyingRemote = false
+  }
+}
+
+/** Force an immediate two-way sync (Settings "Sync now" button). */
+export async function syncNow(): Promise<void> {
+  if (pushTimer) {
+    clearTimeout(pushTimer)
+    pushTimer = null
+  }
+  if (status.pendingPush) await pushState()
+  await pullState()
+}
+
+let initialized = false
+
+/**
+ * Start the sync engine. Safe to call once at app boot; it's a no-op until
+ * the user configures Supabase credentials in Settings.
+ */
+export function initSync(): void {
+  if (initialized || typeof window === 'undefined') return
+  initialized = true
+
+  // Push on any data mutation (navigation-only changes don't count)
+  useStore.subscribe((state, prev) => {
+    if (applyingRemote) return
+    const changed = (Object.keys(state) as (keyof CalibrateState)[]).some(
+      (k) => k !== 'view' && typeof state[k] !== 'function' && state[k] !== prev[k],
+    )
+    if (changed) {
+      status.enabled = !!currentConfig()
+      schedulePush()
+    }
   })
+
+  // Pull on launch, tab focus, reconnect, and a slow poll
+  const tryPull = () => {
+    status.enabled = !!currentConfig()
+    notify()
+    if (status.enabled) void pullState()
+  }
+
+  tryPull()
+  window.addEventListener('online', tryPull)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') tryPull()
+  })
+  setInterval(tryPull, POLL_MS)
 }

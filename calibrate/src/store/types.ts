@@ -271,6 +271,10 @@ export interface Settings {
   openaiKey?: string // OpenAI TTS — secondary voice fallback
   notifyEnabled: boolean // nutrition/recovery reminders
   hevyKey: string // Hevy official API — live workout sync
+  // Cross-device sync (Supabase project owned by the user)
+  supabaseUrl?: string // https://xxxx.supabase.co
+  supabaseKey?: string // anon public key
+  syncCode?: string // shared secret identifying this user's state row — same on every device
 }
 
 export interface HevySession {

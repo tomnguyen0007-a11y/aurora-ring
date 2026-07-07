@@ -72,6 +72,8 @@ Editing & deleting (fix mistakes, don't just add):
   - {"type":"delete_golf"} · {"type":"delete_run"}  (most recent today)
   - {"type":"check_grocery","name":"..."} · {"type":"remove_grocery","name":"..."}
   - {"type":"remove_note","title":"<fragment>"}
+  - {"type":"update_note","title":"<fragment>","body":"<full new body>"}
+  - {"type":"append_note","title":"<fragment>","text":"<lines to add at the END>"}  ← use this to add items to a list note; never delete+recreate
   - {"type":"toggle_milestone","goal":"<fragment>","milestone":"<fragment>"}
   - {"type":"complete_biz_task","title":"<fragment>"} · {"type":"remove_goal","title":"<fragment>"}
   - {"type":"forget","fact":"<memory fragment to erase>"}
@@ -86,6 +88,8 @@ Navigation:
   - {"type":"navigate","view":"today|goals|training|golf|nutrition|recovery|grocery|notes|business|books|mindset|markets|schedule|settings"}
 
 EXECUTION RULES:
+- ALWAYS close the json fence with \`\`\` — an unterminated block cannot execute
+- Emit ONLY action types from the list above, exactly as spelled
 - Only emit actions the user clearly asked for or explicitly confirmed
 - Ground advice about HIS data (his plans, his numbers, his history) in KNOWLEDGE and LIVE STATE — never invent those
 - Use "remember" when user shares durable preferences, plans, or insights
@@ -167,7 +171,7 @@ async function callAnthropic(userText: string, ctx: JarvisContext, image?: strin
     },
     body: JSON.stringify({
       model: settings.anthropicModel || 'claude-sonnet-5',
-      max_tokens: 1500,
+      max_tokens: 2500,
       system: buildSystemPrompt(ctx),
       messages,
       tools: [ANTHROPIC_WEB_SEARCH],
@@ -212,7 +216,7 @@ async function callGemini(userText: string, ctx: JarvisContext, image?: string):
         systemInstruction: { parts: [{ text: buildSystemPrompt(ctx) }] },
         contents,
         tools: GEMINI_SEARCH_TOOLS,
-        generationConfig: { maxOutputTokens: 1500 },
+        generationConfig: { maxOutputTokens: 2500 },
       }),
     },
   )
@@ -242,27 +246,54 @@ export interface LlmResult {
   receipts: string[]
 }
 
+/**
+ * Parse a possibly-truncated JSON actions payload. Models sometimes hit the
+ * token limit mid-block, leaving an unterminated fence — try progressively
+ * appending closers so a cut-off block still executes instead of rendering
+ * as raw JSON in the chat.
+ */
+function parseActionsJson(payload: string): { actions?: JarvisAction[] } | null {
+  const attempts = [payload, payload + '"}]}', payload + '"}]}'.slice(1), payload + '}]}', payload + ']}', payload + '}']
+  for (const p of attempts) {
+    try {
+      const parsed = JSON.parse(p)
+      if (parsed && typeof parsed === 'object') return parsed as { actions?: JarvisAction[] }
+    } catch {
+      /* try the next repair */
+    }
+  }
+  return null
+}
+
 /** Parse trailing ```json action blocks out of a raw LLM reply; execute them. */
 function extractAndApplyActions(raw: string): LlmResult {
   let receipts: string[] = []
   let reply = raw
 
+  // Properly closed blocks
   const blocks = [...raw.matchAll(/```json\s*([\s\S]*?)```/g)]
-
   for (const b of blocks) {
-    try {
-      const parsed: { actions?: JarvisAction[] } = JSON.parse(b[1])
-
-      if (Array.isArray(parsed.actions) && parsed.actions.length) {
-        receipts = receipts.concat(applyActions(parsed.actions))
-      }
-
-      // Remove the action block from the displayed reply
-      reply = reply.replace(b[0], '')
-    } catch {
-      // Leave malformed blocks visible so nothing is silently lost
+    const parsed = parseActionsJson(b[1])
+    if (parsed && Array.isArray(parsed.actions) && parsed.actions.length) {
+      receipts = receipts.concat(applyActions(parsed.actions))
     }
+    // Strip the block from the displayed reply whether or not it parsed —
+    // raw JSON in the chat is never useful to the user
+    reply = reply.replace(b[0], '')
   }
+
+  // Truncated trailing block (no closing fence — the reply got cut off)
+  const openIdx = reply.lastIndexOf('```json')
+  if (openIdx !== -1) {
+    const payload = reply.slice(openIdx + 7).trim()
+    const parsed = parseActionsJson(payload)
+    if (parsed && Array.isArray(parsed.actions) && parsed.actions.length) {
+      receipts = receipts.concat(applyActions(parsed.actions))
+    }
+    reply = reply.slice(0, openIdx)
+  }
+  // Any other stray fence markers left behind
+  reply = reply.replace(/```[a-z]*\s*$/i, '')
 
   return {
     reply: reply.trim() || (receipts.length ? 'Done.' : '…'),
@@ -352,7 +383,7 @@ async function streamAnthropic(userText: string, ctx: JarvisContext, image: stri
     },
     body: JSON.stringify({
       model: settings.anthropicModel || 'claude-sonnet-5',
-      max_tokens: 2000,
+      max_tokens: 2500,
       stream: true,
       system: buildSystemPrompt(ctx),
       messages,
@@ -403,7 +434,7 @@ async function streamGemini(userText: string, ctx: JarvisContext, image: string 
         systemInstruction: { parts: [{ text: buildSystemPrompt(ctx) }] },
         contents,
         tools: GEMINI_SEARCH_TOOLS,
-        generationConfig: { maxOutputTokens: 2000 },
+        generationConfig: { maxOutputTokens: 2500 },
       }),
     },
   )

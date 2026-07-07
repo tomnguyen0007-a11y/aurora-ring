@@ -37,6 +37,8 @@ export type JarvisAction =
   | { type: 'check_grocery'; name: string }
   | { type: 'remove_grocery'; name: string }
   | { type: 'remove_note'; title: string }
+  | { type: 'update_note'; title: string; body: string } // replace a note's body
+  | { type: 'append_note'; title: string; text: string } // add lines to the end of a note
   | { type: 'toggle_milestone'; goal: string; milestone: string }
   | { type: 'complete_biz_task'; title: string }
   | { type: 'remove_goal'; title: string }
@@ -47,13 +49,37 @@ export type JarvisAction =
 
 const VIEWS: ViewId[] = ['today', 'jarvis', 'goals', 'training', 'golf', 'nutrition', 'recovery', 'grocery', 'notes', 'business', 'books', 'mindset', 'markets', 'schedule', 'settings']
 
+// Models sometimes emit near-miss action names ("delete_note" for "remove_note").
+// Map the obvious synonyms instead of silently dropping the user's intent.
+const ACTION_ALIASES: Record<string, JarvisAction['type']> = {
+  delete_note: 'remove_note',
+  delete_grocery: 'remove_grocery',
+  delete_goal: 'remove_goal',
+  delete_block: 'remove_block',
+  remove_food: 'delete_food',
+  remove_golf: 'delete_golf',
+  remove_run: 'delete_run',
+  edit_note: 'update_note',
+  edit_food: 'update_food',
+  update_block: 'move_block',
+  add_food: 'log_food',
+  add_water: 'log_water',
+  log_grocery: 'add_grocery',
+}
+
+function normalizeAction(a: JarvisAction): JarvisAction {
+  const mapped = ACTION_ALIASES[a.type as string]
+  return mapped ? ({ ...a, type: mapped } as JarvisAction) : a
+}
+
 /** Apply actions to the store; returns human-readable receipts. */
 export function applyActions(actions: JarvisAction[]): string[] {
   const s = useStore.getState()
   const date = todayISO()
   const receipts: string[] = []
 
-  for (const a of actions) {
+  for (const raw_ of actions) {
+    const a = normalizeAction(raw_)
     try {
       switch (a.type) {
         case 'log_golf': {
@@ -282,6 +308,24 @@ export function applyActions(actions: JarvisAction[]): string[] {
           if (hit) {
             s.removeNote(hit.id)
             receipts.push(`Deleted note: “${hit.title}”`)
+          }
+          break
+        }
+        case 'update_note': {
+          const q = a.title.toLowerCase()
+          const hit = s.notes.find((n) => n.title.toLowerCase().includes(q))
+          if (hit) {
+            s.updateNote(hit.id, { body: a.body })
+            receipts.push(`Rewrote note: “${hit.title}”`)
+          }
+          break
+        }
+        case 'append_note': {
+          const q = a.title.toLowerCase()
+          const hit = s.notes.find((n) => n.title.toLowerCase().includes(q))
+          if (hit && a.text.trim()) {
+            s.updateNote(hit.id, { body: hit.body ? `${hit.body}\n${a.text.trim()}` : a.text.trim() })
+            receipts.push(`Appended to “${hit.title}”`)
           }
           break
         }

@@ -1,7 +1,8 @@
-import { BrainCircuit, Download, KeyRound, Play, Plus, RotateCcw, Trash2, Upload, Volume2 } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { BrainCircuit, Download, KeyRound, Play, Plus, RefreshCw, RotateCcw, Trash2, Upload, Volume2 } from 'lucide-react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { HudLabel, Panel } from '../components/ui'
 import { englishVoices, speak } from '../lib/speech'
+import { getSyncStatus, subscribeSyncStatus, syncNow } from '../lib/supabase'
 import { useStore } from '../store/store'
 import type { LlmProvider } from '../store/types'
 
@@ -272,6 +273,8 @@ export function Settings() {
         </p>
       </Panel>
 
+      <SyncPanel />
+
       <IntegrationsPanel />
 
       <Panel>
@@ -338,6 +341,80 @@ export function Settings() {
         </p>
       </Panel>
     </div>
+  )
+}
+
+function SyncPanel() {
+  const s = useStore()
+  const status = useSyncExternalStore(subscribeSyncStatus, getSyncStatus)
+  const [syncing, setSyncing] = useState(false)
+  const configured = !!(s.settings.supabaseUrl && s.settings.supabaseKey && s.settings.syncCode)
+
+  const runSync = async () => {
+    setSyncing(true)
+    try {
+      await syncNow()
+    } finally {
+      setSyncing(false)
+    }
+  }
+
+  return (
+    <Panel>
+      <HudLabel>Cross-Device Sync</HudLabel>
+      <p className="mb-3 text-[11px] leading-relaxed text-fog">
+        Sync everything — water, workouts, meals, golf, Jarvis memory, chat, settings — across iPhone and desktop
+        through your own free Supabase project. One-time setup (~2 min): see <span className="text-haze">SUPABASE.md</span> in
+        the repo, then paste the same three values on every device.
+      </p>
+      <div className="space-y-2">
+        <input
+          className="field w-full"
+          placeholder="Supabase project URL — https://xxxx.supabase.co"
+          value={s.settings.supabaseUrl ?? ''}
+          onChange={(e) => s.setSettings({ supabaseUrl: e.target.value.trim() })}
+        />
+        <input
+          className="field num w-full"
+          type="password"
+          placeholder="Supabase anon public key"
+          value={s.settings.supabaseKey ?? ''}
+          onChange={(e) => s.setSettings({ supabaseKey: e.target.value.trim() })}
+        />
+        <div className="flex gap-2">
+          <input
+            className="field num flex-1"
+            placeholder="Sync code — same on every device"
+            value={s.settings.syncCode ?? ''}
+            onChange={(e) => s.setSettings({ syncCode: e.target.value.trim() })}
+          />
+          <button
+            className="btn"
+            type="button"
+            onClick={() => s.setSettings({ syncCode: `cal-${crypto.randomUUID()}` })}
+            title="Generate a random sync code (copy it to your other devices)"
+          >
+            Generate
+          </button>
+        </div>
+      </div>
+      <div className="mt-3 flex items-center justify-between">
+        <span className="text-[11px] text-fog">
+          {!configured
+            ? 'Not configured — local-only storage.'
+            : status.error
+              ? `Sync error: ${status.error}`
+              : status.lastSyncAt
+                ? `Synced ${new Date(status.lastSyncAt).toLocaleTimeString()}${status.pendingPush ? ' · pushing…' : ''}`
+                : 'Configured — waiting for first sync.'}
+        </span>
+        {configured && (
+          <button className="btn !py-1.5 !text-xs" onClick={runSync} disabled={syncing}>
+            <RefreshCw size={13} className={syncing ? 'animate-spin' : ''} /> Sync now
+          </button>
+        )}
+      </div>
+    </Panel>
   )
 }
 
