@@ -67,7 +67,14 @@ export function useJarvis() {
     if (!llmConfigured()) {
       const fallback = image
         ? `I need my full brain to see photos, sir. Add a free Gemini key or an Anthropic key in Settings and I can read images for you.`
-        : `That one needs my full brain, sir. The built-in engine handles logging, lists and stats — for strategy, planning and open conversation, add a free Gemini key or an Anthropic key in Settings.`
+        : `That one needs my full brain, sir. The built-in engine handles logging, lists and stats — for strategy, planning and open conversation, add a free Gemini or Groq key in Settings.`
+      pushChat({ role: 'jarvis', text: fallback })
+      say(fallback)
+      return
+    }
+
+    if (image && useStore.getState().settings.provider === 'groq') {
+      const fallback = `Groq's brain doesn't see images, sir — switch to Gemini or Anthropic in Settings for this one, or describe what's in the photo and I'll work from that.`
       pushChat({ role: 'jarvis', text: fallback })
       say(fallback)
       return

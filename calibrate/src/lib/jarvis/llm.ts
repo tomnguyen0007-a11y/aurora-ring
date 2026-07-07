@@ -25,7 +25,7 @@ import { formatContextForLlm, type JarvisContext } from './context'
 const ANTHROPIC_WEB_SEARCH = { type: 'web_search_20250305', name: 'web_search', max_uses: 3 }
 const GEMINI_SEARCH_TOOLS = [{ google_search: {} }]
 
-function buildSystemPrompt(ctx: JarvisContext): string {
+function buildSystemPrompt(ctx: JarvisContext, opts: { webSearch: boolean } = { webSearch: true }): string {
   const basePrompt = formatContextForLlm(ctx)
 
   // Add action documentation and rules
@@ -108,14 +108,20 @@ EXECUTION RULES:
 FOOD LOGGING POLICY (accurate, never a dead end):
 1. If the item matches the KNOWN FOOD DATABASE in KNOWLEDGE → use those exact figures.
 2. If the user gave numbers → use exactly those.
-3. Otherwise → estimate from your solid nutrition knowledge (or a quick web search for restaurant/branded items),
+3. Otherwise → estimate from your solid nutrition knowledge${opts.webSearch ? ' (or a quick web search for restaurant/branded items)' : ''},
    LOG IT with the estimate, and say it's an estimate — e.g. "Logged pho bo at roughly 450 kcal / 30g protein for a
    typical bowl — correct me if the portion was bigger." An honest labeled estimate beats refusing to help.
    NEVER present an estimate as an exact fact, and NEVER refuse to log because you lack the label.
-
+${
+  opts.webSearch
+    ? `
 WEB SEARCH: You have live web search. Use it when current or specific facts matter — branded/restaurant nutrition,
 golf course info, prices, news, weather, anything beyond your training data. Never claim you are a closed system
-or cannot access the internet. Search silently; report the answer, not the search process.
+or cannot access the internet. Search silently; report the answer, not the search process.`
+    : `
+NOTE: This provider has no live web search — for anything requiring current/real-time facts you don't know, say so
+plainly rather than guessing, and suggest the user ask again with the Anthropic or Gemini brain active for that.`
+}
 `
 
   return basePrompt + '\n' + actionDocs
@@ -239,6 +245,32 @@ async function callGemini(userText: string, ctx: JarvisContext, image?: string):
   return data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? ''
 }
 
+// Groq (groq.com): genuinely free tier, no card, no daily reset surprises —
+// the recommended fallback when Anthropic/Gemini limits are hit. OpenAI-compatible
+// chat completions API. Trade-off: no native web search tool (Groq doesn't offer
+// one), so the system prompt's web-search claim is omitted for this provider.
+async function callGroq(userText: string, ctx: JarvisContext): Promise<string> {
+  const { settings, chat } = useStore.getState()
+  const messages = [
+    { role: 'system', content: buildSystemPrompt(ctx, { webSearch: false }) },
+    ...historyFor(chat, userText),
+  ]
+
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', authorization: `Bearer ${settings.groqKey}` },
+    body: JSON.stringify({ model: settings.groqModel || 'llama-3.3-70b-versatile', max_tokens: 2500, messages }),
+  })
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => '')
+    throw new Error(`Groq ${res.status}: ${body.slice(0, 180)}`)
+  }
+
+  const data: { choices?: { message?: { content?: string } }[] } = await res.json()
+  return data.choices?.[0]?.message?.content ?? ''
+}
+
 /**
  * Check if an LLM provider is configured and ready.
  */
@@ -246,7 +278,8 @@ export function llmConfigured(): boolean {
   const { settings } = useStore.getState()
   return (
     (settings.provider === 'anthropic' && !!settings.anthropicKey) ||
-    (settings.provider === 'gemini' && !!settings.geminiKey)
+    (settings.provider === 'gemini' && !!settings.geminiKey) ||
+    (settings.provider === 'groq' && !!settings.groqKey)
   )
 }
 
@@ -335,7 +368,9 @@ export async function runLlm(userText: string, ctx: JarvisContext, image?: strin
   const raw =
     settings.provider === 'anthropic'
       ? await callAnthropic(userText, ctx, image)
-      : await callGemini(userText, ctx, image)
+      : settings.provider === 'groq'
+        ? await callGroq(userText, ctx)
+        : await callGemini(userText, ctx, image)
 
   return extractAndApplyActions(raw)
 }
@@ -469,6 +504,45 @@ async function streamGemini(userText: string, ctx: JarvisContext, image: string 
   return full
 }
 
+async function streamGroq(userText: string, ctx: JarvisContext, onText: (delta: string) => void): Promise<string> {
+  const { settings, chat } = useStore.getState()
+  const messages = [
+    { role: 'system', content: buildSystemPrompt(ctx, { webSearch: false }) },
+    ...historyFor(chat, userText),
+  ]
+
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', authorization: `Bearer ${settings.groqKey}` },
+    body: JSON.stringify({
+      model: settings.groqModel || 'llama-3.3-70b-versatile',
+      max_tokens: 2500,
+      stream: true,
+      messages,
+    }),
+  })
+
+  if (!res.ok || !res.body) {
+    const body = await res.text().catch(() => '')
+    throw new Error(`Groq ${res.status}: ${body.slice(0, 180)}`)
+  }
+
+  let full = ''
+  await consumeSSE(res, (payload) => {
+    try {
+      const ev: { choices?: { delta?: { content?: string } }[] } = JSON.parse(payload)
+      const text = ev.choices?.[0]?.delta?.content ?? ''
+      if (text) {
+        full += text
+        onText(text)
+      }
+    } catch {
+      /* ignore malformed frames */
+    }
+  })
+  return full
+}
+
 export interface StreamHandlers {
   /**
    * Called as visible reply text grows (action JSON is never included).
@@ -504,7 +578,9 @@ export async function runLlmStream(userText: string, ctx: JarvisContext, image: 
   const full =
     settings.provider === 'anthropic'
       ? await streamAnthropic(userText, ctx, image, collect)
-      : await streamGemini(userText, ctx, image, collect)
+      : settings.provider === 'groq'
+        ? await streamGroq(userText, ctx, collect)
+        : await streamGemini(userText, ctx, image, collect)
 
   return extractAndApplyActions(full)
 }

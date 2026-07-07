@@ -191,6 +191,8 @@ const defaultSettings: Settings = {
   geminiKey: '',
   anthropicModel: 'claude-sonnet-5',
   geminiModel: 'gemini-2.5-flash',
+  groqKey: '',
+  groqModel: 'llama-3.3-70b-versatile',
   finnhubKey: '',
   gnewsKey: '',
   newsCountry: 'us',
