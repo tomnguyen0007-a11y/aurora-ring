@@ -6,6 +6,19 @@
   lang="{{ request.locale.iso_code }}"
 >
   <head>
+<script>
+(function(){
+  try{
+    window.__instant_loading_core = true;
+    window.Instant = window.Instant || { initialized: true, initializedAppEmbed: true, initializedVersion: '4.6.0' };
+    function isInstant(n){ try { return n && n.tagName === 'SCRIPT' && /instant\.so|instant\.io/i.test(n.src || ''); } catch(e){ return false; } }
+    ['appendChild','insertBefore'].forEach(function(m){
+      var orig = Node.prototype[m];
+      Node.prototype[m] = function(n){ if (isInstant(n)) return n; return orig.apply(this, arguments); };
+    });
+  }catch(e){}
+})();
+</script>
     {%- if settings.favicon != blank -%}
       <link
         rel="icon"
@@ -41,55 +54,75 @@
     {% # theme-check-enable RemoteAsset %}
     <meta name="facebook-domain-verification" content="rgshzcsmjohmib8a9gplutrd7d9lu9" />
 
+{% comment %} Instant watermark: app embed disabled + script blocked at source. Force-visible rules below so content that Instant used to reveal still shows. {% endcomment %}
 <style>
-/* Overlay fix */
-body::after {
-  content: '' !important;
-  display: block !important;
-  position: fixed !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  width: 200px !important;
-  height: 60px !important;
-  background: #000000 !important;
-  z-index: 2147483647 !important;
-  pointer-events: none !important;
-}
+  a[href*="instant.so"], a[href*="instant.io"],
+  iframe[src*="instant.so"], iframe[src*="instant.io"] { display: none !important; }
+  .instant-scroll-trigger--hidden,
+  [class*="instant-reveal"],
+  [class*="instant-scroll-trigger"] {
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+    filter: none !important;
+    clip-path: none !important;
+  }
 </style>
-
-{% unless template == 'index' %}
-<style>
-body::after { display: none !important; }
-</style>
-{% endunless %}
-
-<!-- Meta Pixel Code -->
 <script>
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
+(function () {
+  function scrub(root){
+    if(!root || !root.querySelectorAll) return;
+    try{
+      root.querySelectorAll('a[href*="instant.so"],a[href*="instant.io"],iframe[src*="instant.so"],iframe[src*="instant.io"]').forEach(function(el){ el.remove(); });
+      root.querySelectorAll('a,div,span,button,p').forEach(function(el){
+        var t=(el.textContent||'').trim().toLowerCase();
+        if(t==='built with instant' || t==='made with instant'){ (el.closest('a')||el).remove(); }
+      });
+      root.querySelectorAll('*').forEach(function(el){ if(el.shadowRoot) scrub(el.shadowRoot); });
+    }catch(e){}
+  }
+  function run(){ scrub(document); }
+  run(); document.addEventListener('DOMContentLoaded', run);
+  [300,800,1600,3000,5000].forEach(function(ms){ setTimeout(run, ms); });
+})();
+</script>
+
+<!-- Meta Pixel Code with Product Tracking -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
 fbq('init', '1010679018152899');
 fbq('track', 'PageView');
-{% if template.name == 'product' %}fbq('track', 'ViewContent', {content_ids:['{{ product.id }}'],content_type:'product',content_name:'{{ product.title | escape }}',value:{{ product.price | divided_by: 100.0 }},currency:'{{ shop.currency }}'});{% endif %}
-{% if template.name == 'cart' %}fbq('track', 'InitiateCheckout', {value:{{ cart.total_price | divided_by: 100.0 }},currency:'{{ cart.currency.iso_code }}',num_items:{{ cart.item_count }}});{% endif %}
 </script>
-<noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=1010679018152899&ev=PageView&noscript=1"
-/></noscript>
+
+{% if template == 'product' %}
 <script>
-document.addEventListener('DOMContentLoaded',function(){
-  var pid='{{ product.id | default: "" }}',val={{ product.price | default: 0 | divided_by: 100.0 }},cur='{{ shop.currency }}';
-  function atc(){if(typeof fbq!=='undefined')fbq('track','AddToCart',{content_ids:[pid],content_type:'product',value:val,currency:cur});}
-  document.addEventListener('click',function(e){var b=e.target.closest('[name="add"],.product-form__submit,[data-add-to-cart]');if(b)atc();});
-  var _f=window.fetch;window.fetch=function(){var u=(arguments[0]||'').toString();if(u.indexOf('/cart/add')>-1)return _f.apply(this,arguments).then(function(r){if(r.ok)atc();return r;});return _f.apply(this,arguments);};
-  var _x=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u){if(u&&u.toString().indexOf('/cart/add')>-1)this.addEventListener('load',function(){if(this.status<300)atc();});return _x.apply(this,arguments);};
+fbq('track', 'ViewContent', {
+  value: {{ product.price | default: 0 }},
+  currency: 'EUR',
+  content_name: '{{ product.title | escape_javascript }}',
+  content_type: 'product',
+  content_id: '{{ product.id }}',
+  sku: '{{ product.variants.first.sku | escape_javascript }}'
 });
 </script>
+{% endif %}
+
+<script>
+document.addEventListener('click', function(e) {
+  if (e.target.closest('[data-add-to-cart]') && typeof product !== 'undefined') {
+    fbq('track', 'AddToCart', {
+      value: {{ product.price | default: 0 }},
+      currency: 'EUR',
+      content_name: '{{ product.title | escape_javascript }}',
+      content_type: 'product',
+      content_id: '{{ product.id }}',
+      quantity: 1
+    });
+  }
+});
+</script>
+
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1010679018152899&ev=PageView&noscript=1" /></noscript>
 <!-- End Meta Pixel Code -->
   </head>
 
