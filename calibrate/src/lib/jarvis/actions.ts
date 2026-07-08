@@ -55,6 +55,10 @@ export type JarvisAction =
   | { type: 'update_exercise'; workout: string; exercise: string; name?: string; sets?: number; reps?: string; cue?: string }
   | { type: 'add_exercise'; workout: string; name: string; sets: number; reps: string; cue?: string }
   | { type: 'remove_exercise'; workout: string; exercise: string }
+  // ——— workout-level restructuring (change the split itself) ———
+  | { type: 'add_workout'; name: string; weekday: Weekday; exercises?: { name: string; sets: number; reps: string; cue?: string }[] }
+  | { type: 'update_workout'; workout: string; name?: string; weekday?: Weekday }
+  | { type: 'remove_workout'; workout: string }
 
 const VIEWS: ViewId[] = ['today', 'jarvis', 'goals', 'training', 'golf', 'nutrition', 'recovery', 'grocery', 'notes', 'business', 'books', 'mindset', 'markets', 'schedule', 'settings']
 
@@ -467,6 +471,38 @@ export function applyActions(actions: JarvisAction[]): string[] {
           if (w && ex) {
             s.removeExercise(w.id, ex.id)
             receipts.push(`Removed from ${w.name}: ${ex.name}`)
+          }
+          break
+        }
+
+        // ——— workout-level restructuring ———
+        case 'add_workout': {
+          if (a.name.trim()) {
+            s.addWorkout({
+              name: a.name.trim(),
+              weekday: a.weekday,
+              exercises: (a.exercises ?? []).map((ex) => ({ name: ex.name, sets: ex.sets, reps: ex.reps, cue: ex.cue ?? '' })),
+            })
+            receipts.push(`New workout: ${a.name.trim()} (${a.exercises?.length ?? 0} exercises)`)
+          }
+          break
+        }
+        case 'update_workout': {
+          const w = s.workouts.find((x) => x.name.toLowerCase().includes(a.workout.toLowerCase()))
+          if (w) {
+            s.updateWorkout(w.id, {
+              ...(a.name ? { name: a.name } : {}),
+              ...(a.weekday != null ? { weekday: a.weekday } : {}),
+            })
+            receipts.push(`Workout updated: ${a.name ?? w.name}`)
+          }
+          break
+        }
+        case 'remove_workout': {
+          const w = s.workouts.find((x) => x.name.toLowerCase().includes(a.workout.toLowerCase()))
+          if (w) {
+            s.removeWorkout(w.id)
+            receipts.push(`Workout removed: ${w.name}`)
           }
           break
         }

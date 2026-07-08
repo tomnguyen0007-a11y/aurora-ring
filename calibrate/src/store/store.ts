@@ -68,6 +68,9 @@ export interface CalibrateState {
   runLogs: RunLog[]
   logSet: (date: string, workoutId: string, exerciseId: string, setIdx: number, patch: Partial<SetEntry>) => void
   setWorkoutDone: (date: string, workoutId: string, done: boolean) => void
+  addWorkout: (w: Omit<Workout, 'id' | 'exercises'> & { exercises?: Omit<Exercise, 'id'>[] }) => void
+  updateWorkout: (id: string, patch: Partial<Pick<Workout, 'name' | 'weekday'>>) => void
+  removeWorkout: (id: string) => void
   addExercise: (workoutId: string, ex: Omit<Exercise, 'id'>) => void
   updateExercise: (workoutId: string, exId: string, patch: Partial<Exercise>) => void
   removeExercise: (workoutId: string, exId: string) => void
@@ -289,6 +292,12 @@ export const useStore = create<CalibrateState>()(
           }
           return { workoutLogs: logs.map((l) => (l.id === log!.id ? { ...l, completed: done } : l)) }
         }),
+      addWorkout: ({ exercises = [], ...w }) =>
+        set((s) => ({
+          workouts: [...s.workouts, { ...w, id: uid('wo'), exercises: exercises.map((ex) => ({ ...ex, id: uid('ex') })) }],
+        })),
+      updateWorkout: (id, patch) => set((s) => ({ workouts: s.workouts.map((w) => (w.id === id ? { ...w, ...patch } : w)) })),
+      removeWorkout: (id) => set((s) => ({ workouts: s.workouts.filter((w) => w.id !== id) })),
       addExercise: (workoutId, ex) =>
         set((s) => ({
           workouts: s.workouts.map((w) =>
