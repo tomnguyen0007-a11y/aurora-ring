@@ -1,6 +1,7 @@
 import { fmtHours, todayISO, weekDates, weekdayOf } from '../dates'
 import { dayProgress, golfMinutes, golfTotalWeek, macrosForDate, revenueToday, streaks, weightSeries, workoutsThisWeek } from '../stats'
 import { useStore } from '../../store/store'
+import type { DayTypeMacro } from '../../store/seed'
 import type { Exercise, FoodLog, GolfCategory, Weekday, Workout } from '../../store/types'
 import { applyActions, type JarvisAction } from './actions'
 import { lookupFood } from './foodDb'
@@ -85,6 +86,14 @@ function resolveFood(s: StoreState, query?: string): FoodLog | null {
   if (!todays.length) return null
   if (!query) return todays[0] // addFood prepends: index 0 is most recent
   return tierMatch(todays, (f) => f.name, query)
+}
+
+function resolveDayType(s: StoreState, query: string): DayTypeMacro | null {
+  const q = query.trim().toLowerCase()
+  if (!q) return null
+  const byCode = s.dayTypeMacros.find((d) => d.code.toLowerCase() === q)
+  if (byCode) return byCode
+  return tierMatch(s.dayTypeMacros, (d) => d.label, q)
 }
 
 function numericReps(reps: string): number | null {
@@ -517,6 +526,26 @@ export function runLocalEngine(input: string, contextUserName?: string): EngineR
       )
     }
   }
+
+  // ————————————————————————————————————————————————————————
+  // NUTRITION: fuelling framework — day-type carb periodisation
+  // "set lift day carbs to 4-5", "change recovery protein to 2-2.2", "update quality run fat to 0.65"
+  // ————————————————————————————————————————————————————————
+  m = t.match(/^(?:set|change|update)\s+(.+?)\s+(?:day\s+)?(carbs?|protein|fat)\s+(?:target\s+)?(?:to|at)\s+([\d.]+(?:\s*[-–]\s*[\d.]+)?)/i)
+  if (m) {
+    const dayType = resolveDayType(s, m[1])
+    const value = m[3].trim()
+    const kw = m[2].toLowerCase()
+    if (dayType) {
+      const patch: JarvisAction = kw.startsWith('carb')
+        ? { type: 'update_day_type_macro', dayType: dayType.code, carbGkg: value }
+        : kw === 'protein'
+          ? { type: 'update_day_type_macro', dayType: dayType.code, proteinGkg: value }
+          : { type: 'update_day_type_macro', dayType: dayType.code, fatGkg: value }
+      return act([patch], `${dayType.label} ${kw} target → ${value} g/kg.`)
+    }
+  }
+
   // ——— food WITH explicit numbers: "log food chicken bowl 750 kcal 55 protein" / "ate ... 800 kcal" ———
   m = t.match(/(?:log |ate |had |eat )(?:food )?(.+?)(?:[,;]|\s[-–])?\s*(\d{2,4})\s*(?:k?cal(?:ories)?)?(?:\D+(\d{1,3})\s*(?:g\s*)?protein)?/i)
   if (m && /kcal|cal|protein|ate|had|food|meal/i.test(t)) {

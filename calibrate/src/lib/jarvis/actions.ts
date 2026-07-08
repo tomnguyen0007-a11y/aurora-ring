@@ -59,6 +59,8 @@ export type JarvisAction =
   | { type: 'add_workout'; name: string; weekday: Weekday; exercises?: { name: string; sets: number; reps: string; cue?: string }[] }
   | { type: 'update_workout'; workout: string; name?: string; weekday?: Weekday }
   | { type: 'remove_workout'; workout: string }
+  // ——— fuelling framework: carb periodisation by day type (Nutrition view's day-type table) ———
+  | { type: 'update_day_type_macro'; dayType: string; proteinGkg?: string; carbGkg?: string; fatGkg?: string }
 
 const VIEWS: ViewId[] = ['today', 'jarvis', 'goals', 'training', 'golf', 'nutrition', 'recovery', 'grocery', 'notes', 'business', 'books', 'mindset', 'markets', 'schedule', 'settings']
 
@@ -503,6 +505,25 @@ export function applyActions(actions: JarvisAction[]): string[] {
           if (w) {
             s.removeWorkout(w.id)
             receipts.push(`Workout removed: ${w.name}`)
+          }
+          break
+        }
+
+        case 'update_day_type_macro': {
+          const q = a.dayType.toLowerCase()
+          const hit = s.dayTypeMacros.find((d) => d.code.toLowerCase() === q || d.label.toLowerCase().includes(q))
+          if (hit) {
+            s.updateDayTypeMacro(hit.code, {
+              ...(a.proteinGkg ? { proteinGkg: a.proteinGkg } : {}),
+              ...(a.carbGkg ? { carbGkg: a.carbGkg } : {}),
+              ...(a.fatGkg ? { fatGkg: a.fatGkg } : {}),
+            })
+            const parts = [
+              a.carbGkg ? `carbs ${a.carbGkg} g/kg` : '',
+              a.proteinGkg ? `protein ${a.proteinGkg} g/kg` : '',
+              a.fatGkg ? `fat ${a.fatGkg} g/kg` : '',
+            ].filter(Boolean)
+            receipts.push(`Fuelling framework updated — ${hit.label}: ${parts.join(', ')}`)
           }
           break
         }

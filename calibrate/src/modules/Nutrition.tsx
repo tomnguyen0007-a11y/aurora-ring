@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { Empty, HudLabel, Meter, Panel } from '../components/ui'
 import { todayISO } from '../lib/dates'
 import { macrosForDate } from '../lib/stats'
-import { seedDayTypeMacros } from '../store/seed'
 import { useStore } from '../store/store'
 
 export function Nutrition() {
@@ -149,7 +148,7 @@ export function Nutrition() {
               </tr>
             </thead>
             <tbody>
-              {seedDayTypeMacros.map((d) => (
+              {s.dayTypeMacros.map((d) => (
                 <tr key={d.code} className="border-t border-edge">
                   <td className="py-2">
                     <span className="num mr-2 rounded bg-signal/15 px-1.5 py-0.5 text-[10px] font-bold text-signal">{d.code}</span>

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { todayISO } from '../dates'
 import { useStore } from '../../store/store'
+import { seedDayTypeMacros, type DayTypeMacro } from '../../store/seed'
 import type { Exercise, FoodLog, Workout } from '../../store/types'
 import { runLocalEngine } from './engine'
 
@@ -45,7 +46,16 @@ function foodFixture(): FoodLog[] {
 }
 
 function resetFixtures() {
-  useStore.setState({ workouts: workoutFixture(), foodLogs: foodFixture() })
+  useStore.setState({
+    workouts: workoutFixture(),
+    foodLogs: foodFixture(),
+    dayTypeMacros: seedDayTypeMacros.map((d) => ({ ...d })),
+  })
+}
+
+function findDayType(codeOrLabel: string): DayTypeMacro | undefined {
+  const q = codeOrLabel.toLowerCase()
+  return useStore.getState().dayTypeMacros.find((d) => d.code.toLowerCase() === q || d.label.toLowerCase() === q)
 }
 
 function findExercise(workoutName: string, exerciseName: string): Exercise | undefined {
@@ -380,6 +390,38 @@ describe('nutrition: rename food entry', () => {
 
   it('generic present-tense correction ("it\'s brown rice, not white") is too ambiguous -> LLM', () => {
     expect(runLocalEngine("it's brown rice, not white")).toBeNull()
+  })
+})
+
+// ————————————————————————————————————————————————————————
+// NUTRITION: fuelling framework (day-type carb periodisation)
+// ————————————————————————————————————————————————————————
+describe('nutrition: fuelling framework day-type macros', () => {
+  it('"set lift day carbs to 4-5" updates the carb range and recomputes the example', () => {
+    runLocalEngine('set lift day carbs to 4-5')
+    const lift = findDayType('L')
+    expect(lift).toMatchObject({ carbGkg: '4-5' })
+    expect(lift!.example80kg).toContain('C360') // midpoint 4.5 * 80kg
+  })
+
+  it('"change recovery protein to 2-2.4" resolves by label, not just code', () => {
+    runLocalEngine('change recovery protein to 2-2.4')
+    expect(findDayType('Recovery / Rest')).toMatchObject({ proteinGkg: '2-2.4' })
+  })
+
+  it('"update quality run fat to 0.65" accepts a single value (non-range)', () => {
+    runLocalEngine('update quality run fat to 0.65')
+    expect(findDayType('Quality Run')).toMatchObject({ fatGkg: '0.65' })
+  })
+
+  it('unknown day type falls back to the LLM (null)', () => {
+    expect(runLocalEngine('set cardio day carbs to 5-6')).toBeNull()
+  })
+
+  it('editing one field leaves the other two macro fields untouched', () => {
+    runLocalEngine('set lift day carbs to 5-6')
+    const lift = findDayType('L')
+    expect(lift).toMatchObject({ proteinGkg: '1.8–2.2', fatGkg: '0.6–0.8' })
   })
 })
 

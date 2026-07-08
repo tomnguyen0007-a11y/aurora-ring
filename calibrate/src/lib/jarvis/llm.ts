@@ -154,6 +154,13 @@ Restructuring the training split itself (weekday: 0=Mon … 6=Sun):
   - {"type":"update_workout","workout":"<fragment>","name":"<new name>","weekday":N}  ← rename / move day
   - {"type":"remove_workout","workout":"<fragment>"}
 
+Fuelling framework — the Nutrition view's day-type carb periodisation table (Recovery/Lift/Easy Run/Quality Run/Double Day/Long Run):
+  - {"type":"update_day_type_macro","dayType":"<code like L, or a label fragment like 'lift'>","proteinGkg":"1.8-2.2","carbGkg":"3.5-4.5","fatGkg":"0.6-0.8"}
+    Only include the field(s) he asked to change. The "Example (80kg)" column recomputes automatically from
+    whatever protein/carb/fat is set — never state a kcal figure for this table yourself, the app computes it.
+    This table is a REFERENCE FRAMEWORK at a fixed 80kg for scaling logic, not his personal calorie target — for
+    his actual daily target use the NUTRITION TODAY line in LIVE STATE, not this table's example kcal.
+
 Memory:
   - {"type":"remember","fact":"<durable fact to store in memory>"}
 

@@ -1,9 +1,12 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { todayISO, uid } from '../lib/dates'
+import { computeExample80kg } from '../lib/dayTypeMacros'
 import { inferCategory, inferImportance } from '../lib/jarvis/memory'
 import {
+  type DayTypeMacro,
   seedBooks,
+  seedDayTypeMacros,
   seedGoals,
   seedGolfStats,
   seedHandicap,
@@ -102,6 +105,10 @@ export interface CalibrateState {
   addFood: (f: Omit<FoodLog, 'id'>) => void
   removeFood: (id: string) => void
   addWater: (date: string, ml: number) => void
+
+  // fuelling framework — carb periodisation by day type (editable: chat or Nutrition view)
+  dayTypeMacros: DayTypeMacro[]
+  updateDayTypeMacro: (code: string, patch: Partial<Pick<DayTypeMacro, 'label' | 'proteinGkg' | 'carbGkg' | 'fatGkg'>>) => void
 
   // grocery
   grocery: GroceryItem[]
@@ -230,6 +237,7 @@ const seedState = () => ({
   meals: seedMeals,
   foodLogs: [],
   water: {},
+  dayTypeMacros: seedDayTypeMacros,
   grocery: [],
   notes: [],
   tables: [],
@@ -368,6 +376,15 @@ export const useStore = create<CalibrateState>()(
       removeFood: (id) => set((s) => ({ foodLogs: s.foodLogs.filter((f) => f.id !== id) })),
       addWater: (date, ml) =>
         set((s) => ({ water: { ...s.water, [date]: Math.max(0, (s.water[date] ?? 0) + ml) } })),
+
+      updateDayTypeMacro: (code, patch) =>
+        set((s) => ({
+          dayTypeMacros: s.dayTypeMacros.map((d) => {
+            if (d.code !== code) return d
+            const merged = { ...d, ...patch }
+            return { ...merged, example80kg: computeExample80kg(merged.proteinGkg, merged.carbGkg, merged.fatGkg) }
+          }),
+        })),
 
       addGrocery: (name, qty = '') =>
         set((s) => ({ grocery: [...s.grocery, { id: uid('gr'), name, qty, done: false }] })),
