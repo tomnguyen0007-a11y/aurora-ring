@@ -1,7 +1,7 @@
 import { BrainCircuit, CheckCircle2, Download, KeyRound, Play, Plus, RefreshCw, RotateCcw, Trash2, Upload, Volume2, XCircle } from 'lucide-react'
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { HudLabel, Panel } from '../components/ui'
-import { testProvider } from '../lib/jarvis/llm'
+import { llmConfigured, testProvider } from '../lib/jarvis/llm'
 import { englishVoices, speak } from '../lib/speech'
 import { getSyncStatus, subscribeSyncStatus, syncNow } from '../lib/supabase'
 import { useStore } from '../store/store'
@@ -71,6 +71,8 @@ export function Settings() {
         <h1 className="h-lumen text-3xl font-bold tracking-wide">SYSTEM CONFIG</h1>
         <p className="mt-1 text-sm text-haze">Keys, voice, and data control. Everything is stored on this device only.</p>
       </header>
+
+      <BrainPanel />
 
       <Panel>
         <HudLabel>
@@ -148,128 +150,6 @@ export function Settings() {
             </form>
           </div>
         </div>
-      </Panel>
-
-      <Panel>
-        <HudLabel>
-          <KeyRound size={11} className="text-signal" /> Jarvis — Advanced Brain
-        </HudLabel>
-        <p className="mb-3 text-xs leading-relaxed text-fog">
-          Jarvis always works free with the built-in command engine (logging, editing, stats). Plug in an API key to
-          unlock deep conversation, planning and strategy. Keys never leave this device — calls go directly from your
-          browser to the provider.
-        </p>
-        <div className="mb-3 flex flex-wrap gap-1.5">
-          {(['none', 'anthropic', 'gemini', 'groq', 'openrouter'] as LlmProvider[]).map((p) => (
-            <button
-              key={p}
-              onClick={() => s.setSettings({ provider: p })}
-              className={`btn flex-1 !text-xs ${s.settings.provider === p ? '!border-signal/60 !bg-signal/15 !text-signal' : ''}`}
-            >
-              {p === 'none'
-                ? 'Built-in only'
-                : p === 'anthropic'
-                  ? 'Claude'
-                  : p === 'gemini'
-                    ? 'Gemini (free tier)'
-                    : p === 'groq'
-                      ? 'Groq (free, no card)'
-                      : 'OpenRouter (free backup)'}
-            </button>
-          ))}
-        </div>
-        {s.settings.provider === 'anthropic' && (
-          <div className="space-y-2">
-            <input
-              className="field num w-full"
-              type="password"
-              placeholder="sk-ant-…  (console.anthropic.com)"
-              value={s.settings.anthropicKey}
-              onChange={(e) => s.setSettings({ anthropicKey: e.target.value.trim() })}
-            />
-            <input
-              className="field num w-full"
-              placeholder="Model"
-              value={s.settings.anthropicModel}
-              onChange={(e) => s.setSettings({ anthropicModel: e.target.value.trim() })}
-            />
-            <p className="text-[11px] text-fog">Best quality. Costs cents per conversation, billed to your Anthropic account.</p>
-            <TestConnectionButton provider="anthropic" />
-          </div>
-        )}
-        {s.settings.provider === 'gemini' && (
-          <div className="space-y-2">
-            <input
-              className="field num w-full"
-              type="password"
-              placeholder="AI…  (aistudio.google.com — free API key)"
-              value={s.settings.geminiKey}
-              onChange={(e) => s.setSettings({ geminiKey: e.target.value.trim() })}
-            />
-            <input
-              className="field num w-full"
-              placeholder="Model"
-              value={s.settings.geminiModel}
-              onChange={(e) => s.setSettings({ geminiModel: e.target.value.trim() })}
-            />
-            <p className="text-[11px] text-fog">Google's free tier: generous daily quota at no cost — the free way to give Jarvis a real brain.</p>
-            <TestConnectionButton provider="gemini" />
-          </div>
-        )}
-        {s.settings.provider === 'groq' && (
-          <div className="space-y-2">
-            <input
-              className="field num w-full"
-              type="password"
-              placeholder="gsk_…  (console.groq.com — free, no card)"
-              value={s.settings.groqKey}
-              onChange={(e) => s.setSettings({ groqKey: e.target.value.trim() })}
-            />
-            <input
-              className="field num w-full"
-              placeholder="Model"
-              value={s.settings.groqModel}
-              onChange={(e) => s.setSettings({ groqModel: e.target.value.trim() })}
-            />
-            <p className="text-[11px] text-fog">
-              Runs on Groq's LPU hardware — extremely fast responses, genuinely free (no card, no credits system,
-              just rate limits). Best pick if you keep hitting Anthropic/Gemini limits. Trade-off: no live web search
-              and no photo vision on this provider.
-            </p>
-            <TestConnectionButton provider="groq" />
-          </div>
-        )}
-        {s.settings.provider === 'openrouter' && (
-          <div className="space-y-2">
-            <input
-              className="field num w-full"
-              type="password"
-              placeholder="sk-or-…  (openrouter.ai/keys — free, no card)"
-              value={s.settings.openrouterKey}
-              onChange={(e) => s.setSettings({ openrouterKey: e.target.value.trim() })}
-            />
-            <input
-              className="field num w-full"
-              placeholder="Model (default supports photos)"
-              value={s.settings.openrouterModel}
-              onChange={(e) => s.setSettings({ openrouterModel: e.target.value.trim() })}
-            />
-            <p className="text-[11px] text-fog">
-              One key routes to 35+ models — several genuinely free (":free" suffix). Good resilient backup: if a
-              free model gets rate-limited, just swap the model name above without switching providers. The default
-              model (Qwen 2.5 VL) reads photos. Trade-off: no live web search on the free models.
-            </p>
-            <TestConnectionButton provider="openrouter" />
-          </div>
-        )}
-        {s.settings.provider !== 'none' && (
-          <p className="mt-3 border-t border-edge pt-3 text-[11px] leading-relaxed text-fog">
-            <span className="text-affirm">Auto-failover is always on:</span> if your primary brain above errors out —
-            rate limit, quota, outage, bad key — Jarvis automatically retries with the next provider that has a key
-            configured (checked in this order: Claude → Gemini → Groq → OpenRouter). You'll see a small note under
-            its reply when that happens. Add keys for more than one provider to make this actually kick in.
-          </p>
-        )}
       </Panel>
 
       <Panel>
@@ -435,6 +315,147 @@ export function Settings() {
         </p>
       </Panel>
     </div>
+  )
+}
+
+function BrainPanel() {
+  const s = useStore()
+  const hasBrain = llmConfigured()
+  return (
+      <Panel>
+        <HudLabel>
+          <KeyRound size={11} className="text-signal" /> Jarvis — Advanced Brain
+        </HudLabel>
+        <div className={`mb-3 flex items-start gap-2 rounded-lg border px-3 py-2 text-xs leading-relaxed ${hasBrain ? 'border-affirm/30 bg-affirm/[0.06] text-affirm' : 'border-alert/30 bg-alert/[0.06] text-alert'}`}>
+          <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${hasBrain ? 'bg-affirm' : 'bg-alert'}`} />
+          <span>
+            {hasBrain
+              ? 'A smart brain is connected — Jarvis has deep conversation, planning, live web search and photo vision.'
+              : 'No smart brain yet — Jarvis is running on the built-in engine only (logging, editing, stats). Paste ONE free key below to unlock deep conversation, planning, live web search and photo vision.'}
+          </span>
+        </div>
+        <p className="mb-3 text-xs leading-relaxed text-fog">
+          Free in ~60s, no card needed:{' '}
+          <a className="text-signal underline underline-offset-2" href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer">Gemini key</a>
+          {' · '}
+          <a className="text-signal underline underline-offset-2" href="https://console.groq.com/keys" target="_blank" rel="noreferrer">Groq key</a>
+          {' · '}
+          <a className="text-signal underline underline-offset-2" href="https://openrouter.ai/keys" target="_blank" rel="noreferrer">OpenRouter key</a>
+          . Pick the matching tab below, paste, and hit Test connection. Keys never leave this device — calls go
+          straight from your browser to the provider. Web search comes free on Claude &amp; Gemini.
+        </p>
+        <div className="mb-3 flex flex-wrap gap-1.5">
+          {(['none', 'anthropic', 'gemini', 'groq', 'openrouter'] as LlmProvider[]).map((p) => (
+            <button
+              key={p}
+              onClick={() => s.setSettings({ provider: p })}
+              className={`btn flex-1 !text-xs ${s.settings.provider === p ? '!border-signal/60 !bg-signal/15 !text-signal' : ''}`}
+            >
+              {p === 'none'
+                ? 'Built-in only'
+                : p === 'anthropic'
+                  ? 'Claude'
+                  : p === 'gemini'
+                    ? 'Gemini (free tier)'
+                    : p === 'groq'
+                      ? 'Groq (free, no card)'
+                      : 'OpenRouter (free backup)'}
+            </button>
+          ))}
+        </div>
+        {s.settings.provider === 'anthropic' && (
+          <div className="space-y-2">
+            <input
+              className="field num w-full"
+              type="password"
+              placeholder="sk-ant-…  (console.anthropic.com)"
+              value={s.settings.anthropicKey}
+              onChange={(e) => s.setSettings({ anthropicKey: e.target.value.trim() })}
+            />
+            <input
+              className="field num w-full"
+              placeholder="Model"
+              value={s.settings.anthropicModel}
+              onChange={(e) => s.setSettings({ anthropicModel: e.target.value.trim() })}
+            />
+            <p className="text-[11px] text-fog">Best quality. Costs cents per conversation, billed to your Anthropic account.</p>
+            <TestConnectionButton provider="anthropic" />
+          </div>
+        )}
+        {s.settings.provider === 'gemini' && (
+          <div className="space-y-2">
+            <input
+              className="field num w-full"
+              type="password"
+              placeholder="AI…  (aistudio.google.com — free API key)"
+              value={s.settings.geminiKey}
+              onChange={(e) => s.setSettings({ geminiKey: e.target.value.trim() })}
+            />
+            <input
+              className="field num w-full"
+              placeholder="Model"
+              value={s.settings.geminiModel}
+              onChange={(e) => s.setSettings({ geminiModel: e.target.value.trim() })}
+            />
+            <p className="text-[11px] text-fog">Google's free tier: generous daily quota at no cost — the free way to give Jarvis a real brain.</p>
+            <TestConnectionButton provider="gemini" />
+          </div>
+        )}
+        {s.settings.provider === 'groq' && (
+          <div className="space-y-2">
+            <input
+              className="field num w-full"
+              type="password"
+              placeholder="gsk_…  (console.groq.com — free, no card)"
+              value={s.settings.groqKey}
+              onChange={(e) => s.setSettings({ groqKey: e.target.value.trim() })}
+            />
+            <input
+              className="field num w-full"
+              placeholder="Model"
+              value={s.settings.groqModel}
+              onChange={(e) => s.setSettings({ groqModel: e.target.value.trim() })}
+            />
+            <p className="text-[11px] text-fog">
+              Runs on Groq's LPU hardware — extremely fast responses, genuinely free (no card, no credits system,
+              just rate limits). Best pick if you keep hitting Anthropic/Gemini limits. Trade-off: no live web search
+              and no photo vision on this provider.
+            </p>
+            <TestConnectionButton provider="groq" />
+          </div>
+        )}
+        {s.settings.provider === 'openrouter' && (
+          <div className="space-y-2">
+            <input
+              className="field num w-full"
+              type="password"
+              placeholder="sk-or-…  (openrouter.ai/keys — free, no card)"
+              value={s.settings.openrouterKey}
+              onChange={(e) => s.setSettings({ openrouterKey: e.target.value.trim() })}
+            />
+            <input
+              className="field num w-full"
+              placeholder="Model (default supports photos)"
+              value={s.settings.openrouterModel}
+              onChange={(e) => s.setSettings({ openrouterModel: e.target.value.trim() })}
+            />
+            <p className="text-[11px] text-fog">
+              One key routes to 35+ models — several genuinely free (":free" suffix). Good resilient backup: if a
+              free model gets rate-limited, just swap the model name above without switching providers. The default
+              model (Qwen 2.5 VL) reads photos. Trade-off: no live web search on the free models.
+            </p>
+            <TestConnectionButton provider="openrouter" />
+          </div>
+        )}
+        {s.settings.provider !== 'none' && (
+          <p className="mt-3 border-t border-edge pt-3 text-[11px] leading-relaxed text-fog">
+            <span className="text-affirm">Auto-failover is always on:</span> if your primary brain above errors out —
+            rate limit, quota, outage, bad key — Jarvis automatically retries with the next provider that has a key
+            configured (checked in this order: Claude → Gemini → Groq → OpenRouter). You'll see a small note under
+            its reply when that happens. Add keys for more than one provider to make this actually kick in.
+          </p>
+        )}
+      </Panel>
   )
 }
 

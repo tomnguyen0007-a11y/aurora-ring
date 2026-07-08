@@ -186,7 +186,7 @@ export function Shell({ children }: { children: ReactNode }) {
 
       {/* Main */}
       <main
-        className="min-w-0 flex-1 px-3 pb-32 sm:px-6 lg:pb-10 lg:pt-6"
+        className="min-w-0 flex-1 px-3 pb-32 sm:px-6 lg:pb-28 lg:pt-6"
         style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
       >
         {/* Mobile top bar */}
