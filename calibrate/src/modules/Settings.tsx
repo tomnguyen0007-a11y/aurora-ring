@@ -1,10 +1,40 @@
-import { BrainCircuit, Download, KeyRound, Play, Plus, RefreshCw, RotateCcw, Trash2, Upload, Volume2 } from 'lucide-react'
+import { BrainCircuit, CheckCircle2, Download, KeyRound, Play, Plus, RefreshCw, RotateCcw, Trash2, Upload, Volume2, XCircle } from 'lucide-react'
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { HudLabel, Panel } from '../components/ui'
+import { testProvider } from '../lib/jarvis/llm'
 import { englishVoices, speak } from '../lib/speech'
 import { getSyncStatus, subscribeSyncStatus, syncNow } from '../lib/supabase'
 import { useStore } from '../store/store'
 import type { LlmProvider } from '../store/types'
+
+/** A real, cheap round-trip to the provider so a pasted key can be verified on the spot. */
+function TestConnectionButton({ provider }: { provider: LlmProvider }) {
+  const [state, setState] = useState<{ status: 'idle' | 'testing' | 'ok' | 'fail'; message: string }>({ status: 'idle', message: '' })
+
+  const run = async () => {
+    setState({ status: 'testing', message: '' })
+    const res = await testProvider(provider)
+    setState({ status: res.ok ? 'ok' : 'fail', message: res.message })
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <button type="button" className="btn !py-1.5 !text-xs" onClick={run} disabled={state.status === 'testing'}>
+        <RefreshCw size={12} className={state.status === 'testing' ? 'animate-spin' : ''} /> Test connection
+      </button>
+      {state.status === 'ok' && (
+        <span className="flex items-center gap-1 text-xs text-affirm">
+          <CheckCircle2 size={13} /> Working
+        </span>
+      )}
+      {state.status === 'fail' && (
+        <span className="flex items-center gap-1 text-xs text-alert" title={state.message}>
+          <XCircle size={13} /> {state.message.slice(0, 40)}
+        </span>
+      )}
+    </div>
+  )
+}
 
 export function Settings() {
   const s = useStore()
@@ -164,6 +194,7 @@ export function Settings() {
               onChange={(e) => s.setSettings({ anthropicModel: e.target.value.trim() })}
             />
             <p className="text-[11px] text-fog">Best quality. Costs cents per conversation, billed to your Anthropic account.</p>
+            <TestConnectionButton provider="anthropic" />
           </div>
         )}
         {s.settings.provider === 'gemini' && (
@@ -182,6 +213,7 @@ export function Settings() {
               onChange={(e) => s.setSettings({ geminiModel: e.target.value.trim() })}
             />
             <p className="text-[11px] text-fog">Google's free tier: generous daily quota at no cost — the free way to give Jarvis a real brain.</p>
+            <TestConnectionButton provider="gemini" />
           </div>
         )}
         {s.settings.provider === 'groq' && (
@@ -204,6 +236,7 @@ export function Settings() {
               just rate limits). Best pick if you keep hitting Anthropic/Gemini limits. Trade-off: no live web search
               and no photo vision on this provider.
             </p>
+            <TestConnectionButton provider="groq" />
           </div>
         )}
         {s.settings.provider === 'openrouter' && (
@@ -226,7 +259,16 @@ export function Settings() {
               free model gets rate-limited, just swap the model name above without switching providers. The default
               model (Qwen 2.5 VL) reads photos. Trade-off: no live web search on the free models.
             </p>
+            <TestConnectionButton provider="openrouter" />
           </div>
+        )}
+        {s.settings.provider !== 'none' && (
+          <p className="mt-3 border-t border-edge pt-3 text-[11px] leading-relaxed text-fog">
+            <span className="text-affirm">Auto-failover is always on:</span> if your primary brain above errors out —
+            rate limit, quota, outage, bad key — Jarvis automatically retries with the next provider that has a key
+            configured (checked in this order: Claude → Gemini → Groq → OpenRouter). You'll see a small note under
+            its reply when that happens. Add keys for more than one provider to make this actually kick in.
+          </p>
         )}
       </Panel>
 
