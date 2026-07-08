@@ -148,6 +148,11 @@ Corrections & fine-grained control:
   - {"type":"add_exercise","workout":"<fragment>","name":"...","sets":N,"reps":"8-10","cue":"..."}
   - {"type":"remove_exercise","workout":"<fragment>","exercise":"<fragment>"}
 
+Restructuring the training split itself (weekday: 0=Mon … 6=Sun):
+  - {"type":"add_workout","name":"Push + Biceps","weekday":1,"exercises":[{"name":"Incline DB Press","sets":4,"reps":"6-8","cue":"..."},...]}  ← ONE action creates the full workout with all its exercises
+  - {"type":"update_workout","workout":"<fragment>","name":"<new name>","weekday":N}  ← rename / move day
+  - {"type":"remove_workout","workout":"<fragment>"}
+
 Memory:
   - {"type":"remember","fact":"<durable fact to store in memory>"}
 
@@ -155,6 +160,13 @@ Navigation:
   - {"type":"navigate","view":"today|goals|training|golf|nutrition|recovery|grocery|notes|business|books|mindset|markets|schedule|settings"}
 
 EXECUTION RULES:
+- ACT, DON'T ANNOUNCE. When asked to change/edit/restructure ANYTHING, this reply MUST end with the json block
+  that does it. NEVER say "I will now proceed to…" or list planned steps — the plan IS the action block. If you
+  describe a change without emitting its actions, you have failed the request.
+- When executing changes, keep prose to ONE short confirmation sentence, then the action block. Long prose before
+  a large block risks the block being cut off by the token limit — the actions are the priority, not the speech.
+- A single block can hold MANY actions — full restructures (remove old workouts, add new ones, move schedule
+  blocks, update memory) belong in ONE block in ONE reply.
 - ALWAYS close the json fence with \`\`\` — an unterminated block cannot execute
 - Emit ONLY action types from the list above, exactly as spelled
 - Only emit actions the user clearly asked for or explicitly confirmed

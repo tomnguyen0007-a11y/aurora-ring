@@ -109,6 +109,9 @@ function buildSnapshot(): string {
     workout
       ? `TODAY'S WORKOUT: ${workout.name} (${workout.exercises.map((e) => `${e.name} ${e.sets}x${e.reps}`).join(', ')})`
       : `TODAY'S WORKOUT: none scheduled${wd === 3 ? ' — Thursday is the Zone 2 engine run.' : ''}`,
+    `WEEKLY TRAINING SPLIT (all defined workouts — restructure via add_workout/update_workout/remove_workout):\n${s.workouts
+      .map((w) => `  ${WEEKDAY_NAMES[w.weekday]}: ${w.name} — ${w.exercises.map((e) => `${e.name} ${e.sets}x${e.reps}`).join(', ') || 'no exercises yet'}`)
+      .join('\n')}`,
     `NUTRITION TODAY: ${m.kcal}/${s.macros.kcal[0]}-${s.macros.kcal[1]} kcal, protein ${m.protein}/${s.macros.protein[0]}-${s.macros.protein[1]}g, carbs ${m.carbs}g, fat ${m.fat}g, water ${(m.water / 1000).toFixed(1)}/${s.macros.waterMl / 1000}L${kcalRemaining > 0 ? ` — ${kcalRemaining} kcal & ${proteinRemaining}g protein still needed` : ' — targets hit'}${waterRemaining > 0 ? `, ${(waterRemaining / 1000).toFixed(1)}L water still needed` : ''}`,
     `WEIGHT: ${latestW ? `${latestW.value} kg (logged ${latestW.date})` : 'no recent log'} — target 87-90 kg lean`,
     `GOLF THIS WEEK: ${fmtHours(golfTotalWeek(s))} total — ${Object.entries(golfWeek)
