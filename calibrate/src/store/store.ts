@@ -1,9 +1,12 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { todayISO, uid } from '../lib/dates'
+import { computeExample80kg } from '../lib/dayTypeMacros'
 import { inferCategory, inferImportance } from '../lib/jarvis/memory'
 import {
+  type DayTypeMacro,
   seedBooks,
+  seedDayTypeMacros,
   seedGoals,
   seedGolfStats,
   seedHandicap,
@@ -30,6 +33,8 @@ import type {
   GroceryItem,
   HandicapEntry,
   HevySession,
+  KnowledgeDoc,
+  LlmProvider,
   MacroTargets,
   Mantra,
   MemoryCategory,
@@ -102,12 +107,22 @@ export interface CalibrateState {
   removeFood: (id: string) => void
   addWater: (date: string, ml: number) => void
 
+  // fuelling framework — carb periodisation by day type (editable: chat or Nutrition view)
+  dayTypeMacros: DayTypeMacro[]
+  updateDayTypeMacro: (code: string, patch: Partial<Pick<DayTypeMacro, 'label' | 'proteinGkg' | 'carbGkg' | 'fatGkg'>>) => void
+
   // grocery
   grocery: GroceryItem[]
   addGrocery: (name: string, qty?: string) => void
   toggleGrocery: (id: string) => void
   removeGrocery: (id: string) => void
   clearDoneGrocery: () => void
+
+  // brain feed — user-fed knowledge docs (Obsidian notes, specs, coach material) injected into Jarvis's context
+  knowledgeDocs: KnowledgeDoc[]
+  addKnowledgeDoc: (title: string, body: string, source?: string) => string
+  updateKnowledgeDoc: (id: string, patch: Partial<Pick<KnowledgeDoc, 'title' | 'body' | 'source'>>) => void
+  removeKnowledgeDoc: (id: string) => void
 
   // notes & tables
   notes: Note[]
@@ -149,6 +164,8 @@ export interface CalibrateState {
   chat: ChatMsg[]
   pushChat: (m: Omit<ChatMsg, 'id' | 'ts'>) => void
   clearChat: () => void
+  lastJarvisSource: 'local' | LlmProvider | 'rate-limited' | null
+  setLastJarvisSource: (source: CalibrateState['lastJarvisSource']) => void
 
   // profile / memory
   profile: Profile
@@ -227,6 +244,8 @@ const seedState = () => ({
   meals: seedMeals,
   foodLogs: [],
   water: {},
+  dayTypeMacros: seedDayTypeMacros,
+  knowledgeDocs: [],
   grocery: [],
   notes: [],
   tables: [],
@@ -237,6 +256,7 @@ const seedState = () => ({
   checkIns: {},
   watchlist: seedWatchlist,
   chat: [],
+  lastJarvisSource: null,
   profile: seedProfile,
   mantras: seedMantras,
   supplements: seedSupplements,
@@ -365,6 +385,24 @@ export const useStore = create<CalibrateState>()(
       addWater: (date, ml) =>
         set((s) => ({ water: { ...s.water, [date]: Math.max(0, (s.water[date] ?? 0) + ml) } })),
 
+      updateDayTypeMacro: (code, patch) =>
+        set((s) => ({
+          dayTypeMacros: s.dayTypeMacros.map((d) => {
+            if (d.code !== code) return d
+            const merged = { ...d, ...patch }
+            return { ...merged, example80kg: computeExample80kg(merged.proteinGkg, merged.carbGkg, merged.fatGkg) }
+          }),
+        })),
+
+      addKnowledgeDoc: (title, body, source = 'pasted') => {
+        const id = uid('kd')
+        set((s) => ({ knowledgeDocs: [{ id, title: title.trim() || 'Untitled note', body, source, updated: Date.now() }, ...s.knowledgeDocs] }))
+        return id
+      },
+      updateKnowledgeDoc: (id, patch) =>
+        set((s) => ({ knowledgeDocs: s.knowledgeDocs.map((d) => (d.id === id ? { ...d, ...patch, updated: Date.now() } : d)) })),
+      removeKnowledgeDoc: (id) => set((s) => ({ knowledgeDocs: s.knowledgeDocs.filter((d) => d.id !== id) })),
+
       addGrocery: (name, qty = '') =>
         set((s) => ({ grocery: [...s.grocery, { id: uid('gr'), name, qty, done: false }] })),
       toggleGrocery: (id) =>
@@ -433,6 +471,7 @@ export const useStore = create<CalibrateState>()(
       removeWatch: (id) => set((s) => ({ watchlist: s.watchlist.filter((w) => w.id !== id) })),
 
       pushChat: (m) => set((s) => ({ chat: [...s.chat.slice(-199), { ...m, id: uid('msg'), ts: Date.now() }] })),
+      setLastJarvisSource: (source) => set({ lastJarvisSource: source }),
       clearChat: () => set({ chat: [] }),
 
       setProfile: (patch) => set((s) => ({ profile: { ...s.profile, ...patch } })),
@@ -488,12 +527,12 @@ export const useStore = create<CalibrateState>()(
     }),
     {
       name: 'calibrate-v1',
-      version: 4,
+      version: 5,
       // always wake up on Today — don't persist navigation; strip heavy chat images from storage
       partialize: (s) =>
         Object.fromEntries(
           Object.entries(s)
-            .filter(([k]) => k !== 'view')
+            .filter(([k]) => k !== 'view' && k !== 'lastJarvisSource')
             .map(([k, v]) => (k === 'chat' ? [k, (v as ChatMsg[]).map(({ image: _img, ...m }) => m)] : [k, v])),
         ) as CalibrateState,
       // backfill new/preloaded collections for existing users without touching their data
@@ -526,6 +565,9 @@ export const useStore = create<CalibrateState>()(
               accessCount: 0,
             }))
           }
+        }
+        if (version < 5) {
+          if (!Array.isArray(p.knowledgeDocs)) p.knowledgeDocs = []
         }
         return p as unknown as CalibrateState
       },

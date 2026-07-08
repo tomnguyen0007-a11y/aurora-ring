@@ -7,6 +7,7 @@
 // personal-development library. Keep this factual; opinions belong in the prompt.
 // ————————————————————————————————————————————————————————
 
+import { useStore } from '../../store/store'
 import { foodDbForPrompt } from './foodDb'
 
 export const KNOWLEDGE_GOLF = `GOLF DIAGNOSTIC (current, from coach analysis):
@@ -33,15 +34,29 @@ Max HR estimate: 207 − (0.7 × age). Zone 2 = conversational pace.
 - E SHOULDERS/CHEST/BACK: Seated DB Press 4×6-10, Incline Machine Press 4×10, Cable Lateral 4×12-15, Pec Dec×Reverse Pec Dec, Face Pulls×Shrugs
 Warmups: raise temperature 5min, foam roll, dynamic mobility. Static stretching AFTER training. Deload occasionally.`
 
-export const KNOWLEDGE_FUEL = `NUTRITION — Ollie Duthie's Fuelling Framework (evidence-based, g/kg not %):
-- Protein anchor: 1.8-2.2 g/kg/day, spread over 3-5 feedings (~0.3-0.4 g/kg/meal). Stays stable daily.
-- Carbs are the primary dial, periodised by DAY TYPE (g/kg/day):
-  Recovery 2.5-3.5 · Lift 3.5-4.5 · Easy run 4.0-5.0 · Quality run 5.0-6.5 · Double day 6.0-7.5 · Long run 6.5-8.0
-- Fat floor: 0.6-0.8 g/kg/day (~20-35% energy); rises slightly on low-carb days.
-Example for 80kg: Lift day ≈ P160 C320 F56 ≈2425 kcal; Long run ≈ P152 C560 F48 ≈3280 kcal.
+/**
+ * Built live from the store on every request (not a static string) so an edit
+ * made via chat or the Nutrition view — "set lift day carbs to 5-6" — shows up
+ * here on the very next turn instead of the model reasoning from stale numbers.
+ */
+function buildKnowledgeFuel(): string {
+  const rows = useStore.getState().dayTypeMacros
+  const carbLine = rows.map((d) => `${d.label} ${d.carbGkg}`).join(' · ')
+  const proteinRange = rows[0]?.proteinGkg ?? '1.8-2.2'
+  const fatRange = rows[0]?.fatGkg ?? '0.6-0.8'
+  const examples = rows.map((d) => `${d.label} ≈ ${d.example80kg}`).join('; ')
+
+  return `NUTRITION — Ollie Duthie's Fuelling Framework (evidence-based, g/kg not %):
+- Protein anchor: ${proteinRange} g/kg/day, spread over 3-5 feedings (~0.3-0.4 g/kg/meal). Stays stable daily.
+- Carbs are the primary dial, periodised by DAY TYPE (g/kg/day): ${carbLine}
+- Fat floor: ${fatRange} g/kg/day (~20-35% energy); rises slightly on low-carb days.
+REFERENCE FIGURES ONLY, computed at a fixed 80kg to illustrate how the ratios scale — NOT his personal target,
+his real bodyweight, or his real calorie target. For his actual target use NUTRITION TODAY in LIVE STATE below,
+never these numbers: ${examples}.
 Timing: carbs before/during/after quality+long sessions. Long run >90min: 30-60 g carbs/h (up to ~90 g/h for long events). Post hard session if training again <8-24h: ~1 g/kg/h carbs + protein.
 Hydration: 3L/day min + electrolytes; front-load early; ~0.4-0.8 L/h training; sodium 500-700 mg/L; drink to thirst (avoid hyponatremia). Sweat test: weigh pre/post a 1h+ run.
 Whole-food emphasis, 80/20 rule. LOW-FODMAP / "vertical diet" staples digest easiest around training.`
+}
 
 export const KNOWLEDGE_RECOVERY = `RECOVERY — Ollie Duthie's Recovery Blueprint:
 Hydration is the foundation (3L+ / day, front-loaded, electrolytes; cut fluids 1-2h before bed).
@@ -66,14 +81,51 @@ export const KNOWLEDGE_BOOKS = `PERSONAL-DEVELOPMENT LIBRARY (Tom's reading list
 - "The Almanack of Naval Ravikant" (Eric Jorgenson): wealth without luck (leverage + specific knowledge), happiness as a skill/choice, peace over stimulation.
 Themes Tom lives by: "Health, love, and mission — in that order." "A calm mind, a fit body, a house full of love — earned, not bought." "Mystery makes history." "The third door."`
 
+/** Total characters of user-fed knowledge docs to inject — keeps the prompt within budget. */
+const BRAIN_FEED_BUDGET = 14000
+
+/**
+ * The user's own imported knowledge — Obsidian notes, specs, coach material
+ * pasted or uploaded in Settings → Brain Feed. Newest first, truncated to a
+ * character budget so a huge vault can't blow the model's context window.
+ * This is what makes "connect it to Obsidian / bigger context" real inside a
+ * browser app: the material rides along with every query.
+ */
+function buildBrainFeed(): string {
+  const docs = useStore.getState().knowledgeDocs
+  if (!docs.length) return ''
+
+  const parts: string[] = []
+  let used = 0
+  let truncatedDocs = 0
+  for (const d of docs) {
+    if (used >= BRAIN_FEED_BUDGET) {
+      truncatedDocs++
+      continue
+    }
+    const remaining = BRAIN_FEED_BUDGET - used
+    const body = d.body.length > remaining ? d.body.slice(0, remaining) + '\n…[truncated]' : d.body
+    used += body.length
+    parts.push(`### ${d.title}${d.source && d.source !== 'pasted' ? ` (${d.source})` : ''}\n${body}`)
+  }
+
+  const header =
+    "TOM'S OWN KNOWLEDGE (imported by him — his notes, specs, plans; treat as authoritative about HIS world, above generic advice):"
+  const footer = truncatedDocs ? `\n[${truncatedDocs} more note(s) not shown — ask him to open the relevant one if needed.]` : ''
+  return `${header}\n\n${parts.join('\n\n')}${footer}`
+}
+
 export function fullKnowledge(): string {
   return [
     KNOWLEDGE_GOLF,
     KNOWLEDGE_HYBRID,
-    KNOWLEDGE_FUEL,
+    buildKnowledgeFuel(),
     KNOWLEDGE_RECOVERY,
     KNOWLEDGE_ECON,
     KNOWLEDGE_BOOKS,
     foodDbForPrompt(),
-  ].join('\n\n')
+    buildBrainFeed(),
+  ]
+    .filter(Boolean)
+    .join('\n\n')
 }

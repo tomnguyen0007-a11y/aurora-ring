@@ -3,6 +3,7 @@ import type { ChatMsg, LlmProvider } from '../../store/types'
 import { splitDataURL } from '../image'
 import { applyActions, type JarvisAction } from './actions'
 import { formatContextForLlm, type JarvisContext } from './context'
+import { canCall, rateLimitStatus, recordCall } from './rateLimit'
 
 /** Thrown by every provider call so the failover chain knows who failed and why. */
 export class ProviderError extends Error {
@@ -153,8 +154,18 @@ Restructuring the training split itself (weekday: 0=Mon … 6=Sun):
   - {"type":"update_workout","workout":"<fragment>","name":"<new name>","weekday":N}  ← rename / move day
   - {"type":"remove_workout","workout":"<fragment>"}
 
+Fuelling framework — the Nutrition view's day-type carb periodisation table (Recovery/Lift/Easy Run/Quality Run/Double Day/Long Run):
+  - {"type":"update_day_type_macro","dayType":"<code like L, or a label fragment like 'lift'>","proteinGkg":"1.8-2.2","carbGkg":"3.5-4.5","fatGkg":"0.6-0.8"}
+    Only include the field(s) he asked to change. The "Example (80kg)" column recomputes automatically from
+    whatever protein/carb/fat is set — never state a kcal figure for this table yourself, the app computes it.
+    This table is a REFERENCE FRAMEWORK at a fixed 80kg for scaling logic, not his personal calorie target — for
+    his actual daily target use the NUTRITION TODAY line in LIVE STATE, not this table's example kcal.
+
 Memory:
-  - {"type":"remember","fact":"<durable fact to store in memory>"}
+  - {"type":"remember","fact":"<durable one-line fact to store in memory>"}
+  - {"type":"save_knowledge","title":"...","body":"<a longer reference — a plan, protocol, or notes he wants you to keep and reason from later>"}
+    Use this for anything too long for a one-line fact. It lands in his Brain Feed and rides along with every future query.
+    TOM'S OWN KNOWLEDGE (his Brain Feed, in KNOWLEDGE above) is authoritative about HIS world — prefer it over generic advice.
 
 Navigation:
   - {"type":"navigate","view":"today|goals|training|golf|nutrition|recovery|grocery|notes|business|books|mindset|markets|schedule|settings"}
@@ -175,13 +186,21 @@ EXECUTION RULES:
 - Keep replies under 120 words unless the user asks for deep strategy/planning
 - When he corrects a mistake ("that was wrong", "actually it was 600 kcal"), FIX it with an edit action — don't apologise and do nothing
 
-FOOD LOGGING POLICY (accurate, never a dead end):
+FOOD LOGGING POLICY (accurate, never a hallucination):
 1. If the item matches the KNOWN FOOD DATABASE in KNOWLEDGE → use those exact figures.
 2. If the user gave numbers → use exactly those.
-3. Otherwise → estimate from your solid nutrition knowledge${opts.webSearch ? ' (or a quick web search for restaurant/branded items)' : ''},
-   LOG IT with the estimate, and say it's an estimate — e.g. "Logged pho bo at roughly 450 kcal / 30g protein for a
-   typical bowl — correct me if the portion was bigger." An honest labeled estimate beats refusing to help.
-   NEVER present an estimate as an exact fact, and NEVER refuse to log because you lack the label.
+3. Otherwise → do NOT invent macros. Ask for the specific item, brand, or portion (e.g. "What brand/size — I want
+   to log this accurately rather than guess") ${
+     opts.webSearch ? 'or use web search to find the real label/menu figures for a branded or restaurant item' : ''
+   }.
+   NEVER present a guess as a fact, and NEVER silently log a number you are not confident in — asking one clarifying
+   question is always better than a fabricated calorie count.
+
+MEAL INSPIRATION (distinct from logging — no numbers required here):
+When he asks what to eat/cook given constraints ("what should I eat quickly, I only have yogurt", "quick high-protein
+idea with what I've got"), that is a request for IDEAS, not a logging event — don't ask for a label, just suggest
+2-3 concrete, fast options using what he named${opts.webSearch ? ', using web search if a specific recipe or product needs current details' : ''}.
+Keep it practical and short. Only log something if he then tells you he made/ate it.
 ${
   opts.webSearch
     ? `
@@ -341,11 +360,76 @@ async function callGroq(userText: string, ctx: JarvisContext): Promise<string> {
   return data.choices?.[0]?.message?.content ?? ''
 }
 
-// OpenRouter: one key routes to 35+ models, several genuinely free (":free" suffix).
-// A resilient backup — if one free model is rate-limited, switch the model string
-// without switching providers. Default model (Qwen 2.5 VL 72B) supports vision.
+// OpenRouter: one key routes to many models, several genuinely free (":free" suffix).
+// Free models get retired without notice (qwen2.5-vl-72b:free vanished and 404'd
+// everyone using the old default), so the model is SELF-HEALING: on a 404 we fetch
+// the live catalogue, pick the best available free model (vision-capable when the
+// request needs it), persist it to settings, and retry — no user intervention.
 // Web search would need OpenRouter's paid ":online" plugin, so — like Groq — the
 // prompt doesn't claim search on this provider.
+
+/** Known-good free models to prefer, best first. Anything here that's been retired is skipped automatically. */
+const OPENROUTER_FREE_PREFERRED = [
+  'qwen/qwen2.5-vl-72b-instruct:free', // vision — kept first in case it returns
+  'google/gemma-3-27b-it:free', // vision
+  'meta-llama/llama-4-maverick:free', // vision
+  'qwen/qwen-2.5-72b-instruct:free',
+  'meta-llama/llama-3.3-70b-instruct:free',
+  'deepseek/deepseek-chat-v3-0324:free',
+  'deepseek/deepseek-r1:free',
+]
+
+interface OpenRouterModel {
+  id: string
+  architecture?: { input_modalities?: string[] }
+}
+
+/**
+ * Ask OpenRouter what's actually available right now and pick the best free
+ * model. Preference order: our curated list first (highest quality), then any
+ * other ":free" model — vision-capable ones first when the request needs vision.
+ */
+export async function discoverOpenRouterFreeModel(needsVision: boolean): Promise<string | null> {
+  try {
+    const res = await fetch('https://openrouter.ai/api/v1/models')
+    if (!res.ok) return null
+    const data: { data?: OpenRouterModel[] } = await res.json()
+    const free = (data.data ?? []).filter((m) => m.id.endsWith(':free'))
+    if (!free.length) return null
+
+    const hasVision = (m: OpenRouterModel) => m.architecture?.input_modalities?.includes('image') ?? false
+    const pool = needsVision ? free.filter(hasVision) : free
+    if (!pool.length) return null
+
+    const ids = new Set(pool.map((m) => m.id))
+    const preferred = OPENROUTER_FREE_PREFERRED.find((id) => ids.has(id))
+    if (preferred) return preferred
+
+    // No curated hit — fall back to the largest-sounding model still standing
+    const bySize = [...pool].sort((a, b) => {
+      const size = (m: OpenRouterModel) => parseInt(m.id.match(/(\d+)b/i)?.[1] ?? '0', 10)
+      return size(b) - size(a)
+    })
+    return bySize[0]?.id ?? null
+  } catch {
+    return null
+  }
+}
+
+/** True when an OpenRouter error means "this model no longer exists" (vs. auth/rate issues). */
+function isModelGone(e: unknown): boolean {
+  return e instanceof ProviderError && e.provider === 'openrouter' && (e.status === 404 || /model.*(not found|does not exist|is not available)/i.test(e.message))
+}
+
+/**
+ * Self-heal a dead OpenRouter model: discover a live free replacement, persist
+ * it so every future call uses it, and return it (null if nothing suitable).
+ */
+async function healOpenRouterModel(needsVision: boolean): Promise<string | null> {
+  const found = await discoverOpenRouterFreeModel(needsVision)
+  if (found) useStore.getState().setSettings({ openrouterModel: found })
+  return found
+}
 function openRouterMessages(userText: string, image: string | undefined, chat: ChatMsg[]) {
   const history = historyFor(chat, userText) as { role: 'user' | 'assistant'; content: string | unknown }[]
   if (image) {
@@ -360,7 +444,7 @@ function openRouterMessages(userText: string, image: string | undefined, chat: C
   return history
 }
 
-async function callOpenRouter(userText: string, ctx: JarvisContext, image?: string): Promise<string> {
+async function callOpenRouter(userText: string, ctx: JarvisContext, image?: string, isRetry = false): Promise<string> {
   const { settings, chat } = useStore.getState()
   const messages = [{ role: 'system', content: buildSystemPrompt(ctx, { webSearch: false }) }, ...openRouterMessages(userText, image, chat)]
 
@@ -377,7 +461,12 @@ async function callOpenRouter(userText: string, ctx: JarvisContext, image?: stri
 
   if (!res.ok) {
     const body = await res.text().catch(() => '')
-    throw new ProviderError('openrouter', res.status, `OpenRouter ${res.status}: ${body.slice(0, 180)}`)
+    const err = new ProviderError('openrouter', res.status, `OpenRouter ${res.status}: ${body.slice(0, 180)}`)
+    // Free models get retired without notice — swap in a live one and retry once
+    if (!isRetry && isModelGone(err) && (await healOpenRouterModel(!!image))) {
+      return callOpenRouter(userText, ctx, image, true)
+    }
+    throw err
   }
 
   const data: { choices?: { message?: { content?: string } }[] } = await res.json()
@@ -432,6 +521,14 @@ async function streamProvider(
 export interface LlmResult {
   reply: string
   receipts: string[]
+  provider?: LlmProvider
+}
+
+/** Thrown when every provider in the chain is currently over its free-tier rate limit. */
+export class AllProvidersRateLimitedError extends Error {
+  constructor(public retryInSec: number) {
+    super(`All configured brains are rate-limited right now. Retry in ~${retryInSec}s.`)
+  }
 }
 
 /**
@@ -513,11 +610,20 @@ export async function runLlm(userText: string, ctx: JarvisContext, image?: strin
   }
 
   const failures: string[] = []
+  let rateLimitedCount = 0
   for (let i = 0; i < chain.length; i++) {
     const p = chain[i]
+    if (!canCall(p)) {
+      rateLimitedCount++
+      const { retryInSec } = rateLimitStatus(p)
+      failures.push(`${providerLabel(p)}: rate-limited, retry in ~${retryInSec}s`)
+      continue
+    }
+    recordCall(p)
     try {
       const raw = await callProvider(p, userText, ctx, image)
       const result = extractAndApplyActions(raw)
+      result.provider = p
       if (i > 0) {
         result.receipts = [`Auto-switched to ${providerLabel(p)} — ${providerLabel(chain[0])} was unavailable`, ...result.receipts]
       }
@@ -527,6 +633,9 @@ export async function runLlm(userText: string, ctx: JarvisContext, image?: strin
     }
   }
 
+  if (rateLimitedCount === chain.length) {
+    throw new AllProvidersRateLimitedError(Math.min(...chain.map((p) => rateLimitStatus(p).retryInSec)))
+  }
   throw new Error(`All configured brains failed. ${failures.join(' | ')}`)
 }
 
@@ -698,7 +807,13 @@ async function streamGroq(userText: string, ctx: JarvisContext, onText: (delta: 
   return full
 }
 
-async function streamOpenRouter(userText: string, ctx: JarvisContext, image: string | undefined, onText: (delta: string) => void): Promise<string> {
+async function streamOpenRouter(
+  userText: string,
+  ctx: JarvisContext,
+  image: string | undefined,
+  onText: (delta: string) => void,
+  isRetry = false,
+): Promise<string> {
   const { settings, chat } = useStore.getState()
   const messages = [{ role: 'system', content: buildSystemPrompt(ctx, { webSearch: false }) }, ...openRouterMessages(userText, image, chat)]
 
@@ -720,7 +835,12 @@ async function streamOpenRouter(userText: string, ctx: JarvisContext, image: str
 
   if (!res.ok || !res.body) {
     const body = await res.text().catch(() => '')
-    throw new ProviderError('openrouter', res.status, `OpenRouter ${res.status}: ${body.slice(0, 180)}`)
+    const err = new ProviderError('openrouter', res.status, `OpenRouter ${res.status}: ${body.slice(0, 180)}`)
+    // Free models get retired without notice — swap in a live one and retry once
+    if (!isRetry && isModelGone(err) && (await healOpenRouterModel(!!image))) {
+      return streamOpenRouter(userText, ctx, image, onText, true)
+    }
+    throw err
   }
 
   let full = ''
@@ -763,8 +883,16 @@ export async function runLlmStream(userText: string, ctx: JarvisContext, image: 
   }
 
   const failures: string[] = []
+  let rateLimitedCount = 0
   for (let i = 0; i < chain.length; i++) {
     const p = chain[i]
+    if (!canCall(p)) {
+      rateLimitedCount++
+      const { retryInSec } = rateLimitStatus(p)
+      failures.push(`${providerLabel(p)}: rate-limited, retry in ~${retryInSec}s`)
+      continue
+    }
+    recordCall(p)
     let rawText = ''
     let shown = ''
     const collect = (delta: string) => {
@@ -779,6 +907,7 @@ export async function runLlmStream(userText: string, ctx: JarvisContext, image: 
     try {
       const full = await streamProvider(p, userText, ctx, image, collect)
       const result = extractAndApplyActions(full)
+      result.provider = p
       if (i > 0) {
         result.receipts = [`Auto-switched to ${providerLabel(p)} — ${providerLabel(chain[0])} was unavailable`, ...result.receipts]
       }
@@ -788,6 +917,9 @@ export async function runLlmStream(userText: string, ctx: JarvisContext, image: 
     }
   }
 
+  if (rateLimitedCount === chain.length) {
+    throw new AllProvidersRateLimitedError(Math.min(...chain.map((p) => rateLimitStatus(p).retryInSec)))
+  }
   throw new Error(`All configured brains failed. ${failures.join(' | ')}`)
 }
 
@@ -851,22 +983,32 @@ export async function testProvider(p: LlmProvider): Promise<ProviderTestResult> 
       }
       case 'openrouter': {
         if (!settings.openrouterKey) return { ok: false, message: 'No key set' }
-        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'content-type': 'application/json',
-            authorization: `Bearer ${settings.openrouterKey}`,
-            'HTTP-Referer': typeof location !== 'undefined' ? location.origin : 'https://calibrate.app',
-            'X-Title': 'Calibrate',
-          },
-          body: JSON.stringify({
-            model: settings.openrouterModel || 'qwen/qwen2.5-vl-72b-instruct:free',
-            max_tokens: 5,
-            messages: [{ role: 'user', content: 'hi' }],
-          }),
-        })
-        if (!res.ok) return { ok: false, message: `${res.status}: ${(await res.text().catch(() => '')).slice(0, 100)}` }
-        return { ok: true, message: 'Connected' }
+        const ping = async (model: string) =>
+          fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json',
+              authorization: `Bearer ${settings.openrouterKey}`,
+              'HTTP-Referer': typeof location !== 'undefined' ? location.origin : 'https://calibrate.app',
+              'X-Title': 'Calibrate',
+            },
+            body: JSON.stringify({ model, max_tokens: 5, messages: [{ role: 'user', content: 'hi' }] }),
+          })
+        const model = settings.openrouterModel || 'qwen/qwen2.5-vl-72b-instruct:free'
+        const res = await ping(model)
+        if (res.ok) return { ok: true, message: 'Connected' }
+
+        const body = (await res.text().catch(() => '')).slice(0, 140)
+        // Model retired? Find a live free one, save it, and prove it works.
+        if (res.status === 404 || /model.*(not found|does not exist|is not available)/i.test(body)) {
+          const healed = await healOpenRouterModel(false)
+          if (healed) {
+            const retry = await ping(healed)
+            if (retry.ok) return { ok: true, message: `"${model}" was retired — auto-switched to ${healed}` }
+          }
+          return { ok: false, message: `Model "${model}" no longer exists and no free replacement responded — pick one at openrouter.ai/models` }
+        }
+        return { ok: false, message: `${res.status}: ${body.slice(0, 100)}` }
       }
       default:
         return { ok: false, message: 'Not applicable' }

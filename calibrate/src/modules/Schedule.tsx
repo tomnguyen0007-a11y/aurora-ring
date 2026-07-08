@@ -67,7 +67,7 @@ export function Schedule() {
         <p className="mt-1 text-sm text-haze">Your operating schedule. Edit blocks, or tell Jarvis to do it.</p>
       </header>
 
-      <div className="flex gap-1.5 overflow-x-auto pb-1">
+      <div className="flex gap-1.5 overflow-x-auto overscroll-x-contain pb-1">
         {WEEKDAY_NAMES.map((name, i) => (
           <button
             key={name}

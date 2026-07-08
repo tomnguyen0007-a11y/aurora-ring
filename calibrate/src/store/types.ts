@@ -143,6 +143,20 @@ export interface TableDoc {
   updated: number
 }
 
+/**
+ * A free-form knowledge document the user feeds Jarvis — pasted or uploaded
+ * from Obsidian, a spec, a coach's PDF-turned-markdown, anything. Injected into
+ * Jarvis's context so it reasons from the user's real material, not just the
+ * built-in seed knowledge. "source" tags where it came from (e.g. a filename).
+ */
+export interface KnowledgeDoc {
+  id: string
+  title: string
+  body: string
+  source: string
+  updated: number
+}
+
 export interface BizTask {
   id: string
   title: string

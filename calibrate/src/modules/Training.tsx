@@ -71,7 +71,7 @@ export function Training() {
         <StatTile label="This week" value={`${wk.done}/${wk.planned}`} sub="sessions complete" accent="text-signal" />
       </header>
 
-      <div className="flex gap-1.5 overflow-x-auto pb-1">
+      <div className="flex gap-1.5 overflow-x-auto overscroll-x-contain pb-1">
         {s.workouts.map((w) => (
           <button
             key={w.id}

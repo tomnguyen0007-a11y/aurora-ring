@@ -27,6 +27,7 @@ export type JarvisAction =
   | { type: 'complete_workout' }
   | { type: 'update_goal_progress'; goal: string; progress: number }
   | { type: 'remember'; fact: string }
+  | { type: 'save_knowledge'; title: string; body: string } // store a longer reference doc into the Brain Feed
   | { type: 'add_mantra'; text: string; author?: string }
   | { type: 'navigate'; view: ViewId }
   // ——— editing & deleting (Jarvis can fix mistakes, not just add) ———
@@ -59,6 +60,8 @@ export type JarvisAction =
   | { type: 'add_workout'; name: string; weekday: Weekday; exercises?: { name: string; sets: number; reps: string; cue?: string }[] }
   | { type: 'update_workout'; workout: string; name?: string; weekday?: Weekday }
   | { type: 'remove_workout'; workout: string }
+  // ——— fuelling framework: carb periodisation by day type (Nutrition view's day-type table) ———
+  | { type: 'update_day_type_macro'; dayType: string; proteinGkg?: string; carbGkg?: string; fatGkg?: string }
 
 const VIEWS: ViewId[] = ['today', 'jarvis', 'goals', 'training', 'golf', 'nutrition', 'recovery', 'grocery', 'notes', 'business', 'books', 'mindset', 'markets', 'schedule', 'settings']
 
@@ -234,6 +237,14 @@ export function applyActions(actions: JarvisAction[]): string[] {
           if (text) {
             s.addFact(text, inferCategory(text), inferImportance(text))
             receipts.push(`Remembered: ${text}`)
+          }
+          break
+        }
+        case 'save_knowledge': {
+          const body = a.body?.trim()
+          if (body) {
+            s.addKnowledgeDoc(a.title?.trim() || 'Note from Jarvis', body, 'jarvis')
+            receipts.push(`Saved to Brain Feed: “${a.title?.trim() || 'Note'}”`)
           }
           break
         }
@@ -451,7 +462,7 @@ export function applyActions(actions: JarvisAction[]): string[] {
               ...(a.name ? { name: a.name } : {}),
               ...(a.sets != null ? { sets: a.sets } : {}),
               ...(a.reps ? { reps: a.reps } : {}),
-              ...(a.cue ? { cue: a.cue } : {}),
+              ...(a.cue != null ? { cue: a.cue } : {}),
             })
             receipts.push(`Updated ${w.name}: ${a.name ?? ex.name}${a.sets != null || a.reps ? ` ${a.sets ?? ex.sets}×${a.reps ?? ex.reps}` : ''}`)
           }
@@ -503,6 +514,25 @@ export function applyActions(actions: JarvisAction[]): string[] {
           if (w) {
             s.removeWorkout(w.id)
             receipts.push(`Workout removed: ${w.name}`)
+          }
+          break
+        }
+
+        case 'update_day_type_macro': {
+          const q = a.dayType.toLowerCase()
+          const hit = s.dayTypeMacros.find((d) => d.code.toLowerCase() === q || d.label.toLowerCase().includes(q))
+          if (hit) {
+            s.updateDayTypeMacro(hit.code, {
+              ...(a.proteinGkg ? { proteinGkg: a.proteinGkg } : {}),
+              ...(a.carbGkg ? { carbGkg: a.carbGkg } : {}),
+              ...(a.fatGkg ? { fatGkg: a.fatGkg } : {}),
+            })
+            const parts = [
+              a.carbGkg ? `carbs ${a.carbGkg} g/kg` : '',
+              a.proteinGkg ? `protein ${a.proteinGkg} g/kg` : '',
+              a.fatGkg ? `fat ${a.fatGkg} g/kg` : '',
+            ].filter(Boolean)
+            receipts.push(`Fuelling framework updated — ${hit.label}: ${parts.join(', ')}`)
           }
           break
         }

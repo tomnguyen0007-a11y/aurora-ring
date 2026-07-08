@@ -2,9 +2,26 @@ import { Bot, ImagePlus, KeyRound, Mic, MicOff, SendHorizonal, Trash2, VolumeX, 
 import { useEffect, useRef, useState } from 'react'
 import { createDictation, createSpeechStream, speak, stopSpeaking, type Dictation, type SpeechProviders } from '../lib/speech'
 import { runLocalEngine } from '../lib/jarvis/engine'
-import { getProviderChain, llmConfigured, runLlm, runLlmStream } from '../lib/jarvis/llm'
+import { AllProvidersRateLimitedError, getProviderChain, llmConfigured, providerLabel, runLlm, runLlmStream } from '../lib/jarvis/llm'
 import { buildJarvisContext } from '../lib/jarvis/context'
 import { useStore } from '../store/store'
+import type { CalibrateState } from '../store/store'
+
+/** Short human label for the brain that handled the last exchange — used by both the full Jarvis view and the desktop dock. */
+export function jarvisSourceLabel(source: CalibrateState['lastJarvisSource']): string {
+  if (source === 'local') return 'LOCAL · FREE'
+  if (source === 'rate-limited') return 'RATE-LIMITED'
+  if (source) return providerLabel(source).toUpperCase()
+  return llmConfigured() ? 'UNIFIED BRAIN' : 'LOCAL ENGINE · FREE'
+}
+
+/** Semantic dot/text color pair for the same source — literal class names so Tailwind's scanner picks them up. */
+export function jarvisSourceColor(source: CalibrateState['lastJarvisSource']): { dot: string; text: string } {
+  if (source === 'local') return { dot: 'bg-affirm', text: 'text-affirm' }
+  if (source === 'rate-limited') return { dot: 'bg-alert', text: 'text-alert' }
+  if (source) return { dot: 'bg-arc', text: 'text-arc' }
+  return { dot: 'bg-signal-dim', text: 'text-signal-dim' }
+}
 
 const SUGGESTIONS = [
   'log 30 min putting',
@@ -27,6 +44,7 @@ function speechProviders(): SpeechProviders | null {
 
 export function useJarvis() {
   const pushChat = useStore((s) => s.pushChat)
+  const setLastJarvisSource = useStore((s) => s.setLastJarvisSource)
   const [busy, setBusy] = useState(false)
   // Live streaming reply — rendered as a growing bubble before it's committed to the store
   const [draft, setDraft] = useState<string | null>(null)
@@ -60,6 +78,7 @@ export function useJarvis() {
       if (localResult) {
         pushChat({ role: 'jarvis', text: localResult.reply, acted: localResult.receipts })
         say(localResult.reply)
+        setLastJarvisSource('local')
         return
       }
     }
@@ -90,19 +109,37 @@ export function useJarvis() {
         },
       })
       pushChat({ role: 'jarvis', text: res.reply, acted: res.receipts })
+      setLastJarvisSource(res.provider ?? null)
       void voice?.end()
-    } catch {
+    } catch (streamErr) {
       voice?.cancel()
+      if (streamErr instanceof AllProvidersRateLimitedError) {
+        setLastJarvisSource('rate-limited')
+        const msg = `Every configured brain has hit its free-tier rate limit, sir — retry in about ${streamErr.retryInSec}s, or the local engine still handles logging and lookups instantly.`
+        pushChat({ role: 'jarvis', text: msg })
+        say(msg)
+        setDraft(null)
+        setBusy(false)
+        return
+      }
       // Streaming failed (proxy/CORS/transient) — retry once via the non-streaming path
       try {
         const res = await runLlm(t || 'What do you make of this?', ctx, image)
         pushChat({ role: 'jarvis', text: res.reply, acted: res.receipts })
+        setLastJarvisSource(res.provider ?? null)
         say(res.reply)
       } catch (e) {
-        pushChat({
-          role: 'jarvis',
-          text: `Connection issue with the advanced brain: ${e instanceof Error ? e.message : 'unknown error'}. Check the API key in Settings.`,
-        })
+        if (e instanceof AllProvidersRateLimitedError) {
+          setLastJarvisSource('rate-limited')
+          const msg = `Every configured brain has hit its free-tier rate limit, sir — retry in about ${e.retryInSec}s, or the local engine still handles logging and lookups instantly.`
+          pushChat({ role: 'jarvis', text: msg })
+          say(msg)
+        } else {
+          pushChat({
+            role: 'jarvis',
+            text: `Connection issue with the advanced brain: ${e instanceof Error ? e.message : 'unknown error'}. Check the API key in Settings.`,
+          })
+        }
       }
     } finally {
       setDraft(null)
@@ -198,8 +235,9 @@ export function Jarvis() {
           </div>
           <div>
             <h1 className="h-lumen text-2xl font-bold leading-none tracking-wide">JARVIS</h1>
-            <p className="hud-label !mb-0 mt-1 !text-[8px]">
-              {listening ? 'LISTENING…' : busy ? 'THINKING…' : llmConfigured() ? 'UNIFIED BRAIN' : 'LOCAL ENGINE · FREE'}
+            <p className="hud-label !mb-0 mt-1 flex items-center gap-1.5 !text-[8px]">
+              {!listening && !busy && <span className={`h-1.5 w-1.5 rounded-full ${jarvisSourceColor(s.lastJarvisSource).dot}`} />}
+              {listening ? 'LISTENING…' : busy ? 'THINKING…' : jarvisSourceLabel(s.lastJarvisSource)}
             </p>
           </div>
         </div>
@@ -221,7 +259,7 @@ export function Jarvis() {
         </div>
       </header>
 
-      <div className="glass flex-1 space-y-3 overflow-y-auto rounded-2xl p-4">
+      <div className="glass flex-1 space-y-3 overflow-y-auto overscroll-contain rounded-2xl p-4">
         {!s.chat.length && (
           <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
             <p className="max-w-sm text-sm leading-relaxed text-haze">

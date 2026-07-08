@@ -24,7 +24,7 @@ function TableEditor({ id }: { id: string }) {
   const delRow = (r: number) => s.updateTable(id, { rows: t.rows.filter((_, i) => i !== r) })
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto overscroll-x-contain">
       <table className="w-full min-w-[420px] border-collapse text-sm">
         <thead>
           <tr>
