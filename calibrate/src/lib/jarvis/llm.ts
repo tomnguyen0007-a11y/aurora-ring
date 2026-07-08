@@ -162,7 +162,10 @@ Fuelling framework — the Nutrition view's day-type carb periodisation table (R
     his actual daily target use the NUTRITION TODAY line in LIVE STATE, not this table's example kcal.
 
 Memory:
-  - {"type":"remember","fact":"<durable fact to store in memory>"}
+  - {"type":"remember","fact":"<durable one-line fact to store in memory>"}
+  - {"type":"save_knowledge","title":"...","body":"<a longer reference — a plan, protocol, or notes he wants you to keep and reason from later>"}
+    Use this for anything too long for a one-line fact. It lands in his Brain Feed and rides along with every future query.
+    TOM'S OWN KNOWLEDGE (his Brain Feed, in KNOWLEDGE above) is authoritative about HIS world — prefer it over generic advice.
 
 Navigation:
   - {"type":"navigate","view":"today|goals|training|golf|nutrition|recovery|grocery|notes|business|books|mindset|markets|schedule|settings"}

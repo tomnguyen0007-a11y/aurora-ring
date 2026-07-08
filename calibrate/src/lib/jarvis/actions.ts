@@ -27,6 +27,7 @@ export type JarvisAction =
   | { type: 'complete_workout' }
   | { type: 'update_goal_progress'; goal: string; progress: number }
   | { type: 'remember'; fact: string }
+  | { type: 'save_knowledge'; title: string; body: string } // store a longer reference doc into the Brain Feed
   | { type: 'add_mantra'; text: string; author?: string }
   | { type: 'navigate'; view: ViewId }
   // ——— editing & deleting (Jarvis can fix mistakes, not just add) ———
@@ -236,6 +237,14 @@ export function applyActions(actions: JarvisAction[]): string[] {
           if (text) {
             s.addFact(text, inferCategory(text), inferImportance(text))
             receipts.push(`Remembered: ${text}`)
+          }
+          break
+        }
+        case 'save_knowledge': {
+          const body = a.body?.trim()
+          if (body) {
+            s.addKnowledgeDoc(a.title?.trim() || 'Note from Jarvis', body, 'jarvis')
+            receipts.push(`Saved to Brain Feed: “${a.title?.trim() || 'Note'}”`)
           }
           break
         }

@@ -33,6 +33,7 @@ import type {
   GroceryItem,
   HandicapEntry,
   HevySession,
+  KnowledgeDoc,
   LlmProvider,
   MacroTargets,
   Mantra,
@@ -116,6 +117,12 @@ export interface CalibrateState {
   toggleGrocery: (id: string) => void
   removeGrocery: (id: string) => void
   clearDoneGrocery: () => void
+
+  // brain feed — user-fed knowledge docs (Obsidian notes, specs, coach material) injected into Jarvis's context
+  knowledgeDocs: KnowledgeDoc[]
+  addKnowledgeDoc: (title: string, body: string, source?: string) => string
+  updateKnowledgeDoc: (id: string, patch: Partial<Pick<KnowledgeDoc, 'title' | 'body' | 'source'>>) => void
+  removeKnowledgeDoc: (id: string) => void
 
   // notes & tables
   notes: Note[]
@@ -238,6 +245,7 @@ const seedState = () => ({
   foodLogs: [],
   water: {},
   dayTypeMacros: seedDayTypeMacros,
+  knowledgeDocs: [],
   grocery: [],
   notes: [],
   tables: [],
@@ -386,6 +394,15 @@ export const useStore = create<CalibrateState>()(
           }),
         })),
 
+      addKnowledgeDoc: (title, body, source = 'pasted') => {
+        const id = uid('kd')
+        set((s) => ({ knowledgeDocs: [{ id, title: title.trim() || 'Untitled note', body, source, updated: Date.now() }, ...s.knowledgeDocs] }))
+        return id
+      },
+      updateKnowledgeDoc: (id, patch) =>
+        set((s) => ({ knowledgeDocs: s.knowledgeDocs.map((d) => (d.id === id ? { ...d, ...patch, updated: Date.now() } : d)) })),
+      removeKnowledgeDoc: (id) => set((s) => ({ knowledgeDocs: s.knowledgeDocs.filter((d) => d.id !== id) })),
+
       addGrocery: (name, qty = '') =>
         set((s) => ({ grocery: [...s.grocery, { id: uid('gr'), name, qty, done: false }] })),
       toggleGrocery: (id) =>
@@ -510,7 +527,7 @@ export const useStore = create<CalibrateState>()(
     }),
     {
       name: 'calibrate-v1',
-      version: 4,
+      version: 5,
       // always wake up on Today — don't persist navigation; strip heavy chat images from storage
       partialize: (s) =>
         Object.fromEntries(
@@ -548,6 +565,9 @@ export const useStore = create<CalibrateState>()(
               accessCount: 0,
             }))
           }
+        }
+        if (version < 5) {
+          if (!Array.isArray(p.knowledgeDocs)) p.knowledgeDocs = []
         }
         return p as unknown as CalibrateState
       },

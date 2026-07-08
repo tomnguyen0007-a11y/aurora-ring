@@ -1,4 +1,4 @@
-import { BrainCircuit, CheckCircle2, Download, KeyRound, Play, Plus, RefreshCw, RotateCcw, Trash2, Upload, Volume2, XCircle } from 'lucide-react'
+import { BrainCircuit, CheckCircle2, Download, FileText, KeyRound, Play, Plus, RefreshCw, RotateCcw, Trash2, Upload, Volume2, XCircle } from 'lucide-react'
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { HudLabel, Panel } from '../components/ui'
 import { llmConfigured, testProvider } from '../lib/jarvis/llm'
@@ -151,6 +151,8 @@ export function Settings() {
           </div>
         </div>
       </Panel>
+
+      <BrainFeedPanel />
 
       <Panel>
         <HudLabel>
@@ -456,6 +458,100 @@ function BrainPanel() {
           </p>
         )}
       </Panel>
+  )
+}
+
+/** Total characters across the Brain Feed — mirrors the injection budget so the user sees when it's getting big. */
+const BRAIN_FEED_SOFT_BUDGET = 14000
+
+function BrainFeedPanel() {
+  const s = useStore()
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [title, setTitle] = useState('')
+  const [body, setBody] = useState('')
+
+  const totalChars = s.knowledgeDocs.reduce((n, d) => n + d.body.length, 0)
+  const overBudget = totalChars > BRAIN_FEED_SOFT_BUDGET
+
+  const addPasted = () => {
+    if (!body.trim()) return
+    s.addKnowledgeDoc(title, body.trim(), 'pasted')
+    setTitle('')
+    setBody('')
+  }
+
+  const importFiles = async (files: FileList) => {
+    for (const file of Array.from(files)) {
+      const text = await file.text()
+      if (text.trim()) s.addKnowledgeDoc(file.name.replace(/\.(md|markdown|txt)$/i, ''), text, file.name)
+    }
+  }
+
+  return (
+    <Panel>
+      <HudLabel>
+        <FileText size={11} className="text-arc" /> Brain Feed — Jarvis's Reading Material
+      </HudLabel>
+      <p className="mb-3 text-xs leading-relaxed text-fog">
+        Paste or upload your Obsidian notes, a coach's plan, a spec — anything. It rides along with every Jarvis
+        query, so it reasons from <span className="text-haze">your</span> material, not just its built-in knowledge.
+        Stored on this device; the newest ~{Math.round(BRAIN_FEED_SOFT_BUDGET / 1000)}k characters are sent each time.
+      </p>
+
+      <div className="space-y-2">
+        <input
+          className="field w-full"
+          placeholder="Title — e.g. “My Hybrid Training Block” or “Ollie's Fuelling Notes”"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <textarea
+          className="field w-full"
+          rows={4}
+          placeholder="Paste note content here (Markdown is fine)…"
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+        />
+        <div className="flex flex-wrap items-center gap-2">
+          <button className="btn btn-signal" onClick={addPasted} disabled={!body.trim()}>
+            <Plus size={15} /> Add to Brain Feed
+          </button>
+          <button className="btn" onClick={() => fileRef.current?.click()}>
+            <Upload size={15} /> Upload .md / .txt
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".md,.markdown,.txt,text/markdown,text/plain"
+            multiple
+            className="hidden"
+            onChange={(e) => e.target.files && importFiles(e.target.files)}
+          />
+          <span className={`ml-auto text-[11px] ${overBudget ? 'text-alert' : 'text-fog'}`}>
+            {s.knowledgeDocs.length} note{s.knowledgeDocs.length === 1 ? '' : 's'} · {(totalChars / 1000).toFixed(1)}k chars
+            {overBudget ? ' — over budget, oldest get trimmed' : ''}
+          </span>
+        </div>
+      </div>
+
+      {s.knowledgeDocs.length > 0 && (
+        <ul className="mt-4 space-y-1.5">
+          {s.knowledgeDocs.map((d) => (
+            <li key={d.id} className="group flex items-center gap-2 rounded-lg bg-black/25 px-3 py-2">
+              <FileText size={13} className="shrink-0 text-arc/70" />
+              <span className="min-w-0 flex-1 truncate text-sm text-ice">{d.title}</span>
+              <span className="num shrink-0 text-[10px] text-fog">
+                {d.source !== 'pasted' && d.source !== 'jarvis' ? `${d.source} · ` : ''}
+                {(d.body.length / 1000).toFixed(1)}k
+              </span>
+              <button className="opacity-0 transition-opacity group-hover:opacity-100" aria-label={`Remove ${d.title}`} onClick={() => s.removeKnowledgeDoc(d.id)}>
+                <Trash2 size={13} className="text-alert/70" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Panel>
   )
 }
 

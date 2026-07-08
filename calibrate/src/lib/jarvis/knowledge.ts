@@ -81,6 +81,40 @@ export const KNOWLEDGE_BOOKS = `PERSONAL-DEVELOPMENT LIBRARY (Tom's reading list
 - "The Almanack of Naval Ravikant" (Eric Jorgenson): wealth without luck (leverage + specific knowledge), happiness as a skill/choice, peace over stimulation.
 Themes Tom lives by: "Health, love, and mission — in that order." "A calm mind, a fit body, a house full of love — earned, not bought." "Mystery makes history." "The third door."`
 
+/** Total characters of user-fed knowledge docs to inject — keeps the prompt within budget. */
+const BRAIN_FEED_BUDGET = 14000
+
+/**
+ * The user's own imported knowledge — Obsidian notes, specs, coach material
+ * pasted or uploaded in Settings → Brain Feed. Newest first, truncated to a
+ * character budget so a huge vault can't blow the model's context window.
+ * This is what makes "connect it to Obsidian / bigger context" real inside a
+ * browser app: the material rides along with every query.
+ */
+function buildBrainFeed(): string {
+  const docs = useStore.getState().knowledgeDocs
+  if (!docs.length) return ''
+
+  const parts: string[] = []
+  let used = 0
+  let truncatedDocs = 0
+  for (const d of docs) {
+    if (used >= BRAIN_FEED_BUDGET) {
+      truncatedDocs++
+      continue
+    }
+    const remaining = BRAIN_FEED_BUDGET - used
+    const body = d.body.length > remaining ? d.body.slice(0, remaining) + '\n…[truncated]' : d.body
+    used += body.length
+    parts.push(`### ${d.title}${d.source && d.source !== 'pasted' ? ` (${d.source})` : ''}\n${body}`)
+  }
+
+  const header =
+    "TOM'S OWN KNOWLEDGE (imported by him — his notes, specs, plans; treat as authoritative about HIS world, above generic advice):"
+  const footer = truncatedDocs ? `\n[${truncatedDocs} more note(s) not shown — ask him to open the relevant one if needed.]` : ''
+  return `${header}\n\n${parts.join('\n\n')}${footer}`
+}
+
 export function fullKnowledge(): string {
   return [
     KNOWLEDGE_GOLF,
@@ -90,5 +124,8 @@ export function fullKnowledge(): string {
     KNOWLEDGE_ECON,
     KNOWLEDGE_BOOKS,
     foodDbForPrompt(),
-  ].join('\n\n')
+    buildBrainFeed(),
+  ]
+    .filter(Boolean)
+    .join('\n\n')
 }
