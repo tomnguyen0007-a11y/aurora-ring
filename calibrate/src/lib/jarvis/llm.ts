@@ -1,8 +1,66 @@
 import { useStore } from '../../store/store'
-import type { ChatMsg } from '../../store/types'
+import type { ChatMsg, LlmProvider } from '../../store/types'
 import { splitDataURL } from '../image'
 import { applyActions, type JarvisAction } from './actions'
 import { formatContextForLlm, type JarvisContext } from './context'
+
+/** Thrown by every provider call so the failover chain knows who failed and why. */
+export class ProviderError extends Error {
+  constructor(
+    public provider: LlmProvider,
+    public status: number,
+    message: string,
+  ) {
+    super(message)
+  }
+}
+
+// Priority order when auto-failing over: strongest/most-capable first.
+const PROVIDER_ORDER: LlmProvider[] = ['anthropic', 'gemini', 'groq', 'openrouter']
+
+export function providerLabel(p: LlmProvider): string {
+  switch (p) {
+    case 'anthropic':
+      return 'Claude'
+    case 'gemini':
+      return 'Gemini'
+    case 'groq':
+      return 'Groq'
+    case 'openrouter':
+      return 'OpenRouter'
+    default:
+      return p
+  }
+}
+
+function providerHasKey(p: LlmProvider, settings: ReturnType<typeof useStore.getState>['settings']): boolean {
+  switch (p) {
+    case 'anthropic':
+      return !!settings.anthropicKey
+    case 'gemini':
+      return !!settings.geminiKey
+    case 'groq':
+      return !!settings.groqKey
+    case 'openrouter':
+      return !!settings.openrouterKey
+    default:
+      return false
+  }
+}
+
+/**
+ * The ordered list of providers to try for this request: the user's chosen
+ * primary first (if it's actually configured), then every other configured
+ * provider as an automatic fallback. Providers with no vision support are
+ * excluded when the request carries a photo.
+ */
+export function getProviderChain(opts: { needsVision?: boolean } = {}): LlmProvider[] {
+  const { settings } = useStore.getState()
+  const configured = PROVIDER_ORDER.filter((p) => providerHasKey(p, settings))
+  const primary = settings.provider
+  const chain = configured.includes(primary) ? [primary, ...configured.filter((p) => p !== primary)] : configured
+  return opts.needsVision ? chain.filter((p) => p !== 'groq') : chain
+}
 
 // ————————————————————————————————————————————————————————
 // UNIFIED LLM BRAIN (PHASE 1)
@@ -195,7 +253,7 @@ async function callAnthropic(userText: string, ctx: JarvisContext, image?: strin
 
   if (!res.ok) {
     const body = await res.text().catch(() => '')
-    throw new Error(`Anthropic ${res.status}: ${body.slice(0, 180)}`)
+    throw new ProviderError('anthropic', res.status, `Anthropic ${res.status}: ${body.slice(0, 180)}`)
   }
 
   const data: { content: { type: string; text?: string }[] } = await res.json()
@@ -238,7 +296,7 @@ async function callGemini(userText: string, ctx: JarvisContext, image?: string):
 
   if (!res.ok) {
     const body = await res.text().catch(() => '')
-    throw new Error(`Gemini ${res.status}: ${body.slice(0, 180)}`)
+    throw new ProviderError('gemini', res.status, `Gemini ${res.status}: ${body.slice(0, 180)}`)
   }
 
   const data: { candidates?: { content?: { parts?: { text?: string }[] } }[] } = await res.json()
@@ -264,7 +322,7 @@ async function callGroq(userText: string, ctx: JarvisContext): Promise<string> {
 
   if (!res.ok) {
     const body = await res.text().catch(() => '')
-    throw new Error(`Groq ${res.status}: ${body.slice(0, 180)}`)
+    throw new ProviderError('groq', res.status, `Groq ${res.status}: ${body.slice(0, 180)}`)
   }
 
   const data: { choices?: { message?: { content?: string } }[] } = await res.json()
@@ -307,7 +365,7 @@ async function callOpenRouter(userText: string, ctx: JarvisContext, image?: stri
 
   if (!res.ok) {
     const body = await res.text().catch(() => '')
-    throw new Error(`OpenRouter ${res.status}: ${body.slice(0, 180)}`)
+    throw new ProviderError('openrouter', res.status, `OpenRouter ${res.status}: ${body.slice(0, 180)}`)
   }
 
   const data: { choices?: { message?: { content?: string } }[] } = await res.json()
@@ -315,16 +373,48 @@ async function callOpenRouter(userText: string, ctx: JarvisContext, image?: stri
 }
 
 /**
- * Check if an LLM provider is configured and ready.
+ * Check if at least one LLM provider is configured and ready — not just the
+ * chosen primary. If the primary has no key but a backup does, Jarvis still
+ * has a brain to use (the failover chain will pick it up).
  */
 export function llmConfigured(): boolean {
-  const { settings } = useStore.getState()
-  return (
-    (settings.provider === 'anthropic' && !!settings.anthropicKey) ||
-    (settings.provider === 'gemini' && !!settings.geminiKey) ||
-    (settings.provider === 'groq' && !!settings.groqKey) ||
-    (settings.provider === 'openrouter' && !!settings.openrouterKey)
-  )
+  return getProviderChain().length > 0
+}
+
+async function callProvider(p: LlmProvider, userText: string, ctx: JarvisContext, image?: string): Promise<string> {
+  switch (p) {
+    case 'anthropic':
+      return callAnthropic(userText, ctx, image)
+    case 'gemini':
+      return callGemini(userText, ctx, image)
+    case 'groq':
+      return callGroq(userText, ctx)
+    case 'openrouter':
+      return callOpenRouter(userText, ctx, image)
+    default:
+      throw new Error('no provider configured')
+  }
+}
+
+async function streamProvider(
+  p: LlmProvider,
+  userText: string,
+  ctx: JarvisContext,
+  image: string | undefined,
+  onText: (delta: string) => void,
+): Promise<string> {
+  switch (p) {
+    case 'anthropic':
+      return streamAnthropic(userText, ctx, image, onText)
+    case 'gemini':
+      return streamGemini(userText, ctx, image, onText)
+    case 'groq':
+      return streamGroq(userText, ctx, onText)
+    case 'openrouter':
+      return streamOpenRouter(userText, ctx, image, onText)
+    default:
+      throw new Error('no provider configured')
+  }
 }
 
 export interface LlmResult {
@@ -398,27 +488,34 @@ function displayPortion(raw: string): string {
  * 1. Receive the context already built once by the caller (Jarvis.tsx) —
  *    never rebuilt here, so memory-access bookkeeping isn't double-counted
  *    and the local engine + LLM always reason from the exact same snapshot.
- * 2. Call configured provider
+ * 2. Walk the provider failover chain — primary first, then every other
+ *    configured provider — so a rate limit, quota error, or outage on one
+ *    provider doesn't stop Jarvis; it just quietly tries the next brain.
  * 3. Parse and execute action blocks
- * 4. Return clean reply + receipts
+ * 4. Return clean reply + receipts, noting the switch if one happened
  */
 export async function runLlm(userText: string, ctx: JarvisContext, image?: string): Promise<LlmResult> {
-  const { settings } = useStore.getState()
-
-  if (!llmConfigured()) {
+  const chain = getProviderChain({ needsVision: !!image })
+  if (!chain.length) {
     throw new Error('LLM not configured. Add an API key in Settings.')
   }
 
-  const raw =
-    settings.provider === 'anthropic'
-      ? await callAnthropic(userText, ctx, image)
-      : settings.provider === 'groq'
-        ? await callGroq(userText, ctx)
-        : settings.provider === 'openrouter'
-          ? await callOpenRouter(userText, ctx, image)
-          : await callGemini(userText, ctx, image)
+  const failures: string[] = []
+  for (let i = 0; i < chain.length; i++) {
+    const p = chain[i]
+    try {
+      const raw = await callProvider(p, userText, ctx, image)
+      const result = extractAndApplyActions(raw)
+      if (i > 0) {
+        result.receipts = [`Auto-switched to ${providerLabel(p)} — ${providerLabel(chain[0])} was unavailable`, ...result.receipts]
+      }
+      return result
+    } catch (e) {
+      failures.push(`${providerLabel(p)}: ${e instanceof Error ? e.message : 'unknown error'}`)
+    }
+  }
 
-  return extractAndApplyActions(raw)
+  throw new Error(`All configured brains failed. ${failures.join(' | ')}`)
 }
 
 // ————————————————————————————————————————————————————————
@@ -483,7 +580,7 @@ async function streamAnthropic(userText: string, ctx: JarvisContext, image: stri
 
   if (!res.ok || !res.body) {
     const body = await res.text().catch(() => '')
-    throw new Error(`Anthropic ${res.status}: ${body.slice(0, 180)}`)
+    throw new ProviderError('anthropic', res.status, `Anthropic ${res.status}: ${body.slice(0, 180)}`)
   }
 
   let full = ''
@@ -531,7 +628,7 @@ async function streamGemini(userText: string, ctx: JarvisContext, image: string 
 
   if (!res.ok || !res.body) {
     const body = await res.text().catch(() => '')
-    throw new Error(`Gemini ${res.status}: ${body.slice(0, 180)}`)
+    throw new ProviderError('gemini', res.status, `Gemini ${res.status}: ${body.slice(0, 180)}`)
   }
 
   let full = ''
@@ -570,7 +667,7 @@ async function streamGroq(userText: string, ctx: JarvisContext, onText: (delta: 
 
   if (!res.ok || !res.body) {
     const body = await res.text().catch(() => '')
-    throw new Error(`Groq ${res.status}: ${body.slice(0, 180)}`)
+    throw new ProviderError('groq', res.status, `Groq ${res.status}: ${body.slice(0, 180)}`)
   }
 
   let full = ''
@@ -611,7 +708,7 @@ async function streamOpenRouter(userText: string, ctx: JarvisContext, image: str
 
   if (!res.ok || !res.body) {
     const body = await res.text().catch(() => '')
-    throw new Error(`OpenRouter ${res.status}: ${body.slice(0, 180)}`)
+    throw new ProviderError('openrouter', res.status, `OpenRouter ${res.status}: ${body.slice(0, 180)}`)
   }
 
   let full = ''
@@ -640,36 +737,129 @@ export interface StreamHandlers {
 
 /**
  * Streaming LLM pipeline: text renders and can be spoken sentence-by-sentence
- * while the model is still generating. Falls back to the caller for
- * non-streaming retry on failure. Action blocks are executed after the
- * stream completes, exactly like the non-streaming path.
+ * while the model is still generating. Walks the same failover chain as
+ * runLlm — if the primary provider errors before (or shortly after) it
+ * starts streaming, the next configured provider picks up the request from
+ * scratch. Falls back to the caller for a non-streaming retry only if every
+ * provider in the chain fails. Action blocks execute after the stream
+ * completes, exactly like the non-streaming path.
  */
 export async function runLlmStream(userText: string, ctx: JarvisContext, image: string | undefined, handlers: StreamHandlers): Promise<LlmResult> {
-  const { settings } = useStore.getState()
-
-  if (!llmConfigured()) {
+  const chain = getProviderChain({ needsVision: !!image })
+  if (!chain.length) {
     throw new Error('LLM not configured. Add an API key in Settings.')
   }
 
-  let rawText = ''
-  let shown = ''
-  const collect = (delta: string) => {
-    rawText += delta
-    const display = displayPortion(rawText)
-    if (display.length > shown.length) {
-      handlers.onDelta(display.slice(shown.length), display)
-      shown = display
+  const failures: string[] = []
+  for (let i = 0; i < chain.length; i++) {
+    const p = chain[i]
+    let rawText = ''
+    let shown = ''
+    const collect = (delta: string) => {
+      rawText += delta
+      const display = displayPortion(rawText)
+      if (display.length > shown.length) {
+        handlers.onDelta(display.slice(shown.length), display)
+        shown = display
+      }
+    }
+
+    try {
+      const full = await streamProvider(p, userText, ctx, image, collect)
+      const result = extractAndApplyActions(full)
+      if (i > 0) {
+        result.receipts = [`Auto-switched to ${providerLabel(p)} — ${providerLabel(chain[0])} was unavailable`, ...result.receipts]
+      }
+      return result
+    } catch (e) {
+      failures.push(`${providerLabel(p)}: ${e instanceof Error ? e.message : 'unknown error'}`)
     }
   }
 
-  const full =
-    settings.provider === 'anthropic'
-      ? await streamAnthropic(userText, ctx, image, collect)
-      : settings.provider === 'groq'
-        ? await streamGroq(userText, ctx, collect)
-        : settings.provider === 'openrouter'
-          ? await streamOpenRouter(userText, ctx, image, collect)
-          : await streamGemini(userText, ctx, image, collect)
+  throw new Error(`All configured brains failed. ${failures.join(' | ')}`)
+}
 
-  return extractAndApplyActions(full)
+// ————————————————————————————————————————————————————————
+// CONNECTION TEST — lets the user verify a pasted key actually works,
+// straight from Settings, with a real (tiny, cheap) round-trip.
+// ————————————————————————————————————————————————————————
+
+export interface ProviderTestResult {
+  ok: boolean
+  message: string
+}
+
+export async function testProvider(p: LlmProvider): Promise<ProviderTestResult> {
+  const { settings } = useStore.getState()
+
+  try {
+    switch (p) {
+      case 'anthropic': {
+        if (!settings.anthropicKey) return { ok: false, message: 'No key set' }
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'x-api-key': settings.anthropicKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true',
+          },
+          body: JSON.stringify({
+            model: settings.anthropicModel || 'claude-sonnet-5',
+            max_tokens: 8,
+            messages: [{ role: 'user', content: 'hi' }],
+          }),
+        })
+        if (!res.ok) return { ok: false, message: `${res.status}: ${(await res.text().catch(() => '')).slice(0, 100)}` }
+        return { ok: true, message: 'Connected' }
+      }
+      case 'gemini': {
+        if (!settings.geminiKey) return { ok: false, message: 'No key set' }
+        const model = settings.geminiModel || 'gemini-2.5-flash'
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${settings.geminiKey}`,
+          {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'hi' }] }], generationConfig: { maxOutputTokens: 8 } }),
+          },
+        )
+        if (!res.ok) return { ok: false, message: `${res.status}: ${(await res.text().catch(() => '')).slice(0, 100)}` }
+        return { ok: true, message: 'Connected' }
+      }
+      case 'groq': {
+        if (!settings.groqKey) return { ok: false, message: 'No key set' }
+        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', authorization: `Bearer ${settings.groqKey}` },
+          body: JSON.stringify({ model: settings.groqModel || 'llama-3.3-70b-versatile', max_tokens: 5, messages: [{ role: 'user', content: 'hi' }] }),
+        })
+        if (!res.ok) return { ok: false, message: `${res.status}: ${(await res.text().catch(() => '')).slice(0, 100)}` }
+        return { ok: true, message: 'Connected' }
+      }
+      case 'openrouter': {
+        if (!settings.openrouterKey) return { ok: false, message: 'No key set' }
+        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            authorization: `Bearer ${settings.openrouterKey}`,
+            'HTTP-Referer': typeof location !== 'undefined' ? location.origin : 'https://calibrate.app',
+            'X-Title': 'Calibrate',
+          },
+          body: JSON.stringify({
+            model: settings.openrouterModel || 'qwen/qwen2.5-vl-72b-instruct:free',
+            max_tokens: 5,
+            messages: [{ role: 'user', content: 'hi' }],
+          }),
+        })
+        if (!res.ok) return { ok: false, message: `${res.status}: ${(await res.text().catch(() => '')).slice(0, 100)}` }
+        return { ok: true, message: 'Connected' }
+      }
+      default:
+        return { ok: false, message: 'Not applicable' }
+    }
+  } catch (e) {
+    return { ok: false, message: e instanceof Error ? e.message : 'Network error' }
+  }
 }
