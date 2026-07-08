@@ -30,6 +30,7 @@ import type {
   GroceryItem,
   HandicapEntry,
   HevySession,
+  LlmProvider,
   MacroTargets,
   Mantra,
   MemoryCategory,
@@ -149,6 +150,8 @@ export interface CalibrateState {
   chat: ChatMsg[]
   pushChat: (m: Omit<ChatMsg, 'id' | 'ts'>) => void
   clearChat: () => void
+  lastJarvisSource: 'local' | LlmProvider | 'rate-limited' | null
+  setLastJarvisSource: (source: CalibrateState['lastJarvisSource']) => void
 
   // profile / memory
   profile: Profile
@@ -237,6 +240,7 @@ const seedState = () => ({
   checkIns: {},
   watchlist: seedWatchlist,
   chat: [],
+  lastJarvisSource: null,
   profile: seedProfile,
   mantras: seedMantras,
   supplements: seedSupplements,
@@ -433,6 +437,7 @@ export const useStore = create<CalibrateState>()(
       removeWatch: (id) => set((s) => ({ watchlist: s.watchlist.filter((w) => w.id !== id) })),
 
       pushChat: (m) => set((s) => ({ chat: [...s.chat.slice(-199), { ...m, id: uid('msg'), ts: Date.now() }] })),
+      setLastJarvisSource: (source) => set({ lastJarvisSource: source }),
       clearChat: () => set({ chat: [] }),
 
       setProfile: (patch) => set((s) => ({ profile: { ...s.profile, ...patch } })),
@@ -493,7 +498,7 @@ export const useStore = create<CalibrateState>()(
       partialize: (s) =>
         Object.fromEntries(
           Object.entries(s)
-            .filter(([k]) => k !== 'view')
+            .filter(([k]) => k !== 'view' && k !== 'lastJarvisSource')
             .map(([k, v]) => (k === 'chat' ? [k, (v as ChatMsg[]).map(({ image: _img, ...m }) => m)] : [k, v])),
         ) as CalibrateState,
       // backfill new/preloaded collections for existing users without touching their data

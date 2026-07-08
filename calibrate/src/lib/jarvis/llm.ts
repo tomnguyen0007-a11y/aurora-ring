@@ -3,6 +3,7 @@ import type { ChatMsg, LlmProvider } from '../../store/types'
 import { splitDataURL } from '../image'
 import { applyActions, type JarvisAction } from './actions'
 import { formatContextForLlm, type JarvisContext } from './context'
+import { canCall, rateLimitStatus, recordCall } from './rateLimit'
 
 /** Thrown by every provider call so the failover chain knows who failed and why. */
 export class ProviderError extends Error {
@@ -175,13 +176,21 @@ EXECUTION RULES:
 - Keep replies under 120 words unless the user asks for deep strategy/planning
 - When he corrects a mistake ("that was wrong", "actually it was 600 kcal"), FIX it with an edit action — don't apologise and do nothing
 
-FOOD LOGGING POLICY (accurate, never a dead end):
+FOOD LOGGING POLICY (accurate, never a hallucination):
 1. If the item matches the KNOWN FOOD DATABASE in KNOWLEDGE → use those exact figures.
 2. If the user gave numbers → use exactly those.
-3. Otherwise → estimate from your solid nutrition knowledge${opts.webSearch ? ' (or a quick web search for restaurant/branded items)' : ''},
-   LOG IT with the estimate, and say it's an estimate — e.g. "Logged pho bo at roughly 450 kcal / 30g protein for a
-   typical bowl — correct me if the portion was bigger." An honest labeled estimate beats refusing to help.
-   NEVER present an estimate as an exact fact, and NEVER refuse to log because you lack the label.
+3. Otherwise → do NOT invent macros. Ask for the specific item, brand, or portion (e.g. "What brand/size — I want
+   to log this accurately rather than guess") ${
+     opts.webSearch ? 'or use web search to find the real label/menu figures for a branded or restaurant item' : ''
+   }.
+   NEVER present a guess as a fact, and NEVER silently log a number you are not confident in — asking one clarifying
+   question is always better than a fabricated calorie count.
+
+MEAL INSPIRATION (distinct from logging — no numbers required here):
+When he asks what to eat/cook given constraints ("what should I eat quickly, I only have yogurt", "quick high-protein
+idea with what I've got"), that is a request for IDEAS, not a logging event — don't ask for a label, just suggest
+2-3 concrete, fast options using what he named${opts.webSearch ? ', using web search if a specific recipe or product needs current details' : ''}.
+Keep it practical and short. Only log something if he then tells you he made/ate it.
 ${
   opts.webSearch
     ? `
@@ -432,6 +441,14 @@ async function streamProvider(
 export interface LlmResult {
   reply: string
   receipts: string[]
+  provider?: LlmProvider
+}
+
+/** Thrown when every provider in the chain is currently over its free-tier rate limit. */
+export class AllProvidersRateLimitedError extends Error {
+  constructor(public retryInSec: number) {
+    super(`All configured brains are rate-limited right now. Retry in ~${retryInSec}s.`)
+  }
 }
 
 /**
@@ -513,11 +530,20 @@ export async function runLlm(userText: string, ctx: JarvisContext, image?: strin
   }
 
   const failures: string[] = []
+  let rateLimitedCount = 0
   for (let i = 0; i < chain.length; i++) {
     const p = chain[i]
+    if (!canCall(p)) {
+      rateLimitedCount++
+      const { retryInSec } = rateLimitStatus(p)
+      failures.push(`${providerLabel(p)}: rate-limited, retry in ~${retryInSec}s`)
+      continue
+    }
+    recordCall(p)
     try {
       const raw = await callProvider(p, userText, ctx, image)
       const result = extractAndApplyActions(raw)
+      result.provider = p
       if (i > 0) {
         result.receipts = [`Auto-switched to ${providerLabel(p)} — ${providerLabel(chain[0])} was unavailable`, ...result.receipts]
       }
@@ -527,6 +553,9 @@ export async function runLlm(userText: string, ctx: JarvisContext, image?: strin
     }
   }
 
+  if (rateLimitedCount === chain.length) {
+    throw new AllProvidersRateLimitedError(Math.min(...chain.map((p) => rateLimitStatus(p).retryInSec)))
+  }
   throw new Error(`All configured brains failed. ${failures.join(' | ')}`)
 }
 
@@ -763,8 +792,16 @@ export async function runLlmStream(userText: string, ctx: JarvisContext, image: 
   }
 
   const failures: string[] = []
+  let rateLimitedCount = 0
   for (let i = 0; i < chain.length; i++) {
     const p = chain[i]
+    if (!canCall(p)) {
+      rateLimitedCount++
+      const { retryInSec } = rateLimitStatus(p)
+      failures.push(`${providerLabel(p)}: rate-limited, retry in ~${retryInSec}s`)
+      continue
+    }
+    recordCall(p)
     let rawText = ''
     let shown = ''
     const collect = (delta: string) => {
@@ -779,6 +816,7 @@ export async function runLlmStream(userText: string, ctx: JarvisContext, image: 
     try {
       const full = await streamProvider(p, userText, ctx, image, collect)
       const result = extractAndApplyActions(full)
+      result.provider = p
       if (i > 0) {
         result.receipts = [`Auto-switched to ${providerLabel(p)} — ${providerLabel(chain[0])} was unavailable`, ...result.receipts]
       }
@@ -788,6 +826,9 @@ export async function runLlmStream(userText: string, ctx: JarvisContext, image: 
     }
   }
 
+  if (rateLimitedCount === chain.length) {
+    throw new AllProvidersRateLimitedError(Math.min(...chain.map((p) => rateLimitStatus(p).retryInSec)))
+  }
   throw new Error(`All configured brains failed. ${failures.join(' | ')}`)
 }
 

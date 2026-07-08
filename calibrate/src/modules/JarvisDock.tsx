@@ -1,12 +1,13 @@
 import { Bot, ImagePlus, SendHorizonal, X } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useStore } from '../store/store'
-import { useJarvis } from './Jarvis'
+import { jarvisSourceColor, jarvisSourceLabel, useJarvis } from './Jarvis'
 
 /** Desktop-only command bar: talk to Jarvis from any screen — text, screenshots, paste. */
 export function JarvisDock() {
   const setView = useStore((s) => s.setView)
   const lastJarvis = useStore((s) => [...s.chat].reverse().find((m) => m.role === 'jarvis'))
+  const lastJarvisSource = useStore((s) => s.lastJarvisSource)
   const { send, busy } = useJarvis()
   const [input, setInput] = useState('')
   const [image, setImage] = useState<string | null>(null)
@@ -67,12 +68,19 @@ export function JarvisDock() {
             type="button"
             onClick={() => setView('jarvis')}
             aria-label="Open Jarvis"
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all ${
+            title={jarvisSourceLabel(lastJarvisSource)}
+            className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all ${
               busy ? 'border-signal text-signal shadow-[0_0_14px_rgba(233,237,242,0.4)]' : 'border-edge-strong text-haze hover:text-signal hover:border-signal/50'
             }`}
           >
             <Bot size={17} />
+            {!busy && <span className={`absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full ring-2 ring-[#0a0b0d] ${jarvisSourceColor(lastJarvisSource).dot}`} />}
           </button>
+          {!busy && (
+            <span className={`hidden shrink-0 items-center gap-1 pl-0.5 text-[9px] font-medium uppercase tracking-wider sm:flex ${jarvisSourceColor(lastJarvisSource).text}`}>
+              {jarvisSourceLabel(lastJarvisSource)}
+            </span>
+          )}
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
