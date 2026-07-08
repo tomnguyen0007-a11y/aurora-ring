@@ -1,5 +1,85 @@
 import { Check } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+
+/**
+ * Click-to-edit text: renders as plain content until clicked, then becomes an
+ * input. Enter or blur saves (only if changed), Escape cancels. The dotted
+ * underline on hover is the affordance — the whole app's "everything is
+ * editable, no forms" contract rides on this component.
+ */
+export function InlineEdit({
+  value,
+  onSave,
+  num = false,
+  className = '',
+  inputClassName = '',
+  label,
+  placeholder = '—',
+}: {
+  value: string
+  onSave: (next: string) => void
+  /** numeric-ish content: use the mono font + inputMode for phone keyboards */
+  num?: boolean
+  className?: string
+  inputClassName?: string
+  /** accessible name, e.g. "Edit carbs for Lift day" */
+  label: string
+  placeholder?: string
+}) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(value)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (editing) {
+      inputRef.current?.focus()
+      inputRef.current?.select()
+    }
+  }, [editing])
+
+  const commit = () => {
+    setEditing(false)
+    const next = draft.trim()
+    if (next && next !== value) onSave(next)
+    else setDraft(value)
+  }
+
+  if (editing) {
+    return (
+      <input
+        ref={inputRef}
+        aria-label={label}
+        className={`w-full min-w-0 rounded border border-signal/50 bg-black/60 px-1 py-0.5 text-inherit outline-none ring-1 ring-signal/20 ${num ? 'num' : ''} ${inputClassName}`}
+        value={draft}
+        inputMode={num ? 'decimal' : undefined}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') commit()
+          if (e.key === 'Escape') {
+            setDraft(value)
+            setEditing(false)
+          }
+        }}
+      />
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title="Click to edit"
+      onClick={() => {
+        setDraft(value)
+        setEditing(true)
+      }}
+      className={`min-w-0 cursor-text rounded px-1 py-0.5 text-left decoration-dotted underline-offset-4 transition-colors hover:bg-white/[0.05] hover:underline focus-visible:bg-white/[0.05] focus-visible:outline-1 focus-visible:outline-signal/60 ${num ? 'num' : ''} ${className}`}
+    >
+      {value || <span className="text-fog">{placeholder}</span>}
+    </button>
+  )
+}
 
 export function Panel({
   children,

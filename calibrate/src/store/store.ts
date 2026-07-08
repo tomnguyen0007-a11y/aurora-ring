@@ -104,6 +104,7 @@ export interface CalibrateState {
   foodLogs: FoodLog[]
   water: Record<string, number> // date -> ml
   addFood: (f: Omit<FoodLog, 'id'>) => void
+  updateFood: (id: string, patch: Partial<Omit<FoodLog, 'id'>>) => void
   removeFood: (id: string) => void
   addWater: (date: string, ml: number) => void
 
@@ -381,6 +382,7 @@ export const useStore = create<CalibrateState>()(
 
       setMacros: (macros) => set({ macros }),
       addFood: (f) => set((s) => ({ foodLogs: [{ ...f, id: uid('food') }, ...s.foodLogs] })),
+      updateFood: (id, patch) => set((s) => ({ foodLogs: s.foodLogs.map((f) => (f.id === id ? { ...f, ...patch } : f)) })),
       removeFood: (id) => set((s) => ({ foodLogs: s.foodLogs.filter((f) => f.id !== id) })),
       addWater: (date, ml) =>
         set((s) => ({ water: { ...s.water, [date]: Math.max(0, (s.water[date] ?? 0) + ml) } })),

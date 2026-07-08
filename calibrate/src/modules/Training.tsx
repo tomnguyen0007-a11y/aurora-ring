@@ -1,6 +1,6 @@
 import { CheckCircle2, Footprints, Plus, Sparkles, Trash2, TrendingUp } from 'lucide-react'
 import { useState } from 'react'
-import { Empty, HudLabel, Panel, Sparkline, StatTile } from '../components/ui'
+import { Empty, HudLabel, InlineEdit, Panel, Sparkline, StatTile } from '../components/ui'
 import { fmtDateShort, todayISO, WEEKDAY_NAMES, weekdayOf } from '../lib/dates'
 import { exerciseInsight, workoutsThisWeek } from '../lib/stats'
 import { ollieWorkouts } from '../store/seed'
@@ -103,7 +103,12 @@ export function Training() {
         <Panel glow={workout.weekday === wd}>
           <div className="mb-4 flex items-center justify-between gap-2">
             <HudLabel className="!mb-0">
-              {workout.name} — {workout.weekday === wd ? "today's session" : WEEKDAY_NAMES[workout.weekday]}
+              <InlineEdit
+                value={workout.name}
+                label={`Rename workout ${workout.name}`}
+                onSave={(v) => s.updateWorkout(workout.id, { name: v })}
+              />
+              — {workout.weekday === wd ? "today's session" : WEEKDAY_NAMES[workout.weekday]}
             </HudLabel>
             <button
               className={`btn !py-1.5 ${log?.completed ? '!border-affirm/60 !bg-affirm/15 !text-affirm' : 'btn-signal'}`}
@@ -120,12 +125,28 @@ export function Training() {
               return (
                 <div key={ex.id} className="rounded-xl border border-edge bg-black/20 p-3">
                   <div className="flex items-baseline justify-between gap-2">
-                    <span className="font-display text-[0.95rem] font-semibold tracking-wide text-ice">{ex.name}</span>
-                    <span className="num shrink-0 text-xs text-signal">
-                      {ex.sets} × {ex.reps}
+                    <span className="min-w-0 font-display text-[0.95rem] font-semibold tracking-wide text-ice">
+                      <InlineEdit value={ex.name} label={`Rename ${ex.name}`} onSave={(v) => s.updateExercise(workout.id, ex.id, { name: v })} />
+                    </span>
+                    <span className="num flex shrink-0 items-center text-xs text-signal">
+                      <InlineEdit
+                        num
+                        value={String(ex.sets)}
+                        label={`Edit sets for ${ex.name}`}
+                        onSave={(v) => s.updateExercise(workout.id, ex.id, { sets: Math.max(1, parseInt(v) || ex.sets) })}
+                      />
+                      ×
+                      <InlineEdit num value={ex.reps} label={`Edit reps for ${ex.name}`} onSave={(v) => s.updateExercise(workout.id, ex.id, { reps: v })} />
                     </span>
                   </div>
-                  <p className="mt-0.5 text-xs text-fog">{ex.cue}</p>
+                  <p className="mt-0.5 text-xs text-fog">
+                    <InlineEdit
+                      value={ex.cue ?? ''}
+                      placeholder="add a cue…"
+                      label={`Edit cue for ${ex.name}`}
+                      onSave={(v) => s.updateExercise(workout.id, ex.id, { cue: v })}
+                    />
+                  </p>
                   <div className="mt-2.5 flex flex-wrap gap-1.5">
                     {sets.map((st, i) => (
                       <div key={i} className="flex items-center gap-1 rounded-lg border border-edge bg-black/30 px-1.5 py-1">
