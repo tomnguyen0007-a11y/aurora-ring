@@ -81,7 +81,7 @@
     "blocks": {
       "1656560654682496077": {
         "type": "shopify://apps/instant-ai-page-builder/blocks/instant_core/927e19d9-4e68-41db-99c7-d8debdc1f80d",
-        "disabled": false,
+        "disabled": true,
         "settings": {}
       }
     },

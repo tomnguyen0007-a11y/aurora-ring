@@ -1,0 +1,99 @@
+{%- comment -%}
+  Aurora — Delivery reassurance + FAQ.
+  Self-contained (.afaq- scoped). Rendered on product pages before reviews
+  to kill the two biggest dropship fears (shipping time + "will it work").
+
+  >>> SET YOUR REAL NUMBERS HERE <<<  (only edit these two lines)
+    dispatch  = how fast you hand off to the carrier
+    ship_days = tracked transit time the customer actually sees
+  Keep them honest — an accurate range beats an optimistic one that breeds
+  "where is my order" tickets and chargebacks.
+{%- endcomment -%}
+{%- liquid
+  assign dispatch = '24–48 hours'
+  assign ship_days = '6–10 business days'
+-%}
+
+<section class="afaq">
+  <div class="afaq-inner">
+
+    {%- comment -%} Delivery reassurance strip {%- endcomment -%}
+    <div class="afaq-ship">
+      <div class="afaq-ship-item">
+        <span class="afaq-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="10"></rect><path d="M15 9h4l3 3v4h-7z"></path><circle cx="6" cy="18" r="1.6"></circle><circle cx="17.5" cy="18" r="1.6"></circle></svg></span>
+        <div><strong>Ships in {{ ship_days }}</strong><span>Dispatched within {{ dispatch }}</span></div>
+      </div>
+      <div class="afaq-ship-item">
+        <span class="afaq-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span>
+        <div><strong>Tracked, free</strong><span>Live tracking link by email</span></div>
+      </div>
+      <div class="afaq-ship-item">
+        <span class="afaq-ic"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11a9 9 0 1 1 2.6 6.3"></path><polyline points="3 5 3 11 9 11"></polyline></svg></span>
+        <div><strong>30-day returns</strong><span>+ free size exchange</span></div>
+      </div>
+    </div>
+
+    <h2 class="afaq-h2">Questions, answered</h2>
+
+    <div class="afaq-list">
+      <details class="afaq-item">
+        <summary>How long does delivery take?<svg class="afaq-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+        <div class="afaq-a"><p>Orders are dispatched within {{ dispatch }} and arrive in about {{ ship_days }} with fully tracked shipping. The moment yours ships, you&rsquo;ll get an email with a live tracking link.</p></div>
+      </details>
+      <details class="afaq-item">
+        <summary>How do I know my size?<svg class="afaq-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+        <div class="afaq-a"><p>Use the Fit Finder above — measure a ring you already own or wrap a strip of paper, then match the chart. Still unsure? Order your best guess: if it doesn&rsquo;t fit, we send the right size free, no return needed.</p></div>
+      </details>
+      <details class="afaq-item">
+        <summary>Can I shower, swim and sleep in it?<svg class="afaq-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+        <div class="afaq-a"><p>Yes. The ring is water-resistant to 100&nbsp;m, so showering, swimming and sleeping are all fine. We&rsquo;d only keep it out of saunas and hot tubs, where sustained heat isn&rsquo;t good for any electronics.</p></div>
+      </details>
+      <details class="afaq-item">
+        <summary>Which phones does it work with?<svg class="afaq-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+        <div class="afaq-a"><p>Both. It pairs over Bluetooth 5.0 with the free companion app on iOS&nbsp;12+ and Android&nbsp;8+. No SIM, no extra hardware — just the app.</p></div>
+      </details>
+      <details class="afaq-item">
+        <summary>How accurate is the tracking?<svg class="afaq-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+        <div class="afaq-a"><p>Six optical and motion sensors track heart rate, HRV, blood oxygen, temperature, sleep and activity — great for spotting trends and daily changes. It&rsquo;s a wellness device, not a certified medical instrument, so it complements rather than replaces medical advice.</p></div>
+      </details>
+      <details class="afaq-item">
+        <summary>How long does the battery last?<svg class="afaq-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+        <div class="afaq-a"><p>Up to 7 days on a charge, and a full top-up takes about 90 minutes on the included magnetic dock. No cables to fumble with.</p></div>
+      </details>
+      <details class="afaq-item">
+        <summary>Is there a subscription?<svg class="afaq-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+        <div class="afaq-a"><p>Never. Every metric and every feature is free, forever. Your data stays yours — no monthly fee, no paywalled insights.</p></div>
+      </details>
+      <details class="afaq-item">
+        <summary>What if something goes wrong?<svg class="afaq-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></summary>
+        <div class="afaq-a"><p>Every ring is covered by a 2-year warranty, plus 30-day returns. If it arrives faulty or doesn&rsquo;t fit, message us and we&rsquo;ll make it right — replacement or refund.</p></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<style>
+  .afaq{background:var(--vg-paper,#fff);color:var(--vg-ink,#15171a);padding:8px 20px 64px;font-family:var(--aurora-font,'Inter',sans-serif);-webkit-font-smoothing:antialiased;}
+  .afaq-inner{max-width:820px;margin:0 auto;}
+  .afaq-ship{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:48px;}
+  .afaq-ship-item{display:flex;align-items:center;gap:12px;background:var(--vg-paper-2,#f5f6f3);border:1px solid var(--vg-line,#e6e8e3);border-radius:14px;padding:15px 16px;}
+  .afaq-ic{flex-shrink:0;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:rgba(13,148,136,.08);color:#0d9488;}
+  .afaq-ship-item div{display:flex;flex-direction:column;}
+  .afaq-ship-item strong{font-size:13.5px;font-weight:600;color:var(--vg-ink,#15171a);}
+  .afaq-ship-item span{font-size:12px;color:var(--vg-ink-soft,#5b6066);}
+  .afaq-h2{font-family:var(--aurora-serif,'Instrument Serif',serif);font-weight:400;font-size:clamp(26px,3.4vw,38px);letter-spacing:-.01em;text-align:center;margin:0 0 28px;}
+  .afaq-list{display:flex;flex-direction:column;gap:10px;}
+  .afaq-item{border:1px solid var(--vg-line,#e6e8e3);border-radius:14px;background:var(--vg-paper,#fff);overflow:hidden;}
+  .afaq-item summary{display:flex;align-items:center;justify-content:space-between;gap:14px;cursor:pointer;padding:18px 20px;font-size:15px;font-weight:600;color:var(--vg-ink,#15171a);list-style:none;user-select:none;transition:background .15s;}
+  .afaq-item summary::-webkit-details-marker{display:none;}
+  .afaq-item summary:hover{background:var(--vg-paper-2,#f5f6f3);}
+  .afaq-chev{flex-shrink:0;color:var(--vg-ink-soft,#5b6066);transition:transform .25s ease;}
+  .afaq-item[open] summary{color:#0d9488;}
+  .afaq-item[open] .afaq-chev{transform:rotate(180deg);color:#0d9488;}
+  .afaq-a{padding:0 20px 18px;}
+  .afaq-a p{margin:0;font-size:14px;line-height:1.6;color:var(--vg-ink-soft,#5b6066);}
+  @media(max-width:640px){
+    .afaq{padding:4px 16px 48px;}
+    .afaq-ship{grid-template-columns:1fr;gap:10px;margin-bottom:36px;}
+  }
+</style>

@@ -1,0 +1,78 @@
+{%- comment -%}
+  Aurora Design Tokens
+  Central CSS custom properties for the Aurora brand.
+  Rendered once in theme.liquid <head>. Reused across the
+  landing hero, app section, comparison table, reviews, and
+  the Vilgain-style product page.
+{%- endcomment -%}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* ── Brand palette ── */
+    --aurora-bg: #07070b;
+    --aurora-surface: #0e0e14;
+    --aurora-surface-2: #14141c;
+    --aurora-line: #1e1e28;
+    --aurora-line-soft: #15151d;
+
+    --aurora-ink: #ffffff;
+    --aurora-ink-soft: #b8b8c4;
+    --aurora-ink-mute: #74747f;
+    --aurora-ink-faint: #4a4a55;
+
+    /* ── Accents ── */
+    --aurora-mint: #00e5c8;
+    --aurora-violet: #7c3aed;
+    --aurora-rose: #e0115f;
+    --aurora-gold: #f5b400;
+    --aurora-accent-grad: linear-gradient(135deg, #00e5c8, #7c3aed 55%, #e0115f);
+
+    /* ── Vilgain-style product page (light) ── */
+    --vg-lime: #6fbf00;
+    --vg-lime-dark: #5aa400;
+    --vg-paper: #ffffff;
+    --vg-paper-2: #f5f6f3;
+    --vg-paper-3: #eef0ea;
+    --vg-ink: #15171a;
+    --vg-ink-soft: #5b6066;
+    --vg-line: #e6e8e3;
+    --vg-star: #ffb400;
+
+    /* ── Radii ── */
+    --aurora-r-sm: 10px;
+    --aurora-r-md: 16px;
+    --aurora-r-lg: 22px;
+    --aurora-r-pill: 999px;
+
+    /* ── Type ── */
+    --aurora-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --aurora-serif: 'Instrument Serif', Georgia, serif;
+    --aurora-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+    /* ── Shadows ── */
+    --aurora-shadow-soft: 0 18px 50px rgba(0,0,0,.35);
+    --aurora-shadow-card: 0 24px 70px rgba(0,0,0,.5);
+
+    /* ── Layout ── */
+    --aurora-maxw: 1180px;
+  }
+
+  /* ── Kill the Instant builder watermark / section-name badge everywhere ── */
+  a[href*="instant.so"],
+  a[href*="getinstant"],
+  [class*="instant-watermark"],
+  [class*="instant-badge"],
+  [class*="instant-branding"],
+  [data-instant-watermark],
+  [data-instant-badge],
+  #instant-watermark,
+  .__instant__watermark,
+  div[data-instant-id][data-instant-label] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+</style>
