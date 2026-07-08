@@ -451,7 +451,7 @@ export function applyActions(actions: JarvisAction[]): string[] {
               ...(a.name ? { name: a.name } : {}),
               ...(a.sets != null ? { sets: a.sets } : {}),
               ...(a.reps ? { reps: a.reps } : {}),
-              ...(a.cue ? { cue: a.cue } : {}),
+              ...(a.cue != null ? { cue: a.cue } : {}),
             })
             receipts.push(`Updated ${w.name}: ${a.name ?? ex.name}${a.sets != null || a.reps ? ` ${a.sets ?? ex.sets}×${a.reps ?? ex.reps}` : ''}`)
           }

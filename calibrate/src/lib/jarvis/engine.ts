@@ -1,7 +1,7 @@
 import { fmtHours, todayISO, weekDates, weekdayOf } from '../dates'
 import { dayProgress, golfMinutes, golfTotalWeek, macrosForDate, revenueToday, streaks, weightSeries, workoutsThisWeek } from '../stats'
 import { useStore } from '../../store/store'
-import type { GolfCategory } from '../../store/types'
+import type { Exercise, FoodLog, GolfCategory, Weekday, Workout } from '../../store/types'
 import { applyActions, type JarvisAction } from './actions'
 import { lookupFood } from './foodDb'
 import { llmConfigured } from './llm'
@@ -46,6 +46,59 @@ const GOLF_WORDS: [RegExp, GolfCategory][] = [
 function act(actions: JarvisAction[], reply: string): EngineResult {
   const receipts = applyActions(actions)
   return { reply, receipts }
+}
+
+// ————————————————————————————————————————————————————————
+// Deterministic resolvers for workout/nutrition edit patterns.
+// Tiered exact -> startsWith -> contains matching; ambiguous or
+// zero hits both resolve to null so the caller falls through to
+// the next pattern (and ultimately to the LLM) rather than guessing.
+// ————————————————————————————————————————————————————————
+type StoreState = ReturnType<typeof useStore.getState>
+
+function tierMatch<T>(items: T[], nameOf: (item: T) => string, query: string): T | null {
+  const q = query.trim().toLowerCase()
+  if (!q) return null
+  const exact = items.filter((i) => nameOf(i).toLowerCase() === q)
+  if (exact.length === 1) return exact[0]
+  if (exact.length > 1) return null
+  const starts = items.filter((i) => nameOf(i).toLowerCase().startsWith(q))
+  if (starts.length === 1) return starts[0]
+  if (starts.length > 1) return null
+  const contains = items.filter((i) => nameOf(i).toLowerCase().includes(q))
+  if (contains.length === 1) return contains[0]
+  return null
+}
+
+function resolveExercise(s: StoreState, query: string): { workout: Workout; exercise: Exercise } | null {
+  const all: { workout: Workout; exercise: Exercise }[] = []
+  for (const w of s.workouts) for (const e of w.exercises) all.push({ workout: w, exercise: e })
+  return tierMatch(all, (h) => h.exercise.name, query)
+}
+
+function resolveWorkout(s: StoreState, query: string): Workout | null {
+  return tierMatch(s.workouts, (w) => w.name, query)
+}
+
+function resolveFood(s: StoreState, query?: string): FoodLog | null {
+  const todays = s.foodLogs.filter((f) => f.date === todayISO())
+  if (!todays.length) return null
+  if (!query) return todays[0] // addFood prepends: index 0 is most recent
+  return tierMatch(todays, (f) => f.name, query)
+}
+
+function numericReps(reps: string): number | null {
+  return /^\d+$/.test(reps.trim()) ? parseInt(reps, 10) : null
+}
+
+const WEEKDAY_MAP: Record<string, Weekday> = {
+  monday: 0,
+  tuesday: 1,
+  wednesday: 2,
+  thursday: 3,
+  friday: 4,
+  saturday: 5,
+  sunday: 6,
 }
 
 /**
@@ -186,6 +239,284 @@ export function runLocalEngine(input: string, contextUserName?: string): EngineR
     )
   }
 
+  // ————————————————————————————————————————————————————————
+  // WORKOUT: sets × reps
+  // ————————————————————————————————————————————————————————
+  m = t.match(/^(?:reduce|change|update)\s+(.+?)\s+from\s+\d+\s*x\s*\d+\s+to\s+(\d+)\s*x\s*(\d+)/i)
+  if (m) {
+    const target = resolveExercise(s, m[1])
+    const sets = parseInt(m[2], 10)
+    if (target && sets > 0) {
+      return act(
+        [{ type: 'update_exercise', workout: target.workout.name, exercise: target.exercise.name, sets, reps: m[3] }],
+        `${target.exercise.name} → ${sets}×${m[3]}.`,
+      )
+    }
+  }
+
+  m = t.match(/^set\s+(.+?)\s+to\s+(\d+)\s*x\s*(\d+)$/i)
+  if (m) {
+    const target = resolveExercise(s, m[1])
+    const sets = parseInt(m[2], 10)
+    if (target && sets > 0) {
+      return act(
+        [{ type: 'update_exercise', workout: target.workout.name, exercise: target.exercise.name, sets, reps: m[3] }],
+        `${target.exercise.name} → ${sets}×${m[3]}.`,
+      )
+    }
+  }
+
+  m = t.match(/^(\d+)\s*x\s*(\d+)\s+(.+)/i)
+  if (m) {
+    const sets = parseInt(m[1], 10)
+    const target = resolveExercise(s, m[3])
+    if (target && sets > 0) {
+      return act(
+        [{ type: 'update_exercise', workout: target.workout.name, exercise: target.exercise.name, sets, reps: m[2] }],
+        `${target.exercise.name} → ${sets}×${m[2]}.`,
+      )
+    }
+  }
+
+  m = t.match(/^(.+?)\s+(\d+)\s*x\s*(\d+)(?:\s+instead)?$/i)
+  if (m) {
+    const target = resolveExercise(s, m[1])
+    const sets = parseInt(m[2], 10)
+    if (target && sets > 0) {
+      return act(
+        [{ type: 'update_exercise', workout: target.workout.name, exercise: target.exercise.name, sets, reps: m[3] }],
+        `${target.exercise.name} → ${sets}×${m[3]}.`,
+      )
+    }
+  }
+
+  m = t.match(/^(.+?):?\s+(\d+)\s*sets?\s+of\s+(\d+)/i)
+  if (m) {
+    const target = resolveExercise(s, m[1])
+    const sets = parseInt(m[2], 10)
+    if (target && sets > 0) {
+      return act(
+        [{ type: 'update_exercise', workout: target.workout.name, exercise: target.exercise.name, sets, reps: m[3] }],
+        `${target.exercise.name} → ${sets}×${m[3]}.`,
+      )
+    }
+  }
+
+  m = t.match(/^increase\s+(.+?)\s+by\s+(\d+)\s*reps?/i) ?? t.match(/^add\s+(\d+)\s*reps?\s+to\s+(.+)/i)
+  if (m) {
+    const isFirstForm = /^increase/i.test(t)
+    const exerciseQuery = isFirstForm ? m[1] : m[2]
+    const delta = parseInt(isFirstForm ? m[2] : m[1], 10)
+    const target = resolveExercise(s, exerciseQuery)
+    const current = target ? numericReps(target.exercise.reps) : null
+    if (target && current != null) {
+      const reps = String(current + delta)
+      return act(
+        [{ type: 'update_exercise', workout: target.workout.name, exercise: target.exercise.name, reps }],
+        `${target.exercise.name} reps → ${reps}.`,
+      )
+    }
+  }
+
+  m = t.match(/^drop\s+(\d+)\s*sets?\s+from\s+(.+)/i)
+  if (m) {
+    const delta = parseInt(m[1], 10)
+    const target = resolveExercise(s, m[2])
+    if (target) {
+      const sets = Math.max(1, target.exercise.sets - delta)
+      return act(
+        [{ type: 'update_exercise', workout: target.workout.name, exercise: target.exercise.name, sets }],
+        `${target.exercise.name} → ${sets} sets.`,
+      )
+    }
+  }
+
+  // ——— add exercise: "add calf raise 3x15 to leg day" ———
+  m = t.match(/^add\s+(.+?)\s+(\d+)\s*x\s*(\d+)\s+to\s+(?:the\s+)?(.+)/i)
+  if (m) {
+    const workout = resolveWorkout(s, m[4])
+    const sets = parseInt(m[2], 10)
+    if (workout && m[1].trim() && sets > 0) {
+      return act(
+        [{ type: 'add_exercise', workout: workout.name, name: m[1].trim(), sets, reps: m[3] }],
+        `Added to ${workout.name}: ${m[1].trim()} ${sets}×${m[3]}.`,
+      )
+    }
+  }
+
+  // ——— rename exercise/workout: "rename X to Y", "change X to Y", "X → Y" ———
+  m = t.match(/^(?:rename|change)\s+(.+?)\s+to\s+(.+)$/i) ?? t.match(/^(.+?)\s*→\s*(.+)$/)
+  if (m) {
+    const oldQuery = m[1].trim()
+    const newName = m[2].trim()
+    const exTarget = resolveExercise(s, oldQuery)
+    if (exTarget) {
+      return act(
+        [{ type: 'update_exercise', workout: exTarget.workout.name, exercise: exTarget.exercise.name, name: newName }],
+        `Renamed to "${newName}".`,
+      )
+    }
+    const woTarget = resolveWorkout(s, oldQuery)
+    if (woTarget) {
+      return act([{ type: 'update_workout', workout: woTarget.name, name: newName }], `Workout renamed to "${newName}".`)
+    }
+  }
+
+  // ——— cue management ———
+  m = t.match(/^(.+?)\s+add\s+cue:?\s+(.+)/i)
+  if (m) {
+    const target = resolveExercise(s, m[1])
+    if (target) {
+      return act(
+        [{ type: 'update_exercise', workout: target.workout.name, exercise: target.exercise.name, cue: m[2].trim() }],
+        `Cue added to ${target.exercise.name}: "${m[2].trim()}".`,
+      )
+    }
+  }
+  m = t.match(/^set\s+(.+?)\s+cue\s+to\s+(.+)/i)
+  if (m) {
+    const target = resolveExercise(s, m[1])
+    if (target) {
+      return act(
+        [{ type: 'update_exercise', workout: target.workout.name, exercise: target.exercise.name, cue: m[2].trim() }],
+        `Cue set for ${target.exercise.name}: "${m[2].trim()}".`,
+      )
+    }
+  }
+  m = t.match(/^add\s+tempo\s+(.+?)\s+to\s+(.+)/i)
+  if (m) {
+    const target = resolveExercise(s, m[2])
+    if (target) {
+      return act(
+        [{ type: 'update_exercise', workout: target.workout.name, exercise: target.exercise.name, cue: `tempo ${m[1].trim()}` }],
+        `Tempo cue added to ${target.exercise.name}.`,
+      )
+    }
+  }
+  m = t.match(/^(?:remove|clear)\s+cue\s+from\s+(.+)/i) ?? t.match(/^clear\s+(?:the\s+)?(.+?)\s+note$/i)
+  if (m) {
+    const target = resolveExercise(s, m[1])
+    if (target) {
+      return act(
+        [{ type: 'update_exercise', workout: target.workout.name, exercise: target.exercise.name, cue: '' }],
+        `Cue cleared for ${target.exercise.name}.`,
+      )
+    }
+  }
+
+  // ————————————————————————————————————————————————————————
+  // WORKOUT: workout-level restructuring
+  // ————————————————————————————————————————————————————————
+  m = t.match(/^move\s+(.+?)\s+to\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)$/i)
+  if (m) {
+    const target = resolveWorkout(s, m[1])
+    const weekday = WEEKDAY_MAP[m[2].toLowerCase()]
+    if (target) {
+      return act(
+        [{ type: 'update_workout', workout: target.name, weekday }],
+        `${target.name} moved to ${m[2]}.`,
+      )
+    }
+  }
+
+  m = t.match(/^(?:create|add)\s+(?:a\s+|new\s+)?workout:?\s+(.+?)\s+on\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)$/i)
+  if (m) {
+    const weekday = WEEKDAY_MAP[m[2].toLowerCase()]
+    return act([{ type: 'add_workout', name: m[1].trim(), weekday }], `New workout: ${m[1].trim()} on ${m[2]}.`)
+  }
+
+  // ——— generic delete/remove: exercise → workout → food ———
+  m = t.match(/^delete that meal$/i) ?? t.match(/^undo last food$/i)
+  if (m) {
+    const food = resolveFood(s)
+    if (food) return act([{ type: 'delete_food', name: food.name }], `Removed food log: ${food.name}.`)
+  }
+  m = t.match(/^(?:remove|delete)\s+(?:the\s+)?(.+)/i) ?? t.match(/^drop\s+the\s+(.+)/i)
+  if (m) {
+    const query = m[1].trim()
+    const exTarget = resolveExercise(s, query)
+    if (exTarget) {
+      return act(
+        [{ type: 'remove_exercise', workout: exTarget.workout.name, exercise: exTarget.exercise.name }],
+        `Removed from ${exTarget.workout.name}: ${exTarget.exercise.name}.`,
+      )
+    }
+    const woTarget = resolveWorkout(s, query)
+    if (woTarget) {
+      return act([{ type: 'remove_workout', workout: woTarget.name }], `Workout removed: ${woTarget.name}.`)
+    }
+    const food = resolveFood(s, query)
+    if (food) {
+      return act([{ type: 'delete_food', name: food.name }], `Removed food log: ${food.name}.`)
+    }
+  }
+  m = t.match(/^i\s+didn'?t\s+eat\s+(?:the\s+)?(.+)/i)
+  if (m) {
+    const food = resolveFood(s, m[1].trim())
+    if (food) return act([{ type: 'delete_food', name: food.name }], `Removed food log: ${food.name}.`)
+  }
+
+  // ————————————————————————————————————————————————————————
+  // NUTRITION: rename food entry
+  // ————————————————————————————————————————————————————————
+  m = t.match(/^(?:that|it)\s+was\s+(.+?)\s+not\s+(.+)/i)
+  if (m) {
+    const food = resolveFood(s, m[2].trim())
+    if (food) {
+      return act([{ type: 'update_food', name: food.name, newName: m[1].trim() }], `Corrected: "${m[1].trim()}".`)
+    }
+  }
+  m = t.match(/^rename it to\s+(.+)/i) ?? t.match(/^fix the name to\s+(.+)/i) ?? t.match(/^call it\s+(.+)/i)
+  if (m) {
+    const food = resolveFood(s)
+    if (food) {
+      return act([{ type: 'update_food', name: food.name, newName: m[1].trim() }], `Renamed to "${m[1].trim()}".`)
+    }
+  }
+
+  // ————————————————————————————————————————————————————————
+  // NUTRITION: macro corrections
+  // ————————————————————————————————————————————————————————
+  m = t.match(/^make\s+(?:that|it)\s+(\d+)\s*k?cal/i)
+  if (m) {
+    const food = resolveFood(s)
+    if (food) return act([{ type: 'update_food', name: food.name, kcal: parseInt(m[1], 10) }], `Updated: ${food.name} → ${m[1]} kcal.`)
+  }
+  m = t.match(/^fix the protein to\s+(\d+)/i)
+  if (m) {
+    const food = resolveFood(s)
+    if (food) return act([{ type: 'update_food', name: food.name, protein: parseInt(m[1], 10) }], `Updated: ${food.name} → ${m[1]}g protein.`)
+  }
+  m = t.match(/^change carbs to\s+(\d+)/i)
+  if (m) {
+    const food = resolveFood(s)
+    if (food) return act([{ type: 'update_food', name: food.name, carbs: parseInt(m[1], 10) }], `Updated: ${food.name} → ${m[1]}g carbs.`)
+  }
+  m = t.match(/^set fat to\s+(\d+)/i)
+  if (m) {
+    const food = resolveFood(s)
+    if (food) return act([{ type: 'update_food', name: food.name, fat: parseInt(m[1], 10) }], `Updated: ${food.name} → ${m[1]}g fat.`)
+  }
+  m = t.match(/^correct\s+(.+?)\s+to\s+(\d+)\s*g?\s*protein/i)
+  if (m) {
+    const food = resolveFood(s, m[1].trim())
+    if (food) return act([{ type: 'update_food', name: food.name, protein: parseInt(m[2], 10) }], `Updated: ${food.name} → ${m[2]}g protein.`)
+  }
+  m = t.match(/^(.+?)\s+was\s+(\d+)\s*k?cal\s+not\s+\d+/i)
+  if (m) {
+    const food = resolveFood(s, m[1].trim())
+    if (food) return act([{ type: 'update_food', name: food.name, kcal: parseInt(m[2], 10) }], `Corrected: ${food.name} → ${m[2]} kcal.`)
+  }
+  m = t.match(/^update\s+(.+?):\s*(\d+)\s*k?cal\s*\/\s*(\d+)\s*g?\s*protein\s*\/\s*(\d+)\s*g?\s*carbs/i)
+  if (m) {
+    const food = resolveFood(s, m[1].trim())
+    if (food) {
+      return act(
+        [{ type: 'update_food', name: food.name, kcal: parseInt(m[2], 10), protein: parseInt(m[3], 10), carbs: parseInt(m[4], 10) }],
+        `Updated: ${food.name} → ${m[2]} kcal / ${m[3]}g protein / ${m[4]}g carbs.`,
+      )
+    }
+  }
   // ——— food WITH explicit numbers: "log food chicken bowl 750 kcal 55 protein" / "ate ... 800 kcal" ———
   m = t.match(/(?:log |ate |had |eat )(?:food )?(.+?)(?:[,;]|\s[-–])?\s*(\d{2,4})\s*(?:k?cal(?:ories)?)?(?:\D+(\d{1,3})\s*(?:g\s*)?protein)?/i)
   if (m && /kcal|cal|protein|ate|had|food|meal/i.test(t)) {
@@ -276,6 +607,7 @@ export function runLocalEngine(input: string, contextUserName?: string): EngineR
   if (m) {
     return act([{ type: 'add_book', title: m[1].trim(), author: m[2]?.trim() }], `"${m[1].trim()}" added to the library.`)
   }
+
 
   // ————————————————————————————————————————————————————
   // Q&A handlers below are FALLBACK-ONLY. When an LLM brain is configured,
