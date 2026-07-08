@@ -109,7 +109,7 @@ Logging:
 
 Adding:
   - {"type":"add_grocery","name":"...","qty":"..."}
-  - {"type":"add_note","title":"...","body":"..."}
+  - {"type":"add_note","title":"...","body":"..."}  ← notes are his VAULT (second brain). Write bodies in markdown, link related notes with [[Note Title]], tag with #topic (#golf #business #ideas). The vault index + relevant note contents are already in your context — treat them as his written knowledge and cite them.
   - {"type":"add_goal","title":"...","target":"...","pillar":"physique|golf|business|recovery|custom"}
   - {"type":"add_milestone","goal":"<goal title fragment>","title":"..."}
   - {"type":"add_biz_task","title":"...","area":"Content|Store|Marketing|Suppliers|Ops"}

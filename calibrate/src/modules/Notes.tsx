@@ -1,6 +1,8 @@
-import { Pin, Plus, Table2, Trash2, X } from 'lucide-react'
-import { useState } from 'react'
+import { Eye, Hash, Link2, Pencil, Pin, Plus, Search, Table2, Trash2, X } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Markdown } from '../components/Markdown'
 import { Empty, HudLabel, Panel } from '../components/ui'
+import { allVaultTags, backlinksFor, extractTags, findNoteByTitle, searchNotes } from '../lib/vault'
 import { useStore } from '../store/store'
 
 function TableEditor({ id }: { id: string }) {
@@ -60,7 +62,7 @@ function TableEditor({ id }: { id: string }) {
               ))}
               <td className="border-b border-edge text-center">
                 <button
-                  className="opacity-0 transition-opacity group-hover:opacity-100"
+                  className="lg:opacity-0 transition-opacity lg:group-hover:opacity-100"
                   onClick={() => delRow(ri)}
                   aria-label={`Delete row ${ri + 1}`}
                 >
@@ -78,57 +80,129 @@ function TableEditor({ id }: { id: string }) {
   )
 }
 
+function NoteEditor({ id, onClose, onOpenNote }: { id: string; onClose: () => void; onOpenNote: (id: string) => void }) {
+  const s = useStore()
+  // Empty notes open straight into edit mode; notes with content open in preview.
+  const [editing, setEditing] = useState(() => !useStore.getState().notes.find((n) => n.id === id)?.body.trim())
+  const note = s.notes.find((n) => n.id === id)
+  if (!note) return null
+
+  const backlinks = backlinksFor(s.notes, note)
+  const tags = extractTags(note.body)
+
+  const followWikiLink = (title: string) => {
+    const hit = findNoteByTitle(s.notes, title)
+    if (hit) onOpenNote(hit.id)
+    else onOpenNote(s.addNote(title, ''))
+  }
+
+  return (
+    <div className="mx-auto max-w-3xl space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        <button className="btn btn-ghost" onClick={onClose}>
+          ← Vault
+        </button>
+        <div className="flex gap-1">
+          <button
+            className="btn btn-ghost !px-2.5"
+            aria-label={editing ? 'Preview note' : 'Edit note'}
+            onClick={() => setEditing((e) => !e)}
+          >
+            {editing ? <Eye size={16} /> : <Pencil size={16} />}
+          </button>
+          <button
+            className={`btn btn-ghost !px-2.5 ${note.pinned ? '!text-signal' : ''}`}
+            aria-label="Pin note"
+            onClick={() => s.updateNote(note.id, { pinned: !note.pinned })}
+          >
+            <Pin size={16} />
+          </button>
+          <button
+            className="btn btn-ghost !px-2.5"
+            aria-label="Delete note"
+            onClick={() => {
+              s.removeNote(note.id)
+              onClose()
+            }}
+          >
+            <Trash2 size={16} className="text-alert/80" />
+          </button>
+        </div>
+      </div>
+      <Panel>
+        <input
+          className="w-full bg-transparent h-lumen text-2xl font-bold tracking-wide outline-none"
+          value={note.title}
+          aria-label="Note title"
+          onChange={(e) => s.updateNote(note.id, { title: e.target.value })}
+        />
+        {tags.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {tags.map((t) => (
+              <span key={t} className="rounded-full border border-signal/25 bg-signal/10 px-2 py-0.5 text-[0.65rem] tracking-wide text-signal">
+                #{t}
+              </span>
+            ))}
+          </div>
+        )}
+        {editing ? (
+          <textarea
+            className="mt-3 min-h-[50vh] w-full resize-y bg-transparent font-mono text-[0.85rem] leading-relaxed text-ice/90 outline-none placeholder:text-fog"
+            placeholder={'Write in markdown…\n\n# Heading\n- [ ] task\n[[Link another note]]\n#tag'}
+            value={note.body}
+            autoFocus={editing}
+            onChange={(e) => s.updateNote(note.id, { body: e.target.value })}
+          />
+        ) : (
+          <div className="mt-4 min-h-[40vh]" onDoubleClick={() => setEditing(true)}>
+            {note.body.trim() ? (
+              <Markdown text={note.body} onWikiLink={followWikiLink} />
+            ) : (
+              <p className="text-sm text-fog">Empty. Tap the pencil to write.</p>
+            )}
+          </div>
+        )}
+      </Panel>
+      {backlinks.length > 0 && (
+        <Panel>
+          <HudLabel className="flex items-center gap-1.5">
+            <Link2 size={12} /> Linked from
+          </HudLabel>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {backlinks.map((b) => (
+              <button
+                key={b.id}
+                className="rounded-lg border border-edge bg-white/[0.03] px-2.5 py-1 text-xs text-ice/80 transition-colors hover:border-signal/30"
+                onClick={() => onOpenNote(b.id)}
+              >
+                {b.title || 'Untitled'}
+              </button>
+            ))}
+          </div>
+        </Panel>
+      )}
+    </div>
+  )
+}
+
 export function Notes() {
   const s = useStore()
   const [openNote, setOpenNote] = useState<string | null>(null)
   const [openTable, setOpenTable] = useState<string | null>(null)
+  const [query, setQuery] = useState('')
+  const [tagFilter, setTagFilter] = useState<string | null>(null)
 
-  const note = s.notes.find((n) => n.id === openNote)
-  const sorted = [...s.notes].sort((a, b) => Number(b.pinned) - Number(a.pinned) || b.updated - a.updated)
+  const tags = useMemo(() => allVaultTags(s.notes), [s.notes])
 
-  if (note) {
-    return (
-      <div className="mx-auto max-w-3xl space-y-3">
-        <div className="flex items-center justify-between gap-2">
-          <button className="btn btn-ghost" onClick={() => setOpenNote(null)}>
-            ← Notes
-          </button>
-          <div className="flex gap-1">
-            <button
-              className={`btn btn-ghost !px-2.5 ${note.pinned ? '!text-signal' : ''}`}
-              aria-label="Pin note"
-              onClick={() => s.updateNote(note.id, { pinned: !note.pinned })}
-            >
-              <Pin size={16} />
-            </button>
-            <button
-              className="btn btn-ghost !px-2.5"
-              aria-label="Delete note"
-              onClick={() => {
-                s.removeNote(note.id)
-                setOpenNote(null)
-              }}
-            >
-              <Trash2 size={16} className="text-alert/80" />
-            </button>
-          </div>
-        </div>
-        <Panel>
-          <input
-            className="w-full bg-transparent h-lumen text-2xl font-bold tracking-wide outline-none"
-            value={note.title}
-            aria-label="Note title"
-            onChange={(e) => s.updateNote(note.id, { title: e.target.value })}
-          />
-          <textarea
-            className="mt-3 min-h-[50vh] w-full resize-y bg-transparent text-[0.95rem] leading-relaxed text-ice/90 outline-none placeholder:text-fog"
-            placeholder="Write…"
-            value={note.body}
-            onChange={(e) => s.updateNote(note.id, { body: e.target.value })}
-          />
-        </Panel>
-      </div>
-    )
+  const visible = useMemo(() => {
+    let list = searchNotes(s.notes, query)
+    if (tagFilter) list = list.filter((n) => extractTags(n.body).includes(tagFilter))
+    if (!query) list = [...list].sort((a, b) => Number(b.pinned) - Number(a.pinned) || b.updated - a.updated)
+    return list
+  }, [s.notes, query, tagFilter])
+
+  if (openNote) {
+    return <NoteEditor key={openNote} id={openNote} onClose={() => setOpenNote(null)} onOpenNote={setOpenNote} />
   }
 
   const table = s.tables.find((t) => t.id === openTable)
@@ -137,7 +211,7 @@ export function Notes() {
       <div className="mx-auto max-w-4xl space-y-3">
         <div className="flex items-center justify-between gap-2">
           <button className="btn btn-ghost" onClick={() => setOpenTable(null)}>
-            ← Notes
+            ← Vault
           </button>
           <button
             className="btn btn-ghost !px-2.5"
@@ -167,8 +241,10 @@ export function Notes() {
     <div className="space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-3 px-1">
         <div>
-          <h1 className="h-lumen text-3xl font-bold tracking-wide">NOTES & TABLES</h1>
-          <p className="mt-1 text-sm text-haze">Thinking space. Jarvis can create notes for you from chat.</p>
+          <h1 className="h-lumen text-3xl font-bold tracking-wide">VAULT</h1>
+          <p className="mt-1 text-sm text-haze">
+            Your second brain. Markdown, [[links]], #tags — Jarvis reads and writes here too.
+          </p>
         </div>
         <div className="flex gap-2">
           <button className="btn" onClick={() => setOpenTable(s.addTable('New table'))}>
@@ -180,23 +256,74 @@ export function Notes() {
         </div>
       </header>
 
-      {!sorted.length && !s.tables.length && (
-        <Empty>Nothing here yet. Capture drills, business ideas, swing thoughts…</Empty>
+      <div className="flex flex-wrap items-center gap-2 px-1">
+        <div className="flex min-w-[220px] flex-1 items-center gap-2 rounded-xl border border-edge bg-white/[0.03] px-3 py-2 focus-within:border-signal/40 sm:max-w-sm">
+          <Search size={14} className="shrink-0 text-fog" />
+          <input
+            className="w-full bg-transparent text-sm text-ice outline-none placeholder:text-fog"
+            placeholder="Search the vault…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          {query && (
+            <button onClick={() => setQuery('')} aria-label="Clear search">
+              <X size={13} className="text-fog" />
+            </button>
+          )}
+        </div>
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {tags.slice(0, 8).map((t) => (
+              <button
+                key={t}
+                className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-[0.65rem] tracking-wide transition-colors ${
+                  tagFilter === t
+                    ? 'border-signal/50 bg-signal/15 text-signal'
+                    : 'border-edge bg-white/[0.02] text-haze hover:border-signal/30'
+                }`}
+                onClick={() => setTagFilter(tagFilter === t ? null : t)}
+              >
+                <Hash size={10} />
+                {t}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {!visible.length && !s.tables.length && (
+        <Empty>
+          {query || tagFilter ? 'No notes match.' : 'Nothing here yet. Capture drills, business ideas, swing thoughts…'}
+        </Empty>
       )}
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {sorted.map((n) => (
-          <button key={n.id} onClick={() => setOpenNote(n.id)} className="text-left">
-            <Panel className="h-full transition-colors hover:border-signal/30">
-              <div className="flex items-start justify-between gap-2">
-                <span className="font-display text-base font-bold tracking-wide text-ice">{n.title || 'Untitled'}</span>
-                {n.pinned && <Pin size={13} className="shrink-0 text-signal" />}
-              </div>
-              <p className="mt-2 line-clamp-4 text-xs leading-relaxed text-haze">{n.body || '—'}</p>
-            </Panel>
-          </button>
-        ))}
-        {s.tables.map((t) => (
+        {visible.map((n) => {
+          const nTags = extractTags(n.body)
+          return (
+            <button key={n.id} onClick={() => setOpenNote(n.id)} className="text-left">
+              <Panel className="h-full transition-colors hover:border-signal/30">
+                <div className="flex items-start justify-between gap-2">
+                  <span className="font-display text-base font-bold tracking-wide text-ice">{n.title || 'Untitled'}</span>
+                  {n.pinned && <Pin size={13} className="shrink-0 text-signal" />}
+                </div>
+                <p className="mt-2 line-clamp-4 text-xs leading-relaxed text-haze">
+                  {n.body.replace(/[#>*`[\]]/g, '').trim() || '—'}
+                </p>
+                {nTags.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {nTags.slice(0, 4).map((t) => (
+                      <span key={t} className="rounded-full bg-signal/10 px-1.5 py-0.5 text-[0.6rem] text-signal/80">
+                        #{t}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </Panel>
+            </button>
+          )
+        })}
+        {(!query && !tagFilter ? s.tables : []).map((t) => (
           <button key={t.id} onClick={() => setOpenTable(t.id)} className="text-left">
             <Panel className="h-full transition-colors hover:border-steel/40">
               <div className="flex items-center gap-2">
@@ -211,7 +338,7 @@ export function Notes() {
         ))}
       </div>
 
-      {sorted.length > 0 && <HudLabel className="px-1">Tap a card to open</HudLabel>}
+      {visible.length > 0 && <HudLabel className="px-1">Tap a card to open</HudLabel>}
     </div>
   )
 }

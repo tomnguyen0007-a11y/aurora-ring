@@ -3,6 +3,7 @@ import { dayProgress, golfMinutes, golfTotalWeek, macrosForDate, revenueToday, s
 import { DAY_CODENAMES } from '../../store/seed'
 import { useStore } from '../../store/store'
 import { weekDates } from '../dates'
+import { extractTags, noteExcerpt, retrieveRelevantNotes } from '../vault'
 import { fullKnowledge } from './knowledge'
 import { formatMemoriesForPrompt, retrieveRelevantMemories, touchMemories } from './memory'
 
@@ -18,6 +19,7 @@ export interface JarvisContext {
   // User profile & persistent memory
   profile: string
   relevantMemory: string
+  relevantNotes: string
   knowledge: string
 
   // Current live state
@@ -61,6 +63,19 @@ function retrieveRelevantMemory(query: string): string {
 
   touchMemories(relevant.map((f) => f.id))
   return 'RELEVANT MEMORIES:\n' + formatMemoriesForPrompt(relevant)
+}
+
+/**
+ * Vault retrieval: surface the notes (second brain) most relevant to this query
+ * so Jarvis can quote and build on what's actually written there.
+ */
+function retrieveRelevantVaultNotes(query: string): string {
+  const hits = retrieveRelevantNotes(query, 3)
+  if (!hits.length) return ''
+  return (
+    'VAULT NOTES RELEVANT TO THIS QUERY (his own written notes — quote/build on these):\n' +
+    hits.map((n) => noteExcerpt(n)).join('\n---\n')
+  )
 }
 
 /**
@@ -129,6 +144,15 @@ function buildSnapshot(): string {
       .join(', ')}`,
     openGrocery.length ? `GROCERY: ${openGrocery.map((g) => g.name).join(', ')}` : 'GROCERY: empty',
     reading.length ? `READING: ${reading.map((b) => `${b.title} (p${b.currentPage})`).join(', ')}` : 'READING: none active',
+    s.notes.length
+      ? `VAULT (his second-brain notes — read via context, write via add_note/update_note/append_note):\n${s.notes
+          .slice(0, 25)
+          .map((n) => {
+            const tags = extractTags(n.body)
+            return `  • "${n.title || 'Untitled'}"${tags.length ? ` [${tags.map((t) => '#' + t).join(' ')}]` : ''}${n.pinned ? ' (pinned)' : ''}`
+          })
+          .join('\n')}`
+      : 'VAULT: empty — offer to capture important thinking as notes.',
   ]
     .filter(Boolean)
     .join('\n')
@@ -151,6 +175,7 @@ export function buildJarvisContext(userQuery?: string): JarvisContext {
   return {
     profile: buildProfile(),
     relevantMemory: userQuery ? retrieveRelevantMemory(userQuery) : '',
+    relevantNotes: userQuery ? retrieveRelevantVaultNotes(userQuery) : '',
     knowledge: fullKnowledge(),
     snapshot: buildSnapshot(),
     userName: s.settings.userName || 'sir',
@@ -183,6 +208,10 @@ ANTI-HALLUCINATION: When giving training, nutrition, golf, recovery, business or
 
   if (ctx.relevantMemory) {
     sections.push('', `━━━ MEMORIES RELEVANT TO THIS QUERY ━━━`, ctx.relevantMemory)
+  }
+
+  if (ctx.relevantNotes) {
+    sections.push('', `━━━ HIS VAULT (second brain) ━━━`, ctx.relevantNotes)
   }
 
   sections.push(
