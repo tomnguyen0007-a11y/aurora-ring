@@ -23,13 +23,13 @@ function TestConnectionButton({ provider }: { provider: LlmProvider }) {
         <RefreshCw size={12} className={state.status === 'testing' ? 'animate-spin' : ''} /> Test connection
       </button>
       {state.status === 'ok' && (
-        <span className="flex items-center gap-1 text-xs text-affirm">
-          <CheckCircle2 size={13} /> Working
+        <span className="flex items-center gap-1 text-xs text-affirm" title={state.message}>
+          <CheckCircle2 size={13} className="shrink-0" /> {state.message === 'Connected' ? 'Working' : state.message}
         </span>
       )}
       {state.status === 'fail' && (
         <span className="flex items-center gap-1 text-xs text-alert" title={state.message}>
-          <XCircle size={13} /> {state.message.slice(0, 40)}
+          <XCircle size={13} className="shrink-0" /> {state.message.slice(0, 120)}
         </span>
       )}
     </div>
@@ -442,9 +442,9 @@ function BrainPanel() {
               onChange={(e) => s.setSettings({ openrouterModel: e.target.value.trim() })}
             />
             <p className="text-[11px] text-fog">
-              One key routes to 35+ models — several genuinely free (":free" suffix). Good resilient backup: if a
-              free model gets rate-limited, just swap the model name above without switching providers. The default
-              model (Qwen 2.5 VL) reads photos. Trade-off: no live web search on the free models.
+              One key routes to dozens of models — several genuinely free (":free" suffix). Self-healing: free models
+              get retired without notice, so if the one above ever 404s, Jarvis automatically finds a live free
+              replacement, saves it here, and retries. Trade-off: no live web search on the free models.
             </p>
             <TestConnectionButton provider="openrouter" />
           </div>

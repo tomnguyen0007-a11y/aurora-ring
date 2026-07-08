@@ -360,11 +360,76 @@ async function callGroq(userText: string, ctx: JarvisContext): Promise<string> {
   return data.choices?.[0]?.message?.content ?? ''
 }
 
-// OpenRouter: one key routes to 35+ models, several genuinely free (":free" suffix).
-// A resilient backup — if one free model is rate-limited, switch the model string
-// without switching providers. Default model (Qwen 2.5 VL 72B) supports vision.
+// OpenRouter: one key routes to many models, several genuinely free (":free" suffix).
+// Free models get retired without notice (qwen2.5-vl-72b:free vanished and 404'd
+// everyone using the old default), so the model is SELF-HEALING: on a 404 we fetch
+// the live catalogue, pick the best available free model (vision-capable when the
+// request needs it), persist it to settings, and retry — no user intervention.
 // Web search would need OpenRouter's paid ":online" plugin, so — like Groq — the
 // prompt doesn't claim search on this provider.
+
+/** Known-good free models to prefer, best first. Anything here that's been retired is skipped automatically. */
+const OPENROUTER_FREE_PREFERRED = [
+  'qwen/qwen2.5-vl-72b-instruct:free', // vision — kept first in case it returns
+  'google/gemma-3-27b-it:free', // vision
+  'meta-llama/llama-4-maverick:free', // vision
+  'qwen/qwen-2.5-72b-instruct:free',
+  'meta-llama/llama-3.3-70b-instruct:free',
+  'deepseek/deepseek-chat-v3-0324:free',
+  'deepseek/deepseek-r1:free',
+]
+
+interface OpenRouterModel {
+  id: string
+  architecture?: { input_modalities?: string[] }
+}
+
+/**
+ * Ask OpenRouter what's actually available right now and pick the best free
+ * model. Preference order: our curated list first (highest quality), then any
+ * other ":free" model — vision-capable ones first when the request needs vision.
+ */
+export async function discoverOpenRouterFreeModel(needsVision: boolean): Promise<string | null> {
+  try {
+    const res = await fetch('https://openrouter.ai/api/v1/models')
+    if (!res.ok) return null
+    const data: { data?: OpenRouterModel[] } = await res.json()
+    const free = (data.data ?? []).filter((m) => m.id.endsWith(':free'))
+    if (!free.length) return null
+
+    const hasVision = (m: OpenRouterModel) => m.architecture?.input_modalities?.includes('image') ?? false
+    const pool = needsVision ? free.filter(hasVision) : free
+    if (!pool.length) return null
+
+    const ids = new Set(pool.map((m) => m.id))
+    const preferred = OPENROUTER_FREE_PREFERRED.find((id) => ids.has(id))
+    if (preferred) return preferred
+
+    // No curated hit — fall back to the largest-sounding model still standing
+    const bySize = [...pool].sort((a, b) => {
+      const size = (m: OpenRouterModel) => parseInt(m.id.match(/(\d+)b/i)?.[1] ?? '0', 10)
+      return size(b) - size(a)
+    })
+    return bySize[0]?.id ?? null
+  } catch {
+    return null
+  }
+}
+
+/** True when an OpenRouter error means "this model no longer exists" (vs. auth/rate issues). */
+function isModelGone(e: unknown): boolean {
+  return e instanceof ProviderError && e.provider === 'openrouter' && (e.status === 404 || /model.*(not found|does not exist|is not available)/i.test(e.message))
+}
+
+/**
+ * Self-heal a dead OpenRouter model: discover a live free replacement, persist
+ * it so every future call uses it, and return it (null if nothing suitable).
+ */
+async function healOpenRouterModel(needsVision: boolean): Promise<string | null> {
+  const found = await discoverOpenRouterFreeModel(needsVision)
+  if (found) useStore.getState().setSettings({ openrouterModel: found })
+  return found
+}
 function openRouterMessages(userText: string, image: string | undefined, chat: ChatMsg[]) {
   const history = historyFor(chat, userText) as { role: 'user' | 'assistant'; content: string | unknown }[]
   if (image) {
@@ -379,7 +444,7 @@ function openRouterMessages(userText: string, image: string | undefined, chat: C
   return history
 }
 
-async function callOpenRouter(userText: string, ctx: JarvisContext, image?: string): Promise<string> {
+async function callOpenRouter(userText: string, ctx: JarvisContext, image?: string, isRetry = false): Promise<string> {
   const { settings, chat } = useStore.getState()
   const messages = [{ role: 'system', content: buildSystemPrompt(ctx, { webSearch: false }) }, ...openRouterMessages(userText, image, chat)]
 
@@ -396,7 +461,12 @@ async function callOpenRouter(userText: string, ctx: JarvisContext, image?: stri
 
   if (!res.ok) {
     const body = await res.text().catch(() => '')
-    throw new ProviderError('openrouter', res.status, `OpenRouter ${res.status}: ${body.slice(0, 180)}`)
+    const err = new ProviderError('openrouter', res.status, `OpenRouter ${res.status}: ${body.slice(0, 180)}`)
+    // Free models get retired without notice — swap in a live one and retry once
+    if (!isRetry && isModelGone(err) && (await healOpenRouterModel(!!image))) {
+      return callOpenRouter(userText, ctx, image, true)
+    }
+    throw err
   }
 
   const data: { choices?: { message?: { content?: string } }[] } = await res.json()
@@ -737,7 +807,13 @@ async function streamGroq(userText: string, ctx: JarvisContext, onText: (delta: 
   return full
 }
 
-async function streamOpenRouter(userText: string, ctx: JarvisContext, image: string | undefined, onText: (delta: string) => void): Promise<string> {
+async function streamOpenRouter(
+  userText: string,
+  ctx: JarvisContext,
+  image: string | undefined,
+  onText: (delta: string) => void,
+  isRetry = false,
+): Promise<string> {
   const { settings, chat } = useStore.getState()
   const messages = [{ role: 'system', content: buildSystemPrompt(ctx, { webSearch: false }) }, ...openRouterMessages(userText, image, chat)]
 
@@ -759,7 +835,12 @@ async function streamOpenRouter(userText: string, ctx: JarvisContext, image: str
 
   if (!res.ok || !res.body) {
     const body = await res.text().catch(() => '')
-    throw new ProviderError('openrouter', res.status, `OpenRouter ${res.status}: ${body.slice(0, 180)}`)
+    const err = new ProviderError('openrouter', res.status, `OpenRouter ${res.status}: ${body.slice(0, 180)}`)
+    // Free models get retired without notice — swap in a live one and retry once
+    if (!isRetry && isModelGone(err) && (await healOpenRouterModel(!!image))) {
+      return streamOpenRouter(userText, ctx, image, onText, true)
+    }
+    throw err
   }
 
   let full = ''
@@ -902,22 +983,32 @@ export async function testProvider(p: LlmProvider): Promise<ProviderTestResult> 
       }
       case 'openrouter': {
         if (!settings.openrouterKey) return { ok: false, message: 'No key set' }
-        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'content-type': 'application/json',
-            authorization: `Bearer ${settings.openrouterKey}`,
-            'HTTP-Referer': typeof location !== 'undefined' ? location.origin : 'https://calibrate.app',
-            'X-Title': 'Calibrate',
-          },
-          body: JSON.stringify({
-            model: settings.openrouterModel || 'qwen/qwen2.5-vl-72b-instruct:free',
-            max_tokens: 5,
-            messages: [{ role: 'user', content: 'hi' }],
-          }),
-        })
-        if (!res.ok) return { ok: false, message: `${res.status}: ${(await res.text().catch(() => '')).slice(0, 100)}` }
-        return { ok: true, message: 'Connected' }
+        const ping = async (model: string) =>
+          fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json',
+              authorization: `Bearer ${settings.openrouterKey}`,
+              'HTTP-Referer': typeof location !== 'undefined' ? location.origin : 'https://calibrate.app',
+              'X-Title': 'Calibrate',
+            },
+            body: JSON.stringify({ model, max_tokens: 5, messages: [{ role: 'user', content: 'hi' }] }),
+          })
+        const model = settings.openrouterModel || 'qwen/qwen2.5-vl-72b-instruct:free'
+        const res = await ping(model)
+        if (res.ok) return { ok: true, message: 'Connected' }
+
+        const body = (await res.text().catch(() => '')).slice(0, 140)
+        // Model retired? Find a live free one, save it, and prove it works.
+        if (res.status === 404 || /model.*(not found|does not exist|is not available)/i.test(body)) {
+          const healed = await healOpenRouterModel(false)
+          if (healed) {
+            const retry = await ping(healed)
+            if (retry.ok) return { ok: true, message: `"${model}" was retired — auto-switched to ${healed}` }
+          }
+          return { ok: false, message: `Model "${model}" no longer exists and no free replacement responded — pick one at openrouter.ai/models` }
+        }
+        return { ok: false, message: `${res.status}: ${body.slice(0, 100)}` }
       }
       default:
         return { ok: false, message: 'Not applicable' }

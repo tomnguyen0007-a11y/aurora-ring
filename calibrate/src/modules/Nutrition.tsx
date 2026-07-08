@@ -136,7 +136,7 @@ export function Nutrition() {
         <p className="mb-3 text-xs text-fog">
           Protein stays stable (1.8–2.2 g/kg). Carbs are the dial — scale to the day's demand. Example column is for 80kg.
         </p>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overscroll-x-contain">
           <table className="w-full min-w-[560px] border-collapse text-sm">
             <thead>
               <tr className="text-left">

@@ -259,7 +259,7 @@ export function Jarvis() {
         </div>
       </header>
 
-      <div className="glass flex-1 space-y-3 overflow-y-auto rounded-2xl p-4">
+      <div className="glass flex-1 space-y-3 overflow-y-auto overscroll-contain rounded-2xl p-4">
         {!s.chat.length && (
           <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
             <p className="max-w-sm text-sm leading-relaxed text-haze">
