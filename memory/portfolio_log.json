@@ -1,0 +1,111 @@
+{
+  "meta": {
+    "last_run": "2026-06-30T00:00:00Z",
+    "run_count": 1,
+    "account_currency": "EUR",
+    "nav_eur": 1342.62,
+    "nav_usd_approx": 1530.00,
+    "eur_usd_rate": 1.1395,
+    "note": "First run — no prior log existed. Portfolio log initialized."
+  },
+  "account": {
+    "net_liquidation_eur": 1342.62,
+    "equity_with_loan_value_eur": 49.53,
+    "buying_power_eur": 49.53,
+    "gross_position_value_eur": 1293.09,
+    "total_cash_value_eur": 49.53,
+    "available_funds_eur": 49.53,
+    "unrealized_pnl_usd": 93.46,
+    "realized_pnl_usd": 0,
+    "leverage": "0.96",
+    "cash_detail": {
+      "EUR": 0.23,
+      "CZK": 1196.12,
+      "USD": 0.00,
+      "buying_power_eur": 49.53
+    }
+  },
+  "positions": [
+    {
+      "ticker": "SLS",
+      "name": "SELLAS Life Sciences Group",
+      "contract_id": 390872440,
+      "asset_class": "STK",
+      "shares": 65,
+      "avg_cost_usd": 14.38718308,
+      "prior_close_usd": 15.45,
+      "last_price_usd": 16.05,
+      "bid": 16.15,
+      "ask": 16.40,
+      "market_value_usd": 1049.75,
+      "unrealized_pnl_usd": 114.58,
+      "daily_pnl_usd": 45.50,
+      "change_pct": 3.88,
+      "pct_nav": 68.6,
+      "52w_high": 15.67,
+      "52w_low": 1.39,
+      "annual_hv_pct": 111.8,
+      "avg_90d_volume_usd": 132203476,
+      "today_volume": 42312,
+      "catalyst": "REGAL Phase 3 AML trial — 78/80 events as of May 11 2026; 80th event IMMINENT",
+      "catalyst_notes": [
+        "CEO June 2026: GPS has 'very good chance' to beat earlier survival outcomes",
+        "June 24 2026: Change-of-control severance protections added for CEO/CFO/CDO (8-K filed June 25)",
+        "June 16 2026: Annual meeting — shareholders approved 20M new shares, CEO awarded 1M RSUs",
+        "Stock broke above 52w high ($15.67) today — new all-time 52w breakout at $16.05+",
+        "Post-80th-event process: DB lock → blinded review → stats → unblind → press release (weeks)"
+      ],
+      "risk_flag": "OVERWEIGHT — 68.6% NAV vs 35% max rule"
+    },
+    {
+      "ticker": "SPCX",
+      "name": "SpaceX",
+      "contract_id": 890493863,
+      "asset_class": "STK",
+      "shares": 2.6,
+      "avg_cost_usd": 171.12423077,
+      "prior_close_usd": 164.19,
+      "last_price_usd": 163.24,
+      "bid": 163.18,
+      "ask": 163.28,
+      "market_value_usd": 424.45,
+      "unrealized_pnl_usd": -20.47,
+      "daily_pnl_usd": -2.44,
+      "change_pct": -0.58,
+      "pct_nav": 27.7,
+      "ipo_price_usd": 135.00,
+      "ipo_date": "2026-06-12",
+      "52w_high": 225.64,
+      "52w_low": 147.11,
+      "avg_90d_volume_usd": 33333806744,
+      "today_volume": 326298,
+      "catalyst": "SpaceX IPO June 12 2026 — lockup unlock schedule in effect",
+      "catalyst_notes": [
+        "IPO priced $135, peaked ~$225 (+67%), now at $163.24",
+        "Employee 7% tranche unlocks at 70d (Aug 21), 90d (Sep 10), 105d, 120d, 135d after June 12",
+        "Q2 earnings unlock: 20% of holdings + bonus 10% if stock ≥$175.50 for 5/10 days",
+        "Bonus unlock threshold: $175.50 (30% above IPO) — stock currently $163.24 = 7.5% below trigger",
+        "Full unlock remaining: 180-day mark = December 8 2026",
+        "Elon Musk 6.4B shares locked until June 12 2027"
+      ],
+      "risk_flag": "UNDERWATER -4.6% vs cost; unlock pressure August 2026"
+    }
+  ],
+  "watchlist": [
+    {
+      "ticker": "CING",
+      "name": "Cingulate Inc.",
+      "status": "NO POSITION",
+      "note": "FDA CRL received June 2 2026 for CTx-1301 (ADHD). CMC issues only, no safety/efficacy concerns. Resubmission 6-12 months. Monitor for resubmission timeline + price entry."
+    }
+  ],
+  "macro": {
+    "date": "2026-06-30",
+    "sp500_prev_close": 7440.43,
+    "nasdaq_prev_close": 25820.14,
+    "dow_prev_close": 52182.74,
+    "sp500_prev_change_pct": 1.18,
+    "nasdaq_prev_change_pct": 2.07,
+    "premarket_sp500_futures_note": "ES futures +0.2% premarket June 30 2026"
+  }
+}
