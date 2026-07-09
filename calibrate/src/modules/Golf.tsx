@@ -1,5 +1,6 @@
 import { Pause, Play, Plus, Square, Target, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { PhotoGallery } from '../components/PhotoGallery'
 import { Bars, Empty, HudLabel, Panel, Sparkline, StatTile } from '../components/ui'
 import { fmtDateShort, fmtHours, lastNDates, todayISO, weekDates } from '../lib/dates'
 import { GOLF_CATEGORIES, golfMinutes, golfWeeklySeries } from '../lib/stats'
@@ -197,6 +198,8 @@ export function Golf() {
       </header>
 
       <GolfDiagnostic />
+
+      <PhotoGallery category="golf" />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <PracticeTimer />

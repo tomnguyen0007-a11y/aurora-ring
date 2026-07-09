@@ -157,6 +157,20 @@ export interface KnowledgeDoc {
   updated: number
 }
 
+/**
+ * A photo from training or golf, dated and captioned — a Strava-style visual
+ * log of "what did I actually do that day." Uploaded directly from Golf/
+ * Training, or attached to a Jarvis chat message and saved via "log this."
+ */
+export interface TrainingPhoto {
+  id: string
+  date: string
+  category: 'golf' | 'training' | 'other'
+  dataUrl: string
+  caption?: string
+  createdAt: number
+}
+
 export interface BizTask {
   id: string
   title: string

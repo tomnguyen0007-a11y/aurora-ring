@@ -1,5 +1,6 @@
 import { CheckCircle2, Footprints, Plus, Sparkles, Trash2, TrendingUp } from 'lucide-react'
 import { useState } from 'react'
+import { PhotoGallery } from '../components/PhotoGallery'
 import { Empty, HudLabel, InlineEdit, Panel, Sparkline, StatTile } from '../components/ui'
 import { fmtDateShort, todayISO, WEEKDAY_NAMES, weekdayOf } from '../lib/dates'
 import { exerciseInsight, workoutsThisWeek } from '../lib/stats'
@@ -70,6 +71,8 @@ export function Training() {
         </div>
         <StatTile label="This week" value={`${wk.done}/${wk.planned}`} sub="sessions complete" accent="text-signal" />
       </header>
+
+      <PhotoGallery category="training" />
 
       <div className="flex gap-1.5 overflow-x-auto overscroll-x-contain pb-1">
         {s.workouts.map((w) => (
