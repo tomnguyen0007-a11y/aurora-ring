@@ -229,6 +229,11 @@ const defaultSettings: Settings = {
   supabaseUrl: '',
   supabaseKey: '',
   syncCode: '',
+  githubToken: '',
+  githubRepo: '',
+  githubBranch: 'main',
+  githubPath: '',
+  githubSyncedAt: 0,
 }
 
 const seedState = () => ({

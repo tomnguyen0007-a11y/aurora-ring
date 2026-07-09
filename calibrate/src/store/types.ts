@@ -293,6 +293,13 @@ export interface Settings {
   supabaseUrl?: string // https://xxxx.supabase.co
   supabaseKey?: string // anon public key
   syncCode?: string // shared secret identifying this user's state row — same on every device
+  // GitHub knowledge sync — pulls markdown/text straight from a repo (e.g. an
+  // Obsidian vault or the ECC skills repo) into the Brain Feed, no copy-paste.
+  githubToken?: string // personal access token; only needed for private repos / higher rate limits
+  githubRepo?: string // "owner/repo"
+  githubBranch?: string
+  githubPath?: string // optional folder prefix to restrict the sync to
+  githubSyncedAt?: number
 }
 
 export interface HevySession {

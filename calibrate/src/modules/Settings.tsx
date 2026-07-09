@@ -1,6 +1,7 @@
-import { BrainCircuit, CheckCircle2, Download, FileText, KeyRound, Play, Plus, RefreshCw, RotateCcw, Trash2, Upload, Volume2, XCircle } from 'lucide-react'
+import { BrainCircuit, CheckCircle2, Download, FileText, Github, KeyRound, Play, Plus, RefreshCw, RotateCcw, Trash2, Upload, Volume2, XCircle } from 'lucide-react'
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { HudLabel, Panel } from '../components/ui'
+import { syncGithubKnowledge } from '../lib/jarvis/githubSync'
 import { llmConfigured, testProvider } from '../lib/jarvis/llm'
 import { englishVoices, speak } from '../lib/speech'
 import { getSyncStatus, subscribeSyncStatus, syncNow } from '../lib/supabase'
@@ -153,6 +154,8 @@ export function Settings() {
       </Panel>
 
       <BrainFeedPanel />
+
+      <GithubSyncPanel />
 
       <Panel>
         <HudLabel>
@@ -551,6 +554,87 @@ function BrainFeedPanel() {
           ))}
         </ul>
       )}
+    </Panel>
+  )
+}
+
+function GithubSyncPanel() {
+  const s = useStore()
+  const [state, setState] = useState<{ status: 'idle' | 'syncing' | 'ok' | 'fail'; message: string }>({ status: 'idle', message: '' })
+  const syncedCount = s.knowledgeDocs.filter((d) => d.source.startsWith('github:')).length
+
+  const run = async () => {
+    setState({ status: 'syncing', message: '' })
+    const res = await syncGithubKnowledge()
+    setState({ status: res.ok ? 'ok' : 'fail', message: res.message })
+  }
+
+  return (
+    <Panel>
+      <HudLabel>
+        <Github size={11} className="text-arc" /> GitHub Sync — pull notes straight from a repo
+      </HudLabel>
+      <p className="mb-3 text-xs leading-relaxed text-fog">
+        Point this at an Obsidian vault you push to GitHub, the ECC skills repo, project docs — anything. Markdown/text
+        files sync into the Brain Feed above automatically, no copy-paste. Public repos need no token; private repos
+        need a{' '}
+        <a href="https://github.com/settings/tokens" target="_blank" rel="noreferrer" className="text-arc underline underline-offset-2">
+          personal access token
+        </a>{' '}
+        with repo read access.
+      </p>
+
+      <div className="space-y-2">
+        <div className="grid grid-cols-2 gap-2">
+          <input
+            className="field"
+            placeholder="owner/repo"
+            value={s.settings.githubRepo ?? ''}
+            onChange={(e) => s.setSettings({ githubRepo: e.target.value })}
+          />
+          <input
+            className="field"
+            placeholder="branch (main)"
+            value={s.settings.githubBranch ?? ''}
+            onChange={(e) => s.setSettings({ githubBranch: e.target.value })}
+          />
+        </div>
+        <input
+          className="field w-full"
+          placeholder="Optional folder filter — e.g. skills/ (leave blank for whole repo)"
+          value={s.settings.githubPath ?? ''}
+          onChange={(e) => s.setSettings({ githubPath: e.target.value })}
+        />
+        <input
+          className="field w-full"
+          type="password"
+          placeholder="Personal access token (only needed for private repos / higher rate limits)"
+          value={s.settings.githubToken ?? ''}
+          onChange={(e) => s.setSettings({ githubToken: e.target.value })}
+        />
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          <button type="button" className="btn btn-signal !py-1.5 !text-xs" onClick={run} disabled={state.status === 'syncing' || !s.settings.githubRepo}>
+            <RefreshCw size={12} className={state.status === 'syncing' ? 'animate-spin' : ''} /> Sync now
+          </button>
+          {state.status === 'ok' && (
+            <span className="flex items-center gap-1 text-xs text-affirm" title={state.message}>
+              <CheckCircle2 size={13} className="shrink-0" /> {state.message}
+            </span>
+          )}
+          {state.status === 'fail' && (
+            <span className="flex items-center gap-1 text-xs text-alert" title={state.message}>
+              <XCircle size={13} className="shrink-0" /> {state.message}
+            </span>
+          )}
+          {state.status === 'idle' && (
+            <span className="text-[11px] text-fog">
+              {syncedCount > 0
+                ? `${syncedCount} file${syncedCount === 1 ? '' : 's'} synced${s.settings.githubSyncedAt ? ` · last sync ${new Date(s.settings.githubSyncedAt).toLocaleString()}` : ''}`
+                : 'Not synced yet'}
+            </span>
+          )}
+        </div>
+      </div>
     </Panel>
   )
 }
