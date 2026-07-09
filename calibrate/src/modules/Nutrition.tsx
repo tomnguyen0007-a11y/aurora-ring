@@ -1,6 +1,6 @@
 import { Droplets, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import { Empty, HudLabel, Meter, Panel } from '../components/ui'
+import { Empty, HudLabel, InlineEdit, Meter, Panel } from '../components/ui'
 import { todayISO } from '../lib/dates'
 import { macrosForDate } from '../lib/stats'
 import { useStore } from '../store/store'
@@ -68,9 +68,18 @@ export function Nutrition() {
             <ul className="mt-4 space-y-1.5">
               {todayLogs.map((f) => (
                 <li key={f.id} className="group flex items-center justify-between gap-2 rounded-lg bg-black/25 px-3 py-2 text-sm">
-                  <span className="min-w-0 flex-1 truncate text-ice">{f.name}</span>
-                  <span className="num shrink-0 text-xs text-fog">
-                    {f.kcal}kcal · {f.protein}P {f.carbs}C {f.fat}F
+                  <span className="min-w-0 flex-1 truncate text-ice">
+                    <InlineEdit value={f.name} label={`Edit name of ${f.name}`} onSave={(v) => s.updateFood(f.id, { name: v })} />
+                  </span>
+                  <span className="num flex shrink-0 items-center text-xs text-fog">
+                    <InlineEdit num value={String(f.kcal)} label={`Edit calories of ${f.name}`} onSave={(v) => s.updateFood(f.id, { kcal: parseInt(v) || 0 })} />
+                    kcal ·
+                    <InlineEdit num value={String(f.protein)} label={`Edit protein of ${f.name}`} onSave={(v) => s.updateFood(f.id, { protein: parseInt(v) || 0 })} />
+                    P
+                    <InlineEdit num value={String(f.carbs)} label={`Edit carbs of ${f.name}`} onSave={(v) => s.updateFood(f.id, { carbs: parseInt(v) || 0 })} />
+                    C
+                    <InlineEdit num value={String(f.fat)} label={`Edit fat of ${f.name}`} onSave={(v) => s.updateFood(f.id, { fat: parseInt(v) || 0 })} />
+                    F
                   </span>
                   <button className="opacity-0 transition-opacity group-hover:opacity-100" aria-label={`Delete ${f.name}`} onClick={() => s.removeFood(f.id)}>
                     <Trash2 size={14} className="text-alert/70" />
@@ -134,7 +143,8 @@ export function Nutrition() {
       <Panel>
         <HudLabel>Fuelling Framework — Carbs by Day Type</HudLabel>
         <p className="mb-3 text-xs text-fog">
-          Protein stays stable (1.8–2.2 g/kg). Carbs are the dial — scale to the day's demand. Example column is for 80kg.
+          Protein stays stable (1.8–2.2 g/kg). Carbs are the dial — scale to the day's demand. Example column is for
+          80kg and recomputes automatically. Click any value to edit, or just tell Jarvis.
         </p>
         <div className="overflow-x-auto overscroll-x-contain">
           <table className="w-full min-w-[560px] border-collapse text-sm">
@@ -154,9 +164,15 @@ export function Nutrition() {
                     <span className="num mr-2 rounded bg-signal/15 px-1.5 py-0.5 text-[10px] font-bold text-signal">{d.code}</span>
                     <span className="text-ice">{d.label}</span>
                   </td>
-                  <td className="num py-2 text-haze">{d.proteinGkg}</td>
-                  <td className="num py-2 text-arc">{d.carbGkg}</td>
-                  <td className="num py-2 text-haze">{d.fatGkg}</td>
+                  <td className="num py-1 text-haze">
+                    <InlineEdit num value={d.proteinGkg} label={`Edit protein g/kg for ${d.label}`} onSave={(v) => s.updateDayTypeMacro(d.code, { proteinGkg: v })} />
+                  </td>
+                  <td className="num py-1 text-arc">
+                    <InlineEdit num value={d.carbGkg} label={`Edit carbs g/kg for ${d.label}`} onSave={(v) => s.updateDayTypeMacro(d.code, { carbGkg: v })} />
+                  </td>
+                  <td className="num py-1 text-haze">
+                    <InlineEdit num value={d.fatGkg} label={`Edit fat g/kg for ${d.label}`} onSave={(v) => s.updateDayTypeMacro(d.code, { fatGkg: v })} />
+                  </td>
                   <td className="num py-2 text-fog">{d.example80kg}</td>
                 </tr>
               ))}

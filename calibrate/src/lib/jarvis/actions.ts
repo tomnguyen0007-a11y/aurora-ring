@@ -268,9 +268,7 @@ export function applyActions(actions: JarvisAction[]): string[] {
           const q = a.name.toLowerCase()
           const hit = s.foodLogs.find((f) => f.date === date && f.name.toLowerCase().includes(q))
           if (hit) {
-            s.removeFood(hit.id)
-            s.addFood({
-              date,
+            s.updateFood(hit.id, {
               name: a.newName ?? hit.name,
               kcal: a.kcal ?? hit.kcal,
               protein: a.protein ?? hit.protein,
