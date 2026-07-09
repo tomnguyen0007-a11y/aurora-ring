@@ -378,6 +378,26 @@ const OPENROUTER_FREE_PREFERRED = [
   'deepseek/deepseek-chat-v3-0324:free',
   'deepseek/deepseek-r1:free',
 ]
+const OPENROUTER_VISION_MODELS = new Set(['qwen/qwen2.5-vl-72b-instruct:free', 'google/gemma-3-27b-it:free', 'meta-llama/llama-4-maverick:free'])
+
+/** Real proof of life: actually call the chat endpoint rather than trusting catalogue metadata. */
+async function pingOpenRouterModel(model: string, apiKey: string): Promise<boolean> {
+  try {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${apiKey}`,
+        'HTTP-Referer': typeof location !== 'undefined' ? location.origin : 'https://calibrate.app',
+        'X-Title': 'Calibrate',
+      },
+      body: JSON.stringify({ model, max_tokens: 5, messages: [{ role: 'user', content: 'hi' }] }),
+    })
+    return res.ok
+  } catch {
+    return false
+  }
+}
 
 interface OpenRouterModel {
   id: string
@@ -422,13 +442,32 @@ function isModelGone(e: unknown): boolean {
 }
 
 /**
- * Self-heal a dead OpenRouter model: discover a live free replacement, persist
- * it so every future call uses it, and return it (null if nothing suitable).
+ * Self-heal a dead OpenRouter model: discover a live free replacement, prove it
+ * actually responds, persist it so every future call uses it, and return it
+ * (null if nothing suitable). The catalogue call can itself be unreliable — CORS,
+ * a transient outage, stale metadata — so if it doesn't produce a working model
+ * we fall back to pinging our curated list directly against the chat endpoint,
+ * which sidesteps the catalogue entirely.
  */
 async function healOpenRouterModel(needsVision: boolean): Promise<string | null> {
-  const found = await discoverOpenRouterFreeModel(needsVision)
-  if (found) useStore.getState().setSettings({ openrouterModel: found })
-  return found
+  const apiKey = useStore.getState().settings.openrouterKey
+  if (!apiKey) return null
+
+  const discovered = await discoverOpenRouterFreeModel(needsVision)
+  if (discovered && (await pingOpenRouterModel(discovered, apiKey))) {
+    useStore.getState().setSettings({ openrouterModel: discovered })
+    return discovered
+  }
+
+  const candidates = needsVision ? OPENROUTER_FREE_PREFERRED.filter((id) => OPENROUTER_VISION_MODELS.has(id)) : OPENROUTER_FREE_PREFERRED
+  for (const id of candidates) {
+    if (id === discovered) continue // already proven dead above
+    if (await pingOpenRouterModel(id, apiKey)) {
+      useStore.getState().setSettings({ openrouterModel: id })
+      return id
+    }
+  }
+  return null
 }
 function openRouterMessages(userText: string, image: string | undefined, chat: ChatMsg[]) {
   const history = historyFor(chat, userText) as { role: 'user' | 'assistant'; content: string | unknown }[]
@@ -983,32 +1022,15 @@ export async function testProvider(p: LlmProvider): Promise<ProviderTestResult> 
       }
       case 'openrouter': {
         if (!settings.openrouterKey) return { ok: false, message: 'No key set' }
-        const ping = async (model: string) =>
-          fetch('https://openrouter.ai/api/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'content-type': 'application/json',
-              authorization: `Bearer ${settings.openrouterKey}`,
-              'HTTP-Referer': typeof location !== 'undefined' ? location.origin : 'https://calibrate.app',
-              'X-Title': 'Calibrate',
-            },
-            body: JSON.stringify({ model, max_tokens: 5, messages: [{ role: 'user', content: 'hi' }] }),
-          })
         const model = settings.openrouterModel || 'qwen/qwen2.5-vl-72b-instruct:free'
-        const res = await ping(model)
-        if (res.ok) return { ok: true, message: 'Connected' }
+        if (await pingOpenRouterModel(model, settings.openrouterKey)) return { ok: true, message: 'Connected' }
 
-        const body = (await res.text().catch(() => '')).slice(0, 140)
-        // Model retired? Find a live free one, save it, and prove it works.
-        if (res.status === 404 || /model.*(not found|does not exist|is not available)/i.test(body)) {
-          const healed = await healOpenRouterModel(false)
-          if (healed) {
-            const retry = await ping(healed)
-            if (retry.ok) return { ok: true, message: `"${model}" was retired — auto-switched to ${healed}` }
-          }
-          return { ok: false, message: `Model "${model}" no longer exists and no free replacement responded — pick one at openrouter.ai/models` }
-        }
-        return { ok: false, message: `${res.status}: ${body.slice(0, 100)}` }
+        // Model retired or unreachable — heal now brute-forces the whole curated list
+        // directly against the chat endpoint, so this succeeds even if the /models
+        // catalogue call itself is flaky.
+        const healed = await healOpenRouterModel(false)
+        if (healed) return { ok: true, message: `"${model}" was retired — auto-switched to ${healed}` }
+        return { ok: false, message: `Model "${model}" and every free fallback are unreachable right now — try again shortly or pick one at openrouter.ai/models` }
       }
       default:
         return { ok: false, message: 'Not applicable' }

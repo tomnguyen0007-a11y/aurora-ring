@@ -19,7 +19,7 @@ import {
   UtensilsCrossed,
   X,
 } from 'lucide-react'
-import { useState, useSyncExternalStore, type ReactNode } from 'react'
+import { useRef, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { getSyncStatus, subscribeSyncStatus } from '../lib/supabase'
 import { useStore } from '../store/store'
 import type { ViewId } from '../store/types'
@@ -139,17 +139,18 @@ export function Shell({ children }: { children: ReactNode }) {
   const view = useStore((s) => s.view)
   const setView = useStore((s) => s.setView)
   const [moreOpen, setMoreOpen] = useState(false)
+  const mainRef = useRef<HTMLElement>(null)
 
   const go = (v: ViewId) => {
     setView(v)
     setMoreOpen(false)
-    window.scrollTo({ top: 0 })
+    mainRef.current?.scrollTo({ top: 0 })
   }
 
   return (
-    <div className="relative z-10 mx-auto flex min-h-dvh max-w-[1500px]">
+    <div className="relative z-10 mx-auto flex h-dvh max-w-[1500px] overflow-hidden">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-dvh w-56 shrink-0 flex-col gap-1 border-r border-edge px-3 py-6 lg:flex">
+      <aside className="hidden h-dvh w-56 shrink-0 flex-col gap-1 overflow-y-auto border-r border-edge px-3 py-6 lg:flex">
         <div className="mb-8">
           <Brand />
         </div>
@@ -184,13 +185,17 @@ export function Shell({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      {/* Main */}
-      <main
-        className="min-w-0 flex-1 px-3 pb-32 sm:px-6 lg:pb-28 lg:pt-6"
-        style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
-      >
-        {/* Mobile top bar */}
-        <div className="mb-4 flex items-center justify-between lg:hidden">
+      {/* Right column: fixed mobile header + single scroll region + in-flow bottom nav.
+          Nothing here is position:fixed against the layout viewport — that's what let
+          the bottom nav and header get stranded behind the keyboard / dynamic browser
+          chrome on iOS PWAs. Everything is a normal flex child inside an h-dvh shell,
+          so it can never be scrolled past or displaced. */}
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        {/* Mobile top bar — always visible, never scrolls away, so Settings is always one tap away */}
+        <div
+          className="flex shrink-0 items-center justify-between px-3 pb-3 lg:hidden"
+          style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
+        >
           <Brand />
           <div className="flex items-center gap-1">
             <SyncBadge />
@@ -199,49 +204,54 @@ export function Shell({ children }: { children: ReactNode }) {
             </button>
           </div>
         </div>
-        {children}
-      </main>
 
-      {/* Mobile bottom nav — 5 equal columns, Jarvis dead-center, monochrome ice glow */}
-      <nav
-        aria-label="Primary mobile"
-        className="glass-strong fixed inset-x-3 z-40 grid grid-cols-5 items-center rounded-2xl px-1 py-2 lg:hidden"
-        style={{ bottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
-      >
-        {MOBILE_LEFT.map((id) => (
-          <NavTab key={id} item={NAV.find((x) => x.id === id)!} active={view === id} onClick={() => go(id)} />
-        ))}
+        <main ref={mainRef} className="min-w-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-6 sm:px-6 lg:px-6 lg:pb-28 lg:pt-6">
+          {children}
+        </main>
 
-        <button
-          onClick={() => go('jarvis')}
-          aria-label="Jarvis"
-          aria-current={view === 'jarvis' ? 'page' : undefined}
-          className="relative -mt-7 flex flex-col items-center justify-self-center"
+        {/* Mobile bottom nav — 5 equal columns, Jarvis dead-center, monochrome ice glow.
+            In-flow (not fixed), so it always sits right below the scroll region and can
+            never end up unreachable. */}
+        <nav
+          aria-label="Primary mobile"
+          className="glass-strong z-40 mx-3 grid shrink-0 grid-cols-5 items-center rounded-2xl px-1 py-2 lg:hidden"
+          style={{ marginBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
         >
-          <span
-            className={`flex h-14 w-14 items-center justify-center rounded-full border transition-all ${
-              view === 'jarvis'
-                ? 'border-ice/40 bg-gradient-to-b from-[#2a2f38] to-[#05070a] text-ice shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_0_28px_rgba(234,244,255,0.55),0_10px_26px_-10px_rgba(0,0,0,0.9)]'
-                : 'border-white/15 bg-gradient-to-b from-[#20242c] to-[#08090d] text-haze shadow-[0_0_16px_rgba(234,244,255,0.18),0_10px_22px_-10px_rgba(0,0,0,0.85)]'
-            }`}
+          {MOBILE_LEFT.map((id) => (
+            <NavTab key={id} item={NAV.find((x) => x.id === id)!} active={view === id} onClick={() => go(id)} />
+          ))}
+
+          <button
+            onClick={() => go('jarvis')}
+            aria-label="Jarvis"
+            aria-current={view === 'jarvis' ? 'page' : undefined}
+            className="relative -mt-7 flex flex-col items-center justify-self-center"
           >
-            <Bot size={23} strokeWidth={2.2} />
-          </span>
-        </button>
+            <span
+              className={`flex h-14 w-14 items-center justify-center rounded-full border transition-all ${
+                view === 'jarvis'
+                  ? 'border-ice/40 bg-gradient-to-b from-[#2a2f38] to-[#05070a] text-ice shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_0_28px_rgba(234,244,255,0.55),0_10px_26px_-10px_rgba(0,0,0,0.9)]'
+                  : 'border-white/15 bg-gradient-to-b from-[#20242c] to-[#08090d] text-haze shadow-[0_0_16px_rgba(234,244,255,0.18),0_10px_22px_-10px_rgba(0,0,0,0.85)]'
+              }`}
+            >
+              <Bot size={23} strokeWidth={2.2} />
+            </span>
+          </button>
 
-        {MOBILE_RIGHT.map((id) => (
-          <NavTab key={id} item={NAV.find((x) => x.id === id)!} active={view === id} onClick={() => go(id)} />
-        ))}
+          {MOBILE_RIGHT.map((id) => (
+            <NavTab key={id} item={NAV.find((x) => x.id === id)!} active={view === id} onClick={() => go(id)} />
+          ))}
 
-        <button
-          onClick={() => setMoreOpen(true)}
-          aria-label="More sections"
-          className="flex flex-col items-center justify-self-center gap-0.5 rounded-xl px-3 py-1.5 text-fog"
-        >
-          <MoreHorizontal size={19} />
-          <span className="font-display text-[9px] font-semibold tracking-wider">More</span>
-        </button>
-      </nav>
+          <button
+            onClick={() => setMoreOpen(true)}
+            aria-label="More sections"
+            className="flex flex-col items-center justify-self-center gap-0.5 rounded-xl px-3 py-1.5 text-fog"
+          >
+            <MoreHorizontal size={19} />
+            <span className="font-display text-[9px] font-semibold tracking-wider">More</span>
+          </button>
+        </nav>
+      </div>
 
       {/* Mobile "more" sheet */}
       {moreOpen && (
