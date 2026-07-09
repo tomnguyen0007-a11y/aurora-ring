@@ -107,6 +107,10 @@ Logging:
   - {"type":"log_food","name":"...","kcal":N,"protein":N,"carbs":N,"fat":N}
   - {"type":"log_revenue","amount":N,"source":"..."}
   - {"type":"log_handicap","value":N}
+  - {"type":"log_photo","category":"golf|training|other","caption":"<short description of what's in it>"}
+    Use this ONLY when a photo is attached to this message and he asks to log/save it (e.g. "log this into golf
+    training", "save this"). It goes into his dated photo gallery (Golf/Training view) — never emit this without an
+    attached photo, and never invent a caption he didn't describe or confirm.
 
 Adding:
   - {"type":"add_grocery","name":"...","qty":"..."}
@@ -381,7 +385,7 @@ const OPENROUTER_FREE_PREFERRED = [
 const OPENROUTER_VISION_MODELS = new Set(['qwen/qwen2.5-vl-72b-instruct:free', 'google/gemma-3-27b-it:free', 'meta-llama/llama-4-maverick:free'])
 
 /** Real proof of life: actually call the chat endpoint rather than trusting catalogue metadata. */
-async function pingOpenRouterModel(model: string, apiKey: string): Promise<boolean> {
+async function pingOpenRouterModelDetailed(model: string, apiKey: string): Promise<{ ok: boolean; status?: number; body?: string }> {
   try {
     const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -393,10 +397,21 @@ async function pingOpenRouterModel(model: string, apiKey: string): Promise<boole
       },
       body: JSON.stringify({ model, max_tokens: 5, messages: [{ role: 'user', content: 'hi' }] }),
     })
-    return res.ok
+    if (res.ok) return { ok: true, status: res.status }
+    return { ok: false, status: res.status, body: (await res.text().catch(() => '')).slice(0, 140) }
   } catch {
-    return false
+    // Network/CORS failure — no status to report
+    return { ok: false }
   }
+}
+
+async function pingOpenRouterModel(model: string, apiKey: string): Promise<boolean> {
+  return (await pingOpenRouterModelDetailed(model, apiKey)).ok
+}
+
+/** 401/403 means the key itself is bad — no point brute-forcing every model with the same dead key. */
+function isAuthFailure(status: number | undefined): boolean {
+  return status === 401 || status === 403
 }
 
 interface OpenRouterModel {
@@ -589,17 +604,25 @@ function parseActionsJson(payload: string): { actions?: JarvisAction[] } | null 
   return null
 }
 
-/** Parse trailing ```json action blocks out of a raw LLM reply; execute them. */
-function extractAndApplyActions(raw: string): LlmResult {
+/**
+ * Parse trailing ```json action blocks out of a raw LLM reply; execute them.
+ * `image` is the actual attached photo (if any) for THIS request — the model
+ * only ever emits category/caption for log_photo, never image bytes, so we
+ * splice the real attachment in here before it reaches applyActions.
+ */
+function extractAndApplyActions(raw: string, image?: string): LlmResult {
   let receipts: string[] = []
   let reply = raw
+
+  const withImage = (actions: JarvisAction[]) =>
+    image ? actions.map((a) => (a.type === 'log_photo' ? { ...a, imageData: image } : a)) : actions
 
   // Properly closed blocks
   const blocks = [...raw.matchAll(/```json\s*([\s\S]*?)```/g)]
   for (const b of blocks) {
     const parsed = parseActionsJson(b[1])
     if (parsed && Array.isArray(parsed.actions) && parsed.actions.length) {
-      receipts = receipts.concat(applyActions(parsed.actions))
+      receipts = receipts.concat(applyActions(withImage(parsed.actions)))
     }
     // Strip the block from the displayed reply whether or not it parsed —
     // raw JSON in the chat is never useful to the user
@@ -612,7 +635,7 @@ function extractAndApplyActions(raw: string): LlmResult {
     const payload = reply.slice(openIdx + 7).trim()
     const parsed = parseActionsJson(payload)
     if (parsed && Array.isArray(parsed.actions) && parsed.actions.length) {
-      receipts = receipts.concat(applyActions(parsed.actions))
+      receipts = receipts.concat(applyActions(withImage(parsed.actions)))
     }
     reply = reply.slice(0, openIdx)
   }
@@ -661,7 +684,7 @@ export async function runLlm(userText: string, ctx: JarvisContext, image?: strin
     recordCall(p)
     try {
       const raw = await callProvider(p, userText, ctx, image)
-      const result = extractAndApplyActions(raw)
+      const result = extractAndApplyActions(raw, image)
       result.provider = p
       if (i > 0) {
         result.receipts = [`Auto-switched to ${providerLabel(p)} — ${providerLabel(chain[0])} was unavailable`, ...result.receipts]
@@ -945,7 +968,7 @@ export async function runLlmStream(userText: string, ctx: JarvisContext, image: 
 
     try {
       const full = await streamProvider(p, userText, ctx, image, collect)
-      const result = extractAndApplyActions(full)
+      const result = extractAndApplyActions(full, image)
       result.provider = p
       if (i > 0) {
         result.receipts = [`Auto-switched to ${providerLabel(p)} — ${providerLabel(chain[0])} was unavailable`, ...result.receipts]
@@ -1023,7 +1046,14 @@ export async function testProvider(p: LlmProvider): Promise<ProviderTestResult> 
       case 'openrouter': {
         if (!settings.openrouterKey) return { ok: false, message: 'No key set' }
         const model = settings.openrouterModel || 'qwen/qwen2.5-vl-72b-instruct:free'
-        if (await pingOpenRouterModel(model, settings.openrouterKey)) return { ok: true, message: 'Connected' }
+        const first = await pingOpenRouterModelDetailed(model, settings.openrouterKey)
+        if (first.ok) return { ok: true, message: 'Connected' }
+
+        // A bad/expired key fails identically for every model — heal would just burn
+        // requests re-proving the same auth error against the whole curated list.
+        if (isAuthFailure(first.status)) {
+          return { ok: false, message: `OpenRouter rejected this key (${first.status}) — check it's correct at openrouter.ai/keys` }
+        }
 
         // Model retired or unreachable — heal now brute-forces the whole curated list
         // directly against the chat endpoint, so this succeeds even if the /models

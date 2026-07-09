@@ -16,6 +16,9 @@ export type JarvisAction =
   | { type: 'log_run'; minutes: number; distanceKm?: number }
   | { type: 'log_revenue'; amount: number; source?: string }
   | { type: 'log_handicap'; value: number }
+  // imageData is never emitted by the model — the caller (llm.ts) attaches the
+  // actually-sent photo before this reaches applyActions
+  | { type: 'log_photo'; category: 'golf' | 'training' | 'other'; caption?: string; date?: string; imageData?: string }
   | { type: 'add_grocery'; name: string; qty?: string }
   | { type: 'add_note'; title: string; body?: string }
   | { type: 'add_goal'; title: string; target?: string; pillar?: Pillar }
@@ -160,6 +163,16 @@ export function applyActions(actions: JarvisAction[]): string[] {
         case 'log_handicap': {
           s.addHandicap(a.value)
           receipts.push(`Handicap updated: ${a.value}`)
+          break
+        }
+        case 'log_photo': {
+          if (!a.imageData) {
+            receipts.push(`No photo attached to log — attach one and ask again.`)
+            break
+          }
+          s.addTrainingPhoto({ date: a.date || date, category: a.category, dataUrl: a.imageData, caption: a.caption })
+          const dest = a.category === 'golf' ? 'Golf' : a.category === 'training' ? 'Training' : 'the'
+          receipts.push(`Photo saved to ${dest} gallery${a.caption ? ` — "${a.caption}"` : ''}`)
           break
         }
         case 'add_grocery': {

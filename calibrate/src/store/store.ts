@@ -48,6 +48,7 @@ import type {
   Settings,
   SupplementItem,
   TableDoc,
+  TrainingPhoto,
   ViewId,
   WatchItem,
   Workout,
@@ -124,6 +125,12 @@ export interface CalibrateState {
   addKnowledgeDoc: (title: string, body: string, source?: string) => string
   updateKnowledgeDoc: (id: string, patch: Partial<Pick<KnowledgeDoc, 'title' | 'body' | 'source'>>) => void
   removeKnowledgeDoc: (id: string) => void
+
+  // photo log — Strava-style dated gallery for Golf/Training, uploaded directly or via Jarvis
+  trainingPhotos: TrainingPhoto[]
+  addTrainingPhoto: (photo: Omit<TrainingPhoto, 'id' | 'createdAt'>) => string
+  updateTrainingPhoto: (id: string, patch: Partial<Pick<TrainingPhoto, 'caption' | 'date' | 'category'>>) => void
+  removeTrainingPhoto: (id: string) => void
 
   // notes & tables
   notes: Note[]
@@ -252,6 +259,7 @@ const seedState = () => ({
   water: {},
   dayTypeMacros: seedDayTypeMacros,
   knowledgeDocs: [],
+  trainingPhotos: [],
   grocery: [],
   notes: [],
   tables: [],
@@ -410,6 +418,15 @@ export const useStore = create<CalibrateState>()(
         set((s) => ({ knowledgeDocs: s.knowledgeDocs.map((d) => (d.id === id ? { ...d, ...patch, updated: Date.now() } : d)) })),
       removeKnowledgeDoc: (id) => set((s) => ({ knowledgeDocs: s.knowledgeDocs.filter((d) => d.id !== id) })),
 
+      addTrainingPhoto: (photo) => {
+        const id = uid('ph')
+        set((s) => ({ trainingPhotos: [{ ...photo, id, createdAt: Date.now() }, ...s.trainingPhotos] }))
+        return id
+      },
+      updateTrainingPhoto: (id, patch) =>
+        set((s) => ({ trainingPhotos: s.trainingPhotos.map((p) => (p.id === id ? { ...p, ...patch } : p)) })),
+      removeTrainingPhoto: (id) => set((s) => ({ trainingPhotos: s.trainingPhotos.filter((p) => p.id !== id) })),
+
       addGrocery: (name, qty = '') =>
         set((s) => ({ grocery: [...s.grocery, { id: uid('gr'), name, qty, done: false }] })),
       toggleGrocery: (id) =>
@@ -534,7 +551,7 @@ export const useStore = create<CalibrateState>()(
     }),
     {
       name: 'calibrate-v1',
-      version: 5,
+      version: 6,
       // always wake up on Today — don't persist navigation; strip heavy chat images from storage
       partialize: (s) =>
         Object.fromEntries(
@@ -575,6 +592,9 @@ export const useStore = create<CalibrateState>()(
         }
         if (version < 5) {
           if (!Array.isArray(p.knowledgeDocs)) p.knowledgeDocs = []
+        }
+        if (version < 6) {
+          if (!Array.isArray(p.trainingPhotos)) p.trainingPhotos = []
         }
         return p as unknown as CalibrateState
       },
