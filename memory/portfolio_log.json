@@ -1,0 +1,102 @@
+{
+  "meta": {
+    "last_run": "2026-06-29",
+    "currency_base": "EUR",
+    "eur_usd_rate": 1.1406,
+    "nav_rule_trim_threshold_pct": 35,
+    "nav_rule_risk_per_trade_pct": 2
+  },
+  "account": {
+    "nav_eur": 1144.16,
+    "nav_usd_approx": 1305.30,
+    "cash_eur": 95.33,
+    "cash_czk": 2221.78,
+    "gross_position_value_eur": 1048.83,
+    "buying_power_eur": 95.33,
+    "unrealized_pnl_base_eur": 66.17,
+    "unrealized_pnl_usd": 75.46,
+    "realized_pnl_usd": 0
+  },
+  "positions": [
+    {
+      "ticker": "SLS",
+      "contract_id": 390872440,
+      "shares": 50,
+      "avg_cost_usd": 10.845,
+      "last_price_usd": 13.07,
+      "prior_close_usd": 12.39,
+      "gap_pct": 5.49,
+      "market_value_usd": 653.50,
+      "unrealized_pnl_usd": 111.25,
+      "unrealized_pct": 20.5,
+      "pct_nav": 50.1,
+      "bid": 13.00,
+      "ask": 13.20,
+      "volume": 36569,
+      "52w_high": 12.43,
+      "52w_low": 1.39,
+      "13w_high": 12.43,
+      "concentration_flag": true,
+      "catalyst_summary": "REGAL Phase 3 AML trial at 78/80 events as of May 11; 80th death event triggers DB lock -> unblind -> topline. Change-of-control severance filed June 25 (M&A signal or exec protection). 20M new shares + 1M RSU CEO dilution approved June 16. Cash ~$143M."
+    },
+    {
+      "ticker": "SPCX",
+      "contract_id": 890493863,
+      "shares": 2.6,
+      "avg_cost_usd": 171.124,
+      "last_price_usd": 155.36,
+      "prior_close_usd": 153.23,
+      "gap_pct": 1.39,
+      "market_value_usd": 403.94,
+      "unrealized_pnl_usd": -40.97,
+      "unrealized_pct": -9.2,
+      "pct_nav": 30.9,
+      "bid": 155.31,
+      "ask": 155.37,
+      "volume": 322802,
+      "52w_high": 225.64,
+      "52w_low": 147.11,
+      "13w_low": 147.11,
+      "concentration_flag": false,
+      "catalyst_summary": "$20B bond offering settled June 26; $89B demand debunks cash concerns; debt spread 2031-2056. Lockup: first selling window late Jul/Aug 2026; 180-day lock expires Dec 8 2026; Musk locked until Jun 12 2027. Oppenheimer 58% upside to $250."
+    },
+    {
+      "ticker": "CING",
+      "contract_id": 721288785,
+      "shares": 38,
+      "avg_cost_usd": 4.801,
+      "last_price_usd": 4.96,
+      "prior_close_usd": 4.96,
+      "gap_pct": 0,
+      "market_value_usd": 188.48,
+      "unrealized_pnl_usd": 6.08,
+      "unrealized_pct": 3.3,
+      "pct_nav": 14.4,
+      "bid": 4.76,
+      "ask": 5.00,
+      "volume": 2,
+      "52w_high": 11.89,
+      "52w_low": 3.16,
+      "13w_high": 6.76,
+      "concentration_flag": false,
+      "catalyst_summary": "FDA CRL June 2 (CMC-only issues, no clinical concerns) for CTx-1301 ADHD NDA. Resubmission in progress. Patent issued June 16 (US 12,653,791) through Dec 2042. ~$30M cash. No new PDUFA date. Resubmission timeline 2-6 months."
+    }
+  ],
+  "runs": [
+    {
+      "date": "2026-06-29",
+      "session": "premarket",
+      "nav_eur": 1144.16,
+      "nav_usd_approx": 1305.30,
+      "total_unrealized_pnl_usd": 76.36,
+      "top_flags": [
+        "SLS 50.1% NAV — exceeds 35% concentration rule",
+        "SLS REGAL 78/80 events — binary readout imminent",
+        "SLS change-of-control severance filed June 25",
+        "SPCX lockup selling window opens Jul/Aug 2026",
+        "CING flat in resubmission mode, no near-term catalyst"
+      ],
+      "macro": "Quarter-end June 29. Tech malaise: AI cost/spending fears. Mild risk-off tone."
+    }
+  ]
+}
