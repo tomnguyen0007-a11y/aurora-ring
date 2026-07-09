@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "last_run": "2026-07-09T13:22:17.436Z"
+  },
+  "runs": [
+    {
+      "timestamp": "2026-07-09T13:22:17.436Z",
+      "account_summary": {
+        "currency": "EUR",
+        "net_liquidation": 1174.47,
+        "equity_with_loan_value": 2.78,
+        "buying_power": 2.78,
+        "gross_position_value": 1171.69,
+        "total_cash_value": 2.78,
+        "available_funds": 2.78,
+        "initial_margin": 0,
+        "maintenance_margin": 0,
+        "excess_liquidity": 2.78,
+        "dividends": 0,
+        "leverage": "1.0"
+      },
+      "positions": [
+        {
+          "contract_id": 390872440,
+          "ticker": "SLS",
+          "position": 69,
+          "market_price": 13.76000025,
+          "average_price": 14.32894058,
+          "market_value": 949.44001725,
+          "unrealized_pnl": -39.25688275,
+          "nav_weight_pct": 80.84,
+          "gap_pct_since_last_run": null,
+          "cost_basis_delta_pct": -3.97,
+          "sizing_flag": "TRIM"
+        },
+        {
+          "contract_id": 890493863,
+          "ticker": "SPCX",
+          "position": 2.6,
+          "market_price": 151.5,
+          "average_price": 171.12423077,
+          "market_value": 393.9,
+          "unrealized_pnl": -51.023,
+          "nav_weight_pct": 33.54,
+          "gap_pct_since_last_run": null,
+          "cost_basis_delta_pct": -11.47,
+          "sizing_flag": "HOLD"
+        }
+      ]
+    }
+  ]
+}
