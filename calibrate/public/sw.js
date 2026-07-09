@@ -1,4 +1,4 @@
-const CACHE = 'calibrate-shell-v7.7'
+const CACHE = 'calibrate-shell-v7.8'
 
 self.addEventListener('install', (e) => {
   self.skipWaiting()
@@ -6,7 +6,13 @@ self.addEventListener('install', (e) => {
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))),
+    (async () => {
+      const keys = await caches.keys()
+      await Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
+      // Take control of already-open tabs immediately so a new deploy applies on
+      // the very next reload instead of requiring a second one.
+      await self.clients.claim()
+    })(),
   )
 })
 
