@@ -405,13 +405,30 @@ async function pingOpenRouterModelDetailed(model: string, apiKey: string): Promi
   }
 }
 
-async function pingOpenRouterModel(model: string, apiKey: string): Promise<boolean> {
-  return (await pingOpenRouterModelDetailed(model, apiKey)).ok
-}
-
-/** 401/403 means the key itself is bad — no point brute-forcing every model with the same dead key. */
-function isAuthFailure(status: number | undefined): boolean {
-  return status === 401 || status === 403
+/**
+ * Classify a failure that hits EVERY free model identically — an account-level
+ * problem, not a retired model. These are the real reasons "every fallback is
+ * unreachable" in practice: a bad key, no credits, the free-tier daily cap, or
+ * privacy settings that exclude free models (which train on prompts). Returns a
+ * user-actionable message, or null when the failure is genuinely model-specific.
+ */
+function diagnoseOpenRouterAccountIssue(status: number | undefined, body = ''): string | null {
+  if (status === 401 || status === 403) {
+    return `OpenRouter rejected this key (${status}) — check it's correct at openrouter.ai/keys`
+  }
+  if (status === 402) {
+    return 'OpenRouter says the account is out of credits (402) — free models still need a non-negative balance. Top up at openrouter.ai/credits'
+  }
+  if (status === 429 && /free-models-per-day/i.test(body)) {
+    return 'Daily free-model limit reached (429) — OpenRouter free tier resets at midnight UTC. A one-time $10 credit purchase raises it from 50 to 1000 requests/day'
+  }
+  if (status === 429) {
+    return 'OpenRouter is rate-limiting right now (429) — wait a minute and try again'
+  }
+  if (status === 404 && /data policy/i.test(body)) {
+    return 'Your OpenRouter privacy settings block free models (they require prompt training) — enable "Free model publication" at openrouter.ai/settings/privacy, then test again'
+  }
+  return null
 }
 
 interface OpenRouterModel {
@@ -456,33 +473,53 @@ function isModelGone(e: unknown): boolean {
   return e instanceof ProviderError && e.provider === 'openrouter' && (e.status === 404 || /model.*(not found|does not exist|is not available)/i.test(e.message))
 }
 
+interface OpenRouterHealResult {
+  model: string | null
+  /** Set when the failure is account-level (key/credits/daily cap/privacy) — retrying other models is pointless. */
+  diagnosis: string | null
+}
+
 /**
  * Self-heal a dead OpenRouter model: discover a live free replacement, prove it
- * actually responds, persist it so every future call uses it, and return it
- * (null if nothing suitable). The catalogue call can itself be unreliable — CORS,
- * a transient outage, stale metadata — so if it doesn't produce a working model
- * we fall back to pinging our curated list directly against the chat endpoint,
- * which sidesteps the catalogue entirely.
+ * actually responds, persist it so every future call uses it, and return it.
+ * The catalogue call can itself be unreliable — CORS, a transient outage, stale
+ * metadata — so if it doesn't produce a working model we fall back to pinging
+ * our curated list directly against the chat endpoint, which sidesteps the
+ * catalogue entirely. The moment a ping reveals an account-level problem
+ * (bad key, no credits, daily cap, privacy settings) we stop — every further
+ * candidate would fail identically — and return the diagnosis instead.
  */
-async function healOpenRouterModel(needsVision: boolean): Promise<string | null> {
+async function healOpenRouterModel(needsVision: boolean): Promise<OpenRouterHealResult> {
   const apiKey = useStore.getState().settings.openrouterKey
-  if (!apiKey) return null
+  if (!apiKey) return { model: null, diagnosis: null }
+
+  let diagnosis: string | null = null
+  const proves = async (id: string): Promise<boolean> => {
+    const ping = await pingOpenRouterModelDetailed(id, apiKey)
+    if (ping.ok) return true
+    diagnosis ??= diagnoseOpenRouterAccountIssue(ping.status, ping.body)
+    return false
+  }
 
   const discovered = await discoverOpenRouterFreeModel(needsVision)
-  if (discovered && (await pingOpenRouterModel(discovered, apiKey))) {
-    useStore.getState().setSettings({ openrouterModel: discovered })
-    return discovered
+  if (discovered) {
+    if (await proves(discovered)) {
+      useStore.getState().setSettings({ openrouterModel: discovered })
+      return { model: discovered, diagnosis: null }
+    }
+    if (diagnosis) return { model: null, diagnosis }
   }
 
   const candidates = needsVision ? OPENROUTER_FREE_PREFERRED.filter((id) => OPENROUTER_VISION_MODELS.has(id)) : OPENROUTER_FREE_PREFERRED
   for (const id of candidates) {
     if (id === discovered) continue // already proven dead above
-    if (await pingOpenRouterModel(id, apiKey)) {
+    if (await proves(id)) {
       useStore.getState().setSettings({ openrouterModel: id })
-      return id
+      return { model: id, diagnosis: null }
     }
+    if (diagnosis) return { model: null, diagnosis }
   }
-  return null
+  return { model: null, diagnosis }
 }
 function openRouterMessages(userText: string, image: string | undefined, chat: ChatMsg[]) {
   const history = historyFor(chat, userText) as { role: 'user' | 'assistant'; content: string | unknown }[]
@@ -515,10 +552,15 @@ async function callOpenRouter(userText: string, ctx: JarvisContext, image?: stri
 
   if (!res.ok) {
     const body = await res.text().catch(() => '')
-    const err = new ProviderError('openrouter', res.status, `OpenRouter ${res.status}: ${body.slice(0, 180)}`)
+    // Account-level failures (key/credits/daily cap/privacy) hit every model the
+    // same way — report the real cause instead of hunting for a replacement model
+    const accountIssue = diagnoseOpenRouterAccountIssue(res.status, body)
+    const err = new ProviderError('openrouter', res.status, accountIssue ?? `OpenRouter ${res.status}: ${body.slice(0, 180)}`)
     // Free models get retired without notice — swap in a live one and retry once
-    if (!isRetry && isModelGone(err) && (await healOpenRouterModel(!!image))) {
-      return callOpenRouter(userText, ctx, image, true)
+    if (!isRetry && !accountIssue && isModelGone(err)) {
+      const healed = await healOpenRouterModel(!!image)
+      if (healed.model) return callOpenRouter(userText, ctx, image, true)
+      if (healed.diagnosis) throw new ProviderError('openrouter', res.status, healed.diagnosis)
     }
     throw err
   }
@@ -897,10 +939,15 @@ async function streamOpenRouter(
 
   if (!res.ok || !res.body) {
     const body = await res.text().catch(() => '')
-    const err = new ProviderError('openrouter', res.status, `OpenRouter ${res.status}: ${body.slice(0, 180)}`)
+    // Account-level failures (key/credits/daily cap/privacy) hit every model the
+    // same way — report the real cause instead of hunting for a replacement model
+    const accountIssue = diagnoseOpenRouterAccountIssue(res.status, body)
+    const err = new ProviderError('openrouter', res.status, accountIssue ?? `OpenRouter ${res.status}: ${body.slice(0, 180)}`)
     // Free models get retired without notice — swap in a live one and retry once
-    if (!isRetry && isModelGone(err) && (await healOpenRouterModel(!!image))) {
-      return streamOpenRouter(userText, ctx, image, onText, true)
+    if (!isRetry && !accountIssue && isModelGone(err)) {
+      const healed = await healOpenRouterModel(!!image)
+      if (healed.model) return streamOpenRouter(userText, ctx, image, onText, true)
+      if (healed.diagnosis) throw new ProviderError('openrouter', res.status, healed.diagnosis)
     }
     throw err
   }
@@ -1049,18 +1096,19 @@ export async function testProvider(p: LlmProvider): Promise<ProviderTestResult> 
         const first = await pingOpenRouterModelDetailed(model, settings.openrouterKey)
         if (first.ok) return { ok: true, message: 'Connected' }
 
-        // A bad/expired key fails identically for every model — heal would just burn
-        // requests re-proving the same auth error against the whole curated list.
-        if (isAuthFailure(first.status)) {
-          return { ok: false, message: `OpenRouter rejected this key (${first.status}) — check it's correct at openrouter.ai/keys` }
-        }
+        // Account-level failures (bad key, no credits, daily cap, privacy settings
+        // blocking free models) fail identically for every model — report the real
+        // cause immediately instead of burning requests on the whole curated list.
+        const accountIssue = diagnoseOpenRouterAccountIssue(first.status, first.body)
+        if (accountIssue) return { ok: false, message: accountIssue }
 
-        // Model retired or unreachable — heal now brute-forces the whole curated list
+        // Model retired or unreachable — heal brute-forces the whole curated list
         // directly against the chat endpoint, so this succeeds even if the /models
         // catalogue call itself is flaky.
         const healed = await healOpenRouterModel(false)
-        if (healed) return { ok: true, message: `"${model}" was retired — auto-switched to ${healed}` }
-        return { ok: false, message: `Model "${model}" and every free fallback are unreachable right now — try again shortly or pick one at openrouter.ai/models` }
+        if (healed.model) return { ok: true, message: `"${model}" was retired — auto-switched to ${healed.model}` }
+        if (healed.diagnosis) return { ok: false, message: healed.diagnosis }
+        return { ok: false, message: `Model "${model}" and every free fallback are unreachable right now — check your connection, or pick a model manually at openrouter.ai/models` }
       }
       default:
         return { ok: false, message: 'Not applicable' }

@@ -1,9 +1,30 @@
 import { Camera, ImagePlus, Trash2, X } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { todayISO } from '../lib/dates'
+import { loadPhoto, peekPhoto } from '../lib/photoDb'
 import { useStore } from '../store/store'
 import type { TrainingPhoto } from '../store/types'
 import { Empty, HudLabel, InlineEdit, Panel } from './ui'
+
+/**
+ * Resolve a photo's image data: blobs live in IndexedDB (see lib/photoDb), the
+ * store holds metadata only. Just-added photos and legacy pre-migration entries
+ * resolve synchronously; everything else arrives one async read later.
+ */
+function usePhotoUrl(photo: TrainingPhoto): string | null {
+  const [url, setUrl] = useState<string | null>(() => photo.dataUrl ?? peekPhoto(photo.id))
+  useEffect(() => {
+    if (url) return
+    let live = true
+    void loadPhoto(photo.id).then((v) => {
+      if (live && v) setUrl(v)
+    })
+    return () => {
+      live = false
+    }
+  }, [photo.id, url])
+  return url
+}
 
 /** Group photos by date, newest date first — the Strava-style day-by-day feed. */
 function groupByDate(photos: TrainingPhoto[]): [string, TrainingPhoto[]][] {
@@ -14,6 +35,69 @@ function groupByDate(photos: TrainingPhoto[]): [string, TrainingPhoto[]][] {
     else map.set(p.date, [p])
   }
   return [...map.entries()].sort(([a], [b]) => (a < b ? 1 : -1))
+}
+
+function Thumb({ photo, onOpen }: { photo: TrainingPhoto; onOpen: () => void }) {
+  const url = usePhotoUrl(photo)
+  return (
+    <button
+      onClick={onOpen}
+      aria-label={photo.caption || `Photo from ${photo.date}`}
+      className="group relative aspect-square overflow-hidden rounded-lg border border-edge"
+    >
+      {url ? (
+        <img src={url} alt={photo.caption || ''} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+      ) : (
+        <span className="block h-full w-full animate-pulse bg-white/5" />
+      )}
+      {photo.caption && (
+        <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/85 to-transparent px-1.5 py-1 text-[9px] text-ice">
+          {photo.caption}
+        </span>
+      )}
+    </button>
+  )
+}
+
+function Lightbox({ photo, onClose }: { photo: TrainingPhoto; onClose: () => void }) {
+  const s = useStore()
+  const url = usePhotoUrl(photo)
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onClick={onClose}>
+      <div className="w-full max-w-lg animate-rise" onClick={(e) => e.stopPropagation()}>
+        {url ? (
+          <img src={url} alt={photo.caption || ''} className="max-h-[70vh] w-full rounded-xl object-contain" />
+        ) : (
+          <div className="h-64 w-full animate-pulse rounded-xl bg-white/5" />
+        )}
+        <div className="mt-3 flex items-center gap-2 rounded-xl bg-black/60 p-3">
+          <span className="num shrink-0 text-xs text-fog">
+            {new Date(photo.date + 'T00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+          </span>
+          <InlineEdit
+            value={photo.caption ?? ''}
+            placeholder="Add a caption…"
+            label={`Caption for photo from ${photo.date}`}
+            className="min-w-0 flex-1 text-sm text-ice"
+            onSave={(v) => s.updateTrainingPhoto(photo.id, { caption: v })}
+          />
+          <button
+            type="button"
+            aria-label="Delete photo"
+            onClick={() => {
+              s.removeTrainingPhoto(photo.id)
+              onClose()
+            }}
+          >
+            <Trash2 size={15} className="text-alert/70" />
+          </button>
+          <button type="button" aria-label="Close" onClick={onClose}>
+            <X size={15} className="text-haze" />
+          </button>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 /**
@@ -74,19 +158,7 @@ export function PhotoGallery({ category }: { category: 'golf' | 'training' }) {
               </div>
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
                 {dayPhotos.map((p) => (
-                  <button
-                    key={p.id}
-                    onClick={() => setActiveId(p.id)}
-                    aria-label={p.caption || `Photo from ${date}`}
-                    className="group relative aspect-square overflow-hidden rounded-lg border border-edge"
-                  >
-                    <img src={p.dataUrl} alt={p.caption || ''} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                    {p.caption && (
-                      <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/85 to-transparent px-1.5 py-1 text-[9px] text-ice">
-                        {p.caption}
-                      </span>
-                    )}
-                  </button>
+                  <Thumb key={p.id} photo={p} onOpen={() => setActiveId(p.id)} />
                 ))}
               </div>
             </div>
@@ -102,38 +174,7 @@ export function PhotoGallery({ category }: { category: 'golf' | 'training' }) {
       {/* Rendered as a sibling of Panel, not a child — Panel's backdrop-filter (the
           glass effect) creates a new containing block for position:fixed descendants,
           which would trap this overlay inside the panel's bounds instead of the viewport. */}
-      {active && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onClick={() => setActiveId(null)}>
-          <div className="w-full max-w-lg animate-rise" onClick={(e) => e.stopPropagation()}>
-            <img src={active.dataUrl} alt={active.caption || ''} className="max-h-[70vh] w-full rounded-xl object-contain" />
-            <div className="mt-3 flex items-center gap-2 rounded-xl bg-black/60 p-3">
-              <span className="num shrink-0 text-xs text-fog">
-                {new Date(active.date + 'T00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-              </span>
-              <InlineEdit
-                value={active.caption ?? ''}
-                placeholder="Add a caption…"
-                label={`Caption for photo from ${active.date}`}
-                className="min-w-0 flex-1 text-sm text-ice"
-                onSave={(v) => s.updateTrainingPhoto(active.id, { caption: v })}
-              />
-              <button
-                type="button"
-                aria-label="Delete photo"
-                onClick={() => {
-                  s.removeTrainingPhoto(active.id)
-                  setActiveId(null)
-                }}
-              >
-                <Trash2 size={15} className="text-alert/70" />
-              </button>
-              <button type="button" aria-label="Close" onClick={() => setActiveId(null)}>
-                <X size={15} className="text-haze" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {active && <Lightbox photo={active} onClose={() => setActiveId(null)} />}
     </>
   )
 }

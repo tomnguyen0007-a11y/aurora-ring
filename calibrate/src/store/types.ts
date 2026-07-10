@@ -166,7 +166,13 @@ export interface TrainingPhoto {
   id: string
   date: string
   category: 'golf' | 'training' | 'other'
-  dataUrl: string
+  /**
+   * Image blobs live in IndexedDB (lib/photoDb), keyed by this photo's id — the
+   * store holds metadata only, so localStorage never carries base64 payloads.
+   * This field is only populated transiently (adding a photo, or legacy entries
+   * from before the IndexedDB move, which migrate on boot).
+   */
+  dataUrl?: string
   caption?: string
   createdAt: number
 }
