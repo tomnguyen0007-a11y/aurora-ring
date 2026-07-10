@@ -70,6 +70,22 @@ export interface GolfSession {
   notes: string
 }
 
+/**
+ * Wall-clock state for the live Practice Timer — persisted so the elapsed
+ * time survives the phone locking, the tab backgrounding, or iOS killing and
+ * reloading the PWA process while it's running. Elapsed time is always
+ * DERIVED from these timestamps (now - startedAt + accumulatedSec), never
+ * ticked by a setInterval counter, so throttled/suspended background timers
+ * can't make it fall behind reality.
+ */
+export interface GolfTimerState {
+  category: GolfCategory
+  /** epoch ms the current (unpaused) run began; null while paused */
+  startedAt: number | null
+  /** seconds banked from prior runs this session (before the current startedAt) */
+  accumulatedSec: number
+}
+
 export interface HandicapEntry {
   id: string
   date: string
