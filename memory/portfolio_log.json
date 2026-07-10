@@ -1,0 +1,80 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "IBKR pre-market research log. Appended each weekday run. Read by next run to detect changes.",
+    "last_run": "2026-07-05T08:40:45Z",
+    "created": "2026-06-25T00:00:00Z"
+  },
+  "runs": [
+    {
+      "timestamp": "2026-07-05T08:40:45Z",
+      "note": "First real run. Data pulled via Interactive-Brokers MCP connector (local Client Portal Gateway was not reachable in this environment). Run executed Sunday for Monday 2026-07-06 open.",
+      "account": {
+        "nav_base_ccy": "EUR",
+        "nav": 1269.40,
+        "cash_base": 49.69,
+        "gross_position_value_base": 1219.71,
+        "leverage": 0.96
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "qty": 65,
+          "avgCost": 14.3872,
+          "mktPrice": 15.45,
+          "mktValue": 1004.25,
+          "unrealizedPnl": 69.08,
+          "dailyPnl": 141.70,
+          "concentrationPct": 0.68,
+          "catalystDate": null,
+          "catalystDesc": "REGAL Phase 3 (GPS/AML) event-driven readout at 80th event; 78 events reported as of 2026-05-11 update. No calendar date — could trigger any time.",
+          "news": [
+            "SELLAS Q1 2026 results (2026-05-11): REGAL trial at 78/80 events, median OS >13.5mo vs conventional therapy. Cash position $107.1M as of 2026-03-31.",
+            "8-K 2026-06-25: executive severance/change-of-control letter amendments (non-material to thesis).",
+            "$28.7M raised via warrant exercises in April-May 2026."
+          ],
+          "flags": [
+            {"type": "CONCENTRATION", "detail": "~68% of NAV vs 35% limit"},
+            {"type": "CATALYST_IMMINENT", "detail": "REGAL 80th event is event-driven and close (78/80 as of last update); timing unpredictable"}
+          ]
+        },
+        {
+          "ticker": "SPCX",
+          "qty": 2.6,
+          "avgCost": 171.1242,
+          "mktPrice": 160.95,
+          "mktValue": 418.47,
+          "unrealizedPnl": -26.45,
+          "dailyPnl": 8.87,
+          "concentrationPct": 0.28,
+          "catalystDate": "2026-07-07",
+          "catalystDesc": "Nasdaq-100 index inclusion effective 2026-07-07 (bypasses normal seasoning rule); est. $4.3B forced institutional buying. Separately: $25B senior notes offering settled 2026-06-26 (retired $20B bridge loan tied to xAI infra buildout). August lockup expiration is a further-out overhang, not yet imminent.",
+          "news": [
+            "SpaceX priced $25B senior notes across 5 tranches (2031-2056 maturities), settled 2026-06-26, proceeds retire $20B bridge loan.",
+            "Nasdaq-100 inclusion effective 2026-07-07, ~$4.3B estimated forced index buying.",
+            "August lockup expiration flagged by press as a supply overhang to watch (not within 5-trading-day window yet)."
+          ],
+          "flags": [
+            {"type": "CATALYST_IMMINENT", "detail": "Nasdaq-100 inclusion 2026-07-07 is 2 trading days out"}
+          ]
+        }
+      ],
+      "watchlist_not_held": [
+        {
+          "ticker": "CING",
+          "news": [
+            "FDA issued Complete Response Letter 2026-06-02 for CTx-1301 (ADHD) NDA — CMC issues cited, no clinical/safety/efficacy concerns raised.",
+            "Company pursuing CMC-driven resubmission with manufacturing partner; no new PDUFA date set yet.",
+            "~$30M cash, said to fund operations into 2027."
+          ]
+        }
+      ],
+      "flags": [
+        {"ticker": "SLS", "type": "CONCENTRATION", "detail": "~68% of NAV vs 35% limit"},
+        {"ticker": "SLS", "type": "CATALYST_IMMINENT", "detail": "REGAL 80th event imminent, event-driven timing"},
+        {"ticker": "SPCX", "type": "CATALYST_IMMINENT", "detail": "Nasdaq-100 inclusion 2026-07-07, 2 trading days out"},
+        {"ticker": "DATA", "type": "DATA_QUALITY", "detail": "get_price_snapshot returned no usable intraday levels (weekend, no active session) and its SLS 'last' ($13.27) diverged ~14% from the position endpoint mark ($15.45); position-endpoint values used as authoritative for this run."}
+      ]
+    }
+  ]
+}
