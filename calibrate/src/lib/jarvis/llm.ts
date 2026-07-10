@@ -384,8 +384,15 @@ const OPENROUTER_FREE_PREFERRED = [
 ]
 const OPENROUTER_VISION_MODELS = new Set(['qwen/qwen2.5-vl-72b-instruct:free', 'google/gemma-3-27b-it:free', 'meta-llama/llama-4-maverick:free'])
 
+/** Millis-since-epoch a 429 will clear, from OpenRouter's standard rate-limit header. */
+function rateLimitResetAt(res: Response): number | undefined {
+  const raw = res.headers.get('x-ratelimit-reset')
+  const ms = raw ? Number(raw) : NaN
+  return Number.isFinite(ms) ? ms : undefined
+}
+
 /** Real proof of life: actually call the chat endpoint rather than trusting catalogue metadata. */
-async function pingOpenRouterModelDetailed(model: string, apiKey: string): Promise<{ ok: boolean; status?: number; body?: string }> {
+async function pingOpenRouterModelDetailed(model: string, apiKey: string): Promise<{ ok: boolean; status?: number; body?: string; resetAt?: number }> {
   try {
     const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -398,7 +405,10 @@ async function pingOpenRouterModelDetailed(model: string, apiKey: string): Promi
       body: JSON.stringify({ model, max_tokens: 5, messages: [{ role: 'user', content: 'hi' }] }),
     })
     if (res.ok) return { ok: true, status: res.status }
-    return { ok: false, status: res.status, body: (await res.text().catch(() => '')).slice(0, 140) }
+    // Response body text formats vary ("free-models-per-day", "limit_rpd/<model>/…", plain
+    // "Rate limit exceeded") — the reset timestamp is the one signal OpenRouter always sends
+    // on a 429, so a wider slice here is just for the account-issue keyword checks below.
+    return { ok: false, status: res.status, body: (await res.text().catch(() => '')).slice(0, 280), resetAt: rateLimitResetAt(res) }
   } catch {
     // Network/CORS failure — no status to report
     return { ok: false }
@@ -411,18 +421,32 @@ async function pingOpenRouterModelDetailed(model: string, apiKey: string): Promi
  * unreachable" in practice: a bad key, no credits, the free-tier daily cap, or
  * privacy settings that exclude free models (which train on prompts). Returns a
  * user-actionable message, or null when the failure is genuinely model-specific.
+ *
+ * For 429s, `resetAt` (from the X-RateLimit-Reset header OpenRouter always sends)
+ * decides the wording — it's more reliable than pattern-matching the message text,
+ * which varies ("free-models-per-day" vs "limit_rpd/<model>/…" vs plain "Rate limit
+ * exceeded"). A reset more than 5 minutes out means the daily cap, not a transient
+ * per-minute limit; under that, "wait Ns" with the server's own number.
  */
-function diagnoseOpenRouterAccountIssue(status: number | undefined, body = ''): string | null {
+function diagnoseOpenRouterAccountIssue(status: number | undefined, body = '', resetAt?: number): string | null {
   if (status === 401 || status === 403) {
     return `OpenRouter rejected this key (${status}) — check it's correct at openrouter.ai/keys`
   }
   if (status === 402) {
     return 'OpenRouter says the account is out of credits (402) — free models still need a non-negative balance. Top up at openrouter.ai/credits'
   }
-  if (status === 429 && /free-models-per-day/i.test(body)) {
-    return 'Daily free-model limit reached (429) — OpenRouter free tier resets at midnight UTC. A one-time $10 credit purchase raises it from 50 to 1000 requests/day'
-  }
   if (status === 429) {
+    const waitMs = resetAt ? resetAt - Date.now() : undefined
+    if (waitMs !== undefined && waitMs > 5 * 60 * 1000) {
+      const resetLocal = new Date(resetAt!).toLocaleString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true })
+      return `Daily free-model limit reached (429) — resets ~${resetLocal}. A one-time $10 credit purchase raises it from 50 to 1000 requests/day`
+    }
+    if (/free-models-per-day/i.test(body)) {
+      return 'Daily free-model limit reached (429) — OpenRouter free tier resets at midnight UTC. A one-time $10 credit purchase raises it from 50 to 1000 requests/day'
+    }
+    if (waitMs !== undefined && waitMs > 0) {
+      return `OpenRouter is rate-limiting right now (429) — retry in ~${Math.ceil(waitMs / 1000)}s`
+    }
     return 'OpenRouter is rate-limiting right now (429) — wait a minute and try again'
   }
   if (status === 404 && /data policy/i.test(body)) {
@@ -497,7 +521,7 @@ async function healOpenRouterModel(needsVision: boolean): Promise<OpenRouterHeal
   const proves = async (id: string): Promise<boolean> => {
     const ping = await pingOpenRouterModelDetailed(id, apiKey)
     if (ping.ok) return true
-    diagnosis ??= diagnoseOpenRouterAccountIssue(ping.status, ping.body)
+    diagnosis ??= diagnoseOpenRouterAccountIssue(ping.status, ping.body, ping.resetAt)
     return false
   }
 
@@ -554,7 +578,7 @@ async function callOpenRouter(userText: string, ctx: JarvisContext, image?: stri
     const body = await res.text().catch(() => '')
     // Account-level failures (key/credits/daily cap/privacy) hit every model the
     // same way — report the real cause instead of hunting for a replacement model
-    const accountIssue = diagnoseOpenRouterAccountIssue(res.status, body)
+    const accountIssue = diagnoseOpenRouterAccountIssue(res.status, body, rateLimitResetAt(res))
     const err = new ProviderError('openrouter', res.status, accountIssue ?? `OpenRouter ${res.status}: ${body.slice(0, 180)}`)
     // Free models get retired without notice — swap in a live one and retry once
     if (!isRetry && !accountIssue && isModelGone(err)) {
@@ -941,7 +965,7 @@ async function streamOpenRouter(
     const body = await res.text().catch(() => '')
     // Account-level failures (key/credits/daily cap/privacy) hit every model the
     // same way — report the real cause instead of hunting for a replacement model
-    const accountIssue = diagnoseOpenRouterAccountIssue(res.status, body)
+    const accountIssue = diagnoseOpenRouterAccountIssue(res.status, body, rateLimitResetAt(res))
     const err = new ProviderError('openrouter', res.status, accountIssue ?? `OpenRouter ${res.status}: ${body.slice(0, 180)}`)
     // Free models get retired without notice — swap in a live one and retry once
     if (!isRetry && !accountIssue && isModelGone(err)) {
@@ -1099,7 +1123,7 @@ export async function testProvider(p: LlmProvider): Promise<ProviderTestResult> 
         // Account-level failures (bad key, no credits, daily cap, privacy settings
         // blocking free models) fail identically for every model — report the real
         // cause immediately instead of burning requests on the whole curated list.
-        const accountIssue = diagnoseOpenRouterAccountIssue(first.status, first.body)
+        const accountIssue = diagnoseOpenRouterAccountIssue(first.status, first.body, first.resetAt)
         if (accountIssue) return { ok: false, message: accountIssue }
 
         // Model retired or unreachable — heal brute-forces the whole curated list
