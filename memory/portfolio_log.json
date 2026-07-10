@@ -1,0 +1,104 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "IBKR pre-market research log. Appended each weekday run. Read by next run to detect changes.",
+    "last_run": "2026-07-02T08:04:53Z",
+    "created": "2026-06-25T00:00:00Z",
+    "infra_warning": "Every prior run of this routine (PRs #5,#6,#7,#8,#10,#13,#14) rebuilt memory/portfolio_log.json + scripts/premarket-research.js from scratch on a new throwaway branch because none of those PRs were ever merged to main. This run recovered state from PR #14 (branch claude/sweet-goodall-2p4fgs, 2026-07-01) instead of starting blind. Until ONE of these routine-infra PRs is merged to main, every future scheduled run will keep resetting. Recommend merging this PR (or #14) and closing the others as superseded."
+  },
+  "runs": [
+    {
+      "timestamp": "2026-07-01T08:47:54Z",
+      "account": {
+        "nav": 1278.82,
+        "navCurrency": "EUR",
+        "cash": 49.53,
+        "leverage": 0.96
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "qty": 65,
+          "avgCost": 14.38718308,
+          "livePrice": 14.67,
+          "priorClose": 14.76,
+          "mktValue": 948.369474,
+          "unrlzdPnl": 13.202574,
+          "concentration": 0.6506,
+          "catalystDate": null,
+          "newsBias": "BULLISH (REGAL AML trial at 78/80 events, unblind imminent)",
+          "flags": [
+            { "type": "CONCENTRATION", "detail": "65.06% of NAV exceeds 35.00% limit" }
+          ]
+        },
+        {
+          "ticker": "SPCX",
+          "qty": 2.6,
+          "avgCost": 171.12423077,
+          "livePrice": 173.93,
+          "priorClose": null,
+          "mktValue": 452.4259857,
+          "unrlzdPnl": 7.5029857,
+          "concentration": 0.3104,
+          "catalystDate": null,
+          "newsBias": "NEUTRAL (lockup-fear headlines vs. investment-grade $25B bond close; $175.50 = 10% unlock trigger)",
+          "flags": []
+        }
+      ],
+      "flags": [
+        { "ticker": "SLS", "type": "CONCENTRATION", "detail": "65.06% of NAV exceeds 35.00% limit" }
+      ],
+      "notes": "First tracked run (log was empty/never executed before today). CING is in the routine's ticker keyword list but is NOT currently held — that config is stale. IBKR Client Portal Gateway (localhost:5000) is unreachable in this sandbox; account/position/price data pulled directly from the connected IBKR MCP tools instead."
+    },
+    {
+      "timestamp": "2026-07-02T08:04:53Z",
+      "account": {
+        "nav": 1155.94,
+        "navCurrency": "EUR",
+        "cash": 49.62,
+        "leverage": 0.96
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "qty": 65,
+          "avgCost": 14.38718308,
+          "livePrice": 13.17,
+          "priorClose": 13.05,
+          "mktValue": 856.05,
+          "mktValueEUR": 750.1,
+          "unrlzdPnl": -79.12,
+          "concentration": 0.6491,
+          "catalystDate": null,
+          "newsBias": "NEUTRAL/BEARISH (REGAL Phase 3 AML trial still at 78/80 events as of latest confirmed update June 24 — 80th event NOT yet reached, no readout date; SLS gave back most of its June run-up: $10.47 (6/26) -> $17.19 high (6/30) -> $13.05 close (7/1), likely profit-taking/de-risking ahead of the binary unblind rather than negative news)",
+          "flags": [
+            { "type": "CONCENTRATION", "detail": "64.91% of NAV exceeds 35.00% limit" },
+            { "type": "PRICE_MOVE", "detail": "-10.23% since last run ($14.67 -> $13.17); move occurred during the 7/1 session, not overnight" }
+          ]
+        },
+        {
+          "ticker": "SPCX",
+          "qty": 2.6,
+          "avgCost": 171.12423077,
+          "livePrice": 157.27,
+          "priorClose": 157.98,
+          "mktValue": 408.9,
+          "mktValueEUR": 358.26,
+          "unrlzdPnl": -36.02,
+          "concentration": 0.31,
+          "catalystDate": null,
+          "newsBias": "BEARISH-STABILIZING (SPCX round-tripped its post-IPO gains: fell ~24% from the $225 peak on bond-issuance/thin-float/lockup-fear headlines, closed 7/1 at $157.98, now roughly flat pre-market at $157.27; $175.50 = 10% insider-unlock trigger price, still well below; next scheduled unlock tied to first post-IPO earnings ~early-to-mid August, not imminent)",
+          "flags": [
+            { "type": "PRICE_MOVE", "detail": "-9.58% since last run ($173.93 -> $157.27); move occurred during the 7/1 session, not overnight" }
+          ]
+        }
+      ],
+      "flags": [
+        { "ticker": "SLS", "type": "CONCENTRATION", "detail": "64.91% of NAV exceeds 35.00% limit" },
+        { "ticker": "SLS", "type": "PRICE_MOVE", "detail": "-10.23% since last run" },
+        { "ticker": "SPCX", "type": "PRICE_MOVE", "detail": "-9.58% since last run" }
+      ],
+      "notes": "NAV fell from EUR1,278.82 to EUR1,155.94 (-9.61%) day-over-day, driven entirely by the 7/1 intraday selloff in both holdings (SLS -10.2%, SPCX -9.6% vs the prior run's intraday quote) rather than fresh overnight catalysts — no confirmed SLS REGAL 80th-event readout and no new SPCX bond/lockup filing found in this run's news sweep. CING remains unheld; the routine's ticker/keyword config is still stale and should be reconciled or the ticker removed. IBKR Client Portal Gateway (localhost:5000) unreachable in this sandbox; all account/position/price data pulled directly from the connected IBKR MCP tools instead, matching the approach used in the prior run."
+    }
+  ]
+}
