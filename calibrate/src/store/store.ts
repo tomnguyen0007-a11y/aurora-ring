@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 import { todayISO, uid } from '../lib/dates'
 import { computeExample80kg } from '../lib/dayTypeMacros'
 import { inferCategory, inferImportance } from '../lib/jarvis/memory'
+import { deletePhoto, savePhoto } from '../lib/photoDb'
 import {
   type DayTypeMacro,
   seedBooks,
@@ -420,12 +421,18 @@ export const useStore = create<CalibrateState>()(
 
       addTrainingPhoto: (photo) => {
         const id = uid('ph')
-        set((s) => ({ trainingPhotos: [{ ...photo, id, createdAt: Date.now() }, ...s.trainingPhotos] }))
+        // Blob goes to IndexedDB; only metadata enters the persist store — see lib/photoDb
+        const { dataUrl, ...meta } = photo
+        if (dataUrl) void savePhoto(id, dataUrl)
+        set((s) => ({ trainingPhotos: [{ ...meta, id, createdAt: Date.now() }, ...s.trainingPhotos] }))
         return id
       },
       updateTrainingPhoto: (id, patch) =>
         set((s) => ({ trainingPhotos: s.trainingPhotos.map((p) => (p.id === id ? { ...p, ...patch } : p)) })),
-      removeTrainingPhoto: (id) => set((s) => ({ trainingPhotos: s.trainingPhotos.filter((p) => p.id !== id) })),
+      removeTrainingPhoto: (id) => {
+        void deletePhoto(id)
+        set((s) => ({ trainingPhotos: s.trainingPhotos.filter((p) => p.id !== id) }))
+      },
 
       addGrocery: (name, qty = '') =>
         set((s) => ({ grocery: [...s.grocery, { id: uid('gr'), name, qty, done: false }] })),
@@ -601,3 +608,18 @@ export const useStore = create<CalibrateState>()(
     },
   ),
 )
+
+/**
+ * One-time move of legacy inline photo blobs into IndexedDB. Early photo-log
+ * builds stored base64 directly on TrainingPhoto.dataUrl inside the persist
+ * store; that bloats localStorage towards its ~5MB quota and slows every state
+ * write. Copy each blob into IndexedDB FIRST, and only strip the inline copies
+ * once all of them are safely stored — interrupting mid-migration loses nothing.
+ * Called once on boot (main.tsx); a no-op when there's nothing to migrate.
+ */
+export async function migrateLegacyPhotoBlobs(): Promise<void> {
+  const legacy = useStore.getState().trainingPhotos.filter((p) => p.dataUrl)
+  if (!legacy.length) return
+  await Promise.all(legacy.map((p) => savePhoto(p.id, p.dataUrl!)))
+  useStore.setState((s) => ({ trainingPhotos: s.trainingPhotos.map(({ dataUrl: _blob, ...p }) => p) }))
+}

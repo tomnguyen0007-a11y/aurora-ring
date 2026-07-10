@@ -80,6 +80,53 @@ describe('OpenRouter connection test — auth vs. dead-model diagnosis', () => {
     expect(calls.length).toBe(1)
   })
 
+  it('explains when privacy settings block free models (404 data policy) instead of "unreachable"', async () => {
+    useStore.getState().setSettings({ provider: 'openrouter', openrouterKey: 'good-key', openrouterModel: 'google/gemma-3-27b-it:free' })
+    const calls: string[] = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        calls.push(url)
+        return new Response(
+          JSON.stringify({ error: { message: 'No endpoints found matching your data policy (Free model publication). Configure: https://openrouter.ai/settings/privacy' } }),
+          { status: 404 },
+        )
+      }),
+    )
+    const res = await testProvider('openrouter')
+    expect(res.ok).toBe(false)
+    expect(res.message).toMatch(/privacy settings block free models/i)
+    expect(res.message).toContain('openrouter.ai/settings/privacy')
+    // Diagnosed on the very first ping — no pointless brute-force of the curated list
+    expect(calls.length).toBe(1)
+  })
+
+  it('reports the daily free-tier cap (429 free-models-per-day) with the reset time', async () => {
+    useStore.getState().setSettings({ provider: 'openrouter', openrouterKey: 'good-key' })
+    const calls: string[] = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        calls.push(url)
+        return new Response(JSON.stringify({ error: { message: 'Rate limit exceeded: free-models-per-day' } }), { status: 429 })
+      }),
+    )
+    const res = await testProvider('openrouter')
+    expect(res.ok).toBe(false)
+    expect(res.message).toMatch(/daily free-model limit/i)
+    expect(res.message).toMatch(/midnight UTC/i)
+    expect(calls.length).toBe(1)
+  })
+
+  it('reports an out-of-credits account (402) with a fix, not a dead-model message', async () => {
+    useStore.getState().setSettings({ provider: 'openrouter', openrouterKey: 'good-key' })
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('Insufficient credits', { status: 402 })))
+    const res = await testProvider('openrouter')
+    expect(res.ok).toBe(false)
+    expect(res.message).toMatch(/credits/i)
+    expect(res.message).toContain('openrouter.ai/credits')
+  })
+
   it('still heals past a genuinely retired model (404) instead of reporting an auth error', async () => {
     useStore.getState().setSettings({ provider: 'openrouter', openrouterKey: 'good-key', openrouterModel: 'some/retired-model:free' })
     vi.stubGlobal(

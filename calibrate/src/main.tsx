@@ -6,8 +6,11 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
 import { initSync } from './lib/supabase'
+import { migrateLegacyPhotoBlobs } from './store/store'
 
 initSync()
+// Move any pre-IndexedDB photo blobs out of localStorage (no-op once done)
+void migrateLegacyPhotoBlobs()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
