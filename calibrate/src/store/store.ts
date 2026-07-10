@@ -28,9 +28,11 @@ import type {
   Exercise,
   FoodLog,
   Goal,
+  GolfCategory,
   GolfSession,
   GolfStats,
   GolfRound,
+  GolfTimerState,
   GroceryItem,
   HandicapEntry,
   HevySession,
@@ -90,6 +92,14 @@ export interface CalibrateState {
   addGolfSession: (s: Omit<GolfSession, 'id'>) => void
   removeGolfSession: (id: string) => void
   addHandicap: (value: number, date?: string) => void
+
+  // golf practice timer — persisted wall-clock state; survives phone lock / PWA reload
+  golfTimer: GolfTimerState | null
+  startGolfTimer: (category: GolfCategory) => void
+  pauseGolfTimer: () => void
+  resumeGolfTimer: () => void
+  /** Logs the session (if long enough) and clears the timer. Returns minutes logged, if any. */
+  stopGolfTimer: () => number | null
 
   // goals
   goals: Goal[]
@@ -253,6 +263,7 @@ const seedState = () => ({
   runLogs: [],
   golfSessions: [],
   handicap: [seedHandicap],
+  golfTimer: null,
   goals: seedGoals,
   macros: seedMacros,
   meals: seedMeals,
@@ -360,6 +371,34 @@ export const useStore = create<CalibrateState>()(
       removeGolfSession: (id) => set((s) => ({ golfSessions: s.golfSessions.filter((g) => g.id !== id) })),
       addHandicap: (value, date = todayISO()) =>
         set((s) => ({ handicap: [...s.handicap, { id: uid('hcp'), date, value }] })),
+
+      startGolfTimer: (category) => set({ golfTimer: { category, startedAt: Date.now(), accumulatedSec: 0 } }),
+      pauseGolfTimer: () =>
+        set((s) => {
+          const t = s.golfTimer
+          if (!t || t.startedAt === null) return {}
+          const ranSec = (Date.now() - t.startedAt) / 1000
+          return { golfTimer: { ...t, startedAt: null, accumulatedSec: t.accumulatedSec + ranSec } }
+        }),
+      resumeGolfTimer: () =>
+        set((s) => {
+          const t = s.golfTimer
+          if (!t || t.startedAt !== null) return {}
+          return { golfTimer: { ...t, startedAt: Date.now() } }
+        }),
+      stopGolfTimer: () => {
+        const t = get().golfTimer
+        if (!t) return null
+        const ranSec = t.startedAt !== null ? (Date.now() - t.startedAt) / 1000 : 0
+        const totalSec = t.accumulatedSec + ranSec
+        const minutes = Math.max(1, Math.round(totalSec / 60))
+        set({ golfTimer: null })
+        if (totalSec >= 30) {
+          get().addGolfSession({ date: todayISO(), category: t.category, minutes, notes: 'timer' })
+          return minutes
+        }
+        return null
+      },
 
       addGoal: (g) =>
         set((s) => ({
@@ -558,7 +597,7 @@ export const useStore = create<CalibrateState>()(
     }),
     {
       name: 'calibrate-v1',
-      version: 6,
+      version: 7,
       // always wake up on Today — don't persist navigation; strip heavy chat images from storage
       partialize: (s) =>
         Object.fromEntries(
@@ -602,6 +641,9 @@ export const useStore = create<CalibrateState>()(
         }
         if (version < 6) {
           if (!Array.isArray(p.trainingPhotos)) p.trainingPhotos = []
+        }
+        if (version < 7) {
+          if (!('golfTimer' in p)) p.golfTimer = null
         }
         return p as unknown as CalibrateState
       },

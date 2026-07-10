@@ -1,5 +1,5 @@
 import { Pause, Play, Plus, Square, Target, Trash2 } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { PhotoGallery } from '../components/PhotoGallery'
 import { Bars, Empty, HudLabel, Panel, Sparkline, StatTile } from '../components/ui'
 import { fmtDateShort, fmtHours, lastNDates, todayISO, weekDates } from '../lib/dates'
@@ -93,34 +93,50 @@ const CAT_COLORS: Record<GolfCategory, string> = {
   'on-course': '#c9a3d4',
 }
 
-/** Live practice timer — select a category, hit start, minutes log themselves. */
+/**
+ * Live practice timer — select a category, hit start, minutes log themselves.
+ *
+ * Elapsed time is always DERIVED from a wall-clock `startedAt` timestamp
+ * (persisted in the store), never accumulated by counting setInterval ticks.
+ * A ticking counter falls behind reality the moment the phone locks or the
+ * PWA backgrounds — browsers throttle or fully suspend setInterval in the
+ * background (especially iOS), so missed ticks mean the display undercounts
+ * real elapsed time, sometimes badly. Deriving from Date.now() means every
+ * render is correct regardless of how many ticks were actually delivered,
+ * and persisting the timer means an iOS-killed background tab still shows
+ * the right time on reload instead of resetting to zero.
+ */
 function PracticeTimer() {
-  const addGolfSession = useStore((st) => st.addGolfSession)
+  const timer = useStore((st) => st.golfTimer)
+  const startGolfTimer = useStore((st) => st.startGolfTimer)
+  const pauseGolfTimer = useStore((st) => st.pauseGolfTimer)
+  const resumeGolfTimer = useStore((st) => st.resumeGolfTimer)
+  const stopGolfTimer = useStore((st) => st.stopGolfTimer)
   const [cat, setCat] = useState<GolfCategory>('putting')
-  const [running, setRunning] = useState(false)
-  const [paused, setPaused] = useState(false)
-  const [elapsed, setElapsed] = useState(0) // seconds
-  const tick = useRef<ReturnType<typeof setInterval> | null>(null)
+  // Forces a re-render every second while running so the derived elapsed value redraws.
+  const [, forceTick] = useState(0)
+
+  const running = !!timer
+  const paused = !!timer && timer.startedAt === null
 
   useEffect(() => {
-    if (running && !paused) {
-      tick.current = setInterval(() => setElapsed((e) => e + 1), 1000)
-      return () => {
-        if (tick.current) clearInterval(tick.current)
-      }
+    if (!running || paused) return
+    const id = setInterval(() => forceTick((n) => n + 1), 1000)
+    // Also resync the instant the tab/screen comes back — don't wait up to 1s
+    // for the next tick after a background suspension.
+    const onVisible = () => document.visibilityState === 'visible' && forceTick((n) => n + 1)
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      clearInterval(id)
+      document.removeEventListener('visibilitychange', onVisible)
     }
   }, [running, paused])
 
-  const stop = () => {
-    const minutes = Math.max(1, Math.round(elapsed / 60))
-    if (elapsed >= 30) addGolfSession({ date: todayISO(), category: cat, minutes, notes: 'timer' })
-    setRunning(false)
-    setPaused(false)
-    setElapsed(0)
-  }
-
-  const mm = String(Math.floor(elapsed / 60)).padStart(2, '0')
-  const ss = String(elapsed % 60).padStart(2, '0')
+  const elapsed = timer ? timer.accumulatedSec + (timer.startedAt !== null ? (Date.now() - timer.startedAt) / 1000 : 0) : 0
+  const elapsedInt = Math.floor(elapsed)
+  const mm = String(Math.floor(elapsedInt / 60)).padStart(2, '0')
+  const ss = String(elapsedInt % 60).padStart(2, '0')
+  const activeCat = timer?.category ?? cat
 
   return (
     <Panel glow={running}>
@@ -132,9 +148,9 @@ function PracticeTimer() {
             disabled={running}
             onClick={() => setCat(c.id)}
             className={`rounded-full border px-3 py-1.5 font-display text-xs font-semibold tracking-wide transition-all disabled:opacity-40 ${
-              cat === c.id ? 'border-transparent text-black' : 'border-edge text-haze hover:text-ice'
+              activeCat === c.id ? 'border-transparent text-black' : 'border-edge text-haze hover:text-ice'
             }`}
-            style={cat === c.id ? { background: CAT_COLORS[c.id] } : {}}
+            style={activeCat === c.id ? { background: CAT_COLORS[c.id] } : {}}
           >
             {c.label}
           </button>
@@ -146,16 +162,16 @@ function PracticeTimer() {
         </div>
         <div className="flex gap-2">
           {!running ? (
-            <button className="btn btn-signal !px-5" onClick={() => setRunning(true)}>
+            <button className="btn btn-signal !px-5" onClick={() => startGolfTimer(cat)}>
               <Play size={16} /> Start
             </button>
           ) : (
             <>
-              <button className="btn" onClick={() => setPaused(!paused)}>
+              <button className="btn" onClick={() => (paused ? resumeGolfTimer() : pauseGolfTimer())}>
                 {paused ? <Play size={16} /> : <Pause size={16} />}
                 {paused ? 'Resume' : 'Pause'}
               </button>
-              <button className="btn btn-danger" onClick={stop}>
+              <button className="btn btn-danger" onClick={stopGolfTimer}>
                 <Square size={15} /> Stop & log
               </button>
             </>
@@ -164,7 +180,7 @@ function PracticeTimer() {
       </div>
       {running && (
         <p className="mt-2 text-xs text-fog">
-          Logging to <span style={{ color: CAT_COLORS[cat] }}>{GOLF_CATEGORIES.find((c) => c.id === cat)?.label}</span> when you stop.
+          Logging to <span style={{ color: CAT_COLORS[activeCat] }}>{GOLF_CATEGORIES.find((c) => c.id === activeCat)?.label}</span> when you stop.
         </p>
       )}
     </Panel>
