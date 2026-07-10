@@ -118,6 +118,46 @@ describe('OpenRouter connection test — auth vs. dead-model diagnosis', () => {
     expect(calls.length).toBe(1)
   })
 
+  it('reports the daily cap from the X-RateLimit-Reset header even when the message text is unrecognized', async () => {
+    // OpenRouter's daily-cap wording varies ("limit_rpd/<model>/…", plain "Rate limit exceeded", etc.) —
+    // the reset header is the one signal that's always present, so a >5min reset means the daily cap
+    // regardless of what the message says.
+    useStore.getState().setSettings({ provider: 'openrouter', openrouterKey: 'good-key' })
+    const resetAt = Date.now() + 6 * 60 * 60 * 1000 // 6 hours out
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(JSON.stringify({ error: { message: 'Rate limit exceeded' } }), {
+            status: 429,
+            headers: { 'X-RateLimit-Reset': String(resetAt) },
+          }),
+      ),
+    )
+    const res = await testProvider('openrouter')
+    expect(res.ok).toBe(false)
+    expect(res.message).toMatch(/daily free-model limit/i)
+  })
+
+  it('reports a real countdown for a short-lived per-minute limit instead of a vague "wait a minute"', async () => {
+    useStore.getState().setSettings({ provider: 'openrouter', openrouterKey: 'good-key' })
+    const resetAt = Date.now() + 12_000 // 12s out — a per-minute limit, not the daily cap
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(JSON.stringify({ error: { message: 'Rate limit exceeded' } }), {
+            status: 429,
+            headers: { 'X-RateLimit-Reset': String(resetAt) },
+          }),
+      ),
+    )
+    const res = await testProvider('openrouter')
+    expect(res.ok).toBe(false)
+    expect(res.message).toMatch(/retry in ~\d+s/)
+    expect(res.message).not.toMatch(/daily free-model limit/i)
+  })
+
   it('reports an out-of-credits account (402) with a fix, not a dead-model message', async () => {
     useStore.getState().setSettings({ provider: 'openrouter', openrouterKey: 'good-key' })
     vi.stubGlobal('fetch', vi.fn(async () => new Response('Insufficient credits', { status: 402 })))
