@@ -107,7 +107,7 @@ export function Markets() {
                   ) : (
                     <span className="text-xs text-fog">{w.kind === 'stock' && !s.settings.finnhubKey ? 'needs key' : '…'}</span>
                   )}
-                  <button className="opacity-0 transition-opacity group-hover:opacity-100" aria-label={`Remove ${w.symbol}`} onClick={() => s.removeWatch(w.id)}>
+                  <button className="transition-opacity focus-visible:opacity-100 lg:opacity-0 lg:group-hover:opacity-100" aria-label={`Remove ${w.symbol}`} onClick={() => s.removeWatch(w.id)}>
                     <Trash2 size={14} className="text-alert/70" />
                   </button>
                 </div>

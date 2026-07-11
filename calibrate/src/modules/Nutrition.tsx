@@ -81,7 +81,7 @@ export function Nutrition() {
                     <InlineEdit num value={String(f.fat)} label={`Edit fat of ${f.name}`} onSave={(v) => s.updateFood(f.id, { fat: parseInt(v) || 0 })} />
                     F
                   </span>
-                  <button className="opacity-0 transition-opacity group-hover:opacity-100" aria-label={`Delete ${f.name}`} onClick={() => s.removeFood(f.id)}>
+                  <button className="transition-opacity focus-visible:opacity-100 lg:opacity-0 lg:group-hover:opacity-100" aria-label={`Delete ${f.name}`} onClick={() => s.removeFood(f.id)}>
                     <Trash2 size={14} className="text-alert/70" />
                   </button>
                 </li>

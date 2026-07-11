@@ -43,7 +43,7 @@ export function Grocery() {
               <CheckDot checked={false} onToggle={() => s.toggleGrocery(g.id)} label={g.name} />
               <span className="flex-1 text-sm text-ice">{g.name}</span>
               {g.qty && <span className="num text-xs text-fog">{g.qty}</span>}
-              <button className="opacity-0 transition-opacity group-hover:opacity-100" aria-label={`Delete ${g.name}`} onClick={() => s.removeGrocery(g.id)}>
+              <button className="transition-opacity focus-visible:opacity-100 lg:opacity-0 lg:group-hover:opacity-100" aria-label={`Delete ${g.name}`} onClick={() => s.removeGrocery(g.id)}>
                 <Trash2 size={14} className="text-alert/70" />
               </button>
             </li>

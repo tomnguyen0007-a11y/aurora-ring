@@ -67,7 +67,7 @@ export function Business() {
                   <span className="num text-xs text-fog">{fmtDateShort(r.date)}</span>
                   <span className="text-haze">{r.source}</span>
                   <span className="num text-affirm">${r.amount.toFixed(0)}</span>
-                  <button className="opacity-0 group-hover:opacity-100" aria-label="Delete entry" onClick={() => s.removeRevenue(r.id)}>
+                  <button className="transition-opacity focus-visible:opacity-100 lg:opacity-0 lg:group-hover:opacity-100" aria-label="Delete entry" onClick={() => s.removeRevenue(r.id)}>
                     <Trash2 size={13} className="text-alert/70" />
                   </button>
                 </li>
@@ -106,7 +106,7 @@ export function Business() {
                 <CheckDot checked={false} onToggle={() => s.toggleBizTask(t.id)} label={t.title} />
                 <span className="min-w-0 flex-1 truncate text-sm text-ice">{t.title}</span>
                 <span className="hud-label !mb-0 shrink-0 !text-[8px] text-signal-dim">{t.area}</span>
-                <button className="opacity-0 transition-opacity group-hover:opacity-100" aria-label={`Delete ${t.title}`} onClick={() => s.removeBizTask(t.id)}>
+                <button className="transition-opacity focus-visible:opacity-100 lg:opacity-0 lg:group-hover:opacity-100" aria-label={`Delete ${t.title}`} onClick={() => s.removeBizTask(t.id)}>
                   <Trash2 size={14} className="text-alert/70" />
                 </button>
               </li>

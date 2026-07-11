@@ -112,7 +112,7 @@ export function Schedule() {
                   </span>
                 </button>
                 <button
-                  className="btn btn-ghost !px-2 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                  className="btn btn-ghost !px-2 transition-opacity focus-visible:opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
                   aria-label={`Delete ${b.title}`}
                   onClick={() => s.removeBlock(b.id)}
                 >

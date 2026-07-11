@@ -1,7 +1,7 @@
 import { Pause, Play, Plus, Square, Target, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { PhotoGallery } from '../components/PhotoGallery'
-import { Bars, Empty, HudLabel, Panel, Sparkline, StatTile } from '../components/ui'
+import { Bars, Empty, HudLabel, InlineEdit, Panel, Sparkline, StatTile } from '../components/ui'
 import { fmtDateShort, fmtHours, lastNDates, todayISO, weekDates } from '../lib/dates'
 import { GOLF_CATEGORIES, golfMinutes, golfWeeklySeries } from '../lib/stats'
 import { useStore } from '../store/store'
@@ -326,9 +326,20 @@ export function Golf() {
                   <li key={g.id} className="group flex items-center justify-between rounded-lg bg-black/25 px-3 py-2 text-sm">
                     <span className="num text-xs text-fog">{fmtDateShort(g.date)}</span>
                     <span style={{ color: CAT_COLORS[g.category] }}>{GOLF_CATEGORIES.find((c) => c.id === g.category)?.label}</span>
-                    <span className="num text-ice">{fmtHours(g.minutes)}</span>
+                    <span className="num flex items-baseline text-ice">
+                      <InlineEdit
+                        num
+                        value={String(g.minutes)}
+                        label={`Edit minutes for ${g.category} session on ${g.date}`}
+                        onSave={(v) => {
+                          const m = parseInt(v)
+                          if (m > 0) s.updateGolfSession(g.id, { minutes: m })
+                        }}
+                      />
+                      <span className="ml-0.5 text-[10px] text-fog">min</span>
+                    </span>
                     <button
-                      className="opacity-0 transition-opacity group-hover:opacity-100"
+                      className="transition-opacity focus-visible:opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
                       aria-label="Delete session"
                       onClick={() => s.removeGolfSession(g.id)}
                     >

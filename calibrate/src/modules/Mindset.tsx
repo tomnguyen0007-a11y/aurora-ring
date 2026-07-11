@@ -112,7 +112,7 @@ export function Mindset() {
                 {TAG_LABEL[m.tag]}
               </span>
               <button
-                className="opacity-0 transition-opacity group-hover:opacity-100"
+                className="transition-opacity focus-visible:opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
                 aria-label="Delete principle"
                 onClick={() => s.removeMantra(m.id)}
               >

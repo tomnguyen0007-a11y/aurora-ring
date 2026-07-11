@@ -90,6 +90,7 @@ export interface CalibrateState {
   golfSessions: GolfSession[]
   handicap: HandicapEntry[]
   addGolfSession: (s: Omit<GolfSession, 'id'>) => void
+  updateGolfSession: (id: string, patch: Partial<Pick<GolfSession, 'minutes' | 'category' | 'date'>>) => void
   removeGolfSession: (id: string) => void
   addHandicap: (value: number, date?: string) => void
 
@@ -368,6 +369,8 @@ export const useStore = create<CalibrateState>()(
       removeRun: (id) => set((s) => ({ runLogs: s.runLogs.filter((r) => r.id !== id) })),
 
       addGolfSession: (g) => set((s) => ({ golfSessions: [{ ...g, id: uid('gs') }, ...s.golfSessions] })),
+      updateGolfSession: (id, patch) =>
+        set((s) => ({ golfSessions: s.golfSessions.map((g) => (g.id === id ? { ...g, ...patch } : g)) })),
       removeGolfSession: (id) => set((s) => ({ golfSessions: s.golfSessions.filter((g) => g.id !== id) })),
       addHandicap: (value, date = todayISO()) =>
         set((s) => ({ handicap: [...s.handicap, { id: uid('hcp'), date, value }] })),

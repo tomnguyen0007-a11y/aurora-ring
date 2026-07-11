@@ -60,7 +60,7 @@ function TableEditor({ id }: { id: string }) {
               ))}
               <td className="border-b border-edge text-center">
                 <button
-                  className="opacity-0 transition-opacity group-hover:opacity-100"
+                  className="transition-opacity focus-visible:opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
                   onClick={() => delRow(ri)}
                   aria-label={`Delete row ${ri + 1}`}
                 >
