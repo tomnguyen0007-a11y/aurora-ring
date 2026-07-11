@@ -127,7 +127,7 @@ export function Settings() {
                 <li key={f.id} className="group flex items-center gap-2 rounded-lg bg-black/25 px-3 py-2">
                   <span className="text-arc">•</span>
                   <span className="flex-1 text-sm text-ice">{f.text}</span>
-                  <button className="opacity-0 transition-opacity group-hover:opacity-100" aria-label="Remove fact" onClick={() => s.removeFact(f.id)}>
+                  <button className="transition-opacity focus-visible:opacity-100 lg:opacity-0 lg:group-hover:opacity-100" aria-label="Remove fact" onClick={() => s.removeFact(f.id)}>
                     <Trash2 size={13} className="text-alert/70" />
                   </button>
                 </li>
@@ -547,7 +547,7 @@ function BrainFeedPanel() {
                 {d.source !== 'pasted' && d.source !== 'jarvis' ? `${d.source} · ` : ''}
                 {(d.body.length / 1000).toFixed(1)}k
               </span>
-              <button className="opacity-0 transition-opacity group-hover:opacity-100" aria-label={`Remove ${d.title}`} onClick={() => s.removeKnowledgeDoc(d.id)}>
+              <button className="transition-opacity focus-visible:opacity-100 lg:opacity-0 lg:group-hover:opacity-100" aria-label={`Remove ${d.title}`} onClick={() => s.removeKnowledgeDoc(d.id)}>
                 <Trash2 size={13} className="text-alert/70" />
               </button>
             </li>
