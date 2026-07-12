@@ -26,7 +26,9 @@ export const FOOD_DB: FoodFact[] = [
   { aliases: ['white rice cooked', 'cooked rice', 'white rice', 'rice'], serving: '1 cup cooked (158g)', kcal: 205, protein: 4.3, carbs: 45, fat: 0.4 },
   { aliases: ['brown rice'], serving: '1 cup cooked (195g)', kcal: 216, protein: 5, carbs: 45, fat: 1.8 },
   { aliases: ['oats', 'oatmeal', 'rolled oats'], serving: '1/2 cup dry (40g)', kcal: 150, protein: 5, carbs: 27, fat: 3 },
-  { aliases: ['greek yogurt', 'greek yoghurt'], serving: '170g plain', kcal: 100, protein: 17, carbs: 6, fat: 0.5 },
+  { aliases: ['chocolate porridge', 'instant chocolate porridge', 'instant porridge', 'choc porridge'], serving: '1 sachet (~55g) made with water', kcal: 210, protein: 6, carbs: 37, fat: 4 },
+  // 'yougurt' included deliberately — the common misspelling must still hit the DB
+  { aliases: ['greek yogurt', 'greek yoghurt', 'greek yougurt', 'white yogurt greek', 'yogurt greek', 'skyr'], serving: '170g plain 0-2% fat', kcal: 100, protein: 17, carbs: 6, fat: 0.5 },
   { aliases: ['whole milk'], serving: '1 cup (244g)', kcal: 149, protein: 8, carbs: 12, fat: 8 },
   { aliases: ['skim milk', 'skimmed milk'], serving: '1 cup (245g)', kcal: 83, protein: 8.3, carbs: 12, fat: 0.2 },
   { aliases: ['almonds'], serving: '28g (~23 almonds)', kcal: 164, protein: 6, carbs: 6, fat: 14 },
