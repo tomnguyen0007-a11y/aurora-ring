@@ -2,6 +2,7 @@ import { useStore } from '../../store/store'
 import type { ChatMsg, LlmProvider } from '../../store/types'
 import { splitDataURL } from '../image'
 import { applyActions, type JarvisAction } from './actions'
+import { enrichLogFoodActions } from './nutrition'
 import { formatContextForLlm, type JarvisContext } from './context'
 import { canCall, rateLimitStatus, recordCall } from './rateLimit'
 
@@ -104,7 +105,10 @@ Logging:
   - {"type":"log_sleep","hours":N,"blackoutOnTime":bool}
   - {"type":"log_reading","minutes":N}
   - {"type":"log_run","minutes":N,"distanceKm":N}
-  - {"type":"log_food","name":"...","kcal":N,"protein":N,"carbs":N,"fat":N}
+  - {"type":"log_food","name":"...","portionGrams":N,"kcal":N,"protein":N,"carbs":N,"fat":N}
+    kcal/protein/carbs/fat: include ONLY when the user stated them, the KNOWN FOOD DATABASE has the item, or you
+    verified a real label via web search. Otherwise OMIT all macros and give name + portionGrams — the app resolves
+    real label figures automatically (food DB scaled to portion, then the Open Food Facts database).
   - {"type":"log_revenue","amount":N,"source":"..."}
   - {"type":"log_handicap","value":N}
   - {"type":"log_photo","category":"golf|training|other","caption":"<short description of what's in it>"}
@@ -205,18 +209,18 @@ EXECUTION RULES:
 - Keep replies under 120 words unless the user asks for deep strategy/planning
 - When he corrects a mistake ("that was wrong", "actually it was 600 kcal"), FIX it with an edit action — don't apologise and do nothing
 
-FOOD LOGGING POLICY (a sharp nutritionist's instinct — decisive, transparent, correctable):
-1. If the item matches the KNOWN FOOD DATABASE in KNOWLEDGE → use those exact figures.
+FOOD LOGGING POLICY (real data over model guesses — decisive, transparent, correctable):
+1. If the item matches the KNOWN FOOD DATABASE in KNOWLEDGE → use those exact figures (scale to his portion).
 2. If the user gave numbers → use exactly those. A weight in grams is a PORTION, never calories — "150g yogurt"
-   means compute macros for 150g, not log 150 kcal.
-3. Otherwise → ESTIMATE like a nutritionist and LOG IT${
-     opts.webSearch ? ' (web search first for branded/restaurant items — real label beats estimate)' : ''
-   }: assume a typical portion, compute realistic
-   kcal/protein/carbs/fat, and state the assumption in ONE short line ("assumed 50g dry porridge ≈ 190 kcal —
-   correct me and I'll fix it"). He wants a decisive log he can correct, not an interrogation. Ask a clarifying
-   question ONLY when the honest range is huge (unknown restaurant meal, no portion clue at all).
-4. MULTIPLE foods in one message → one log_food action PER item with clean short names ("chocolate porridge
-   (hot water)", "greek yogurt 150g") so each can be edited or deleted on its own. NEVER concatenate the whole
+   means macros for 150g of yogurt, not 150 kcal.
+3. Otherwise → emit log_food with a clean short name + portionGrams and NO macros. The app resolves real label
+   figures automatically from nutrition databases — that resolver beats any guess you could make.${
+     opts.webSearch ? ' For branded/restaurant items you may web-search the real label and supply those figures yourself.' : ''
+   }
+   Log DECISIVELY — one short confirmation, no interrogation. Ask a clarifying question ONLY when even the food's
+   identity is unclear.
+4. MULTIPLE foods in one message → one log_food action PER item with clean short names ("chocolate porridge",
+   "greek yogurt" + portionGrams:150) so each resolves and can be edited on its own. NEVER concatenate the whole
    sentence into one food name.
 5. When he corrects an entry, fix it with update_food/delete_food + a fresh log — never apologise without acting.
 
@@ -695,20 +699,23 @@ function parseActionsJson(payload: string): { actions?: JarvisAction[] } | null 
  * `image` is the actual attached photo (if any) for THIS request — the model
  * only ever emits category/caption for log_photo, never image bytes, so we
  * splice the real attachment in here before it reaches applyActions.
+ * log_food actions without macros are enriched from real nutrition data
+ * (local DB scaled to portion, then Open Food Facts) before applying — the
+ * model names the food, the numbers come from databases.
  */
-function extractAndApplyActions(raw: string, image?: string): LlmResult {
+async function extractAndApplyActions(raw: string, image?: string): Promise<LlmResult> {
   let receipts: string[] = []
   let reply = raw
 
-  const withImage = (actions: JarvisAction[]) =>
-    image ? actions.map((a) => (a.type === 'log_photo' ? { ...a, imageData: image } : a)) : actions
+  const prepare = async (actions: JarvisAction[]) =>
+    enrichLogFoodActions(image ? actions.map((a) => (a.type === 'log_photo' ? { ...a, imageData: image } : a)) : actions)
 
   // Properly closed blocks
   const blocks = [...raw.matchAll(/```json\s*([\s\S]*?)```/g)]
   for (const b of blocks) {
     const parsed = parseActionsJson(b[1])
     if (parsed && Array.isArray(parsed.actions) && parsed.actions.length) {
-      receipts = receipts.concat(applyActions(withImage(parsed.actions)))
+      receipts = receipts.concat(applyActions(await prepare(parsed.actions)))
     }
     // Strip the block from the displayed reply whether or not it parsed —
     // raw JSON in the chat is never useful to the user
@@ -721,7 +728,7 @@ function extractAndApplyActions(raw: string, image?: string): LlmResult {
     const payload = reply.slice(openIdx + 7).trim()
     const parsed = parseActionsJson(payload)
     if (parsed && Array.isArray(parsed.actions) && parsed.actions.length) {
-      receipts = receipts.concat(applyActions(withImage(parsed.actions)))
+      receipts = receipts.concat(applyActions(await prepare(parsed.actions)))
     }
     reply = reply.slice(0, openIdx)
   }
@@ -770,7 +777,7 @@ export async function runLlm(userText: string, ctx: JarvisContext, image?: strin
     recordCall(p)
     try {
       const raw = await callProvider(p, userText, ctx, image)
-      const result = extractAndApplyActions(raw, image)
+      const result = await extractAndApplyActions(raw, image)
       result.provider = p
       if (i > 0) {
         result.receipts = [`Auto-switched to ${providerLabel(p)} — ${providerLabel(chain[0])} was unavailable`, ...result.receipts]
@@ -1059,7 +1066,7 @@ export async function runLlmStream(userText: string, ctx: JarvisContext, image: 
 
     try {
       const full = await streamProvider(p, userText, ctx, image, collect)
-      const result = extractAndApplyActions(full, image)
+      const result = await extractAndApplyActions(full, image)
       result.provider = p
       if (i > 0) {
         result.receipts = [`Auto-switched to ${providerLabel(p)} — ${providerLabel(chain[0])} was unavailable`, ...result.receipts]

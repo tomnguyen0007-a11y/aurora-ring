@@ -6,6 +6,7 @@ import type { Exercise, FoodLog, GolfCategory, Weekday, Workout } from '../../st
 import { applyActions, type JarvisAction } from './actions'
 import { lookupFood } from './foodDb'
 import { llmConfigured } from './llm'
+import { parseGrams } from './nutrition'
 
 // ————————————————————————————————————————————————————————
 // UNIFIED JARVIS LOCAL ENGINE (PHASE 1)
@@ -586,10 +587,25 @@ export function runLocalEngine(input: string, contextUserName?: string): EngineR
     const found = lookupFood(foodName)
 
     if (found) {
+      // Scale to a stated portion ("ate 150g greek yogurt") instead of always
+      // logging the default serving — grams are a portion, never calories.
+      const grams = parseGrams(foodName)
+      const factor = grams && found.gramsPerServing ? grams / found.gramsPerServing : 1
+      const kcal = Math.round(found.kcal * factor)
+      const protein = Math.round(found.protein * factor * 10) / 10
       const after = macrosForDate(s, todayISO())
       return act(
-        [{ type: 'log_food', name: foodName || found.matchedAlias, kcal: found.kcal, protein: found.protein, carbs: found.carbs, fat: found.fat }],
-        `Logged: ${foodName || found.matchedAlias} (${found.serving}) — ${found.kcal} kcal / ${found.protein}g protein from my food database. Running total ${after.kcal + found.kcal} kcal.`,
+        [
+          {
+            type: 'log_food',
+            name: foodName || found.matchedAlias,
+            kcal,
+            protein,
+            carbs: Math.round(found.carbs * factor * 10) / 10,
+            fat: Math.round(found.fat * factor * 10) / 10,
+          },
+        ],
+        `Logged: ${foodName || found.matchedAlias} (${factor === 1 ? found.serving : `${grams}g`}) — ${kcal} kcal / ${protein}g protein from my food database. Running total ${after.kcal + kcal} kcal.`,
       )
     }
   }

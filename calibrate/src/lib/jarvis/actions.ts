@@ -12,7 +12,9 @@ export type JarvisAction =
   | { type: 'log_weight'; kg: number }
   | { type: 'log_sleep'; hours: number; blackoutOnTime?: boolean }
   | { type: 'log_reading'; minutes: number }
-  | { type: 'log_food'; name: string; kcal?: number; protein?: number; carbs?: number; fat?: number }
+  // portionGrams lets the nutrition resolver scale real label data to the stated
+  // portion; resolvedFrom is set by the resolver (never the model) for the receipt
+  | { type: 'log_food'; name: string; kcal?: number; protein?: number; carbs?: number; fat?: number; portionGrams?: number; resolvedFrom?: string }
   | { type: 'log_run'; minutes: number; distanceKm?: number }
   | { type: 'log_revenue'; amount: number; source?: string }
   | { type: 'log_handicap'; value: number }
@@ -174,8 +176,14 @@ export function applyActions(actions: JarvisAction[]): string[] {
           break
         }
         case 'log_food': {
-          s.addFood({ date, name: a.name, kcal: a.kcal ?? 0, protein: a.protein ?? 0, carbs: a.carbs ?? 0, fat: a.fat ?? 0 })
-          receipts.push(`Food logged: ${a.name}${a.kcal ? ` (${a.kcal} kcal)` : ''}`)
+          // No macros from the user, the model, OR the nutrition resolver — a
+          // 0-kcal entry is worse than no entry. Say what's needed instead.
+          if (a.kcal == null) {
+            receipts.push(`Couldn't verify macros for "${a.name}" — tell me the kcal (or brand/portion) and I'll log it properly.`)
+            break
+          }
+          s.addFood({ date, name: a.name, kcal: a.kcal, protein: a.protein ?? 0, carbs: a.carbs ?? 0, fat: a.fat ?? 0 })
+          receipts.push(`Food logged: ${a.name} (${a.kcal} kcal${a.protein ? `, ${a.protein}g protein` : ''})${a.resolvedFrom ? ` — from ${a.resolvedFrom}` : ''}`)
           break
         }
         case 'log_run': {
