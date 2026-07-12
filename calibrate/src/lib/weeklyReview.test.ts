@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { buildJarvisContext } from './jarvis/context'
 import { useStore } from '../store/store'
 import { addDays, todayISO, weekDates } from './dates'
 import { weeklyReview, weekSnapshot } from './stats'
@@ -46,6 +47,14 @@ describe('weekly review — this week vs last, from real store state', () => {
     const { current, previous } = weeklyReview(s)
     expect(previous.golfMin).toBe(90)
     expect(current.golfMin).toBe(0)
+  })
+
+  it("Jarvis's live-state snapshot carries the week-vs-last-week numbers and the real $1,000 target", () => {
+    const snapshot = buildJarvisContext().snapshot
+    expect(snapshot).toContain('WEEK VS LAST WEEK')
+    expect(snapshot).toContain('$1,000 daily target')
+    // regression: the revenue target must never be the kcal target again
+    expect(snapshot).not.toMatch(/AURORA REVENUE: \$\d+ today \/ \$?2[,.]?[89]\d\d(?!\d)/)
   })
 
   it('schedule completion only counts days that have already happened', () => {

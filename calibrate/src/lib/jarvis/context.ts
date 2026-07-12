@@ -1,5 +1,5 @@
 import { fmtHours, todayISO, WEEKDAY_NAMES, weekdayOf } from '../dates'
-import { dayProgress, golfMinutes, golfTotalWeek, macrosForDate, revenueToday, streaks, weightSeries, workoutsThisWeek } from '../stats'
+import { dayProgress, golfMinutes, golfTotalWeek, macrosForDate, revenueToday, streaks, weeklyReview, weightSeries, workoutsThisWeek } from '../stats'
 import { DAY_CODENAMES } from '../../store/seed'
 import { useStore } from '../../store/store'
 import { weekDates } from '../dates'
@@ -84,6 +84,7 @@ function buildSnapshot(): string {
   const st = streaks(s)
   const wk = workoutsThisWeek(s)
   const golfWeek = golfMinutes(s, weekDates())
+  const review = weeklyReview(s)
   const weights = weightSeries(s, 30)
   const latestW = weights[weights.length - 1]
   const hcp = [...s.handicap].sort((a, b) => (a.date < b.date ? -1 : 1)).pop()
@@ -121,7 +122,8 @@ function buildSnapshot(): string {
     `HANDICAP: ${hcp?.value ?? 'unknown'} (goal: +handicap)`,
     `STRENGTH TRAINING: ${wk.done}/${wk.planned} sessions completed this week`,
     `STREAKS: blackout ${st.blackout}d, reading ${st.reading}d, check-in ${st.checkin}d`,
-    `AURORA REVENUE: $${revenueToday(s).toFixed(0)}/${s.macros.kcal[0]} target${revenueToday(s) >= 1000 ? ' — TARGET HIT' : ''}`,
+    `WEEK VS LAST WEEK (his Review view sees these same numbers — use them when he asks to review his week): golf ${fmtHours(review.current.golfMin)} (was ${fmtHours(review.previous.golfMin)}), workouts ${review.current.workouts} (was ${review.previous.workouts}), run ${review.current.runKm}km (was ${review.previous.runKm}km), revenue $${review.current.revenue} (was $${review.previous.revenue}), reading ${fmtHours(review.current.readingMin)} (was ${fmtHours(review.previous.readingMin)}), schedule kept ${review.current.schedulePct}% (was ${review.previous.schedulePct}%)`,
+    `AURORA REVENUE: $${revenueToday(s).toFixed(0)} today / $1,000 daily target${revenueToday(s) >= 1000 ? ' — TARGET HIT' : ''}`,
     openBiz.length ? `AURORA TASKS (${openBiz.length} open): ${openBiz.slice(0, 5).map((t) => t.title).join(' | ')}` : 'AURORA: no open tasks',
     `GOALS: ${s.goals.length} active — ${s.goals
       .slice(0, 3)
