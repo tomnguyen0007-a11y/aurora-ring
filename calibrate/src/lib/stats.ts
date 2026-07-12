@@ -1,6 +1,6 @@
 import type { CalibrateState } from '../store/store'
 import type { GolfCategory } from '../store/types'
-import { lastNDates, todayISO, weekDates } from './dates'
+import { fmtMonthKey, lastNDates, lastNMonthKeys, monthKey, todayISO, weekDates } from './dates'
 
 export const GOLF_CATEGORIES: { id: GolfCategory; label: string }[] = [
   { id: 'putting', label: 'Putting' },
@@ -144,6 +144,139 @@ export function exerciseInsight(s: CalibrateState, exerciseId: string, repLow: n
   }
 
   return { best, last, sessions: logs.length, trend, suggestion }
+}
+
+// ——— Long-horizon history ———
+// Nothing is ever pruned from the store, so history views are pure aggregation:
+// bucket dated entries by month and sum.
+
+/** Bucket dated values into the last `months` calendar months (oldest → current). */
+export function monthlySeries(entries: { date: string; value: number }[], months = 12): { label: string; value: number }[] {
+  const keys = lastNMonthKeys(months)
+  const sums = new Map(keys.map((k) => [k, 0]))
+  for (const e of entries) {
+    const k = monthKey(e.date)
+    if (sums.has(k)) sums.set(k, sums.get(k)! + e.value)
+  }
+  return keys.map((k) => ({ label: fmtMonthKey(k), value: sums.get(k)! }))
+}
+
+/** Golf hours per month, last 12 months. */
+export function golfMonthlySeries(s: CalibrateState, months = 12): { label: string; value: number }[] {
+  return monthlySeries(
+    s.golfSessions.map((g) => ({ date: g.date, value: g.minutes })),
+    months,
+  ).map((m) => ({ ...m, value: Math.round((m.value / 60) * 10) / 10 }))
+}
+
+export interface GolfAllTime {
+  totalMinutes: number
+  sessions: number
+  byCategory: Record<GolfCategory, number>
+  firstDate: string | null
+  /** average minutes per week since the first logged session */
+  avgWeekMinutes: number
+}
+
+export function golfAllTime(s: CalibrateState): GolfAllTime {
+  const byCategory = { putting: 0, chipping: 0, 'long-game': 0, drills: 0, simulator: 0, 'on-course': 0 }
+  let totalMinutes = 0
+  let firstDate: string | null = null
+  for (const g of s.golfSessions) {
+    byCategory[g.category] += g.minutes
+    totalMinutes += g.minutes
+    if (!firstDate || g.date < firstDate) firstDate = g.date
+  }
+  const weeks = firstDate ? Math.max(1, (Date.now() - new Date(firstDate + 'T00:00').getTime()) / (7 * 86400000)) : 1
+  return { totalMinutes, sessions: s.golfSessions.length, byCategory, firstDate, avgWeekMinutes: Math.round(totalMinutes / weeks) }
+}
+
+/** Completed workouts (logged + Hevy-imported) per month. */
+export function trainingMonthlySeries(s: CalibrateState, months = 12): { label: string; value: number }[] {
+  const entries = [
+    ...s.workoutLogs.filter((l) => l.completed).map((l) => ({ date: l.date, value: 1 })),
+    ...s.hevySessions.map((h) => ({ date: h.date, value: 1 })),
+  ]
+  return monthlySeries(entries, months)
+}
+
+/** Running distance (km) per month. */
+export function runMonthlySeries(s: CalibrateState, months = 12): { label: string; value: number }[] {
+  return monthlySeries(
+    s.runLogs.map((r) => ({ date: r.date, value: r.distanceKm ?? 0 })),
+    months,
+  ).map((m) => ({ ...m, value: Math.round(m.value * 10) / 10 }))
+}
+
+/** Revenue per month. */
+export function revenueMonthlySeries(s: CalibrateState, months = 12): { label: string; value: number }[] {
+  return monthlySeries(
+    s.revenue.map((r) => ({ date: r.date, value: r.amount })),
+    months,
+  ).map((m) => ({ ...m, value: Math.round(m.value) }))
+}
+
+/** Reading hours per month. */
+export function readingMonthlySeries(s: CalibrateState, months = 12): { label: string; value: number }[] {
+  return monthlySeries(
+    Object.entries(s.readingLog).map(([date, minutes]) => ({ date, value: minutes })),
+    months,
+  ).map((m) => ({ ...m, value: Math.round((m.value / 60) * 10) / 10 }))
+}
+
+// ——— Weekly Review ———
+
+export interface WeekSnapshot {
+  golfMin: number
+  workouts: number
+  runKm: number
+  revenue: number
+  readingMin: number
+  /** average completion % across days that had schedule blocks AND have already happened */
+  schedulePct: number
+  checkIns: number
+}
+
+/** Everything that happened in the given dates, one number per pillar. */
+export function weekSnapshot(s: CalibrateState, dates: string[]): WeekSnapshot {
+  const set = new Set(dates)
+  const today = todayISO()
+  const golfMin = s.golfSessions.filter((g) => set.has(g.date)).reduce((a, g) => a + g.minutes, 0)
+  const workouts =
+    s.workoutLogs.filter((l) => set.has(l.date) && l.completed).length + s.hevySessions.filter((h) => set.has(h.date)).length
+  const runKm = s.runLogs.filter((r) => set.has(r.date)).reduce((a, r) => a + (r.distanceKm ?? 0), 0)
+  const revenue = s.revenue.filter((r) => set.has(r.date)).reduce((a, r) => a + r.amount, 0)
+  const readingMin = dates.reduce((a, d) => a + (s.readingLog[d] ?? 0), 0)
+  const checkIns = dates.filter((d) => !!s.checkIns[d]).length
+
+  const elapsed = dates.filter((d) => d <= today)
+  let pctSum = 0
+  let pctDays = 0
+  for (const d of elapsed) {
+    const wd = ((new Date(d + 'T12:00:00').getDay() + 6) % 7) as 0 | 1 | 2 | 3 | 4 | 5 | 6
+    const p = dayProgress(s, d, wd)
+    if (p.total > 0) {
+      pctSum += p.pct
+      pctDays++
+    }
+  }
+  return {
+    golfMin,
+    workouts,
+    runKm: Math.round(runKm * 10) / 10,
+    revenue,
+    readingMin,
+    schedulePct: pctDays ? Math.round(pctSum / pctDays) : 0,
+    checkIns,
+  }
+}
+
+/** This week vs last — the raw material of the Sunday review. */
+export function weeklyReview(s: CalibrateState): { current: WeekSnapshot; previous: WeekSnapshot } {
+  const now = new Date()
+  const prevRef = new Date(now)
+  prevRef.setDate(now.getDate() - 7)
+  return { current: weekSnapshot(s, weekDates(now)), previous: weekSnapshot(s, weekDates(prevRef)) }
 }
 
 export function golfWeeklySeries(s: CalibrateState, weeks = 8): { label: string; value: number }[] {

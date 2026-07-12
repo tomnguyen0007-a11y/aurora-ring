@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { PhotoGallery } from '../components/PhotoGallery'
 import { Bars, Empty, HudLabel, InlineEdit, Panel, Sparkline, StatTile } from '../components/ui'
 import { fmtDateShort, fmtHours, lastNDates, todayISO, weekDates } from '../lib/dates'
-import { GOLF_CATEGORIES, golfMinutes, golfWeeklySeries } from '../lib/stats'
+import { GOLF_CATEGORIES, golfAllTime, golfMinutes, golfMonthlySeries, golfWeeklySeries } from '../lib/stats'
 import { useStore } from '../store/store'
 import type { GolfCategory } from '../store/types'
 
@@ -264,7 +264,8 @@ export function Golf() {
           <div className="mt-5 border-t border-edge pt-4">
             <HudLabel>Handicap Trend</HudLabel>
             <div className="flex items-center justify-between gap-4">
-              <Sparkline points={hcp.map((h) => -h.value)} width={180} height={44} color="var(--color-affirm)" />
+              {/* Handicap is plotted negated so improvement rises; the dashed line is scratch (0.0) — the gateway to plus */}
+              <Sparkline points={hcp.map((h) => -h.value)} goal={0} width={180} height={44} color="var(--color-affirm)" />
               <form
                 className="flex gap-2"
                 onSubmit={(e) => {
@@ -354,6 +355,44 @@ export function Golf() {
           </div>
         </Panel>
       </div>
+
+      <GolfHistory />
     </div>
+  )
+}
+
+/** The long game, literally — every hour ever logged, month by month, plus all-time totals. */
+function GolfHistory() {
+  const s = useStore()
+  const all = golfAllTime(s)
+  if (!all.sessions) return null
+  const monthly = golfMonthlySeries(s)
+  return (
+    <Panel>
+      <HudLabel>History — hours per month</HudLabel>
+      <Bars data={monthly} color="var(--color-arc)" unit="h" height={110} />
+      <div className="mt-4 grid grid-cols-3 gap-3 border-t border-edge pt-4">
+        <StatTile label="All time" value={fmtHours(all.totalMinutes)} sub={all.firstDate ? `since ${fmtDateShort(all.firstDate)}` : undefined} accent="text-arc" />
+        <StatTile label="Sessions" value={all.sessions} sub="logged total" />
+        <StatTile label="Avg / week" value={fmtHours(all.avgWeekMinutes)} sub="lifetime pace" accent="text-affirm" />
+      </div>
+      <div className="mt-3 space-y-1.5">
+        {GOLF_CATEGORIES.filter((c) => all.byCategory[c.id] > 0)
+          .sort((a, b) => all.byCategory[b.id] - all.byCategory[a.id])
+          .map((c) => {
+            const mins = all.byCategory[c.id]
+            const pct = all.totalMinutes ? (mins / all.totalMinutes) * 100 : 0
+            return (
+              <div key={c.id} className="flex items-center gap-2 text-xs">
+                <span className="w-20 shrink-0 text-haze">{c.label}</span>
+                <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-black/40">
+                  <div className="h-full rounded-full" style={{ width: `${pct}%`, background: CAT_COLORS[c.id] }} />
+                </div>
+                <span className="num w-14 shrink-0 text-right text-ice">{fmtHours(mins)}</span>
+              </div>
+            )
+          })}
+      </div>
+    </Panel>
   )
 }

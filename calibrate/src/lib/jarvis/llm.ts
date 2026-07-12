@@ -172,7 +172,7 @@ Memory:
     TOM'S OWN KNOWLEDGE (his Brain Feed, in KNOWLEDGE above) is authoritative about HIS world — prefer it over generic advice.
 
 Navigation:
-  - {"type":"navigate","view":"today|goals|training|golf|nutrition|recovery|grocery|notes|business|books|mindset|markets|schedule|settings"}
+  - {"type":"navigate","view":"today|goals|training|golf|nutrition|recovery|grocery|notes|business|books|mindset|markets|news|schedule|review|settings"}
 
 EXECUTION RULES:
 - ACT, DON'T ANNOUNCE. When asked to change/edit/restructure ANYTHING, this reply MUST end with the json block

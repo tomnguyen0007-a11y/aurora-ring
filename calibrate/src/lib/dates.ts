@@ -43,6 +43,26 @@ export function lastNDates(n: number, ref: Date = new Date()): string[] {
   })
 }
 
+/** 'YYYY-MM' month bucket for an ISO date — history aggregation key */
+export function monthKey(iso: string): string {
+  return iso.slice(0, 7)
+}
+
+/** The last n month keys, oldest first, ending with the current month */
+export function lastNMonthKeys(n: number, ref: Date = new Date()): string[] {
+  return Array.from({ length: n }, (_, i) => {
+    const d = new Date(ref.getFullYear(), ref.getMonth() - (n - 1 - i), 1)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+  })
+}
+
+/** Short label for a 'YYYY-MM' key, e.g. 'Jul' (with year for January: 'Jan 27') */
+export function fmtMonthKey(key: string): string {
+  const [y, m] = key.split('-').map(Number)
+  const name = new Date(y, m - 1, 1).toLocaleDateString('en-GB', { month: 'short' })
+  return m === 1 ? `${name} ${String(y).slice(2)}` : name
+}
+
 /** minutes since midnight for "HH:MM" */
 export function toMinutes(hhmm: string): number {
   if (!hhmm) return 24 * 60

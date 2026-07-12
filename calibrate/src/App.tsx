@@ -22,6 +22,7 @@ const News = lazy(() => import('./modules/News').then((m) => ({ default: m.News 
 const Notes = lazy(() => import('./modules/Notes').then((m) => ({ default: m.Notes })))
 const Nutrition = lazy(() => import('./modules/Nutrition').then((m) => ({ default: m.Nutrition })))
 const Recovery = lazy(() => import('./modules/Recovery').then((m) => ({ default: m.Recovery })))
+const Review = lazy(() => import('./modules/Review').then((m) => ({ default: m.Review })))
 const Schedule = lazy(() => import('./modules/Schedule').then((m) => ({ default: m.Schedule })))
 const Settings = lazy(() => import('./modules/Settings').then((m) => ({ default: m.Settings })))
 const Training = lazy(() => import('./modules/Training').then((m) => ({ default: m.Training })))
@@ -59,6 +60,7 @@ export default function App() {
           {view === 'markets' && <Markets />}
           {view === 'news' && <News />}
           {view === 'schedule' && <Schedule />}
+          {view === 'review' && <Review />}
           {view === 'settings' && <Settings />}
         </Suspense>
       </Shell>

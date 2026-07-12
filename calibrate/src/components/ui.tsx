@@ -207,11 +207,14 @@ export function Sparkline({
   width = 140,
   height = 36,
   color = 'var(--color-steel)',
+  goal,
 }: {
   points: number[]
   width?: number
   height?: number
   color?: string
+  /** Draw a dashed target line at this value (scaled with the data range). */
+  goal?: number
 }) {
   if (points.length < 2) {
     return (
@@ -220,17 +223,20 @@ export function Sparkline({
       </svg>
     )
   }
-  const min = Math.min(...points)
-  const max = Math.max(...points)
+  // Include the goal in the scale so the target line is always on-canvas
+  const all = goal !== undefined ? [...points, goal] : points
+  const min = Math.min(...all)
+  const max = Math.max(...all)
   const span = max - min || 1
   const step = width / (points.length - 1)
-  const d = points
-    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${(i * step).toFixed(1)} ${(height - 4 - ((p - min) / span) * (height - 8)).toFixed(1)}`)
-    .join(' ')
-  const last = points[points.length - 1]
-  const lastY = height - 4 - ((last - min) / span) * (height - 8)
+  const yFor = (v: number) => height - 4 - ((v - min) / span) * (height - 8)
+  const d = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${(i * step).toFixed(1)} ${yFor(p).toFixed(1)}`).join(' ')
+  const lastY = yFor(points[points.length - 1])
   return (
     <svg width={width} height={height} className="overflow-visible">
+      {goal !== undefined && (
+        <line x1={0} y1={yFor(goal)} x2={width} y2={yFor(goal)} stroke="rgba(93,211,158,0.45)" strokeWidth={1} strokeDasharray="4 4" />
+      )}
       <path d={d} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
       <circle cx={width} cy={lastY} r={3} fill={color} style={{ filter: `drop-shadow(0 0 4px ${color})` }} />
     </svg>

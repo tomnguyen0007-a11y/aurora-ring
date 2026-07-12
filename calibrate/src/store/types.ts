@@ -369,4 +369,5 @@ export type ViewId =
   | 'markets'
   | 'news'
   | 'schedule'
+  | 'review'
   | 'settings'

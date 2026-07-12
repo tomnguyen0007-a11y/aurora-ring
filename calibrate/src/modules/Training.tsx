@@ -1,9 +1,9 @@
 import { CheckCircle2, Footprints, Plus, Sparkles, Trash2, TrendingUp } from 'lucide-react'
 import { useState } from 'react'
 import { PhotoGallery } from '../components/PhotoGallery'
-import { Empty, HudLabel, InlineEdit, Panel, Sparkline, StatTile } from '../components/ui'
+import { Bars, Empty, HudLabel, InlineEdit, Panel, Sparkline, StatTile } from '../components/ui'
 import { fmtDateShort, todayISO, WEEKDAY_NAMES, weekdayOf } from '../lib/dates'
-import { exerciseInsight, workoutsThisWeek } from '../lib/stats'
+import { exerciseInsight, runMonthlySeries, trainingMonthlySeries, workoutsThisWeek } from '../lib/stats'
 import { ollieWorkouts } from '../store/seed'
 import { useStore } from '../store/store'
 
@@ -267,6 +267,34 @@ export function Training() {
           </div>
         )}
       </Panel>
+
+      <TrainingHistory />
+    </div>
+  )
+}
+
+/** Month-by-month training volume — the consistency record behind the physique goal. */
+function TrainingHistory() {
+  const s = useStore()
+  const workouts = trainingMonthlySeries(s)
+  const runs = runMonthlySeries(s)
+  const anyWorkouts = workouts.some((m) => m.value > 0)
+  const anyRuns = runs.some((m) => m.value > 0)
+  if (!anyWorkouts && !anyRuns) return null
+  return (
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {anyWorkouts && (
+        <Panel>
+          <HudLabel>History — workouts per month</HudLabel>
+          <Bars data={workouts} color="var(--color-signal)" height={110} />
+        </Panel>
+      )}
+      {anyRuns && (
+        <Panel>
+          <HudLabel>History — run km per month</HudLabel>
+          <Bars data={runs} color="var(--color-affirm)" unit="km" height={110} />
+        </Panel>
+      )}
     </div>
   )
 }
