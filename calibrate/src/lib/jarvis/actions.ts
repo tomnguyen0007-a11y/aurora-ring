@@ -1,6 +1,6 @@
 import { todayISO, weekdayOf } from '../dates'
 import { useStore } from '../../store/store'
-import type { BlockTag, GolfCategory, Pillar, ViewId, Weekday } from '../../store/types'
+import type { BlockTag, BookStatus, GolfCategory, Pillar, ViewId, Weekday } from '../../store/types'
 import { inferCategory, inferImportance } from './memoryCategorize'
 
 // Structured actions Jarvis can execute against the app.
@@ -65,6 +65,21 @@ export type JarvisAction =
   | { type: 'remove_workout'; workout: string }
   // ——— fuelling framework: carb periodisation by day type (Nutrition view's day-type table) ———
   | { type: 'update_day_type_macro'; dayType: string; proteinGkg?: string; carbGkg?: string; fatGkg?: string }
+  // ——— total edit control: every logged thing is editable, not just deletable ———
+  | { type: 'update_golf'; session?: string; minutes?: number; category?: GolfCategory; date?: string } // session = category/note fragment; default most recent
+  | { type: 'update_run'; minutes?: number; distanceKm?: number; avgHr?: number } // most recent run
+  | { type: 'update_revenue'; match?: string; amount?: number; source?: string } // match by source fragment; default most recent
+  | { type: 'delete_revenue'; match?: string }
+  | { type: 'update_book'; title: string; newTitle?: string; author?: string; status?: BookStatus; currentPage?: number; totalPages?: number; rating?: number }
+  | { type: 'remove_book'; title: string }
+  | { type: 'update_goal'; goal: string; title?: string; target?: string; deadline?: string; notes?: string }
+  | { type: 'set_macros'; kcal?: number | [number, number]; protein?: number | [number, number]; carbs?: number | [number, number]; fat?: number | [number, number]; waterMl?: number }
+  | { type: 'update_photo'; photo?: string; caption?: string; category?: 'golf' | 'training' | 'other'; date?: string } // photo = caption fragment; default most recent
+  | { type: 'delete_photo'; photo?: string }
+  | { type: 'update_supplement'; name: string; newName?: string; dose?: string; timing?: string }
+  | { type: 'update_biz_task'; title: string; newTitle?: string; area?: string }
+  | { type: 'delete_handicap' } // remove the most recent handicap entry (mislogged value)
+  | { type: 'update_checkin'; date?: string; weightKg?: number; sleepH?: number; sleepQuality?: number; energy?: number; notes?: string }
 
 const VIEWS: ViewId[] = ['today', 'jarvis', 'goals', 'training', 'golf', 'nutrition', 'recovery', 'grocery', 'notes', 'business', 'books', 'mindset', 'markets', 'news', 'schedule', 'review', 'settings']
 
@@ -84,6 +99,19 @@ const ACTION_ALIASES: Record<string, JarvisAction['type']> = {
   add_food: 'log_food',
   add_water: 'log_water',
   log_grocery: 'add_grocery',
+  remove_revenue: 'delete_revenue',
+  delete_book: 'remove_book',
+  edit_book: 'update_book',
+  edit_goal: 'update_goal',
+  update_golf_session: 'update_golf',
+  edit_golf: 'update_golf',
+  remove_photo: 'delete_photo',
+  edit_photo: 'update_photo',
+  edit_supplement: 'update_supplement',
+  edit_biz_task: 'update_biz_task',
+  remove_handicap: 'delete_handicap',
+  edit_checkin: 'update_checkin',
+  log_checkin: 'update_checkin',
 }
 
 function normalizeAction(a: JarvisAction): JarvisAction {
@@ -526,6 +554,172 @@ export function applyActions(actions: JarvisAction[]): string[] {
             s.removeWorkout(w.id)
             receipts.push(`Workout removed: ${w.name}`)
           }
+          break
+        }
+
+        // ——— total edit control ———
+        case 'update_golf': {
+          // Prefer today's sessions, newest first; optionally narrow by category/notes fragment
+          const pool = [...s.golfSessions].sort((x, y) => (x.date < y.date ? 1 : -1))
+          const q = a.session?.toLowerCase()
+          const hit = q ? pool.find((g) => g.category.includes(q) || g.notes.toLowerCase().includes(q)) : (pool.find((g) => g.date === date) ?? pool[0])
+          if (hit) {
+            s.updateGolfSession(hit.id, {
+              ...(a.minutes != null && a.minutes > 0 ? { minutes: Math.round(a.minutes) } : {}),
+              ...(a.category ? { category: a.category } : {}),
+              ...(a.date ? { date: a.date } : {}),
+            })
+            receipts.push(`Golf session updated${a.minutes != null ? `: ${Math.round(a.minutes)} min` : ''}${a.category ? ` ${a.category}` : ''}`)
+          }
+          break
+        }
+        case 'update_run': {
+          const hit = s.runLogs.find((r) => r.date === date) ?? s.runLogs[0]
+          if (hit) {
+            s.updateRun(hit.id, {
+              ...(a.minutes != null ? { minutes: Math.round(a.minutes) } : {}),
+              ...(a.distanceKm != null ? { distanceKm: a.distanceKm } : {}),
+              ...(a.avgHr != null ? { avgHr: Math.round(a.avgHr) } : {}),
+            })
+            receipts.push(`Run updated${a.minutes != null ? `: ${Math.round(a.minutes)} min` : ''}${a.distanceKm != null ? ` ${a.distanceKm} km` : ''}`)
+          }
+          break
+        }
+        case 'update_revenue': {
+          const hit = a.match ? s.revenue.find((r) => r.source.toLowerCase().includes(a.match!.toLowerCase())) : s.revenue[0]
+          if (hit) {
+            s.updateRevenue(hit.id, {
+              ...(a.amount != null ? { amount: a.amount } : {}),
+              ...(a.source ? { source: a.source } : {}),
+            })
+            receipts.push(`Revenue entry updated${a.amount != null ? `: $${a.amount}` : ''}`)
+          }
+          break
+        }
+        case 'delete_revenue': {
+          const hit = a.match ? s.revenue.find((r) => r.source.toLowerCase().includes(a.match!.toLowerCase())) : s.revenue[0]
+          if (hit) {
+            s.removeRevenue(hit.id)
+            receipts.push(`Revenue entry removed: $${hit.amount} (${hit.source})`)
+          }
+          break
+        }
+        case 'update_book': {
+          const hit = s.books.find((b) => b.title.toLowerCase().includes(a.title.toLowerCase()))
+          if (hit) {
+            s.updateBook(hit.id, {
+              ...(a.newTitle ? { title: a.newTitle } : {}),
+              ...(a.author ? { author: a.author } : {}),
+              ...(a.status ? { status: a.status } : {}),
+              ...(a.currentPage != null ? { currentPage: a.currentPage } : {}),
+              ...(a.totalPages != null ? { totalPages: a.totalPages } : {}),
+              ...(a.rating != null ? { rating: a.rating } : {}),
+            })
+            receipts.push(`Book updated: ${a.newTitle ?? hit.title}${a.status ? ` → ${a.status}` : ''}${a.currentPage != null ? ` (p.${a.currentPage})` : ''}`)
+          }
+          break
+        }
+        case 'remove_book': {
+          const hit = s.books.find((b) => b.title.toLowerCase().includes(a.title.toLowerCase()))
+          if (hit) {
+            s.removeBook(hit.id)
+            receipts.push(`Book removed: ${hit.title}`)
+          }
+          break
+        }
+        case 'update_goal': {
+          const hit = s.goals.find((g) => g.title.toLowerCase().includes(a.goal.toLowerCase()))
+          if (hit) {
+            s.updateGoal(hit.id, {
+              ...(a.title ? { title: a.title } : {}),
+              ...(a.target != null ? { target: a.target } : {}),
+              ...(a.deadline !== undefined ? { deadline: a.deadline || null } : {}),
+              ...(a.notes != null ? { notes: a.notes } : {}),
+            })
+            receipts.push(`Goal updated: ${a.title ?? hit.title}`)
+          }
+          break
+        }
+        case 'set_macros': {
+          const range = (v: number | [number, number] | undefined, prev: [number, number]): [number, number] =>
+            v == null ? prev : Array.isArray(v) ? v : [v, v]
+          const m0 = s.macros
+          s.setMacros({
+            kcal: range(a.kcal, m0.kcal),
+            protein: range(a.protein, m0.protein),
+            carbs: range(a.carbs, m0.carbs),
+            fat: range(a.fat, m0.fat),
+            waterMl: a.waterMl ?? m0.waterMl,
+          })
+          receipts.push('Daily macro targets updated')
+          break
+        }
+        case 'update_photo': {
+          const pool = [...s.trainingPhotos].sort((x, y) => y.createdAt - x.createdAt)
+          const hit = a.photo ? pool.find((p) => (p.caption ?? '').toLowerCase().includes(a.photo!.toLowerCase())) : pool[0]
+          if (hit) {
+            s.updateTrainingPhoto(hit.id, {
+              ...(a.caption != null ? { caption: a.caption } : {}),
+              ...(a.category ? { category: a.category } : {}),
+              ...(a.date ? { date: a.date } : {}),
+            })
+            receipts.push(`Photo updated${a.caption ? ` — "${a.caption}"` : ''}`)
+          }
+          break
+        }
+        case 'delete_photo': {
+          const pool = [...s.trainingPhotos].sort((x, y) => y.createdAt - x.createdAt)
+          const hit = a.photo ? pool.find((p) => (p.caption ?? '').toLowerCase().includes(a.photo!.toLowerCase())) : pool[0]
+          if (hit) {
+            s.removeTrainingPhoto(hit.id)
+            receipts.push(`Photo deleted${hit.caption ? ` — "${hit.caption}"` : ''}`)
+          }
+          break
+        }
+        case 'update_supplement': {
+          const hit = s.supplements.find((x) => x.name.toLowerCase().includes(a.name.toLowerCase()))
+          if (hit) {
+            s.updateSupplement(hit.id, {
+              ...(a.newName ? { name: a.newName } : {}),
+              ...(a.dose != null ? { dose: a.dose } : {}),
+              ...(a.timing != null ? { timing: a.timing } : {}),
+            })
+            receipts.push(`Supplement updated: ${a.newName ?? hit.name}`)
+          }
+          break
+        }
+        case 'update_biz_task': {
+          const hit = s.bizTasks.find((t) => t.title.toLowerCase().includes(a.title.toLowerCase()))
+          if (hit) {
+            s.updateBizTask(hit.id, {
+              ...(a.newTitle ? { title: a.newTitle } : {}),
+              ...(a.area ? { area: a.area } : {}),
+            })
+            receipts.push(`AURORA task updated: ${a.newTitle ?? hit.title}`)
+          }
+          break
+        }
+        case 'delete_handicap': {
+          const latest = [...s.handicap].sort((x, y) => (x.date < y.date ? -1 : 1)).pop()
+          if (latest) {
+            s.removeHandicap(latest.id)
+            receipts.push(`Handicap entry removed: ${latest.value}`)
+          }
+          break
+        }
+        case 'update_checkin': {
+          const d = a.date || date
+          const prev = s.checkIns[d]
+          s.saveCheckIn({
+            date: d,
+            weightKg: a.weightKg ?? prev?.weightKg ?? null,
+            sleepH: a.sleepH ?? prev?.sleepH ?? null,
+            sleepQuality: a.sleepQuality ?? prev?.sleepQuality ?? null,
+            energy: a.energy ?? prev?.energy ?? null,
+            blackoutOnTime: prev?.blackoutOnTime ?? null,
+            notes: a.notes ?? prev?.notes ?? '',
+          })
+          receipts.push(`Check-in updated for ${d}`)
           break
         }
 

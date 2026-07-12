@@ -84,6 +84,7 @@ export interface CalibrateState {
   updateExercise: (workoutId: string, exId: string, patch: Partial<Exercise>) => void
   removeExercise: (workoutId: string, exId: string) => void
   addRun: (r: Omit<RunLog, 'id'>) => void
+  updateRun: (id: string, patch: Partial<Omit<RunLog, 'id'>>) => void
   removeRun: (id: string) => void
 
   // golf
@@ -93,6 +94,7 @@ export interface CalibrateState {
   updateGolfSession: (id: string, patch: Partial<Pick<GolfSession, 'minutes' | 'category' | 'date'>>) => void
   removeGolfSession: (id: string) => void
   addHandicap: (value: number, date?: string) => void
+  removeHandicap: (id: string) => void
 
   // golf practice timer — persisted wall-clock state; survives phone lock / PWA reload
   golfTimer: GolfTimerState | null
@@ -159,8 +161,10 @@ export interface CalibrateState {
   revenue: RevenueEntry[]
   addBizTask: (title: string, area?: string) => void
   toggleBizTask: (id: string) => void
+  updateBizTask: (id: string, patch: Partial<Pick<BizTask, 'title' | 'area'>>) => void
   removeBizTask: (id: string) => void
   addRevenue: (r: Omit<RevenueEntry, 'id'>) => void
+  updateRevenue: (id: string, patch: Partial<Omit<RevenueEntry, 'id'>>) => void
   removeRevenue: (id: string) => void
 
   // books
@@ -203,6 +207,7 @@ export interface CalibrateState {
   supLog: Record<string, Record<string, boolean>> // date -> supId -> taken
   toggleSupplement: (date: string, id: string) => void
   addSupplement: (name: string, dose: string, timing: string) => void
+  updateSupplement: (id: string, patch: Partial<Pick<SupplementItem, 'name' | 'dose' | 'timing'>>) => void
   removeSupplement: (id: string) => void
   moveSupplement: (id: string, position: number) => void // reorder within the stack
   setWater: (date: string, ml: number) => void // overwrite a day's total (corrections)
@@ -366,6 +371,7 @@ export const useStore = create<CalibrateState>()(
           ),
         })),
       addRun: (r) => set((s) => ({ runLogs: [{ ...r, id: uid('run') }, ...s.runLogs] })),
+      updateRun: (id, patch) => set((s) => ({ runLogs: s.runLogs.map((r) => (r.id === id ? { ...r, ...patch } : r)) })),
       removeRun: (id) => set((s) => ({ runLogs: s.runLogs.filter((r) => r.id !== id) })),
 
       addGolfSession: (g) => set((s) => ({ golfSessions: [{ ...g, id: uid('gs') }, ...s.golfSessions] })),
@@ -374,6 +380,7 @@ export const useStore = create<CalibrateState>()(
       removeGolfSession: (id) => set((s) => ({ golfSessions: s.golfSessions.filter((g) => g.id !== id) })),
       addHandicap: (value, date = todayISO()) =>
         set((s) => ({ handicap: [...s.handicap, { id: uid('hcp'), date, value }] })),
+      removeHandicap: (id) => set((s) => ({ handicap: s.handicap.filter((h) => h.id !== id) })),
 
       startGolfTimer: (category) => set({ golfTimer: { category, startedAt: Date.now(), accumulatedSec: 0 } }),
       pauseGolfTimer: () =>
@@ -513,8 +520,12 @@ export const useStore = create<CalibrateState>()(
         set((s) => ({ bizTasks: [{ id: uid('bt'), title, area, done: false, created: Date.now() }, ...s.bizTasks] })),
       toggleBizTask: (id) =>
         set((s) => ({ bizTasks: s.bizTasks.map((t) => (t.id === id ? { ...t, done: !t.done } : t)) })),
+      updateBizTask: (id, patch) =>
+        set((s) => ({ bizTasks: s.bizTasks.map((t) => (t.id === id ? { ...t, ...patch } : t)) })),
       removeBizTask: (id) => set((s) => ({ bizTasks: s.bizTasks.filter((t) => t.id !== id) })),
       addRevenue: (r) => set((s) => ({ revenue: [{ ...r, id: uid('rev') }, ...s.revenue] })),
+      updateRevenue: (id, patch) =>
+        set((s) => ({ revenue: s.revenue.map((r) => (r.id === id ? { ...r, ...patch } : r)) })),
       removeRevenue: (id) => set((s) => ({ revenue: s.revenue.filter((r) => r.id !== id) })),
 
       addBook: (b) =>
@@ -575,6 +586,8 @@ export const useStore = create<CalibrateState>()(
         }),
       addSupplement: (name, dose, timing) =>
         set((s) => ({ supplements: [...s.supplements, { id: uid('sup'), name, dose, timing }] })),
+      updateSupplement: (id, patch) =>
+        set((s) => ({ supplements: s.supplements.map((x) => (x.id === id ? { ...x, ...patch } : x)) })),
       removeSupplement: (id) => set((s) => ({ supplements: s.supplements.filter((x) => x.id !== id) })),
       moveSupplement: (id, position) =>
         set((s) => {
