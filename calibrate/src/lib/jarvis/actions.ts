@@ -66,7 +66,7 @@ export type JarvisAction =
   // ——— fuelling framework: carb periodisation by day type (Nutrition view's day-type table) ———
   | { type: 'update_day_type_macro'; dayType: string; proteinGkg?: string; carbGkg?: string; fatGkg?: string }
 
-const VIEWS: ViewId[] = ['today', 'jarvis', 'goals', 'training', 'golf', 'nutrition', 'recovery', 'grocery', 'notes', 'business', 'books', 'mindset', 'markets', 'schedule', 'settings']
+const VIEWS: ViewId[] = ['today', 'jarvis', 'goals', 'training', 'golf', 'nutrition', 'recovery', 'grocery', 'notes', 'business', 'books', 'mindset', 'markets', 'news', 'schedule', 'review', 'settings']
 
 // Models sometimes emit near-miss action names ("delete_note" for "remove_note").
 // Map the obvious synonyms instead of silently dropping the user's intent.

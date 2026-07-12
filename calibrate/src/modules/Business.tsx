@@ -2,8 +2,46 @@ import { Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Bars, CheckDot, Empty, HudLabel, Panel, StatTile } from '../components/ui'
 import { fmtDateShort, todayISO } from '../lib/dates'
-import { revenueSeries, revenueToday } from '../lib/stats'
+import { revenueMonthlySeries, revenueSeries, revenueToday } from '../lib/stats'
 import { useStore } from '../store/store'
+
+const DAILY_TARGET = 1000
+
+/** The mission, made visible: today's progress toward $1k/day plus the honest run-rate. */
+function RevenueMission({ today, series }: { today: number; series: { date: string; value: number }[] }) {
+  const pct = Math.min(100, (today / DAILY_TARGET) * 100)
+  const last7 = series.slice(-7)
+  const avg7 = last7.reduce((a, p) => a + p.value, 0) / Math.max(1, last7.length)
+  const avg30 = series.reduce((a, p) => a + p.value, 0) / Math.max(1, series.length)
+  const revenueDays = series.filter((p) => p.value > 0).length
+  return (
+    <Panel glow={today >= DAILY_TARGET}>
+      <div className="mb-2 flex items-baseline justify-between">
+        <HudLabel className="!mb-0">Mission — $1,000 / day</HudLabel>
+        <span className="num text-sm font-bold text-ice">
+          ${today.toFixed(0)} <span className="text-xs font-normal text-fog">/ ${DAILY_TARGET.toLocaleString()}</span>
+        </span>
+      </div>
+      <div className="h-2.5 overflow-hidden rounded-full bg-black/40">
+        <div
+          className={`h-full rounded-full transition-all duration-700 ${today >= DAILY_TARGET ? 'bg-affirm shadow-[0_0_12px_rgba(93,211,158,0.6)]' : 'bg-signal'}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-fog">
+        <span>
+          7d run-rate <span className="num text-ice">${avg7.toFixed(0)}/day</span>
+        </span>
+        <span>
+          30d run-rate <span className="num text-ice">${avg30.toFixed(0)}/day</span>
+        </span>
+        <span>
+          revenue days <span className="num text-ice">{revenueDays}/30</span>
+        </span>
+      </div>
+    </Panel>
+  )
+}
 
 const AREAS = ['Content', 'Store', 'Marketing', 'Suppliers', 'Ops']
 
@@ -27,6 +65,8 @@ export function Business() {
         <h1 className="h-lumen text-3xl font-bold tracking-wide">AURORA COMMAND</h1>
         <p className="mt-1 text-sm text-haze">Smart Ring operations. Target: $1,000/day. Protect the deep work windows.</p>
       </header>
+
+      <RevenueMission today={today} series={series} />
 
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
         <StatTile label="Today" value={`$${today.toFixed(0)}`} sub="of $1,000 target" accent={today >= 1000 ? 'text-affirm' : 'text-signal'} />
@@ -126,6 +166,13 @@ export function Business() {
           )}
         </Panel>
       </div>
+
+      {s.revenue.length > 0 && (
+        <Panel>
+          <HudLabel>History — revenue per month</HudLabel>
+          <Bars data={revenueMonthlySeries(s)} color="var(--color-affirm)" unit="$" height={110} />
+        </Panel>
+      )}
     </div>
   )
 }

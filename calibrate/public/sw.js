@@ -1,4 +1,4 @@
-const CACHE = 'calibrate-shell-v7.9'
+const CACHE = 'calibrate-shell-v8.0'
 
 self.addEventListener('install', (e) => {
   self.skipWaiting()

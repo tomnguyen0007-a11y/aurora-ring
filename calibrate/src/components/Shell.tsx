@@ -4,6 +4,7 @@ import {
   Bot,
   Brain,
   Briefcase,
+  CalendarCheck,
   CalendarRange,
   CandlestickChart,
   Crosshair,
@@ -40,6 +41,7 @@ const NAV: { id: ViewId; label: string; icon: typeof Activity }[] = [
   { id: 'markets', label: 'Markets', icon: CandlestickChart },
   { id: 'news', label: 'News', icon: Globe },
   { id: 'schedule', label: 'Schedule', icon: CalendarRange },
+  { id: 'review', label: 'Review', icon: CalendarCheck },
   { id: 'settings', label: 'Settings', icon: Settings2 },
 ]
 

@@ -1,8 +1,8 @@
 import { BookOpen, Plus, Star, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import { Empty, HudLabel, Panel, StatTile } from '../components/ui'
+import { Bars, Empty, HudLabel, Panel, StatTile } from '../components/ui'
 import { todayISO } from '../lib/dates'
-import { streaks } from '../lib/stats'
+import { readingMonthlySeries, streaks } from '../lib/stats'
 import { useStore } from '../store/store'
 import type { BookStatus } from '../store/types'
 
@@ -43,6 +43,12 @@ export function Books() {
             </button>
           )}
         </div>
+        {Object.keys(s.readingLog).length > 0 && (
+          <div className="mt-4 border-t border-edge pt-4">
+            <HudLabel>History — reading hours per month</HudLabel>
+            <Bars data={readingMonthlySeries(s)} color="var(--color-arc)" unit="h" height={90} />
+          </div>
+        )}
       </Panel>
 
       <Panel>

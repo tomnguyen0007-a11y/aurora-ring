@@ -1,6 +1,7 @@
 import { BrainCircuit, CheckCircle2, Download, FileText, Github, KeyRound, Play, Plus, RefreshCw, RotateCcw, Trash2, Upload, Volume2, XCircle } from 'lucide-react'
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { HudLabel, Panel } from '../components/ui'
+import { downloadBackup, isCalibrateBackup, restoreBackup } from '../lib/backup'
 import { syncGithubKnowledge } from '../lib/jarvis/githubSync'
 import { llmConfigured, testProvider } from '../lib/jarvis/llm'
 import { englishVoices, speak } from '../lib/speech'
@@ -42,23 +43,28 @@ export function Settings() {
   const fileRef = useRef<HTMLInputElement>(null)
   const [confirmReset, setConfirmReset] = useState(false)
 
-  const exportData = () => {
-    const raw = localStorage.getItem('calibrate-v1') ?? '{}'
-    const blob = new Blob([raw], { type: 'application/json' })
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(blob)
-    a.download = `calibrate-backup-${new Date().toISOString().slice(0, 10)}.json`
-    a.click()
-    URL.revokeObjectURL(a.href)
-  }
+  // Full backup includes photo blobs from IndexedDB — raw localStorage alone
+  // stopped being a complete backup when photos moved out of the persist store.
+  const exportData = () => void downloadBackup()
 
   const importData = (file: File) => {
     const reader = new FileReader()
-    reader.onload = () => {
+    reader.onload = async () => {
       try {
-        JSON.parse(String(reader.result)) // validate
-        localStorage.setItem('calibrate-v1', String(reader.result))
-        location.reload()
+        const parsed: unknown = JSON.parse(String(reader.result))
+        if (!confirm('Importing a backup REPLACES everything currently in the app. Continue?')) return
+        if (isCalibrateBackup(parsed)) {
+          await restoreBackup(parsed) // reloads on success
+          return
+        }
+        // Legacy backups are the raw persist payload ({ state, version }) with no photos
+        const legacy = parsed as { state?: unknown; version?: unknown }
+        if (legacy && typeof legacy === 'object' && legacy.state && typeof legacy.version === 'number') {
+          localStorage.setItem('calibrate-v1', String(reader.result))
+          location.reload()
+          return
+        }
+        alert('Not a valid Calibrate backup file.')
       } catch {
         alert('Not a valid Calibrate backup file.')
       }
@@ -315,8 +321,9 @@ export function Settings() {
           )}
         </div>
         <p className="mt-3 text-[11px] leading-relaxed text-fog">
-          All data lives in this browser (localStorage). Export a backup before clearing browser data, and import it on
-          your other devices to move data between phone and desktop.
+          All data lives on this device. Export includes everything — logs, settings, knowledge, and photos — in one
+          file; import it on another device to move your whole setup, or keep it as a safety net before clearing
+          browser data.
         </p>
       </Panel>
     </div>
