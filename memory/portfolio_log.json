@@ -1,0 +1,71 @@
+{
+  "meta": {
+    "created": "2026-07-11",
+    "last_run": "2026-07-11",
+    "account_currency_base": "EUR",
+    "risk_rules": {
+      "single_name_nav_trim_threshold_pct": 35,
+      "add_size_nav_target_pct": 2
+    },
+    "notes": "Read-only research log. No trades are ever placed by this routine."
+  },
+  "runs": [
+    {
+      "timestamp": "2026-07-11",
+      "account": {
+        "nav_usd": 1261.212,
+        "nav_eur_base": 1107.7268,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -172.41,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 12.76000025,
+          "prior_close": 13.51,
+          "gap_pct": -5.55,
+          "market_value": 880.44001725,
+          "nav_pct": 69.81,
+          "unrealized_pnl": -108.25688275,
+          "daily_pnl": -51.74998275,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "78 of 80 required events reported as of company's May 11, 2026 update; final analysis triggers on 80th event; topline readout guided for 2H 2026",
+            "next_check": "watch for 8-K / press release announcing 80th event"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 69.8% of NAV vs 35% trim threshold"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 145.91999815,
+          "prior_close": 152.16,
+          "gap_pct": -4.1,
+          "market_value": 379.39199519,
+          "nav_pct": 30.08,
+          "unrealized_pnl": -65.53100481,
+          "daily_pnl": -16.22400481,
+          "catalyst": {
+            "name": "$25B investment-grade bond deal (priced late Jun/early Jul 2026, $89B demand, proceeds retired bridge loan) + staggered IPO lockup",
+            "status": "First lockup tranche (20% of 180-day block) unlocks 2nd full trading day after Q2 2026 earnings, expected late Jul/early Aug 2026; further 7% tranches Aug-Oct; full lockup expires Dec 8 2026",
+            "next_check": "Q2 2026 earnings date announcement; stock reaction into lockup"
+          },
+          "risk_flag": "WATCH - within cap but second-largest single-name risk; lockup supply event ~2-3 weeks out"
+        }
+      ],
+      "flags": [
+        "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
+        "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
+        "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    }
+  ]
+}
