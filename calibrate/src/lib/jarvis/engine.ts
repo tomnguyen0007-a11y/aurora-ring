@@ -546,11 +546,19 @@ export function runLocalEngine(input: string, contextUserName?: string): EngineR
     }
   }
 
-  // ——— food WITH explicit numbers: "log food chicken bowl 750 kcal 55 protein" / "ate ... 800 kcal" ———
-  m = t.match(/(?:log |ate |had |eat )(?:food )?(.+?)(?:[,;]|\s[-–])?\s*(\d{2,4})\s*(?:k?cal(?:ories)?)?(?:\D+(\d{1,3})\s*(?:g\s*)?protein)?/i)
-  if (m && /kcal|cal|protein|ate|had|food|meal/i.test(t)) {
+  // ——— food WITH explicit calories: "log food chicken bowl 750 kcal 55 protein" / "ate ... 800 kcal" ———
+  // The kcal unit is REQUIRED: a bare number after a food is usually grams or a
+  // quantity ("150 g of yogurt"), and logging grams as calories is exactly the
+  // kind of garbage entry that destroys trust. Messages describing food without
+  // explicit calories fall through to the LLM, which estimates like a
+  // nutritionist per item (or hits the food database) instead of regex-guessing.
+  // Multi-item messages ("porridge, then 150g yogurt") also belong to the LLM —
+  // each item needs its own entry with its own macros.
+  const multiItem = /(?:,|\band then\b|\bplus\b|\bfollowed by\b|&)/i.test(t)
+  m = t.match(/(?:log |ate |had |eat )(?:food )?(.+?)(?:[,;]|\s[-–])?\s*(\d{2,4})\s*k?cal(?:ories)?\b(?:\D+(\d{1,3})\s*(?:g\s*)?protein)?/i)
+  if (m && !multiItem) {
     const foodName = m[1]
-      .replace(/\b(a|an|the|some|my)\b/gi, '')
+      .replace(/\b(a|an|the|some|my|in)\b/gi, '')
       .trim()
     const kcal = parseInt(m[2])
     const protein = m[3] ? parseInt(m[3]) : undefined

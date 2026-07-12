@@ -286,6 +286,34 @@ describe('workout: cue management', () => {
 })
 
 // ————————————————————————————————————————————————————————
+// NUTRITION: the local fast-path must never regex-guess macros
+// ————————————————————————————————————————————————————————
+describe('nutrition: local logging guardrails', () => {
+  it('logs locally when explicit kcal is given ("ate chicken wrap 650 kcal")', () => {
+    const res = runLocalEngine('ate chicken wrap 650 kcal')
+    expect(res).not.toBeNull()
+    expect(findFood('chicken wrap')).toMatchObject({ kcal: 650 })
+  })
+
+  it('never logs a gram weight as calories — "150 g of yogurt" defers to the LLM', () => {
+    // The production bug: "log in a instaant chocolate poridge with hot water,
+    // and then 150 g of white yougurt greek" got logged as ONE food at 150 kcal
+    // ("chocolate" contains "ate", and the bare 150 was read as kcal).
+    const res = runLocalEngine('log in a instaant chocolate poridge with hot water, and then 150 g of white yougurt greek')
+    expect(res).toBeNull() // LLM estimates each item properly instead
+    expect(useStore.getState().foodLogs.some((f) => f.kcal === 150)).toBe(false)
+  })
+
+  it('multi-item food messages defer to the LLM even with a number present', () => {
+    expect(runLocalEngine('had porridge and then 300 g yogurt')).toBeNull()
+  })
+
+  it('a word merely containing "ate" (chocolate) does not trip food logging', () => {
+    expect(runLocalEngine('log chocolate progress 85')).toBeNull()
+  })
+})
+
+// ————————————————————————————————————————————————————————
 // NUTRITION: correct/update last or named food entry
 // ————————————————————————————————————————————————————————
 describe('nutrition: update food macros', () => {
