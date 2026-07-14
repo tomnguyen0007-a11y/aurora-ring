@@ -4,7 +4,7 @@ import { useStore } from '../../store/store'
 import type { DayTypeMacro } from '../../store/seed'
 import type { Exercise, FoodLog, GolfCategory, Weekday, Workout } from '../../store/types'
 import { applyActions, type JarvisAction } from './actions'
-import { lookupFood } from './foodDb'
+import { countFoodMatches, lookupFood } from './foodDb'
 import { llmConfigured } from './llm'
 import { parseGrams } from './nutrition'
 
@@ -584,6 +584,9 @@ export function runLocalEngine(input: string, contextUserName?: string): EngineR
     t.match(/^(?:log|add|track|record)\s+(?:my |a |an |the )?(.+?(?:shake|smoothie|meal|snack|breakfast|lunch|dinner|protein|whey|yogurt|yoghurt))\b.*/i)
   if (m) {
     const foodName = m[1].trim()
+    // "ate chicken and rice" hits TWO database foods — logging only one would be
+    // silently wrong. Fall through so each item gets its own proper entry.
+    if (countFoodMatches(foodName) > 1) return null
     const found = lookupFood(foodName)
 
     if (found) {

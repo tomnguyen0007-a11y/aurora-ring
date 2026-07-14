@@ -10,8 +10,11 @@
 // is answering: the model contributes language understanding, the numbers
 // come from databases.
 // ————————————————————————————————————————————————————————
-import type { JarvisAction } from './actions'
-import { lookupFood } from './foodDb'
+import { todayISO } from '../dates'
+import { macrosForDate } from '../stats'
+import { useStore } from '../../store/store'
+import { applyActions, type JarvisAction } from './actions'
+import { countFoodMatches, foodTokens, lookupFood } from './foodDb'
 
 export interface ResolvedFood {
   kcal: number
@@ -110,6 +113,108 @@ export async function resolveNutrition(name: string, portionGrams?: number | nul
   }
 
   return null
+}
+
+// ————————————————————————————————————————————————————————
+// LOCAL MULTI-ITEM FOOD LOGGING — the "no model needed" path.
+// A food message like "log chocolate porridge, and then 150g greek yogurt"
+// is split into items, each resolved from real data (DB scaled to portion,
+// then Open Food Facts). If EVERY item resolves, it's logged instantly —
+// free, offline-capable for DB items, identical quality on any device.
+// If anything can't be resolved from data, return null and let the LLM
+// handle it — precision over coverage.
+// ————————————————————————————————————————————————————————
+
+const FOOD_VERB = /^(?:log(?:\s+in)?|ate|had|eat|eating|track|record|i\s+(?:ate|had))\b/i
+// Messages that are clearly other domains (the local engine or LLM owns those).
+// Plain water logging is handled by the engine's own patterns before this runs,
+// so "water" as an ingredient ("porridge with hot water") must NOT disqualify.
+const NON_FOOD =
+  /\b(golf|putt(?:ing)?|chip(?:ping)?|drill|run|ran|km|sleep|slept|read(?:ing)?|revenue|sale|weight|kg|handicap|workout|gym|note|idea|thought|task|goal|mantra|book|remember|photo|schedule|block|session)\b/i
+
+/** True when an Open Food Facts result plausibly IS the asked-for item, not a random product. */
+function offRelevant(segment: string, productName: string): boolean {
+  const pn = productName.toLowerCase()
+  return segment
+    .toLowerCase()
+    .split(/[^a-z]+/)
+    .filter((w) => w.length >= 4)
+    .some((w) => pn.includes(w))
+}
+
+/**
+ * Try to fully resolve a food-logging message from real data with NO language
+ * model involved. Returns the spoken reply + receipts after logging, or null
+ * when this message isn't confidently food / any item can't be resolved.
+ */
+export async function tryLocalFoodLog(text: string): Promise<{ reply: string; receipts: string[] } | null> {
+  const t = text.trim()
+  if (!FOOD_VERB.test(t) || NON_FOOD.test(t)) return null
+
+  const body = t
+    .replace(FOOD_VERB, '')
+    .replace(/^\s*(?:a|an|the|some|my|of)\s+/i, '')
+    .trim()
+  if (body.length < 3) return null
+
+  const segments = body
+    .split(/[,;]|\band then\b|\bthen\b|\bplus\b|\bfollowed by\b|&/i)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 2)
+  if (!segments.length || segments.length > 4) return null
+
+  const resolved: { name: string; hit: ResolvedFood }[] = []
+  for (const seg of segments) {
+    // A segment with no meaningful food tokens ("hot water" alone) means this
+    // message isn't confidently food — hand it to the engine/LLM instead.
+    if (!foodTokens(seg).length) return null
+    // Two different DB foods in ONE segment ("chicken and rice") — logging just
+    // one would be silently wrong; the LLM should split that into proper items.
+    if (countFoodMatches(seg) > 1) return null
+
+    const grams = parseGrams(seg)
+    let hit: ResolvedFood | null = null
+    let name = ''
+
+    const local = lookupFood(seg)
+    if (local) {
+      hit = scaled(local, grams)
+      name = local.matchedAlias
+    }
+    if (!hit) {
+      const off = await searchOpenFoodFacts(seg.replace(/\d+(?:[.,]\d+)?\s*(?:g|grams?|ml)\b/gi, '').trim() || seg)
+      if (off && offRelevant(seg, off.name)) {
+        const g = grams ?? 100
+        const f = g / 100
+        hit = {
+          kcal: Math.round(off.per100g.kcal * f),
+          protein: round1(off.per100g.protein * f),
+          carbs: round1(off.per100g.carbs * f),
+          fat: round1(off.per100g.fat * f),
+          source: 'Open Food Facts',
+          detail: `${off.name}, ${g}g`,
+        }
+        name = off.name
+      }
+    }
+    if (!hit) return null // one unresolvable item → the whole message goes to the LLM
+
+    resolved.push({ name: grams ? `${name} (${grams}g)` : name, hit })
+  }
+
+  const actions: JarvisAction[] = resolved.map(({ name, hit }) => ({
+    type: 'log_food',
+    name,
+    kcal: hit.kcal,
+    protein: hit.protein,
+    carbs: hit.carbs,
+    fat: hit.fat,
+    resolvedFrom: hit.source,
+  }))
+  const receipts = applyActions(actions)
+  const total = macrosForDate(useStore.getState(), todayISO()).kcal
+  const items = resolved.map((x) => `${x.name} — ${x.hit.kcal} kcal / ${x.hit.protein}g protein`).join(', ')
+  return { reply: `Fuel logged from real data: ${items}. Running total ${total} kcal.`, receipts }
 }
 
 /**

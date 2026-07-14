@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { useStore } from '../../store/store'
 import { applyActions } from './actions'
-import { enrichLogFoodActions, parseGrams, resolveNutrition } from './nutrition'
+import { lookupFood } from './foodDb'
+import { enrichLogFoodActions, parseGrams, resolveNutrition, tryLocalFoodLog } from './nutrition'
 
 function offResponse(products: unknown[]) {
   return new Response(JSON.stringify({ products }), { status: 200 })
@@ -64,6 +65,49 @@ describe('deterministic nutrition resolution — data over model guesses', () =>
     const receipts = applyActions([{ type: 'log_food', name: 'grandmas mystery casserole' }])
     expect(useStore.getState().foodLogs).toHaveLength(0)
     expect(receipts[0]).toMatch(/couldn't verify macros/i)
+  })
+
+  it('lookupFood is order-free and misspelling-tolerant ("150 g of white yougurt greek")', () => {
+    const hit = lookupFood('150 g of white yougurt greek')
+    expect(hit).not.toBeNull()
+    expect(hit!.aliases[0]).toBe('greek yogurt')
+    expect(lookupFood('instaant chocolate poridge with hot water')?.aliases[0]).toBe('chocolate porridge')
+  })
+
+  it('NO-MODEL PATH: the exact reported message logs two accurate entries with zero LLM', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => offResponse([]))) // OFF not even needed — DB covers both
+    const res = await tryLocalFoodLog('log in a instaant chocolate poridge with hot water, and then 150 g of white yougurt greek')
+    expect(res).not.toBeNull()
+    const logs = useStore.getState().foodLogs
+    expect(logs).toHaveLength(2)
+    expect(logs.find((f) => f.name.includes('porridge'))).toMatchObject({ kcal: 210 })
+    expect(logs.find((f) => f.name.includes('yogurt'))).toMatchObject({ kcal: 88 })
+    expect(res!.reply).toContain('Fuel logged from real data')
+  })
+
+  it('NO-MODEL PATH: unknown branded item resolves via Open Food Facts with a relevance guard', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        offResponse([{ product_name: 'Snickers Bar', nutriments: { 'energy-kcal_100g': 488, proteins_100g: 8.5, carbohydrates_100g: 60, fat_100g: 24 } }]),
+      ),
+    )
+    const res = await tryLocalFoodLog('log a snickers 50g')
+    expect(res).not.toBeNull()
+    expect(useStore.getState().foodLogs[0]).toMatchObject({ kcal: 244 }) // 488 × 0.5
+  })
+
+  it('NO-MODEL PATH: bails to the LLM rather than half-logging ("chicken and rice" = two foods)', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => offResponse([])))
+    expect(await tryLocalFoodLog('had chicken breast and rice')).toBeNull()
+    expect(useStore.getState().foodLogs).toHaveLength(0)
+  })
+
+  it('NO-MODEL PATH: never hijacks non-food messages', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => offResponse([])))
+    expect(await tryLocalFoodLog('log a note about my swing thoughts')).toBeNull()
+    expect(await tryLocalFoodLog('log 45 min run')).toBeNull()
+    expect(await tryLocalFoodLog('remember that I prefer morning workouts')).toBeNull()
   })
 
   it('the reported failure end-to-end: porridge + 150g yogurt become two accurate entries', async () => {

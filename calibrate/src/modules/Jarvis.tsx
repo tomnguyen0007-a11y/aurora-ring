@@ -2,6 +2,7 @@ import { Bot, ImagePlus, KeyRound, Mic, MicOff, SendHorizonal, Trash2, VolumeX, 
 import { useEffect, useRef, useState } from 'react'
 import { createDictation, createSpeechStream, speak, stopSpeaking, type Dictation, type SpeechProviders } from '../lib/speech'
 import { runLocalEngine } from '../lib/jarvis/engine'
+import { tryLocalFoodLog } from '../lib/jarvis/nutrition'
 import { AllProvidersRateLimitedError, getProviderChain, llmConfigured, providerLabel, runLlm, runLlmStream } from '../lib/jarvis/llm'
 import { buildJarvisContext } from '../lib/jarvis/context'
 import { useStore } from '../store/store'
@@ -78,6 +79,17 @@ export function useJarvis() {
       if (localResult) {
         pushChat({ role: 'jarvis', text: localResult.reply, acted: localResult.receipts })
         say(localResult.reply)
+        setLastJarvisSource('local')
+        return
+      }
+
+      // Multi-item / portioned food messages resolve from REAL nutrition data
+      // (food DB + Open Food Facts) with no language model at all — instant,
+      // free, and identical quality regardless of which brain is configured.
+      const foodResult = await tryLocalFoodLog(t)
+      if (foodResult) {
+        pushChat({ role: 'jarvis', text: foodResult.reply, acted: foodResult.receipts })
+        say(foodResult.reply)
         setLastJarvisSource('local')
         return
       }

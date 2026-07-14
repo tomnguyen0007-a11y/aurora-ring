@@ -44,34 +44,79 @@ export const FOOD_DB: FoodFact[] = [
   { aliases: ['creatine'], gramsPerServing: 5, serving: '5g', kcal: 0, protein: 0, carbs: 0, fat: 0 },
 ]
 
-function normalize(name: string): string {
+// Common misspellings normalised per-token so "yougurt"/"poridge" still hit real data
+const SPELLFIX: Record<string, string> = {
+  yougurt: 'yogurt',
+  yoghurt: 'yogurt',
+  poridge: 'porridge',
+  porrige: 'porridge',
+  porage: 'porridge',
+  bannana: 'banana',
+  chiken: 'chicken',
+  brocoli: 'broccoli',
+}
+
+const FILLER = new Set(['a', 'an', 'the', 'some', 'my', 'of', 'with', 'and', 'in', 'on', 'hot', 'cold', 'fresh', 'plain', 'white', 'water'])
+
+/** Meaningful (non-filler) food tokens in a phrase — empty means "nothing to resolve here". */
+export function foodTokens(name: string): string[] {
+  return tokens(name)
+}
+
+function tokens(name: string): string[] {
   return name
     .toLowerCase()
-    .replace(/\b(a|an|the|some|my|of|with|and)\b/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
+    .split(/[^a-z0-9]+/)
+    .map((t) => SPELLFIX[t] ?? t)
+    .filter((t) => t && !FILLER.has(t) && !/^\d+$/.test(t) && t !== 'g' && t !== 'ml' && t !== 'grams')
 }
 
 /**
  * Look up known macros for a food by name. Matches on substring against
- * aliases (longest alias wins first, so "protein shake" beats bare "shake").
- * Returns null if nothing in the local DB matches — callers must NOT invent
- * numbers in that case; ask the user for the label instead.
+ * aliases, or on token subset — order-free and misspelling-tolerant, so
+ * "150 g of white yougurt greek" still resolves to the greek yogurt entry.
+ * Returns null if nothing matches — callers must NOT invent numbers then.
  */
 export function lookupFood(name: string): (FoodFact & { matchedAlias: string }) | null {
-  const n = normalize(name)
-  if (!n) return null
+  const nTokens = tokens(name)
+  if (!nTokens.length) return null
+  const n = nTokens.join(' ')
+  const nSet = new Set(nTokens)
 
-  let best: { fact: FoodFact; alias: string } | null = null
+  let best: { fact: FoodFact; alias: string; a: string } | null = null
   for (const fact of FOOD_DB) {
     for (const alias of fact.aliases) {
-      if (n.includes(alias) || alias.includes(n)) {
-        if (!best || alias.length > best.alias.length) best = { fact, alias }
+      const aTokens = tokens(alias)
+      if (!aTokens.length) continue
+      const a = aTokens.join(' ')
+      const subset = aTokens.every((t) => nSet.has(t))
+      if (n.includes(a) || a.includes(n) || subset) {
+        if (!best || a.length > best.a.length) best = { fact, alias, a }
       }
     }
   }
 
   return best ? { ...best.fact, matchedAlias: best.alias } : null
+}
+
+/**
+ * How many DISTINCT database foods appear in this phrase. "chicken and rice"
+ * hits two — logging just one of them would be silently wrong, so callers
+ * treat >1 as "this needs per-item handling", not a single-food match.
+ */
+export function countFoodMatches(name: string): number {
+  const nSet = new Set(tokens(name))
+  if (!nSet.size) return 0
+  let count = 0
+  for (const fact of FOOD_DB) {
+    if (fact.aliases.some((alias) => {
+      const aTokens = tokens(alias)
+      return aTokens.length > 0 && aTokens.every((t) => nSet.has(t))
+    })) {
+      count++
+    }
+  }
+  return count
 }
 
 /** Formatted reference table injected into Jarvis's grounded knowledge. */
