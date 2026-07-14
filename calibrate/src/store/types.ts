@@ -251,7 +251,8 @@ export interface ChatMsg {
   text: string
   ts: number
   acted?: string[] // human-readable list of actions Jarvis executed
-  image?: string // data URL of an attached reference photo (user messages)
+  image?: string // data URL of an attached reference photo (legacy single-photo messages)
+  images?: string[] // data URLs — a message can carry several photos at once
 }
 
 export type MemoryCategory = 'golf' | 'fitness' | 'nutrition' | 'life' | 'business' | 'recovery'

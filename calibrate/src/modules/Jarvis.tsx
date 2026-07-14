@@ -64,17 +64,18 @@ export function useJarvis() {
    *    SPOKEN sentence-by-sentence while the model is still thinking.
    * 4. Actions execute after the stream completes; receipts attach to the reply.
    */
-  const send = async (text: string, image?: string) => {
+  const send = async (text: string, images?: string[]) => {
     const t = text.trim()
-    if ((!t && !image) || busy) return
+    const imgs = images?.length ? images : undefined
+    if ((!t && !imgs) || busy) return
 
     stopSpeaking() // barge-in: a new query silences the previous reply
 
-    pushChat({ role: 'user', text: t || '(photo)', image })
+    pushChat({ role: 'user', text: t || (imgs && imgs.length > 1 ? `(${imgs.length} photos)` : '(photo)'), images: imgs })
 
     const ctx = buildJarvisContext(t)
 
-    if (!image) {
+    if (!imgs) {
       const localResult = runLocalEngine(t, ctx.userName)
       if (localResult) {
         pushChat({ role: 'jarvis', text: localResult.reply, acted: localResult.receipts })
@@ -98,8 +99,8 @@ export function useJarvis() {
     // Check the chain for THIS request — a photo needs a vision-capable provider,
     // which may exclude the chosen primary (Groq has none) but still succeed via
     // another configured provider automatically.
-    if (getProviderChain({ needsVision: !!image }).length === 0) {
-      const fallback = image
+    if (getProviderChain({ needsVision: !!imgs }).length === 0) {
+      const fallback = imgs
         ? llmConfigured()
           ? `None of your configured brains read photos, sir — Groq doesn't support vision. Add a Gemini, Anthropic or OpenRouter key in Settings for this one, or describe what's in the photo and I'll work from that.`
           : `I need a brain to see photos, sir. Add a free Gemini, Anthropic or OpenRouter key in Settings and I can read images for you.`
@@ -114,7 +115,7 @@ export function useJarvis() {
     const voice = providers ? createSpeechStream(providers) : null
 
     try {
-      const res = await runLlmStream(t || 'What do you make of this?', ctx, image, {
+      const res = await runLlmStream(t || (imgs && imgs.length > 1 ? 'What do you make of these photos?' : 'What do you make of this?'), ctx, imgs, {
         onDelta: (delta, full) => {
           setDraft(full)
           voice?.push(delta)
@@ -136,7 +137,7 @@ export function useJarvis() {
       }
       // Streaming failed (proxy/CORS/transient) — retry once via the non-streaming path
       try {
-        const res = await runLlm(t || 'What do you make of this?', ctx, image)
+        const res = await runLlm(t || (imgs && imgs.length > 1 ? 'What do you make of these photos?' : 'What do you make of this?'), ctx, imgs)
         pushChat({ role: 'jarvis', text: res.reply, acted: res.receipts })
         setLastJarvisSource(res.provider ?? null)
         say(res.reply)
@@ -166,16 +167,18 @@ export function Jarvis() {
   const s = useStore()
   const { send, busy, draft } = useJarvis()
   const [input, setInput] = useState('')
-  const [image, setImage] = useState<string | null>(null)
+  const [images, setImages] = useState<string[]>([])
   const [listening, setListening] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const recRef = useRef<Dictation | null>(null)
 
-  const attachPhoto = async (file: File) => {
+  const MAX_PHOTOS = 4
+  const attachPhotos = async (files: FileList | File[]) => {
     try {
       const { fileToDataURL } = await import('../lib/image')
-      setImage(await fileToDataURL(file))
+      const urls = await Promise.all(Array.from(files).map((f) => fileToDataURL(f)))
+      setImages((prev) => [...prev, ...urls].slice(0, MAX_PHOTOS))
     } catch {
       /* ignore bad files */
     }
@@ -183,11 +186,13 @@ export function Jarvis() {
 
   // Paste a screenshot straight into the conversation (desktop: Cmd/Ctrl+V)
   const handlePaste = (e: React.ClipboardEvent) => {
-    const item = Array.from(e.clipboardData.items).find((i) => i.type.startsWith('image/'))
-    const file = item?.getAsFile()
-    if (file) {
+    const files = Array.from(e.clipboardData.items)
+      .filter((i) => i.type.startsWith('image/'))
+      .map((i) => i.getAsFile())
+      .filter((f): f is File => !!f)
+    if (files.length) {
       e.preventDefault()
-      void attachPhoto(file)
+      void attachPhotos(files)
     }
   }
 
@@ -228,9 +233,9 @@ export function Jarvis() {
 
   const submit = (e?: React.FormEvent) => {
     e?.preventDefault()
-    send(input, image ?? undefined)
+    send(input, images.length ? images : undefined)
     setInput('')
-    setImage(null)
+    setImages([])
   }
 
   return (
@@ -297,7 +302,13 @@ export function Jarvis() {
                   : 'rounded-bl-md bg-black/35 text-ice/95 ring-1 ring-edge'
               }`}
             >
-              {m.image && <img src={m.image} alt="attached reference" className="mb-2 max-h-56 w-full rounded-lg object-cover" />}
+              {(m.images?.length || m.image) && (
+                <div className={`mb-2 grid gap-1.5 ${(m.images?.length ?? 1) > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                  {(m.images ?? (m.image ? [m.image] : [])).map((img, i) => (
+                    <img key={i} src={img} alt={`attached reference ${i + 1}`} className="max-h-56 w-full rounded-lg object-cover" />
+                  ))}
+                </div>
+              )}
               <div className="whitespace-pre-wrap">{m.text}</div>
               {m.acted && m.acted.length > 0 && (
                 <ul className="mt-2 space-y-0.5 border-t border-edge pt-2">
@@ -342,13 +353,26 @@ export function Jarvis() {
         <div ref={bottomRef} />
       </div>
 
-      {image && (
-        <div className="mt-3 flex items-center gap-3 rounded-xl border border-arc/30 bg-arc/[0.05] p-2">
-          <img src={image} alt="attachment preview" className="h-14 w-14 rounded-lg object-cover" />
-          <span className="flex-1 text-xs text-haze">Photo attached — ask Jarvis about it.</span>
-          <button type="button" className="btn btn-ghost !px-2" aria-label="Remove photo" onClick={() => setImage(null)}>
-            <X size={16} />
-          </button>
+      {images.length > 0 && (
+        <div className="mt-3 flex items-center gap-2 rounded-xl border border-arc/30 bg-arc/[0.05] p-2">
+          <div className="flex gap-1.5">
+            {images.map((img, i) => (
+              <span key={i} className="relative">
+                <img src={img} alt={`attachment ${i + 1} preview`} className="h-14 w-14 rounded-lg object-cover" />
+                <button
+                  type="button"
+                  aria-label={`Remove photo ${i + 1}`}
+                  onClick={() => setImages((prev) => prev.filter((_, j) => j !== i))}
+                  className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/85 text-haze ring-1 ring-edge"
+                >
+                  <X size={11} />
+                </button>
+              </span>
+            ))}
+          </div>
+          <span className="min-w-0 flex-1 text-xs text-haze">
+            {images.length > 1 ? `${images.length} photos attached` : 'Photo attached'} — ask Jarvis, or say “log these”.
+          </span>
         </div>
       )}
 
@@ -371,7 +395,7 @@ export function Jarvis() {
           onClick={() => fileRef.current?.click()}
           aria-label="Attach a photo"
           className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-all ${
-            image ? 'border-arc bg-arc/20 text-arc' : 'border-edge-strong bg-black/30 text-haze hover:border-arc/50 hover:text-ice'
+            images.length ? 'border-arc bg-arc/20 text-arc' : 'border-edge-strong bg-black/30 text-haze hover:border-arc/50 hover:text-ice'
           }`}
         >
           <ImagePlus size={18} />
@@ -381,13 +405,14 @@ export function Jarvis() {
           ref={fileRef}
           type="file"
           accept="image/*"
+          multiple
           className="hidden"
-          onChange={(e) => e.target.files?.[0] && attachPhoto(e.target.files[0])}
+          onChange={(e) => e.target.files?.length && attachPhotos(e.target.files)}
         />
 
         <input
           className="field h-11 flex-1 !rounded-full !px-4"
-          placeholder={listening ? 'Listening…' : image ? 'Ask about the photo…' : 'Speak or type to Jarvis…'}
+          placeholder={listening ? 'Listening…' : images.length > 1 ? 'Ask about the photos…' : images.length ? 'Ask about the photo…' : 'Speak or type to Jarvis…'}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onPaste={handlePaste}
@@ -397,7 +422,7 @@ export function Jarvis() {
         <button
           type="submit"
           aria-label="Send"
-          disabled={(!input.trim() && !image) || busy}
+          disabled={(!input.trim() && !images.length) || busy}
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/15 bg-gradient-to-b from-[#2a2f38] to-[#08090d] text-ice shadow-[0_0_18px_rgba(234,244,255,0.3),0_6px_20px_-6px_rgba(0,0,0,0.8)] transition-all disabled:opacity-50"
         >
           <SendHorizonal size={18} />

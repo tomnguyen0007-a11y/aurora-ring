@@ -1,7 +1,7 @@
 import { useStore } from '../../store/store'
 import type { ChatMsg, LlmProvider } from '../../store/types'
 import { splitDataURL } from '../image'
-import { applyActions, type JarvisAction } from './actions'
+import { applyActions, assignPhotoAttachments, type JarvisAction } from './actions'
 import { enrichLogFoodActions } from './nutrition'
 import { formatContextForLlm, type JarvisContext } from './context'
 import { canCall, rateLimitStatus, recordCall } from './rateLimit'
@@ -112,9 +112,10 @@ Logging:
   - {"type":"log_revenue","amount":N,"source":"..."}
   - {"type":"log_handicap","value":N}
   - {"type":"log_photo","category":"golf|training|other","caption":"<short description of what's in it>"}
-    Use this ONLY when a photo is attached to this message and he asks to log/save it (e.g. "log this into golf
-    training", "save this"). It goes into his dated photo gallery (Golf/Training view) — never emit this without an
-    attached photo, and never invent a caption he didn't describe or confirm.
+    Use this ONLY when photo(s) are attached to this message and he asks to log/save them (e.g. "log these into
+    golf training", "save this"). Goes into his dated photo gallery (Golf/Training view). Several photos attached →
+    emit one log_photo PER photo, in the same order they were attached, each with its own caption describing that
+    photo. Never emit this without an attached photo, and never invent a caption he didn't describe or confirm.
 
 Adding:
   - {"type":"add_grocery","name":"...","qty":"..."}
@@ -270,27 +271,21 @@ function historyFor(chat: ChatMsg[], userText: string): { role: 'user' | 'assist
   return merged
 }
 
-async function callAnthropic(userText: string, ctx: JarvisContext, image?: string): Promise<string> {
+async function callAnthropic(userText: string, ctx: JarvisContext, images?: string[]): Promise<string> {
   const { settings, chat } = useStore.getState()
   const messages = historyFor(chat, userText) as Array<{ role: 'user' | 'assistant'; content: unknown }>
 
-  if (image) {
-    const { mime, base64 } = splitDataURL(image)
+  if (images?.length) {
+    const content = [
+      ...images.map((img) => {
+        const { mime, base64 } = splitDataURL(img)
+        return { type: 'image', source: { type: 'base64', media_type: mime, data: base64 } }
+      }),
+      { type: 'text', text: userText },
+    ]
     const last = messages[messages.length - 1]
-    if (!last) {
-      messages.push({
-        role: 'user',
-        content: [
-          { type: 'image', source: { type: 'base64', media_type: mime, data: base64 } },
-          { type: 'text', text: userText },
-        ],
-      })
-    } else {
-      last.content = [
-        { type: 'image', source: { type: 'base64', media_type: mime, data: base64 } },
-        { type: 'text', text: userText },
-      ]
-    }
+    if (!last) messages.push({ role: 'user', content })
+    else last.content = content
   }
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -322,7 +317,7 @@ async function callAnthropic(userText: string, ctx: JarvisContext, image?: strin
     .join('')
 }
 
-async function callGemini(userText: string, ctx: JarvisContext, image?: string): Promise<string> {
+async function callGemini(userText: string, ctx: JarvisContext, images?: string[]): Promise<string> {
   const { settings, chat } = useStore.getState()
   const model = settings.geminiModel || 'gemini-2.5-flash'
 
@@ -331,10 +326,10 @@ async function callGemini(userText: string, ctx: JarvisContext, image?: string):
     parts: [{ text: m.content }] as Array<Record<string, unknown>>,
   }))
 
-  if (image) {
-    const { mime, base64 } = splitDataURL(image)
-    const lastContent = contents[contents.length - 1]
-    if (lastContent) {
+  const lastContent = contents[contents.length - 1]
+  if (lastContent) {
+    for (const img of images ?? []) {
+      const { mime, base64 } = splitDataURL(img)
       lastContent.parts.unshift({ inlineData: { mimeType: mime, data: base64 } })
     }
   }
@@ -569,13 +564,13 @@ async function healOpenRouterModel(needsVision: boolean): Promise<OpenRouterHeal
   }
   return { model: null, diagnosis }
 }
-function openRouterMessages(userText: string, image: string | undefined, chat: ChatMsg[]) {
+function openRouterMessages(userText: string, images: string[] | undefined, chat: ChatMsg[]) {
   const history = historyFor(chat, userText) as { role: 'user' | 'assistant'; content: string | unknown }[]
-  if (image) {
+  if (images?.length) {
     const last = history[history.length - 1]
     const content = [
       { type: 'text', text: userText },
-      { type: 'image_url', image_url: { url: image } },
+      ...images.map((img) => ({ type: 'image_url', image_url: { url: img } })),
     ]
     if (last && last.role === 'user') last.content = content
     else history.push({ role: 'user', content })
@@ -583,9 +578,9 @@ function openRouterMessages(userText: string, image: string | undefined, chat: C
   return history
 }
 
-async function callOpenRouter(userText: string, ctx: JarvisContext, image?: string, isRetry = false): Promise<string> {
+async function callOpenRouter(userText: string, ctx: JarvisContext, images?: string[], isRetry = false): Promise<string> {
   const { settings, chat } = useStore.getState()
-  const messages = [{ role: 'system', content: buildSystemPrompt(ctx, { webSearch: false }) }, ...openRouterMessages(userText, image, chat)]
+  const messages = [{ role: 'system', content: buildSystemPrompt(ctx, { webSearch: false }) }, ...openRouterMessages(userText, images, chat)]
 
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
@@ -606,8 +601,8 @@ async function callOpenRouter(userText: string, ctx: JarvisContext, image?: stri
     const err = new ProviderError('openrouter', res.status, accountIssue ?? `OpenRouter ${res.status}: ${body.slice(0, 180)}`)
     // Free models get retired without notice — swap in a live one and retry once
     if (!isRetry && !accountIssue && isModelGone(err)) {
-      const healed = await healOpenRouterModel(!!image)
-      if (healed.model) return callOpenRouter(userText, ctx, image, true)
+      const healed = await healOpenRouterModel(!!images?.length)
+      if (healed.model) return callOpenRouter(userText, ctx, images, true)
       if (healed.diagnosis) throw new ProviderError('openrouter', res.status, healed.diagnosis)
     }
     throw err
@@ -626,16 +621,16 @@ export function llmConfigured(): boolean {
   return getProviderChain().length > 0
 }
 
-async function callProvider(p: LlmProvider, userText: string, ctx: JarvisContext, image?: string): Promise<string> {
+async function callProvider(p: LlmProvider, userText: string, ctx: JarvisContext, images?: string[]): Promise<string> {
   switch (p) {
     case 'anthropic':
-      return callAnthropic(userText, ctx, image)
+      return callAnthropic(userText, ctx, images)
     case 'gemini':
-      return callGemini(userText, ctx, image)
+      return callGemini(userText, ctx, images)
     case 'groq':
       return callGroq(userText, ctx)
     case 'openrouter':
-      return callOpenRouter(userText, ctx, image)
+      return callOpenRouter(userText, ctx, images)
     default:
       throw new Error('no provider configured')
   }
@@ -645,18 +640,18 @@ async function streamProvider(
   p: LlmProvider,
   userText: string,
   ctx: JarvisContext,
-  image: string | undefined,
+  images: string[] | undefined,
   onText: (delta: string) => void,
 ): Promise<string> {
   switch (p) {
     case 'anthropic':
-      return streamAnthropic(userText, ctx, image, onText)
+      return streamAnthropic(userText, ctx, images, onText)
     case 'gemini':
-      return streamGemini(userText, ctx, image, onText)
+      return streamGemini(userText, ctx, images, onText)
     case 'groq':
       return streamGroq(userText, ctx, onText)
     case 'openrouter':
-      return streamOpenRouter(userText, ctx, image, onText)
+      return streamOpenRouter(userText, ctx, images, onText)
     default:
       throw new Error('no provider configured')
   }
@@ -703,12 +698,11 @@ function parseActionsJson(payload: string): { actions?: JarvisAction[] } | null 
  * (local DB scaled to portion, then Open Food Facts) before applying — the
  * model names the food, the numbers come from databases.
  */
-async function extractAndApplyActions(raw: string, image?: string): Promise<LlmResult> {
+async function extractAndApplyActions(raw: string, images?: string[]): Promise<LlmResult> {
   let receipts: string[] = []
   let reply = raw
 
-  const prepare = async (actions: JarvisAction[]) =>
-    enrichLogFoodActions(image ? actions.map((a) => (a.type === 'log_photo' ? { ...a, imageData: image } : a)) : actions)
+  const prepare = async (actions: JarvisAction[]) => enrichLogFoodActions(assignPhotoAttachments(actions, images))
 
   // Properly closed blocks
   const blocks = [...raw.matchAll(/```json\s*([\s\S]*?)```/g)]
@@ -758,8 +752,8 @@ function displayPortion(raw: string): string {
  * 3. Parse and execute action blocks
  * 4. Return clean reply + receipts, noting the switch if one happened
  */
-export async function runLlm(userText: string, ctx: JarvisContext, image?: string): Promise<LlmResult> {
-  const chain = getProviderChain({ needsVision: !!image })
+export async function runLlm(userText: string, ctx: JarvisContext, images?: string[]): Promise<LlmResult> {
+  const chain = getProviderChain({ needsVision: !!images?.length })
   if (!chain.length) {
     throw new Error('LLM not configured. Add an API key in Settings.')
   }
@@ -776,8 +770,8 @@ export async function runLlm(userText: string, ctx: JarvisContext, image?: strin
     }
     recordCall(p)
     try {
-      const raw = await callProvider(p, userText, ctx, image)
-      const result = await extractAndApplyActions(raw, image)
+      const raw = await callProvider(p, userText, ctx, images)
+      const result = await extractAndApplyActions(raw, images)
       result.provider = p
       if (i > 0) {
         result.receipts = [`Auto-switched to ${providerLabel(p)} — ${providerLabel(chain[0])} was unavailable`, ...result.receipts]
@@ -821,17 +815,19 @@ async function consumeSSE(res: Response, onData: (json: string) => void): Promis
   }
 }
 
-async function streamAnthropic(userText: string, ctx: JarvisContext, image: string | undefined, onText: (delta: string) => void): Promise<string> {
+async function streamAnthropic(userText: string, ctx: JarvisContext, images: string[] | undefined, onText: (delta: string) => void): Promise<string> {
   const { settings, chat } = useStore.getState()
   const messages = historyFor(chat, userText) as Array<{ role: 'user' | 'assistant'; content: unknown }>
 
-  if (image) {
-    const { mime, base64 } = splitDataURL(image)
-    const last = messages[messages.length - 1]
+  if (images?.length) {
     const content = [
-      { type: 'image', source: { type: 'base64', media_type: mime, data: base64 } },
+      ...images.map((img) => {
+        const { mime, base64 } = splitDataURL(img)
+        return { type: 'image', source: { type: 'base64', media_type: mime, data: base64 } }
+      }),
       { type: 'text', text: userText },
     ]
+    const last = messages[messages.length - 1]
     if (last) last.content = content
     else messages.push({ role: 'user', content })
   }
@@ -874,7 +870,7 @@ async function streamAnthropic(userText: string, ctx: JarvisContext, image: stri
   return full
 }
 
-async function streamGemini(userText: string, ctx: JarvisContext, image: string | undefined, onText: (delta: string) => void): Promise<string> {
+async function streamGemini(userText: string, ctx: JarvisContext, images: string[] | undefined, onText: (delta: string) => void): Promise<string> {
   const { settings, chat } = useStore.getState()
   const model = settings.geminiModel || 'gemini-2.5-flash'
 
@@ -883,8 +879,8 @@ async function streamGemini(userText: string, ctx: JarvisContext, image: string 
     parts: [{ text: m.content }] as Array<Record<string, unknown>>,
   }))
 
-  if (image) {
-    const { mime, base64 } = splitDataURL(image)
+  for (const img of images ?? []) {
+    const { mime, base64 } = splitDataURL(img)
     contents[contents.length - 1]?.parts.unshift({ inlineData: { mimeType: mime, data: base64 } })
   }
 
@@ -965,12 +961,12 @@ async function streamGroq(userText: string, ctx: JarvisContext, onText: (delta: 
 async function streamOpenRouter(
   userText: string,
   ctx: JarvisContext,
-  image: string | undefined,
+  images: string[] | undefined,
   onText: (delta: string) => void,
   isRetry = false,
 ): Promise<string> {
   const { settings, chat } = useStore.getState()
-  const messages = [{ role: 'system', content: buildSystemPrompt(ctx, { webSearch: false }) }, ...openRouterMessages(userText, image, chat)]
+  const messages = [{ role: 'system', content: buildSystemPrompt(ctx, { webSearch: false }) }, ...openRouterMessages(userText, images, chat)]
 
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
@@ -996,8 +992,8 @@ async function streamOpenRouter(
     const err = new ProviderError('openrouter', res.status, accountIssue ?? `OpenRouter ${res.status}: ${body.slice(0, 180)}`)
     // Free models get retired without notice — swap in a live one and retry once
     if (!isRetry && !accountIssue && isModelGone(err)) {
-      const healed = await healOpenRouterModel(!!image)
-      if (healed.model) return streamOpenRouter(userText, ctx, image, onText, true)
+      const healed = await healOpenRouterModel(!!images?.length)
+      if (healed.model) return streamOpenRouter(userText, ctx, images, onText, true)
       if (healed.diagnosis) throw new ProviderError('openrouter', res.status, healed.diagnosis)
     }
     throw err
@@ -1036,8 +1032,8 @@ export interface StreamHandlers {
  * provider in the chain fails. Action blocks execute after the stream
  * completes, exactly like the non-streaming path.
  */
-export async function runLlmStream(userText: string, ctx: JarvisContext, image: string | undefined, handlers: StreamHandlers): Promise<LlmResult> {
-  const chain = getProviderChain({ needsVision: !!image })
+export async function runLlmStream(userText: string, ctx: JarvisContext, images: string[] | undefined, handlers: StreamHandlers): Promise<LlmResult> {
+  const chain = getProviderChain({ needsVision: !!images?.length })
   if (!chain.length) {
     throw new Error('LLM not configured. Add an API key in Settings.')
   }
@@ -1065,8 +1061,8 @@ export async function runLlmStream(userText: string, ctx: JarvisContext, image: 
     }
 
     try {
-      const full = await streamProvider(p, userText, ctx, image, collect)
-      const result = await extractAndApplyActions(full, image)
+      const full = await streamProvider(p, userText, ctx, images, collect)
+      const result = await extractAndApplyActions(full, images)
       result.provider = p
       if (i > 0) {
         result.receipts = [`Auto-switched to ${providerLabel(p)} — ${providerLabel(chain[0])} was unavailable`, ...result.receipts]

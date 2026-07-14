@@ -619,7 +619,7 @@ export const useStore = create<CalibrateState>()(
         Object.fromEntries(
           Object.entries(s)
             .filter(([k]) => k !== 'view' && k !== 'lastJarvisSource')
-            .map(([k, v]) => (k === 'chat' ? [k, (v as ChatMsg[]).map(({ image: _img, ...m }) => m)] : [k, v])),
+            .map(([k, v]) => (k === 'chat' ? [k, (v as ChatMsg[]).map(({ image: _img, images: _imgs, ...m }) => m)] : [k, v])),
         ) as CalibrateState,
       // backfill new/preloaded collections for existing users without touching their data
       migrate: (persisted, version) => {
