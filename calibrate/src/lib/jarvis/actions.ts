@@ -121,6 +121,21 @@ function normalizeAction(a: JarvisAction): JarvisAction {
   return mapped ? ({ ...a, type: mapped } as JarvisAction) : a
 }
 
+/**
+ * Attach the ACTUAL sent photos to log_photo actions — the model only ever
+ * emits category/caption, never image bytes. With several photos attached,
+ * log_photo actions map to them in order (1st action → 1st photo …); if the
+ * model emits fewer actions than photos that's its choice, and extras of
+ * either side fall back to the last available photo rather than dropping.
+ */
+export function assignPhotoAttachments(actions: JarvisAction[], images?: string[]): JarvisAction[] {
+  if (!images?.length) return actions
+  let i = 0
+  return actions.map((a) =>
+    a.type === 'log_photo' && !a.imageData ? { ...a, imageData: images[Math.min(i++, images.length - 1)] } : a,
+  )
+}
+
 /** Apply actions to the store; returns human-readable receipts. */
 export function applyActions(actions: JarvisAction[]): string[] {
   const s = useStore.getState()

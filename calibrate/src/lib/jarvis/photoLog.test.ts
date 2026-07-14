@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { loadPhoto } from '../../lib/photoDb'
 import { migrateLegacyPhotoBlobs, useStore } from '../../store/store'
-import { applyActions } from './actions'
+import { applyActions, assignPhotoAttachments } from './actions'
 
 function reset() {
   useStore.setState({ trainingPhotos: [] })
@@ -32,6 +32,36 @@ describe('log_photo action → dated photo gallery', () => {
   it('defaults to today when no date is given, and respects an explicit one', () => {
     applyActions([{ type: 'log_photo', category: 'other', imageData: 'data:image/jpeg;base64,BBBB', date: '2026-01-01' }])
     expect(useStore.getState().trainingPhotos[0].date).toBe('2026-01-01')
+  })
+
+  it('multiple attached photos map to log_photo actions in order, each with its own image', () => {
+    const imgs = ['data:image/jpeg;base64,ONE', 'data:image/jpeg;base64,TWO', 'data:image/jpeg;base64,THREE']
+    const actions = assignPhotoAttachments(
+      [
+        { type: 'log_photo', category: 'golf', caption: 'drill setup' },
+        { type: 'log_water', ml: 500 }, // non-photo actions must pass through untouched
+        { type: 'log_photo', category: 'golf', caption: 'ball flight' },
+        { type: 'log_photo', category: 'training', caption: 'gym pump' },
+      ],
+      imgs,
+    )
+    applyActions(actions)
+    const photos = useStore.getState().trainingPhotos
+    expect(photos).toHaveLength(3)
+    // addTrainingPhoto prepends, so reverse-chronological: THREE, TWO, ONE
+    expect(photos.map((p) => p.caption)).toEqual(['gym pump', 'ball flight', 'drill setup'])
+  })
+
+  it('more log_photo actions than photos: extras reuse the last photo instead of dropping', () => {
+    const actions = assignPhotoAttachments(
+      [
+        { type: 'log_photo', category: 'golf', caption: 'a' },
+        { type: 'log_photo', category: 'golf', caption: 'b' },
+      ],
+      ['data:image/jpeg;base64,ONLY'],
+    )
+    applyActions(actions)
+    expect(useStore.getState().trainingPhotos).toHaveLength(2)
   })
 
   it('migrates legacy inline blobs into photoDb and strips them from the store', async () => {

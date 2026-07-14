@@ -10,34 +10,37 @@ export function JarvisDock() {
   const lastJarvisSource = useStore((s) => s.lastJarvisSource)
   const { send, busy } = useJarvis()
   const [input, setInput] = useState('')
-  const [image, setImage] = useState<string | null>(null)
+  const [images, setImages] = useState<string[]>([])
   const [flash, setFlash] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const attachPhoto = async (file: File) => {
+  const attachPhotos = async (files: FileList | File[]) => {
     try {
       const { fileToDataURL } = await import('../lib/image')
-      setImage(await fileToDataURL(file))
+      const urls = await Promise.all(Array.from(files).map((f) => fileToDataURL(f)))
+      setImages((prev) => [...prev, ...urls].slice(0, 4))
     } catch {
       /* ignore bad files */
     }
   }
 
   const handlePaste = (e: React.ClipboardEvent) => {
-    const item = Array.from(e.clipboardData.items).find((i) => i.type.startsWith('image/'))
-    const file = item?.getAsFile()
-    if (file) {
+    const files = Array.from(e.clipboardData.items)
+      .filter((i) => i.type.startsWith('image/'))
+      .map((i) => i.getAsFile())
+      .filter((f): f is File => !!f)
+    if (files.length) {
       e.preventDefault()
-      void attachPhoto(file)
+      void attachPhotos(files)
     }
   }
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!input.trim() && !image) return
-    send(input, image ?? undefined)
+    if (!input.trim() && !images.length) return
+    send(input, images.length ? images : undefined)
     setInput('')
-    setImage(null)
+    setImages([])
     setFlash(true)
     setTimeout(() => setFlash(false), 2600)
   }
@@ -54,11 +57,13 @@ export function JarvisDock() {
             <span className="line-clamp-2">{lastJarvis.text}</span>
           </button>
         )}
-        {image && (
+        {images.length > 0 && (
           <div className="glass-strong mb-2 flex items-center gap-2 rounded-xl p-2 animate-rise">
-            <img src={image} alt="attachment preview" className="h-10 w-10 rounded-lg object-cover" />
-            <span className="flex-1 text-xs text-haze">Screenshot attached — ask Jarvis about it.</span>
-            <button type="button" className="btn btn-ghost !px-1.5" aria-label="Remove image" onClick={() => setImage(null)}>
+            {images.map((img, i) => (
+              <img key={i} src={img} alt={`attachment ${i + 1} preview`} className="h-10 w-10 rounded-lg object-cover" />
+            ))}
+            <span className="flex-1 text-xs text-haze">{images.length > 1 ? `${images.length} screenshots` : 'Screenshot'} attached — ask Jarvis.</span>
+            <button type="button" className="btn btn-ghost !px-1.5" aria-label="Remove images" onClick={() => setImages([])}>
               <X size={14} />
             </button>
           </div>
@@ -86,7 +91,7 @@ export function JarvisDock() {
             onClick={() => fileRef.current?.click()}
             aria-label="Attach a screenshot"
             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all ${
-              image ? 'border-ice/40 text-ice' : 'border-edge-strong text-haze hover:border-ice/40 hover:text-ice'
+              images.length ? 'border-ice/40 text-ice' : 'border-edge-strong text-haze hover:border-ice/40 hover:text-ice'
             }`}
           >
             <ImagePlus size={15} />
@@ -95,8 +100,9 @@ export function JarvisDock() {
             ref={fileRef}
             type="file"
             accept="image/*"
+            multiple
             className="hidden"
-            onChange={(e) => e.target.files?.[0] && attachPhoto(e.target.files[0])}
+            onChange={(e) => e.target.files?.length && attachPhotos(e.target.files)}
           />
           <input
             className="min-w-0 flex-1 bg-transparent text-sm text-ice outline-none placeholder:text-fog"
@@ -109,7 +115,7 @@ export function JarvisDock() {
           <button
             type="submit"
             aria-label="Send to Jarvis"
-            disabled={(!input.trim() && !image) || busy}
+            disabled={(!input.trim() && !images.length) || busy}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-b border border-white/15 from-[#2a2f38] to-[#08090d] text-ice transition-transform active:scale-95 disabled:opacity-35"
           >
             <SendHorizonal size={15} />
