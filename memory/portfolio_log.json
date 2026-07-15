@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-07-15",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,67 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-07-15",
+      "account": {
+        "nav_usd": 1286.36,
+        "nav_eur_base": 1125.7229,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -147.94,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 13.4499998,
+          "prior_close": 13.39,
+          "gap_pct": 0.45,
+          "since_last_run_pct": 5.41,
+          "market_value": 928.0499862,
+          "nav_pct": 72.15,
+          "unrealized_pnl": -60.6469138,
+          "daily_pnl": 4.1399862,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still at 78 of 80 required events as of company's most recent public confirmation (~Jul 8-9, 2026, CEO LinkedIn post); no 80th-event announcement found overnight. CEO signaled that post was likely his 'last brief posting' before the quiet period begins once the 80th event is announced.",
+            "next_check": "watch for 8-K / press release announcing 80th event and start of quiet period"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 72.2% of NAV vs 35% trim threshold (up from 69.8% last run); trim ~35.5 shares to reach 35% NAV cap"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 137.6300049,
+          "prior_close": 136.08,
+          "gap_pct": 1.14,
+          "since_last_run_pct": -5.68,
+          "market_value": 357.83801274,
+          "nav_pct": 27.82,
+          "unrealized_pnl": -87.08498726,
+          "daily_pnl": 4.03001274,
+          "catalyst": {
+            "name": "$25B investment-grade bond deal + staggered IPO lockup",
+            "status": "First lockup tranche (20%, or 30% if stock is up 30%+ from IPO, of the 4.6B-share 180-day block) unlocks 2nd trading day after Q2 2026 earnings; Motley Fool flags ~Aug 6, 2026 as the likely window. Stock fell 7.8% on Jul 1 on the bond announcement but has stabilized/recovered since (+1.1% premarket, +since-last-run -5.7% but off the lows).",
+            "next_check": "official Q2 2026 earnings date announcement; index-inflow ($4.3B flagged) vs lockup-supply tug of war into Aug"
+          },
+          "risk_flag": "WATCH - within cap; lockup unlock now ~3 weeks out (~Aug 6 est.)"
+        }
+      ],
+      "flags": [
+        "SLS at 72.2% of NAV is now further above the 35% single-name trim threshold than last run (was 69.8%); position size risk continues to compound as the stock has rallied since last run with no fundamental catalyst news yet.",
+        "Zero USD cash buffer persists - account fully invested, no dry powder (not on margin, so no forced-liquidation risk).",
+        "No confirmation of SLS REGAL 80th event yet; CEO's Jul 8-9 commentary suggests it is imminent and a quiet period will follow once announced - binary catalyst risk is now very near-term.",
+        "SPCX lockup catalyst has firmed up to an estimated ~Aug 6, 2026 date (2nd trading day after Q2 earnings); no new negative credit/bond news found overnight.",
+        "CING (Cingulate) is referenced in the routine's ticker watchlist but is NOT a current IBKR position - confirmed via live get_account_positions (only SLS and SPCX held). For reference: CING received an FDA Complete Response Letter for CTx-1301 on Jun 2, 2026 (CMC/manufacturing issues only, no clinical/efficacy concerns cited) and is working toward resubmission with ~$30M cash on hand."
       ]
     }
   ]
