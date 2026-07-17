@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-07-17",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,78 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-07-17",
+      "account": {
+        "nav_usd": 1141.034,
+        "nav_eur_base": 999.66,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -292.94,
+        "leverage": "1.0",
+        "margin_used": false,
+        "nav_change_since_last_run_pct": -9.75
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 11.8000002,
+          "prior_close": 11.75,
+          "gap_pct": 0.43,
+          "since_last_run_pct": -7.52,
+          "market_value": 814.2000138,
+          "nav_pct": 71.36,
+          "unrealized_pnl": -174.4968862,
+          "daily_pnl": 3.4500138,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still 78 of 80 required events as of last confirmed update; no 8-K or press release announcing the 80th event found as of 2026-07-17. Only unrelated 8-Ks filed in July (executive employment/severance agreements). Stock has been highly volatile on WSB/social-media buzz (spiked ~18-25% intraday on multiple days, then given back) layered on top of the pending binary catalyst, unrelated to trial data.",
+            "next_check": "watch for 8-K / press release announcing 80th event; topline still guided for 2H 2026"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 71.4% of NAV vs 35% trim threshold, worse than last run's 69.8%",
+          "risk_sizing": {
+            "over_35pct_nav": true,
+            "trim_shares_to_reach_35pct": 35.16,
+            "two_pct_nav_target_value_usd": 22.82
+          }
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 125.5699997,
+          "prior_close": 131.11,
+          "gap_pct": -4.23,
+          "since_last_run_pct": -13.95,
+          "market_value": 326.48199922,
+          "nav_pct": 28.61,
+          "unrealized_pnl": -118.44100078,
+          "daily_pnl": -14.40400078,
+          "catalyst": {
+            "name": "$25B investment-grade bond deal (closed) + staggered IPO lockup + Q2 earnings",
+            "status": "NEW since last run: a failed Starship V3 launch test attempt pushed shares below the $135 IPO price for the first time. Q2 2026 earnings date confirmed for Aug 6, 2026; first lockup tranche (20% of the 4.6B-share 180-day block) unlocks the 2nd trading day after earnings (~Aug 10, 2026). Further 7% tranches Aug-Oct; a larger 28% tranche after Q3 earnings (~Nov); full lockup expiry Dec 8, 2026. Bond thesis unchanged (oversubscribed, investment-grade, retired the bridge loan).",
+            "next_check": "Aug 6 2026 Q2 earnings print; stock reaction into the ~Aug 10 first lockup tranche"
+          },
+          "risk_flag": "WATCH - within 35% cap but second-largest single-name risk; confirmed lockup/earnings event now ~3 weeks out and fresh negative operational news (launch failure) has compounded the pre-existing lockup overhang",
+          "risk_sizing": {
+            "over_35pct_nav": false,
+            "trim_shares_to_reach_35pct": 0,
+            "two_pct_nav_target_value_usd": 22.82
+          }
+        }
+      ],
+      "flags": [
+        "NAV down 9.75% since last run (EUR 1107.73 -> 999.66) over 6 days, driven by broad declines in both positions; no new capital added.",
+        "SLS at 71.4% of NAV is now more than double the 35% single-name trim threshold and has worsened since last run; no trial-thesis-breaking news found, but the position's risk concentration is objectively worse.",
+        "SPCX hit fresh negative news (failed Starship V3 launch test, first close below IPO price) on top of the previously flagged lockup overhang; Q2 earnings (Aug 6) and first lockup tranche (~Aug 10) are now confirmed and ~3 weeks out.",
+        "Zero USD cash buffer persists - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
+        "Broader tape is risk-off: oil sharply higher and chip stocks pressured on renewed US-Iran/Gulf tensions, plus new 25% US tariffs on Brazil - a headwind backdrop, not specific to either position but relevant to today's gap-down in SPCX."
       ]
     }
   ]
