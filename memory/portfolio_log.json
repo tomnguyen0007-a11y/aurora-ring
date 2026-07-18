@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-07-18",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,94 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-07-18",
+      "note": "Run date is a Saturday; markets closed. All marks are Fri 2026-07-17 official close; gap_pct is vs Thu 2026-07-16 close. This is weekend prep for Monday 2026-07-20 open.",
+      "account": {
+        "nav_usd": 1243.224,
+        "nav_eur_base": 1089.5857,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd_base": -166.44,
+        "leverage": "1.0",
+        "margin_used": false,
+        "nav_change_vs_last_run_pct": {
+          "usd": -1.43,
+          "eur_base": -1.64
+        }
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 13.3001,
+          "prior_close": 11.8186,
+          "gap_pct": 12.54,
+          "since_last_run_pct": 4.23,
+          "fri_open": 11.88,
+          "fri_high": 13.543,
+          "fri_low": 11.4,
+          "vwap_proxy": 12.748,
+          "market_value": 917.70692415,
+          "nav_pct": 73.82,
+          "unrealized_pnl": -70.98997585,
+          "daily_pnl": 106.95692415,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still 78 of 80 required events per company's last confirmed update; CEO Stergiou posted early-July that this 'may likely be my last brief posting around REGAL' before the 80th event triggers quiet period. No 80th-event/unblind announcement found in this search.",
+            "news_since_last_run": "CEO publicly rebutted investor/short-seller criticism of REGAL trial design (control-arm setup, event-accrual pace, non-disclosure of blinded metrics) in a public post ('let's separate the noise from the data'). Fri 7/17 stock rallied +12% intraday (open 11.88 -> close 13.30) on elevated volume with no confirmed press release/8-K found explaining the move - unverified, may be readout-anticipation or rumor-driven.",
+            "next_check": "watch for 8-K / press release announcing 80th event and quiet-period start; verify Friday's rally against any Monday follow-through or reversal"
+          },
+          "risk": {
+            "over_35pct_nav": true,
+            "trim_shares_to_reach_35pct": 36.28,
+            "two_pct_nav_target_value_usd": 24.86
+          },
+          "risk_flag": "OVER_CONCENTRATED - 73.8% of NAV vs 35% trim threshold, worse than last run (69.8%); unexplained +12% single-day move ahead of a binary readout with no confirmed catalyst news"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 124.14099885,
+          "prior_close": 127.07,
+          "gap_pct": -2.31,
+          "since_last_run_pct": -14.93,
+          "fri_open": 125.48,
+          "fri_high": 130.33,
+          "fri_low": 122.12,
+          "vwap_proxy": 125.53,
+          "market_value": 322.76659701,
+          "nav_pct": 25.96,
+          "unrealized_pnl": -122.15640299,
+          "daily_pnl": -18.11940299,
+          "catalyst": {
+            "name": "$25B investment-grade bond deal (closed, retired bridge loan) + Nasdaq-100/Russell 1000 index inclusion inflows + staggered IPO lockup",
+            "status": "S&P/Moody's/Fitch all confirmed low-tier investment grade (BBB/Baa1/BBB+) on 6/18/26, but SPCX bonds trade at a wider credit spread (1.62pp over Treasuries) than the average BB junk bond (1.55pp) as of early July - credit market pricing more risk than the raters. Joined Nasdaq-100 on 7/7 (~$4.3B forced inflow) plus ~$3B from Russell 1000 fast-track, but float is lockup-constrained. First 20% lockup tranche unlocks ~2nd trading day after Q2 earnings (expected ~Aug 6), then further 7% tranches ~Aug 21 and ~Sep 10; combined with other unlock triggers, reporting suggests up to ~44% of shares (~$123B) could become sellable by early September - a materially larger overhang than modeled in the prior run.",
+            "news_since_last_run": "Stock down another ~14.9% since 7/11 mark, closed Fri near session low after fading from an intraday high of 130.33. No negative operational news found; move consistent with bond-market credit skepticism + lockup-overhang repricing ahead of index-inflow support.",
+            "next_check": "Q2 earnings date confirmation (sets Aug 6ish first-unlock trigger), credit spread trend, index-inflow timing vs lockup supply"
+          },
+          "risk": {
+            "over_35pct_nav": false,
+            "trim_shares_to_reach_35pct": 0,
+            "two_pct_nav_target_value_usd": 24.86
+          },
+          "risk_flag": "WATCH - within cap and NAV% eased to 26.0% (was 30.1%) purely because SLS grew faster, not because SPCX is de-risking; credit spreads wider than junk despite fresh IG rating; lockup overhang bigger than previously modeled"
+        }
+      ],
+      "flags": [
+        "Run falls on a Saturday - markets closed; all data is Friday 7/17 close vs Thursday 7/16 close, prepping for Monday 7/20 open, not same-day premarket.",
+        "SLS concentration worsened to 73.8% of NAV (vs 69.8% last run), more than double the 35% single-name trim threshold, on a stock that just moved +12% in a single session with no confirmed news catalyst found - verify before Monday open.",
+        "SLS CEO went public defending REGAL trial design against investor/short-seller criticism, signaling this is now a contested narrative right before the quiet period begins - credibility risk to monitor alongside the data risk.",
+        "SPCX lockup overhang is meaningfully larger than what was logged last run: reporting now points to ~44% of shares (~$123B) potentially unlocking by early September versus the prior simple 20%-then-7%-tranches picture.",
+        "SPCX credit spreads (1.62pp over Treasuries) are trading wider than the average junk bond (1.55pp) despite SpaceX's fresh investment-grade ratings from all three agencies - a bond-market signal at odds with the equity story.",
+        "Zero USD cash buffer persists - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
+        "CING is not currently a held position in this account - skipped per-ticker strategy block; flagging in case it was expected to be tracked."
       ]
     }
   ]
