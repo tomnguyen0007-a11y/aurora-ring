@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-07-20",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,74 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-07-20",
+      "account": {
+        "nav_usd": 1243.224,
+        "nav_eur_base": 1096.5,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -181.04,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 13.40999985,
+          "prior_close": 13.19,
+          "gap_pct": 1.67,
+          "since_last_run_pct": 5.09,
+          "market_value": 925.28998965,
+          "nav_pct": 74.43,
+          "unrealized_pnl": -63.40691035,
+          "daily_pnl": 15.17998965,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still awaiting 80th of 80 required events as of this run; no 8-K or press release announcing final event/topline data found in overnight/SEC search; company reiterated 2H 2026 guidance in Q1 2026 update ($107.1M cash + $7.5M warrant exercise proceeds post-quarter)",
+            "next_check": "watch for 8-K / press release announcing 80th event"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 74.4% of NAV vs 35% trim threshold, WORSE than last run (69.8%) as stock rallied +5.1% since 2026-07-11 with no dry powder to rebalance",
+          "risk_sizing": {
+            "trim_shares_to_reach_35pct_nav": 36.55,
+            "two_pct_nav_target_value_usd": 24.86
+          }
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 125.87999725,
+          "prior_close": null,
+          "gap_pct": null,
+          "since_last_run_pct": -13.73,
+          "market_value": 327.28799285,
+          "nav_pct": 26.33,
+          "unrealized_pnl": -117.63500715,
+          "daily_pnl": 4.91399285,
+          "catalyst": {
+            "name": "$25B investment-grade bond deal (5 tranches, settled ~Jun 26 2026) + staggered IPO lockup",
+            "status": "No new negative credit/bond news found. First lockup tranche (20%) still expected 2nd full trading day after Q2 2026 earnings (~$123B in shares per public estimates), pegged late Jul/early Aug 2026; conditional bonus 10% release requires 5-of-10 closes >= $175.50 (30% above $135 IPO) before that print - stock at $125.88 is well below that bar so bonus tranche will NOT trigger; further 7% tranches Aug-Oct; full 180-day lockup expires Dec 8 2026; Musk's ~6.4B shares locked ~366 days separately",
+            "next_check": "Q2 2026 earnings date announcement; stock reaction into lockup; confirm bonus-release threshold stays unmet"
+          },
+          "risk_flag": "WATCH - within 35% cap and NAV% shrank vs last run only because the position lost value (-13.7% since 2026-07-11), not because of trimming",
+          "risk_sizing": {
+            "trim_shares_to_reach_35pct_nav": 0,
+            "two_pct_nav_target_value_usd": 24.86
+          }
+        }
+      ],
+      "flags": [
+        "SLS concentration worsened to 74.4% of NAV (from 69.8%) purely on price appreciation - no thesis-breaking news, no fresh catalyst confirmation, no 80th-event announcement found in this run's search.",
+        "SPCX down 13.7% since the 2026-07-11 run with no negative company-specific news identified - looks broad/technical, not catalyst-driven; but it also confirms the stock is far below the $175.50 bonus-unlock trigger price, so only the base 20% tranche is in play post-Q2-earnings.",
+        "Zero USD cash buffer remains - account fully invested, no dry powder to rebalance SLS down to target even if desired (not on margin, no forced-liquidation risk).",
+        "No trades were placed. This routine is read-only."
       ]
     }
   ]
