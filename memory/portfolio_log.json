@@ -94,7 +94,7 @@
           "daily_pnl": 5.8650276,
           "catalyst": {
             "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
-            "status": "Last disclosed count still 78 of 80 required events as of the May 11, 2026 / Q1 2026 update; no press release or 8-K found confirming the 80th event has been reached as of this run. Coverage notes the trial 'continues unaltered' after review (no DSMB halt signal). Topline readout still guided for 2H 2026.",
+            "status": "Last disclosed count still 78 of 80 required events as of the May 11, 2026 / Q1 2026 update; no press release or 8-K found confirming the 80th event has been reached as of this run. Coverage notes the trial 'continues unaltered' after review (no DSMB halt signal). Topline readout still guided for 2H 2026. SEC EDGAR check confirms the company's most recent 8-K (filed June 15, 2026) addressed shareholder-vote matters, not the REGAL trial - no unblind/topline 8-K on file yet.",
             "next_check": "watch for 8-K / press release announcing 80th event and unblinding"
           },
           "risk_flag": "OVER_CONCENTRATED - 73.35% of NAV vs 35% trim threshold, up from 69.8% ten days ago (SPCX's larger decline shrank NAV and pushed SLS's share higher even as SLS itself dipped slightly). Trim ~36 shares to reach the 35% threshold."
@@ -124,7 +124,7 @@
         "SLS at 73.35% of NAV is now more than double the 35% single-name trim threshold, and has worsened from 69.8% ten days ago. REGAL topline catalyst remains unconfirmed/pending (last count 78/80 events); no unblind news found.",
         "SPCX down 16.4% since the 07/11 run, now below its $135 IPO price and its $171.12 avg cost. No adverse credit/bond news; decline appears to reflect lockup-overhang de-risking ahead of the first tranche unlock (~1-3 weeks out).",
         "Zero USD cash buffer persists - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
-        "Data gap: WebSearch API returned intermittent 529 overload errors during this run. Ticker-specific SLS/SPCX catalyst searches succeeded, but the generic SEC EDGAR filings search and broad 'premarket futures' market search could not be completed and were not verified this run."
+        "Data gap from earlier in this run resolved on retry: SEC EDGAR search confirms SELLAS's latest 8-K (June 15, 2026) was shareholder-vote related, not a REGAL trial announcement - no unblind filing on record. Broad market check found premarket/futures modestly green (SPY +0.44%, QQQ +0.5%) with the Fed seen holding rates at the July meeting (~87.7% odds per CME FedWatch) - no risk-off macro backdrop driving the SLS/SPCX weakness."
       ]
     }
   ]
