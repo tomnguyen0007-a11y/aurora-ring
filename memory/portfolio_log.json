@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-07-22",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,66 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-07-22",
+      "account": {
+        "nav_usd": 1211.264,
+        "nav_eur_base": 1064.5,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -231.16,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 12.77000045,
+          "prior_close": 12.9,
+          "gap_pct": -1.01,
+          "since_last_run_pct": 0.08,
+          "market_value": 881.13003105,
+          "nav_pct": 72.74,
+          "unrealized_pnl": -107.56686895,
+          "daily_pnl": -8.96996895,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still blinded at 78 of 80 required events as of latest confirmed reporting (mid-July 2026); no 80th-event / database-lock press release found as of this run. Stock popped ~12% on 2026-07-17 on CEO Fox Business appearance and quiet-period language; retail speculation about a possible buyout is circulating on social/retail media but is UNVERIFIED - no company statement, filing, or credible outlet confirms any M&A process.",
+            "next_check": "watch for 8-K / press release announcing 80th event and database lock"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 72.7% of NAV vs 35% trim threshold (worse than last run); trim ~35.8 of 69 shares to reach 35% NAV"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 123.5887985,
+          "prior_close": 123.54,
+          "gap_pct": 0.04,
+          "since_last_run_pct": -15.3,
+          "market_value": 321.3308761,
+          "nav_pct": 26.53,
+          "unrealized_pnl": -123.5921239,
+          "daily_pnl": 0.1268761,
+          "catalyst": {
+            "name": "IPO lockup unlock, now anchored to a confirmed Q2 2026 earnings date",
+            "status": "SpaceX confirmed on 2026-07-21 it will report Q2 2026 results after market close on 2026-08-04 (first earnings report as a public company). This locks in the first insider lockup tranche: ~20% of the 180-day block (~911.5M shares, reported ~$116B value) becomes sellable 2nd full trading day after earnings, i.e. ~2026-08-06. A bonus 10% tranche only unlocks if SPCX trades >=$175.50 (30% above the $135 IPO price) for 5 of 10 days before earnings - not close, stock is ~8.5% BELOW IPO price. Further 7% tranches ~Aug 21 and Sept 10; full lockup expires 2026-12-08. $25B investment-grade bond (5 tranches, 2031-2056 maturities) settled June 26, unrelated credit concerns not a factor in the decline.",
+            "next_check": "Stock reaction into 2026-08-04 earnings and 2026-08-06 first unlock date"
+          },
+          "risk_flag": "WATCH - within 35% cap, down 15.3% since last run (2026-07-11) mostly on lockup-supply overhang now that the earnings/unlock date is confirmed and near (~2 weeks out)"
+        }
+      ],
+      "flags": [
+        "SLS concentration worsened to 72.7% of NAV (from 69.8% on 2026-07-11), still no confirmed catalyst event; retail buyout chatter is unverified speculation, not a fundamental development - do not treat as thesis-confirming.",
+        "Zero USD cash buffer persists - no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
+        "SPCX's first lockup unlock now has a hard date (~2026-08-06) tied to the confirmed 2026-08-04 earnings report - the previously vague 'late Jul/early Aug' overhang is now a concrete near-term event ~2 weeks away.",
+        "Account NAV down ~4.0% (USD) / ~3.9% (EUR) since 2026-07-11, driven almost entirely by SPCX's -15.3% move; SLS roughly flat over the same window."
       ]
     }
   ]
