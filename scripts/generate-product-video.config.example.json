@@ -1,0 +1,8 @@
+{
+  "model": "fal-ai/ltx-video/image-to-video",
+  "input": {
+    "image_path": "Stats ring.png",
+    "prompt": "Slow cinematic rotation of a sleek titanium smart ring on a dark reflective surface, soft studio light glinting off the metal, subtle depth of field, premium product ad look",
+    "negative_prompt": "blurry, low quality, distorted, watermark"
+  }
+}
