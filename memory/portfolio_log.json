@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-07-24",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,67 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-07-24",
+      "account": {
+        "nav_usd": 1158.81,
+        "nav_eur_base": 1017.62,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -268.95,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 12.5,
+          "prior_close": 12.34,
+          "gap_pct": 1.3,
+          "since_last_run_pct": -2.04,
+          "market_value": 862.5,
+          "nav_pct": 74.43,
+          "unrealized_pnl": -126.1969,
+          "daily_pnl": 11.04,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "As of May 11, 2026 update, 78 of 80 required events reported; final analysis triggers on 80th event; topline readout still guided for 2H 2026, no confirmation yet that 80th event has been reached. New: company filed a $154.6M shelf registration in July 2026 (dilution overhang, not an imminent raise).",
+            "next_check": "watch for 8-K / press release announcing 80th event; watch for any shelf takedown/offering"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 74.4% of NAV vs 35% trim threshold, worse than last run's 69.8%; trim ~36.55 shares to reach 35% NAV"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 116.19,
+          "prior_close": 118.24,
+          "gap_pct": -1.73,
+          "since_last_run_pct": -20.37,
+          "market_value": 302.17200312,
+          "nav_pct": 26.08,
+          "unrealized_pnl": -142.75099688,
+          "daily_pnl": -5.25199688,
+          "catalyst": {
+            "name": "Staggered IPO lockup unlock + $25B bond overhang",
+            "status": "Stock now ~$116, down ~14% below the $135 IPO price and down 20.4% since the 2026-07-11 log entry. First insider lockup tranche (20%) unlocks 2nd trading day after Q2 2026 earnings, expected around Aug 6 2026 (~2 weeks out); bonus 10% unlock possible if stock trades 30%+ above IPO price pre-earnings (not currently on track). Longest-dated 2056 bond tranche now trading at junk-like spreads despite investment-grade rating and oversubscribed pricing - credit market repricing risk higher than the rating implies.",
+            "next_check": "Q2 2026 earnings date confirmation; stock action into the Aug lockup unlock; bond spread trend"
+          },
+          "risk_flag": "WATCH - within 35% cap but position down sharply since last check; lockup-driven supply event ~2 weeks out with deteriorating credit tone"
+        }
+      ],
+      "flags": [
+        "SLS concentration WORSENED to 74.4% of NAV (vs 69.8% on 2026-07-11), now more than double the 35% trim threshold, still with no confirmed 80th-event catalyst; new $154.6M shelf filing adds a dilution overhang.",
+        "SPCX down 20.4% since the last log entry (2026-07-11), now trading ~14% below its IPO price, heading into its first lockup unlock (~Aug 6) with the long-dated 2056 bond trading at junk-like levels - credit tone has softened.",
+        "Zero USD cash buffer - account still fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
+        "Account NAV (EUR base) down ~8.1% since the last log entry, driven by declines in both positions.",
+        "No news breaks either thesis outright, but neither position has a de-risking catalyst confirmed yet, and the SLS concentration has never been closer to breaching a full 2x of its own trim rule."
       ]
     }
   ]
