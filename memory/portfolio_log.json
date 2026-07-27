@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-07-27",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,67 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-07-27",
+      "account": {
+        "nav_usd": 1087.568,
+        "nav_eur_base": 956.9641,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -349.77,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 11.3800001,
+          "prior_close": 11.32,
+          "gap_pct": 0.53,
+          "since_last_run_pct": -10.82,
+          "market_value": 785.2200069,
+          "nav_pct": 72.2,
+          "unrealized_pnl": -203.4768931,
+          "daily_pnl": 4.1400069,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still 78 of 80 required events as of the last company update; CEO signaled his last public REGAL commentary before entering quiet period ahead of the 80th event and topline readout, guided for 2H 2026. No 80th-event trigger announced as of this run.",
+            "next_check": "watch for 8-K / press release announcing 80th event and database lock"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 72.2% of NAV vs 35% trim threshold (worse than 69.8% at last run, driven mainly by SPCX falling faster than SLS, shrinking total NAV)"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 114.8560028,
+          "prior_close": null,
+          "gap_pct": null,
+          "since_last_run_pct": -21.29,
+          "market_value": 298.62560728,
+          "nav_pct": 27.46,
+          "unrealized_pnl": -146.29739272,
+          "daily_pnl": -0.55639272,
+          "catalyst": {
+            "name": "Q2 2026 earnings (Aug 4, after close) triggering first IPO lock-up expiration (Aug 6) - largest single lock-up unlock in history",
+            "status": "SpaceX confirmed Aug 4 as its first earnings report as a public company; this opens the window for insiders to sell up to 20% of restricted holdings (~911.5M shares, ~$116B) starting Aug 6, the 2nd full trading day after earnings. Further 7% tranches unlock Aug 31, Sep 10, Sep 25, Oct 10, Oct 25. Musk's controlling stake stays locked until Jun 12 2027. Separately, credit spreads on the June 2026 $25B bond deal's longest tranche (2056 notes) have widened from ~175bps at issuance to >230bps now, alongside the stock trading ~20% below its $135 IPO price.",
+            "next_check": "Aug 4 earnings print and market reaction into the Aug 6 unlock; bond spread trend on the 2056 tranche"
+          },
+          "risk_flag": "WATCH - largest portfolio catalyst risk over the next ~1-2 weeks; earnings + record-size lockup unlock landing back-to-back on Aug 4-6"
+        }
+      ],
+      "flags": [
+        "SLS at 72.2% of NAV remains nearly 2x the 35% single-name trim threshold and has gotten worse, not better, since the last run - no news breaks the thesis but no catalyst confirmation either; still fully event-driven and binary.",
+        "Zero USD cash buffer persists - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
+        "SPCX's Q2 earnings (Aug 4) and first lock-up expiration (Aug 6, ~$116B/911.5M shares - the largest such unlock on record) are now ~1-2 weeks out and land back-to-back; historically lock-up unlocks of this size pressure the float.",
+        "SPCX bond credit spreads have widened materially since the June bond pricing (2056 tranche ~175bps -> >230bps), a market-priced credit-risk signal independent of the equity lock-up story - worth tracking alongside the stock.",
+        "Combined unrealized P&L has roughly doubled since the last run (-$172.41 -> -$349.77) as both positions have drifted down (-10.8% SLS, -21.3% SPCX) with total NAV down ~13.7% over the 16-day gap, even though today's pre-market action in both names is close to flat and broad futures are up (+0.79% S&P)."
       ]
     }
   ]
