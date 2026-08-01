@@ -3,9 +3,10 @@ calibrate/
 ECC/
 memory/
 scripts/
-CLAUDE.md
-README.md
-*.zip
-*.png
-*.jpg
-*.avif
+/CLAUDE.md
+/README.md
+/*.zip
+/*.png
+/*.jpg
+/*.jpeg
+/*.avif

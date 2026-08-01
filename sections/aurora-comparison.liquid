@@ -1,0 +1,186 @@
+{%- comment -%}
+  Own vs rent.
+
+  This replaced a six-row scrolling table. The argument is one idea, so it gets
+  two plain columns and no chrome — nothing to scroll sideways, nothing to
+  decode, and it stacks cleanly on a phone.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+-%}
+
+<section class="aurora aurora-own" style="{% render 'aurora-spacing', settings: section.settings %}">
+  <div class="aurora__inner">
+    <header class="aurora-own__head">
+      {%- if s.eyebrow != blank -%}
+        <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
+      {%- endif -%}
+      <h2 class="aurora__h2 aurora-reveal" style="--aur-reveal-delay: 80ms">{{ s.heading }}</h2>
+      {%- if s.subheading != blank -%}
+        <p class="aurora__lede aurora-reveal" style="--aur-reveal-delay: 150ms">{{ s.subheading }}</p>
+      {%- endif -%}
+    </header>
+
+    <div class="aurora-own__columns">
+      <div class="aurora-own__col aurora-own__col--ours aurora-reveal" style="--aur-reveal-delay: 200ms">
+        <h3 class="aurora-own__col-title">{{ s.ours_title }}</h3>
+        <ul class="aurora-own__list">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'ours' -%}
+              <li {{ block.shopify_attributes }}>{{ block.settings.text }}</li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      </div>
+
+      <div class="aurora-own__col aurora-own__col--theirs aurora-reveal" style="--aur-reveal-delay: 260ms">
+        <h3 class="aurora-own__col-title">{{ s.theirs_title }}</h3>
+        <ul class="aurora-own__list aurora-own__list--muted">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'theirs' -%}
+              <li {{ block.shopify_attributes }}>{{ block.settings.text }}</li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      </div>
+    </div>
+
+    {%- if s.disclaimer != blank -%}
+      <p class="aurora-own__disclaimer">{{ s.disclaimer }}</p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .aurora-own {
+    background: var(--aur-bg-alt);
+    padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
+  }
+
+  .aurora-own__head {
+    max-width: 34rem;
+    margin-bottom: var(--aur-stack-loose);
+  }
+
+  .aurora-own__columns {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .aurora-own__col-title {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--aur-text-muted);
+    margin: 0 0 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--aur-line);
+  }
+
+  .aurora-own__col--ours .aurora-own__col-title {
+    color: var(--aur-text);
+    border-bottom-color: var(--aur-text);
+  }
+
+  .aurora-own__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.875rem;
+  }
+
+  .aurora-own__list li {
+    font-size: 1.0625rem;
+    line-height: 1.45;
+    color: var(--aur-text);
+  }
+
+  /* The rented column is set back rather than crossed out — deriding the
+     competition reads as insecurity; simply being quieter reads as confidence. */
+  .aurora-own__list--muted li {
+    color: var(--aur-text-muted);
+  }
+
+  .aurora-own__disclaimer {
+    margin: var(--aur-stack-loose) 0 0;
+    font-size: 0.75rem;
+    line-height: 1.6;
+    color: var(--aur-text-dim);
+    max-width: 62ch;
+  }
+
+  @media screen and (min-width: 750px) {
+    .aurora-own__columns {
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(2.5rem, 6vw, 6rem);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Aurora ownership",
+  "tag": "section",
+  "class": "aurora-section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Own it outright" },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Pay once. Not every month, forever."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Most tracking rings and straps put your own numbers behind a monthly fee. Aurora does not have one."
+    },
+    { "type": "text", "id": "ours_title", "label": "Left column title", "default": "With Aurora" },
+    { "type": "text", "id": "theirs_title", "label": "Right column title", "default": "With a subscription tracker" },
+    {
+      "type": "textarea",
+      "id": "disclaimer",
+      "label": "Disclaimer",
+      "default": "Based on publicly advertised subscription plans at time of writing, for general guidance only. Competitor pricing changes — please check their current terms."
+    },
+    { "type": "header", "content": "Padding" },
+    { "type": "range", "id": "padding-block-start", "label": "Top", "min": 0, "max": 280, "step": 4, "unit": "px", "default": 128 },
+    { "type": "range", "id": "padding-block-end", "label": "Bottom", "min": 0, "max": 280, "step": 4, "unit": "px", "default": 128 }
+  ],
+  "blocks": [
+    {
+      "type": "ours",
+      "name": "Aurora line",
+      "settings": [{ "type": "text", "id": "text", "label": "Text", "default": "One payment, then nothing" }]
+    },
+    {
+      "type": "theirs",
+      "name": "Subscription line",
+      "settings": [{ "type": "text", "id": "text", "label": "Text", "default": "A fee every month you own it" }]
+    }
+  ],
+  "max_blocks": 10,
+  "presets": [
+    {
+      "name": "Aurora ownership",
+      "category": "Aurora",
+      "blocks": {
+        "ours": { "type": "ours", "settings": { "text": "One payment, then nothing" } },
+        "ours_2": { "type": "ours", "settings": { "text": "Every metric unlocked on day one" } },
+        "ours_3": { "type": "ours", "settings": { "text": "Export your raw data whenever you like" } },
+        "ours_4": { "type": "ours", "settings": { "text": "Still works in five years, untouched" } },
+        "theirs": { "type": "theirs", "settings": { "text": "£5.99 a month, indefinitely" } },
+        "theirs_2": { "type": "theirs", "settings": { "text": "The useful metrics sit behind the paywall" } },
+        "theirs_3": { "type": "theirs", "settings": { "text": "Export is limited or unavailable" } },
+        "theirs_4": { "type": "theirs", "settings": { "text": "Stop paying and it stops telling you anything" } }
+      },
+      "block_order": ["ours", "ours_2", "ours_3", "ours_4", "theirs", "theirs_2", "theirs_3", "theirs_4"]
+    }
+  ]
+}
+{% endschema %}

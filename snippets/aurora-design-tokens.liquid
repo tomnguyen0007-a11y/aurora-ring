@@ -1,0 +1,318 @@
+{%- doc -%}
+  Aurora Ring design tokens.
+
+  Direction: light by default, dark exactly once.
+
+  The store, the product shots and the ad creative all live on a warm bone
+  surface with ink type and a lot of empty space. Exactly one section — the
+  sleep moment — inverts to near-black via `.aurora--night`, so darkness reads
+  as a deliberate statement rather than as the whole brand.
+
+  Colour is rationed. Ink carries the calls to action; ember appears only where
+  it means something. Every surface pairing below clears WCAG AA.
+{%- enddoc -%}
+
+{%- comment -%}
+  Self-hosted, SIL Open Font Licence, latin subset. Keeps two third-party
+  connections off the critical path and lets the Shopify CDN serve them.
+{%- endcomment -%}
+{{ 'aurora-inter.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
+{{ 'aurora-instrument-serif.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
+
+<style>
+  @font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 300 600;
+    font-display: swap;
+    src: url({{ 'aurora-inter.woff2' | asset_url }}) format('woff2');
+  }
+
+  @font-face {
+    font-family: 'Instrument Serif';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url({{ 'aurora-instrument-serif.woff2' | asset_url }}) format('woff2');
+  }
+
+  @font-face {
+    font-family: 'Instrument Serif';
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    src: url({{ 'aurora-instrument-serif-italic.woff2' | asset_url }}) format('woff2');
+  }
+
+  @font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal;
+    font-weight: 400 500;
+    font-display: swap;
+    src: url({{ 'aurora-jetbrains-mono.woff2' | asset_url }}) format('woff2');
+  }
+
+  :root {
+    /* ---- Surfaces: warm bone, not clinical white ---- */
+    --aur-page: #f6f4f0;
+    --aur-page-alt: #efece6;
+    --aur-card: #ffffff;
+    --aur-night: #0e0f11;
+    --aur-night-alt: #14161a;
+
+    /* ---- Ink ---- */
+    --aur-ink: #14151a;
+    --aur-ink-soft: #3d3e45;
+    --aur-ink-muted: #5f6068; /* 5.69:1 on bone */
+    --aur-ink-faint: #696a72; /* 4.87:1 on bone */
+
+    /* ---- Hairlines: the only structure on the page ---- */
+    --aur-rule: rgba(20, 21, 26, 0.13);
+    --aur-rule-soft: rgba(20, 21, 26, 0.08);
+
+    /* ---- Accent: rationed ---- */
+    --aur-ember: #b8431a; /* CTA-safe on bone, 4.96:1 */
+    --aur-ember-bright: #ff7e47; /* night surfaces only */
+
+    /* ---- Semantic aliases used by the sections ---- */
+    --aur-bg: var(--aur-page);
+    --aur-bg-alt: var(--aur-page-alt);
+    --aur-surface: var(--aur-card);
+    --aur-text: var(--aur-ink);
+    --aur-text-soft: var(--aur-ink-soft);
+    --aur-text-muted: var(--aur-ink-muted);
+    --aur-text-dim: var(--aur-ink-faint);
+    --aur-line: var(--aur-rule);
+    --aur-line-soft: var(--aur-rule-soft);
+    --aur-accent: var(--aur-ember);
+
+    /* Primary action: ink pill, bone label. Reads as jewellery, not as gadget,
+       and never competes with the product photography. */
+    --aur-btn-bg: var(--aur-ink);
+    --aur-btn-text: var(--aur-page);
+    --aur-btn-bg-hover: #000000;
+
+    /* ---- Type ---- */
+    --aur-font-display: 'Instrument Serif', 'Times New Roman', serif;
+    --aur-font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --aur-font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+    --aur-size-display: clamp(2.75rem, 8vw, 6rem);
+    --aur-size-h2: clamp(2.125rem, 5.4vw, 4rem);
+    --aur-size-body: clamp(1rem, 1.1vw, 1.125rem);
+
+    /* ---- Rhythm: generous by default ---- */
+    --aur-gutter: clamp(1.5rem, 6vw, 6rem);
+    --aur-section-y: clamp(5rem, 13vh, 11rem);
+    --aur-stack: 1.5rem;
+    --aur-stack-loose: clamp(3rem, 6vw, 5.5rem);
+    --aur-max: 1240px;
+
+    --aur-r-pill: 999px;
+    --aur-r-soft: 4px;
+
+    --aur-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* ---- The single dark moment ---- */
+  .aurora--night {
+    --aur-bg: var(--aur-night);
+    --aur-bg-alt: var(--aur-night-alt);
+    --aur-surface: var(--aur-night-alt);
+    --aur-text: #f6f4f0;
+    --aur-text-soft: #c8ced6;
+    --aur-text-muted: #9aa1aa;
+    --aur-text-dim: #8f959d;
+    --aur-line: rgba(255, 255, 255, 0.14);
+    --aur-line-soft: rgba(255, 255, 255, 0.07);
+    --aur-accent: var(--aur-ember-bright);
+    --aur-btn-bg: #f6f4f0;
+    --aur-btn-text: #14151a;
+    --aur-btn-bg-hover: #ffffff;
+  }
+
+  /* ---- Base ---- */
+  .aurora {
+    background: var(--aur-bg);
+    color: var(--aur-text);
+    font-family: var(--aur-font-body);
+    font-size: var(--aur-size-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .aurora *,
+  .aurora *::before,
+  .aurora *::after {
+    box-sizing: border-box;
+  }
+
+  .aurora__inner {
+    max-width: var(--aur-max);
+    margin-inline: auto;
+    padding-inline: var(--aur-gutter);
+  }
+
+  /* ---- Type primitives ---- */
+  .aurora__eyebrow {
+    font-family: var(--aur-font-body);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--aur-text-muted);
+    margin: 0 0 var(--aur-stack);
+  }
+
+  .aurora__display {
+    font-family: var(--aur-font-display);
+    font-size: var(--aur-size-display);
+    font-weight: 400;
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    color: var(--aur-text);
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .aurora__display em {
+    font-style: italic;
+  }
+
+  .aurora__h2 {
+    font-family: var(--aur-font-display);
+    font-size: var(--aur-size-h2);
+    font-weight: 400;
+    line-height: 1.02;
+    letter-spacing: -0.015em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .aurora__lede {
+    color: var(--aur-text-muted);
+    max-width: 42ch;
+    margin: var(--aur-stack) 0 0;
+  }
+
+  .aurora__num {
+    font-family: var(--aur-font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  /* Mono is reserved for prices and spec lines. Using it for every label is
+     what made an earlier pass read like an instrument panel. */
+  .aurora__label {
+    font-family: var(--aur-font-body);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--aur-text-muted);
+  }
+
+  /* ---- Buttons ---- */
+  .aurora__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    padding: 1.0625rem 2rem;
+    border-radius: var(--aur-r-pill);
+    font-family: var(--aur-font-body);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color 0.3s var(--aur-ease-out), color 0.3s var(--aur-ease-out),
+      border-color 0.3s var(--aur-ease-out), transform 0.3s var(--aur-ease-out);
+  }
+
+  .aurora__btn--primary {
+    background: var(--aur-btn-bg);
+    color: var(--aur-btn-text);
+  }
+
+  .aurora__btn--primary:hover {
+    background: var(--aur-btn-bg-hover);
+    transform: translateY(-1px);
+  }
+
+  .aurora__btn--ghost {
+    background: transparent;
+    border-color: var(--aur-line);
+    color: var(--aur-text);
+  }
+
+  .aurora__btn--ghost:hover {
+    border-color: var(--aur-text);
+  }
+
+  .aurora__btn:focus-visible,
+  .aurora a:focus-visible,
+  .aurora button:focus-visible,
+  .aurora summary:focus-visible,
+  .aurora input:focus-visible {
+    outline: 2px solid var(--aur-accent);
+    outline-offset: 3px;
+  }
+
+  .aurora__price {
+    font-family: var(--aur-font-mono);
+    font-size: 0.8125rem;
+    padding-left: 0.75rem;
+    border-left: 1px solid currentColor;
+    opacity: 0.6;
+  }
+
+  /* ---- Scroll reveal ----
+     Gated on [data-aurora-js] so that without scripting nothing is ever left
+     stuck at opacity 0. */
+  [data-aurora-js] .aurora-reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.8s var(--aur-ease-out), transform 0.8s var(--aur-ease-out);
+    transition-delay: var(--aur-reveal-delay, 0ms);
+  }
+
+  [data-aurora-js] .aurora-reveal.is-revealed {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-aurora-js] .aurora-reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+
+    .aurora *,
+    .aurora *::before,
+    .aurora *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+
+  .aurora__visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>
+
+{%- comment -%}
+  Marks the document as scripted before first paint, so the reveal start state
+  only applies where JavaScript can finish the animation.
+{%- endcomment -%}
+<script>document.documentElement.setAttribute('data-aurora-js', '');</script>
