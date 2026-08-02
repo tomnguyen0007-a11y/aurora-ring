@@ -397,6 +397,7 @@
         "text_9qiA6Y",
         "accordion_EhRViA"
       ],
+      "disabled": true,
       "name": "t:names.faq_section",
       "settings": {
         "content_direction": "column",
