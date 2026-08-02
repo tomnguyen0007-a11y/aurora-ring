@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "hero": {
@@ -7,10 +16,47 @@
         "heading": "Sleep is the <em>whole</em> game.",
         "subheading": "Aurora measures your nights and tells you one thing each morning: push, or hold back. Buy it once and every insight is yours for good.",
         "cta_label": "Buy Aurora",
+        "cta_link": "",
+        "product": "",
         "show_price": true,
         "assurance": "Free EU delivery · Free size exchange · No subscription, ever",
         "padding-block-start": 0,
         "padding-block-end": 24
+      }
+    },
+    "trust": {
+      "type": "aurora-trust-bar",
+      "blocks": {
+        "a": {
+          "type": "item",
+          "settings": {
+            "title": "Free EU delivery",
+            "detail": "Tracked, and included in the price"
+          }
+        },
+        "b": {
+          "type": "item",
+          "settings": {
+            "title": "No subscription, ever",
+            "detail": "Every metric unlocked at purchase"
+          }
+        },
+        "c": {
+          "type": "item",
+          "settings": {
+            "title": "Free size exchange",
+            "detail": "Wrong fit, right size, at our cost"
+          }
+        }
+      },
+      "block_order": [
+        "a",
+        "b",
+        "c"
+      ],
+      "settings": {
+        "padding-block-start": 8,
+        "padding-block-end": 8
       }
     },
     "proof": {
@@ -19,28 +65,28 @@
         "sleep": {
           "type": "item",
           "settings": {
-            "title": "How well you slept",
-            "text": "One score for the night, and the two or three things that shaped it.",
             "readout": "85",
-            "readout_label": "Sleep score"
+            "readout_label": "Sleep score",
+            "title": "How well you slept",
+            "text": "One score for the night, and the two or three things that shaped it."
           }
         },
         "readiness": {
           "type": "item",
           "settings": {
-            "title": "Whether to push today",
-            "text": "Aurora compares last night against your own baseline and answers in a word, not a chart.",
             "readout": "7.2",
-            "readout_label": "Readiness"
+            "readout_label": "Readiness",
+            "title": "Whether to push today",
+            "text": "Aurora compares last night against your own baseline and answers in a word, not a chart."
           }
         },
         "activity": {
           "type": "item",
           "settings": {
-            "title": "What your effort actually cost",
-            "text": "Real sessions counted separately from walking about, so the numbers mean something.",
             "readout": "62",
-            "readout_label": "Active minutes"
+            "readout_label": "Active minutes",
+            "title": "What your effort actually cost",
+            "text": "Real sessions counted separately from walking about, so the numbers mean something."
           }
         }
       },
@@ -51,28 +97,76 @@
       ],
       "settings": {
         "anchor": "aurora-how",
+        "eyebrow": "Every morning",
         "heading": "Three things it tells you.",
         "subheading": "Not forty charts. Three answers, every morning.",
+        "image_alt": "The Aurora ring worn on a hand resting on a bicycle bar at sunset",
+        "readout_note": "Figures shown are examples of the app's morning summary.",
         "spec_line": "Grade 5 titanium · 2.8 mm thin · 4 grams · 7-day battery · water-resistant to 100 m",
         "padding-block-start": 128,
-        "padding-block-end": 128,
-        "eyebrow": "Every morning",
-        "image_alt": "The Aurora ring worn on a hand resting on a bicycle bar at sunset",
-        "readout_note": "Figures shown are examples of the app's morning summary."
+        "padding-block-end": 128
       }
     },
     "night": {
       "type": "aurora-night",
       "settings": {
+        "show_image": true,
+        "image_alt": "Two Aurora rings with the display lit, showing the time",
         "eyebrow": "While you sleep",
         "heading": "The eight hours you never get to watch.",
         "body": "Aurora reads every stage of your night — deep, REM, light, and the wakings you will not remember — and has an answer waiting before you reach for the kettle.",
         "stat_value": "7×",
         "stat_label": "A week of nights on one charge, so the data never has gaps.",
         "padding-block-start": 144,
-        "padding-block-end": 144,
-        "show_image": true,
-        "image_alt": "Two Aurora rings with the display lit, showing the time"
+        "padding-block-end": 144
+      }
+    },
+    "app": {
+      "type": "aurora-app",
+      "blocks": {
+        "pair": {
+          "type": "step",
+          "settings": {
+            "title": "Pair it once",
+            "text": "Open the app, hold the ring near your phone and confirm. It stays paired after that."
+          }
+        },
+        "wear": {
+          "type": "step",
+          "settings": {
+            "title": "Wear it to bed",
+            "text": "No button to press and nothing to start. The ring records the whole night on its own."
+          }
+        },
+        "read": {
+          "type": "step",
+          "settings": {
+            "title": "Read one screen at breakfast",
+            "text": "Sleep stages, heart rate through the night and what your body did with the day before — summarised before you have finished the coffee."
+          }
+        },
+        "keep": {
+          "type": "step",
+          "settings": {
+            "title": "Keep the history",
+            "text": "Every night stays in the app and can be exported in full whenever you want it. Nothing is locked behind a tier."
+          }
+        }
+      },
+      "block_order": [
+        "pair",
+        "wear",
+        "read",
+        "keep"
+      ],
+      "settings": {
+        "eyebrow": "The app",
+        "heading": "Where the night turns into an answer.",
+        "subheading": "The ring collects. The app is where you actually read it — one screen each morning, and the detail underneath only if you want it.",
+        "image_alt": "The Aurora companion app showing the overnight sleep summary",
+        "spec_line": "iOS and Android · Bluetooth pairing · no account fee · full export at any time",
+        "padding-block-start": 128,
+        "padding-block-end": 128
       }
     },
     "ownership": {
@@ -138,6 +232,7 @@
         "theirs_4"
       ],
       "settings": {
+        "image_alt": "The Aurora ring in silver, gold and black finishes",
         "eyebrow": "Own it outright",
         "heading": "Pay once. Not every month, forever.",
         "subheading": "Most tracking rings and straps put your own numbers behind a monthly fee. Aurora does not have one.",
@@ -145,8 +240,103 @@
         "theirs_title": "With a subscription tracker",
         "disclaimer": "Based on publicly advertised subscription plans at time of writing, for general guidance only. Competitor pricing changes — please check their current terms. Prices shown include VAT.",
         "padding-block-start": 128,
-        "padding-block-end": 128,
-        "image_alt": "The Aurora ring in silver, gold and black finishes"
+        "padding-block-end": 128
+      }
+    },
+    "story": {
+      "type": "aurora-story",
+      "blocks": {
+        "once": {
+          "type": "principle",
+          "disabled": true,
+          "settings": {
+            "label": "Paid once",
+            "text": "One price at the checkout, then nothing. No tier above you holding the metric you actually wanted."
+          }
+        },
+        "yours": {
+          "type": "principle",
+          "disabled": true,
+          "settings": {
+            "label": "Your data",
+            "text": "Exportable in full, whenever you ask, in a format you can open somewhere else. Leaving is not punished."
+          }
+        },
+        "quiet": {
+          "type": "principle",
+          "disabled": true,
+          "settings": {
+            "label": "Quiet by design",
+            "text": "One answer each morning instead of forty charts. A tracker that needs constant attention has failed at the job."
+          }
+        },
+        "honest": {
+          "type": "principle",
+          "disabled": true,
+          "settings": {
+            "label": "Wellness, not medicine",
+            "text": "It reports trends in sleep, activity and recovery. It is not a medical device and we will not pretend otherwise."
+          }
+        }
+      },
+      "block_order": [
+        "once",
+        "yours",
+        "quiet",
+        "honest"
+      ],
+      "settings": {
+        "eyebrow": "Why we built it this way",
+        "heading": "Your body should not be a <em>subscription</em>.",
+        "standfirst": "<p>Every tracker we tried did the same thing eventually: measured us accurately, then put the reading behind a monthly fee. Stop paying and years of your own sleep stop being yours to look at.</p><p>Aurora exists because that trade is unnecessary. The sensors cost what they cost once. Nothing about reading your own data justifies a bill every month for the rest of your life.</p>",
+        "signature": "— The Aurora team, Prague",
+        "padding-block-start": 128,
+        "padding-block-end": 128
+      }
+    },
+    "box": {
+      "type": "aurora-box",
+      "blocks": {
+        "ring": {
+          "type": "item",
+          "settings": {
+            "title": "The Aurora ring",
+            "text": "In the size and finish you confirmed."
+          }
+        },
+        "sizer": {
+          "type": "item",
+          "settings": {
+            "title": "Sizing kit",
+            "text": "Posted first, so the fit is right before we ship."
+          }
+        },
+        "dock": {
+          "type": "item",
+          "settings": {
+            "title": "Charging dock",
+            "text": "Full charge in about 90 minutes."
+          }
+        },
+        "cable": {
+          "type": "item",
+          "settings": {
+            "title": "USB-C cable",
+            "text": "No proprietary connector to lose."
+          }
+        }
+      },
+      "block_order": [
+        "ring",
+        "sizer",
+        "dock",
+        "cable"
+      ],
+      "settings": {
+        "eyebrow": "What arrives",
+        "heading": "In the box.",
+        "padding-block-start": 128,
+        "padding-block-end": 128
       }
     },
     "faq": {
@@ -200,6 +390,7 @@
         "heading": "The questions that actually matter.",
         "support_text": "Still deciding? Real answers, no sales script.",
         "support_link_label": "Talk to us",
+        "support_link": "",
         "open_first": true,
         "padding-block-start": 128,
         "padding-block-end": 128
@@ -240,8 +431,10 @@
         "heading": "One price. Then it is yours.",
         "subheading": "No monthly fee, no metric held back, no second bill in two years' time. You buy the ring and every reading it takes belongs to you.",
         "cta_label": "Buy Aurora",
+        "cta_link": "",
+        "product": "",
         "show_price": true,
-        "disclaimer": "<p>Every EU order carries the statutory right to withdraw within 14 days of delivery, no reason required — full terms are in our refund policy.</p><p>Aurora is a general wellness product. It measures and reports trends in sleep, activity and recovery to support your own understanding of your habits. It is not a medical device and is not intended to diagnose, treat, cure or prevent any disease or condition.</p><p>Nothing shown in the app or on this site is medical advice. If you have a health concern, speak to a qualified healthcare professional.</p>",
+        "disclaimer": "<p></p><p>Aurora is a general wellness product. It measures and reports trends in sleep, activity and recovery to support your own understanding of your habits. It is not a medical device and is not intended to diagnose, treat, cure or prevent any disease or condition.</p><p>Nothing shown in the app or on this site is medical advice. If you have a health concern, speak to a qualified healthcare professional.</p>",
         "padding-block-start": 128,
         "padding-block-end": 128
       }
@@ -249,184 +442,12 @@
     "sticky": {
       "type": "aurora-sticky-atc",
       "settings": {
+        "product": "",
+        "short_title": "",
         "button_label": "Buy Aurora",
         "note": "Free shipping",
-        "watch_selector": "#aurora-hero-cta"
-      }
-    },
-    "box": {
-      "type": "aurora-box",
-      "blocks": {
-        "ring": {
-          "type": "item",
-          "settings": {
-            "title": "The Aurora ring",
-            "text": "In the size and finish you confirmed."
-          }
-        },
-        "sizer": {
-          "type": "item",
-          "settings": {
-            "title": "Sizing kit",
-            "text": "Posted first, so the fit is right before we ship."
-          }
-        },
-        "dock": {
-          "type": "item",
-          "settings": {
-            "title": "Charging dock",
-            "text": "Full charge in about 90 minutes."
-          }
-        },
-        "cable": {
-          "type": "item",
-          "settings": {
-            "title": "USB-C cable",
-            "text": "No proprietary connector to lose."
-          }
-        }
-      },
-      "block_order": [
-        "ring",
-        "sizer",
-        "dock",
-        "cable"
-      ],
-      "settings": {
-        "eyebrow": "What arrives",
-        "heading": "In the box.",
-        "padding-block-start": 128,
-        "padding-block-end": 128
-      }
-    },
-    "trust": {
-      "type": "aurora-trust-bar",
-      "blocks": {
-        "a": {
-          "type": "item",
-          "settings": {
-            "title": "Free EU delivery",
-            "detail": "Tracked, and included in the price"
-          }
-        },
-        "b": {
-          "type": "item",
-          "settings": {
-            "title": "No subscription, ever",
-            "detail": "Every metric unlocked at purchase"
-          }
-        },
-        "c": {
-          "type": "item",
-          "settings": {
-            "title": "Free size exchange",
-            "detail": "Wrong fit, right size, at our cost"
-          }
-        }
-      },
-      "block_order": [
-        "a",
-        "b",
-        "c"
-      ],
-      "settings": {
-        "padding-block-start": 8,
-        "padding-block-end": 8
-      }
-    },
-    "app": {
-      "type": "aurora-app",
-      "blocks": {
-        "pair": {
-          "type": "step",
-          "settings": {
-            "title": "Pair it once",
-            "text": "Open the app, hold the ring near your phone and confirm. It stays paired after that."
-          }
-        },
-        "wear": {
-          "type": "step",
-          "settings": {
-            "title": "Wear it to bed",
-            "text": "No button to press and nothing to start. The ring records the whole night on its own."
-          }
-        },
-        "read": {
-          "type": "step",
-          "settings": {
-            "title": "Read one screen at breakfast",
-            "text": "Sleep stages, heart rate through the night and what your body did with the day before — summarised before you have finished the coffee."
-          }
-        },
-        "keep": {
-          "type": "step",
-          "settings": {
-            "title": "Keep the history",
-            "text": "Every night stays in the app and can be exported in full whenever you want it. Nothing is locked behind a tier."
-          }
-        }
-      },
-      "block_order": [
-        "pair",
-        "wear",
-        "read",
-        "keep"
-      ],
-      "settings": {
-        "eyebrow": "The app",
-        "heading": "Where the night turns into an answer.",
-        "subheading": "The ring collects. The app is where you actually read it — one screen each morning, and the detail underneath only if you want it.",
-        "image_alt": "The Aurora companion app showing the overnight sleep summary",
-        "spec_line": "iOS and Android · Bluetooth pairing · no account fee · full export at any time",
-        "padding-block-start": 128,
-        "padding-block-end": 128
-      }
-    },
-    "story": {
-      "type": "aurora-story",
-      "blocks": {
-        "once": {
-          "type": "principle",
-          "settings": {
-            "label": "Paid once",
-            "text": "One price at the checkout, then nothing. No tier above you holding the metric you actually wanted."
-          }
-        },
-        "yours": {
-          "type": "principle",
-          "settings": {
-            "label": "Your data",
-            "text": "Exportable in full, whenever you ask, in a format you can open somewhere else. Leaving is not punished."
-          }
-        },
-        "quiet": {
-          "type": "principle",
-          "settings": {
-            "label": "Quiet by design",
-            "text": "One answer each morning instead of forty charts. A tracker that needs constant attention has failed at the job."
-          }
-        },
-        "honest": {
-          "type": "principle",
-          "settings": {
-            "label": "Wellness, not medicine",
-            "text": "It reports trends in sleep, activity and recovery. It is not a medical device and we will not pretend otherwise."
-          }
-        }
-      },
-      "block_order": [
-        "once",
-        "yours",
-        "quiet",
-        "honest"
-      ],
-      "settings": {
-        "eyebrow": "Why we built it this way",
-        "heading": "Your body should not be a <em>subscription</em>.",
-        "standfirst": "<p>Every tracker we tried did the same thing eventually: measured us accurately, then put the reading behind a monthly fee. Stop paying and years of your own sleep stop being yours to look at.</p><p>Aurora exists because that trade is unnecessary. The sensors cost what they cost once. Nothing about reading your own data justifies a bill every month for the rest of your life.</p>",
-        "signature": "— The Aurora team, Prague",
-        "padding-block-start": 128,
-        "padding-block-end": 128
+        "watch_selector": "#aurora-hero-cta",
+        "form_selector": ""
       }
     }
   },
