@@ -56,6 +56,7 @@
     /* ---- Surfaces: warm bone, not clinical white ---- */
     --aur-page: #f6f4f0;
     --aur-page-alt: #efece6;
+    --aur-page-sand: #e8e2d6;
     --aur-card: #ffffff;
     --aur-night: #0e0f11;
     --aur-night-alt: #14161a;
@@ -102,7 +103,7 @@
     --aur-size-body: clamp(1rem, 1.1vw, 1.125rem);
 
     /* ---- Rhythm: generous by default ---- */
-    --aur-gutter: clamp(1.5rem, 6vw, 6rem);
+    --aur-gutter: clamp(1.5rem, 6vw, 7.5rem);
     --aur-section-y: clamp(5rem, 13vh, 11rem);
     --aur-stack: 1.5rem;
     --aur-stack-loose: clamp(3rem, 6vw, 5.5rem);
@@ -112,6 +113,23 @@
     --aur-r-soft: 4px;
 
     --aur-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* Deeper warm surface. Ember (4.22:1) and the dim ink (4.17:1) both fail on
+     it, so both are restated here rather than inherited. */
+  .aurora--sand {
+    --aur-bg: var(--aur-page-sand);
+    --aur-bg-alt: #e0d9cb;
+    --aur-accent: #9e3a16;
+    --aur-text-dim: var(--aur-ink-muted);
+    --aur-line: rgba(20, 21, 26, 0.16);
+    --aur-line-soft: rgba(20, 21, 26, 0.1);
+  }
+
+  /* Crisp surface, used sparingly to break the run of warm tones. */
+  .aurora--card {
+    --aur-bg: var(--aur-card);
+    --aur-bg-alt: var(--aur-page);
   }
 
   /* ---- The single dark moment ---- */
@@ -148,9 +166,9 @@
   }
 
   .aurora__inner {
-    max-width: var(--aur-max);
+    max-width: var(--aur-max, 77.5rem);
     margin-inline: auto;
-    padding-inline: var(--aur-gutter);
+    padding-inline: var(--aur-gutter, clamp(1.5rem, 6vw, 7.5rem));
   }
 
   /* ---- Type primitives ---- */

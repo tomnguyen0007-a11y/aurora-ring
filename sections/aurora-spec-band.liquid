@@ -12,12 +12,29 @@
 {%- liquid
   assign s = section.settings
 
+  comment
+    Which model this is. Tag detection alone was too fragile: a store with one
+    untagged test product silently fell through to the display-model set, which
+    is how the screen photograph ended up on the screenless page. The setting
+    wins, and auto-detection is only the fallback.
+  endcomment
   assign is_screenless = false
-  if product != blank
-    if product.handle contains 'screenless' or product.tags contains 'screenless'
+  case s.model
+    when 'screenless'
       assign is_screenless = true
-    endif
-  endif
+    when 'screen'
+      assign is_screenless = false
+    else
+      if product != blank
+        if product.handle contains 'screenless'
+          assign is_screenless = true
+        elsif product.tags contains 'screenless'
+          assign is_screenless = true
+        elsif product.title contains 'Screenless' or product.title contains 'screenless'
+          assign is_screenless = true
+        endif
+      endif
+  endcase
 
   assign band_image = s.image
   assign band_heading = s.heading
@@ -314,6 +331,18 @@
   "class": "aurora-section",
   "disabled_on": { "groups": ["header", "footer"] },
   "settings": [
+    {
+      "type": "select",
+      "id": "model",
+      "label": "Model",
+      "info": "Auto reads the product handle, tags and title. Set it explicitly if the product is not tagged.",
+      "options": [
+        { "value": "auto", "label": "Auto-detect" },
+        { "value": "screen", "label": "With display" },
+        { "value": "screenless", "label": "Screenless" }
+      ],
+      "default": "auto"
+    },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Worn, not watched" },
     {
       "type": "inline_richtext",
