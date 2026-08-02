@@ -1,0 +1,248 @@
+{%- comment -%}
+  The why. A tracking ring is a commodity until someone explains the position
+  behind it, and the position here is narrow and specific: the hardware is not
+  the argument, the absence of a subscription is.
+
+  Structure borrowed from the discipline of a well-run supplement brand — a
+  stated position, then hairline label-and-paragraph rows carrying the reasoning.
+  No cards, no portrait, no manufactured founder mythology.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+-%}
+
+<section class="aurora aurora-story" style="{% render 'aurora-spacing', settings: section.settings %}">
+  <div class="aurora__inner aurora-story__inner">
+    <div class="aurora-story__stage">
+      {%- if s.eyebrow != blank -%}
+        <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
+      {%- endif -%}
+
+      <h2 class="aurora__h2 aurora-story__title aurora-reveal" style="--aur-reveal-delay: 80ms">{{ s.heading }}</h2>
+
+      {%- if s.standfirst != blank -%}
+        <div class="aurora-story__standfirst aurora-reveal" style="--aur-reveal-delay: 150ms">{{ s.standfirst }}</div>
+      {%- endif -%}
+
+      {%- if s.signature != blank -%}
+        <p class="aurora-story__signature aurora-reveal" style="--aur-reveal-delay: 220ms">{{ s.signature }}</p>
+      {%- endif -%}
+    </div>
+
+    <dl class="aurora-story__list">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'principle' -%}
+          <div
+            class="aurora-story__row aurora-reveal"
+            style="--aur-reveal-delay: {{ forloop.index0 | times: 80 | plus: 120 }}ms"
+            {{ block.shopify_attributes }}
+          >
+            <dt class="aurora-story__label">{{ block.settings.label }}</dt>
+            <dd class="aurora-story__text">{{ block.settings.text }}</dd>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </dl>
+  </div>
+</section>
+
+{% stylesheet %}
+  .aurora-story {
+    padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
+  }
+
+  .aurora-story__inner {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  .aurora-story__title {
+    max-width: 18ch;
+  }
+
+  .aurora-story__standfirst {
+    margin-top: var(--aur-stack);
+    color: var(--aur-text-muted);
+    max-width: 44ch;
+  }
+
+  .aurora-story__standfirst > p {
+    margin: 0 0 0.875rem;
+  }
+
+  .aurora-story__standfirst > p:last-child {
+    margin-bottom: 0;
+  }
+
+  .aurora-story__signature {
+    margin: 1.75rem 0 0;
+    font-size: 0.8125rem;
+    letter-spacing: 0.02em;
+    color: var(--aur-text-dim);
+  }
+
+  .aurora-story__list {
+    margin: 0;
+    border-top: 1px solid var(--aur-line);
+  }
+
+  .aurora-story__row {
+    padding-block: clamp(1.375rem, 3vw, 1.875rem);
+    border-bottom: 1px solid var(--aur-line);
+  }
+
+  .aurora-story__label {
+    font-family: var(--aur-font-body);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--aur-text-muted);
+  }
+
+  .aurora-story__text {
+    margin: 0.625rem 0 0;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    color: var(--aur-text);
+    max-width: 52ch;
+  }
+
+  @media screen and (min-width: 990px) {
+    .aurora-story__inner {
+      /* The statement is set narrow and the reasoning runs wide beside it, so
+         the eye lands on the position before the evidence. */
+      grid-template-columns: 0.85fr 1.15fr;
+      gap: clamp(3rem, 8vw, 7rem);
+      align-items: start;
+    }
+
+    .aurora-story__stage {
+      position: sticky;
+      top: clamp(5rem, 12vh, 8rem);
+    }
+
+    .aurora-story__row {
+      display: grid;
+      grid-template-columns: 14ch 1fr;
+      gap: 0 2.5rem;
+      align-items: baseline;
+    }
+
+    .aurora-story__text {
+      margin-top: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .aurora-story__stage {
+      position: static;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Aurora story",
+  "tag": "section",
+  "class": "aurora-section",
+  "disabled_on": { "groups": ["header", "footer"] },
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Why we built it this way" },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Your body should not be a <em>subscription</em>."
+    },
+    {
+      "type": "richtext",
+      "id": "standfirst",
+      "label": "Standfirst",
+      "default": "<p>Every tracker we tried did the same thing eventually: measured us accurately, then put the reading behind a monthly fee. Stop paying and years of your own sleep stop being yours to look at.</p><p>Aurora exists because that trade is unnecessary. The sensors cost what they cost once. Nothing about reading your own data justifies a bill every month for the rest of your life.</p>"
+    },
+    {
+      "type": "text",
+      "id": "signature",
+      "label": "Signature line",
+      "default": "— The Aurora team, Prague"
+    },
+    { "type": "header", "content": "Padding" },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 128
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 128
+    }
+  ],
+  "blocks": [
+    {
+      "type": "principle",
+      "name": "Principle",
+      "limit": 6,
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Paid once" },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text",
+          "default": "One price at the checkout and no second bill, ever."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Aurora story",
+      "category": "Aurora",
+      "blocks": {
+        "once": {
+          "type": "principle",
+          "settings": {
+            "label": "Paid once",
+            "text": "One price at the checkout, then nothing. No tier above you holding the metric you actually wanted."
+          }
+        },
+        "yours": {
+          "type": "principle",
+          "settings": {
+            "label": "Your data",
+            "text": "Exportable in full, whenever you ask, in a format you can open somewhere else. Leaving is not punished."
+          }
+        },
+        "quiet": {
+          "type": "principle",
+          "settings": {
+            "label": "Quiet by design",
+            "text": "One answer each morning instead of forty charts. A tracker that needs constant attention has failed at the job."
+          }
+        },
+        "honest": {
+          "type": "principle",
+          "settings": {
+            "label": "Wellness, not medicine",
+            "text": "It reports trends in sleep, activity and recovery. It is not a medical device and we will not pretend otherwise."
+          }
+        }
+      },
+      "block_order": ["once", "yours", "quiet", "honest"]
+    }
+  ]
+}
+{% endschema %}

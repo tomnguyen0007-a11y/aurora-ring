@@ -40,6 +40,29 @@ function initReveal(root = document) {
     el.setAttribute('data-reveal-bound', '');
     observer.observe(el);
   });
+
+  // Safety net for the end of the document.
+  //
+  // The negative bottom margin above means the observer ignores the last 12% of
+  // the viewport, and the 0.1 threshold needs a tenth of the element inside what
+  // is left. An element sitting in that band when the page is already scrolled
+  // as far as it goes can therefore never satisfy either condition, and stays at
+  // opacity 0 permanently — which is exactly what happens to the final FAQ row
+  // on a page that ends with the accordion. Once we are at the bottom there is
+  // no scrolling left to trigger anything, so reveal whatever is still waiting.
+  const revealRemainder = () => {
+    const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+    if (!atBottom) return;
+    root.querySelectorAll('.aurora-reveal:not(.is-revealed)').forEach((el) => {
+      el.classList.add('is-revealed');
+      observer.unobserve(el);
+    });
+  };
+
+  window.addEventListener('scroll', revealRemainder, { passive: true });
+  window.addEventListener('resize', revealRemainder, { passive: true });
+  // A short page may already be at its own bottom before any scrolling happens.
+  requestAnimationFrame(revealRemainder);
 }
 
 /* ------------------------------------------------------------------ *

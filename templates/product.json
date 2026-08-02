@@ -1,0 +1,289 @@
+{
+  "sections": {
+    "main": {
+      "type": "product-information",
+      "blocks": {
+        "media-gallery": {
+          "type": "_product-media-gallery",
+          "static": true,
+          "settings": {
+            "media_presentation": "grid",
+            "media_columns": "one",
+            "image_gap": 4,
+            "large_first_image": false,
+            "icons_style": "none",
+            "slideshow_controls_style": "counter",
+            "slideshow_mobile_controls_style": "dots",
+            "thumbnail_position": "below",
+            "thumbnail_width": 44,
+            "aspect_ratio": "adapt",
+            "constrain_to_viewport": true,
+            "media_fit": "contain",
+            "media_radius": 0,
+            "extend_media": false,
+            "zoom": true,
+            "video_loop": false,
+            "hide_variants": true,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "product-details": {
+          "type": "_product-details",
+          "static": true,
+          "settings": {
+            "width": "fill",
+            "custom_width": 100,
+            "width_mobile": "fill",
+            "custom_width_mobile": 100,
+            "height": "fit",
+            "details_position": "flex-start",
+            "gap": 28,
+            "sticky_details_desktop": true,
+            "inherit_color_scheme": true,
+            "color_scheme": "scheme-1",
+            "background_media": "none",
+            "video_position": "cover",
+            "background_image_position": "cover",
+            "border": "none",
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        }
+      },
+      "settings": {}
+    },
+    "band": {
+      "type": "aurora-spec-band",
+      "blocks": {
+        "b1": {
+          "type": "benefit",
+          "settings": {
+            "icon": "moon",
+            "title": "Sleep stages",
+            "text": "Deep, REM and light, plus the wakings you will not remember."
+          }
+        },
+        "b2": {
+          "type": "benefit",
+          "settings": {
+            "icon": "heart",
+            "title": "Heart rate",
+            "text": "Through the night and across the day, not only when you ask."
+          }
+        },
+        "b3": {
+          "type": "benefit",
+          "settings": {
+            "icon": "pulse",
+            "title": "Heart rate variability",
+            "text": "The number that moves first when you are run down."
+          }
+        },
+        "b4": {
+          "type": "benefit",
+          "settings": {
+            "icon": "drop",
+            "title": "Blood oxygen",
+            "text": "Overnight readings, tracked as a trend rather than a one-off."
+          }
+        },
+        "b5": {
+          "type": "benefit",
+          "settings": {
+            "icon": "steps",
+            "title": "Activity",
+            "text": "Real sessions counted separately from walking about."
+          }
+        },
+        "b6": {
+          "type": "benefit",
+          "settings": {
+            "icon": "thermometer",
+            "title": "Skin temperature",
+            "text": "Nightly baseline, so a shift actually means something."
+          }
+        },
+        "s1": { "type": "spec", "settings": { "label": "Material", "value": "Titanium" } },
+        "s2": { "type": "spec", "settings": { "label": "Weight", "value": "3.3 g" } },
+        "s3": { "type": "spec", "settings": { "label": "Battery", "value": "7 days" } },
+        "s4": { "type": "spec", "settings": { "label": "Water", "value": "100 m" } },
+        "s5": { "type": "spec", "settings": { "label": "Sensors", "value": "6" } },
+        "s6": { "type": "spec", "settings": { "label": "Bluetooth", "value": "5.0" } }
+      },
+      "block_order": ["b1", "b2", "b3", "b4", "b5", "b6", "s1", "s2", "s3", "s4", "s5", "s6"],
+      "settings": {
+        "eyebrow": "Worn, not watched",
+        "heading": "It disappears by the second day.",
+        "body": "<p>Titanium, thinner than most wedding bands, with nothing on the outside to catch the light or announce itself. You stop noticing it long before it stops noticing you.</p><p>No screen to wake, no strap to tighten, no charging every night. It reads your body while you get on with the day.</p>",
+        "image_alt": "The Aurora ring worn on a hand in evening light",
+        "heading_screenless": "No screen. That is the point.",
+        "body_screenless": "<p>A flat, unbroken band with the sensor window on the inside and nothing on the outside at all. From across a table it reads as jewellery, because that is what it looks like.</p><p>Everything it measures goes straight to your phone, where there is a proper screen to read it on.</p>",
+        "image_alt_screenless": "The screenless Aurora ring worn on a hand in golden evening light",
+        "benefits_title": "What it reads.",
+        "padding-block-start": 128,
+        "padding-block-end": 112
+      }
+    },
+    "app": {
+      "type": "aurora-app",
+      "blocks": {
+        "pair": {
+          "type": "step",
+          "settings": {
+            "title": "Pair it once",
+            "text": "Open the app, hold the ring near your phone and confirm. It stays paired after that."
+          }
+        },
+        "wear": {
+          "type": "step",
+          "settings": {
+            "title": "Wear it to bed",
+            "text": "No button to press and nothing to start. The ring records the whole night on its own."
+          }
+        },
+        "read": {
+          "type": "step",
+          "settings": {
+            "title": "Read one screen at breakfast",
+            "text": "Sleep stages, heart rate through the night and what your body did with the day before — summarised before you have finished the coffee."
+          }
+        },
+        "keep": {
+          "type": "step",
+          "settings": {
+            "title": "Keep the history",
+            "text": "Every night stays in the app and can be exported in full whenever you want it. Nothing is locked behind a tier."
+          }
+        }
+      },
+      "block_order": ["pair", "wear", "read", "keep"],
+      "settings": {
+        "eyebrow": "The app",
+        "heading": "Where the night turns into an answer.",
+        "subheading": "The ring collects. The app is where you actually read it — one screen each morning, and the detail underneath only if you want it.",
+        "image_alt": "The Aurora companion app showing the overnight sleep summary",
+        "spec_line": "iOS and Android · Bluetooth pairing · no account fee · full export at any time",
+        "padding-block-start": 128,
+        "padding-block-end": 128
+      }
+    },
+    "fit": {
+      "type": "aurora-sizing",
+      "blocks": {
+        "ring": {
+          "type": "method",
+          "settings": {
+            "title": "Measure a ring you already wear",
+            "text": "Take a ring that fits the finger you want to track, measure straight across the inside in millimetres, and read it off the chart."
+          }
+        },
+        "strip": {
+          "type": "method",
+          "settings": {
+            "title": "Wrap a strip of paper",
+            "text": "Wrap paper or string around the base of the finger, mark where it overlaps, then lay it flat against a ruler. That length is your circumference."
+          }
+        }
+      },
+      "block_order": ["ring", "strip"],
+      "settings": {
+        "eyebrow": "Sizing",
+        "heading": "Get the fit right the first time.",
+        "subheading": "Two ways to measure, both under a minute, neither needs a kit. If the size is wrong when it arrives, we swap it.",
+        "chart_label": "Size chart (US 6–13)",
+        "chart_tip": "Measure at the end of the day, when your hands are warmest — finger size moves by up to half a size between morning and evening. Between two sizes, take the larger one: the ring should clear the knuckle with a little resistance.",
+        "exchange_title": "Free size exchange.",
+        "exchange_text": "If the ring does not fit, tell us and we send the right size at our cost.",
+        "padding-block-start": 0,
+        "padding-block-end": 128
+      }
+    },
+    "faq": {
+      "type": "aurora-faq",
+      "blocks": {
+        "delivery": {
+          "type": "faq",
+          "settings": {
+            "question": "How long does delivery take?",
+            "answer": "<p>Orders are dispatched from within the EU with tracked delivery included in the price. You will get the tracking number by email as soon as the parcel is handed over.</p>"
+          }
+        },
+        "sub": {
+          "type": "faq",
+          "settings": {
+            "question": "Is there really no subscription?",
+            "answer": "<p>Correct. You buy the ring once and every metric, trend and export is unlocked permanently. There is no paid tier, and nothing stops working later.</p>"
+          }
+        },
+        "sizing": {
+          "type": "faq",
+          "settings": {
+            "question": "What if I order the wrong size?",
+            "answer": "<p>Tell us and we send the correct size at our cost. Use the fit finder above before ordering — measuring at the end of the day gives the most reliable result.</p>"
+          }
+        },
+        "water": {
+          "type": "faq",
+          "settings": {
+            "question": "Can I wear it in water?",
+            "answer": "<p>Yes. The ring is water-resistant to 100 metres, so showering, swimming and washing up are all fine. It is not intended for diving.</p>"
+          }
+        },
+        "phone": {
+          "type": "faq",
+          "settings": {
+            "question": "Does it work with my phone?",
+            "answer": "<p>It pairs over Bluetooth with current iOS and Android phones. The app is free and there is no account fee attached to it.</p>"
+          }
+        },
+        "battery": {
+          "type": "faq",
+          "settings": {
+            "question": "How often does it need charging?",
+            "answer": "<p>About once a week under normal use, on the dock in the box. A full charge takes roughly ninety minutes, so a shower is usually enough to top it up.</p>"
+          }
+        },
+        "medical": {
+          "type": "faq",
+          "settings": {
+            "question": "Is Aurora a medical device?",
+            "answer": "<p>No. Aurora is a wellness tracker. It reports trends in sleep, activity and recovery to help you understand your own patterns. It is not intended to diagnose, treat, cure or prevent any disease, and it should never replace advice from a qualified clinician.</p>"
+          }
+        },
+        "returns": {
+          "type": "faq",
+          "settings": {
+            "question": "What if I change my mind?",
+            "answer": "<p>Every EU order carries a 14-day right of withdrawal from the day it arrives, no reason required. Tell us within that window and you get a full refund — full terms are in our refund policy.</p>"
+          }
+        }
+      },
+      "block_order": ["delivery", "sub", "sizing", "water", "phone", "battery", "medical", "returns"],
+      "settings": {
+        "eyebrow": "Before you buy",
+        "heading": "The questions that actually matter.",
+        "support_text": "Still deciding? Real answers, no sales script.",
+        "support_link_label": "Talk to us",
+        "open_first": true,
+        "padding-block-start": 0,
+        "padding-block-end": 128
+      }
+    },
+    "sticky": {
+      "type": "aurora-sticky-atc",
+      "settings": {
+        "button_label": "Add to cart",
+        "note": "Free EU delivery",
+        "watch_selector": ".product-form__submit, [name=add]"
+      }
+    }
+  },
+  "order": ["main", "band", "app", "fit", "faq", "sticky"]
+}
