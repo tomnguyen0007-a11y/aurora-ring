@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-08-02",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,74 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-08-02",
+      "run_context": "Weekend run (Sunday) - markets closed, no live premarket quotes. All levels reference Friday 2026-07-31 close. Next session: Monday 2026-08-03.",
+      "account": {
+        "nav_usd": 971.582,
+        "nav_eur_base": 845.27,
+        "cash_usd": 0,
+        "cash_eur": 2.77,
+        "unrealized_pnl_usd": -462.04,
+        "leverage": "1.0",
+        "margin_used": false,
+        "nav_change_since_last_run_pct": {
+          "usd": -22.96,
+          "eur_base": -23.7
+        }
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 10.01000025,
+          "prior_close": 10.29,
+          "gap_pct": -2.72,
+          "since_last_run_pct": -21.55,
+          "market_value": 690.69001725,
+          "nav_pct": 71.09,
+          "unrealized_pnl": -298.00688275,
+          "daily_pnl": -19.31998275,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still 78 of 80 required events as of company's most recent public update (May 11, 2026); no newer event-count disclosure found. Final analysis triggers on 80th event; topline readout guided for 2H 2026, exact date unconfirmed.",
+            "next_check": "watch for 8-K / press release announcing 80th event"
+          },
+          "new_developments": "Lost binding arbitration (HKIAC) against 3D Medicines on 2026-07-24 over $13.0M disputed Greater China GPS milestone payments; must pay ~$1.0M of 3D Medicines' legal fees. GPS China license agreement remains intact ($191.5M in other future milestones per 3D Medicines). Company still guided ~$107M+ cash as of Q1 2026 update plus ~$28.7M in April/May warrant-exercise proceeds. Stock fell ~11% same week on the ruling plus elevated social-media-driven volatility; not a thesis-breaking event for REGAL but a sentiment hit.",
+          "risk_flag": "OVER_CONCENTRATED - 71.1% of NAV vs 35% trim threshold (worse than last run's 69.8%); trim ~35.03 sh to reach 35% NAV cap"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 107.7900009,
+          "prior_close": 112.2,
+          "gap_pct": -3.93,
+          "since_last_run_pct": -26.13,
+          "market_value": 280.25400234,
+          "nav_pct": 28.85,
+          "unrealized_pnl": -164.66899766,
+          "daily_pnl": -11.46599766,
+          "catalyst": {
+            "name": "First public earnings + staggered IPO lockup unlock",
+            "status": "Q2 2026 earnings confirmed for Tuesday 2026-08-04 after market close (SpaceX's first-ever public earnings report). First lockup tranche - 20% of restricted shares, ~911.5M shares / ~$123B - unlocks 2026-08-06 (2nd trading day after earnings). Bonus 10% unlock (30%+ above $135 IPO price for 5 of 10 sessions pre-earnings) will NOT trigger; stock trading well below IPO price. Further ~7% tranches through Oct; full lockup expires 2026-12-08.",
+            "next_check": "Q2 earnings print/guidance on 2026-08-04; stock reaction into and through the 2026-08-06 unlock"
+          },
+          "new_developments": "No negative credit news - the $25B bond deal remains investment-grade/oversubscribed. Decline is a supply/technical overhang story (market pre-positioning ahead of confirmed unlock date), not a fundamentals deterioration signal.",
+          "risk_flag": "WATCH - within 35% cap but 2nd-largest single-name risk; confirmed lockup unlock event now imminent (this week)"
+        }
+      ],
+      "flags": [
+        "SLS at 71.1% of NAV, up from 69.8% last run and now down -21.55% since the last logged run three weeks ago, driven by a 2026-07-24 adverse arbitration loss (~$13M China milestone dispute vs 3D Medicines, ~$1.0M in fees owed) plus general volatility. REGAL trial still has not reached its 80th event as of the most recent disclosure (78/80, May 11) - the binary catalyst remains unconfirmed and pending.",
+        "SPCX's first lockup tranche (~$123B / 20% of restricted shares) unlocks 2026-08-06, two trading days after SpaceX's first-ever public earnings report on 2026-08-04 - the single most time-critical event in the book, landing this week. Stock already down -26.13% since last run pricing in the overhang.",
+        "Zero USD cash buffer persists - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
+        "Account NAV down roughly -23% to -24% since the last logged run (2026-07-11): USD segment $1,261.21 -> $971.58; EUR base EUR1,107.73 -> EUR845.27.",
+        "This run executed on a Sunday - markets closed, no live premarket quotes available. All levels reference Friday 2026-07-31 close; next session opens Monday 2026-08-03."
       ]
     }
   ]
