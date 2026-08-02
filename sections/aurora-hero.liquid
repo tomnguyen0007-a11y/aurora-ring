@@ -72,9 +72,29 @@
   .aurora-hero__inner {
     display: grid;
     grid-template-columns: 1fr;
-    gap: clamp(2.5rem, 6vw, 5rem);
+    gap: clamp(1.75rem, 5vw, 5rem);
     align-items: center;
-    padding-block: clamp(3rem, 8vh, 6rem);
+    padding-block: clamp(1.5rem, 8vh, 6rem);
+  }
+
+  /* Phones: the product leads.
+     Stacked in source order the whole first screen was type and the rings did
+     not appear until everything had been scrolled past — the one thing a buyer
+     is here to look at, below the fold. The photograph is pulled to the top and
+     run to both viewport edges so it reads as a scene, not an inset thumbnail. */
+  @media screen and (max-width: 989px) {
+    .aurora-hero__media {
+      order: -1;
+      margin-inline: calc(var(--aur-gutter, 1.5rem) * -1);
+    }
+
+    .aurora-hero__title {
+      max-width: 18ch;
+    }
+
+    .aurora-hero__action {
+      margin-top: clamp(1.5rem, 5vw, 2rem);
+    }
   }
 
   .aurora-hero__title {

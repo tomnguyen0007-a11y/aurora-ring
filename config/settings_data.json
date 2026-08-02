@@ -400,12 +400,12 @@
       },
       "scheme-8a223d0c-1a47-4e0e-8033-59e35bf5c940": {
         "settings": {
-          "background": "#f6f4f0",
+          "background": "#ffffff",
           "foreground_heading": "#14151a",
           "foreground": "#3d3e45",
           "primary": "#b8431a",
           "primary_hover": "#14151a",
-          "border": "#14151a21",
+          "border": "#14151a1f",
           "shadow": "#14151a",
           "primary_button_background": "#14151a",
           "primary_button_text": "#f6f4f0",
