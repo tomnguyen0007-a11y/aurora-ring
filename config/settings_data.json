@@ -393,12 +393,12 @@
       },
       "scheme-8a223d0c-1a47-4e0e-8033-59e35bf5c940": {
         "settings": {
-          "background": "#ffffff",
+          "background": "#e8e2d6",
           "foreground_heading": "#14151a",
           "foreground": "#3d3e45",
           "primary": "#b8431a",
           "primary_hover": "#14151a",
-          "border": "#14151a1f",
+          "border": "#14151a26",
           "shadow": "#14151a",
           "primary_button_background": "#14151a",
           "primary_button_text": "#f6f4f0",
