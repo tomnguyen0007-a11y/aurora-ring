@@ -1,0 +1,17 @@
+{%- comment -%}
+  Aurora — third-party integrations loaded in <head>.
+
+  KLAVIYO (email capture + abandoned cart)
+  ----------------------------------------
+  1. Create a free Klaviyo account, then go to Settings → API keys and copy
+     your PUBLIC API KEY (a short 6-character "Company ID", e.g. ABC123).
+  2. Paste it between the quotes below and save. Leave empty to disable.
+
+  This single script powers everything: the on-site signup popup, any
+  embedded forms, on-site tracking, and the abandoned-cart / abandoned-browse
+  flows (those flows are switched on inside Klaviyo, not here).
+{%- endcomment -%}
+{%- assign klaviyo_company_id = '' -%}
+{%- if klaviyo_company_id != blank -%}
+  <script async type="text/javascript" src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id={{ klaviyo_company_id }}"></script>
+{%- endif -%}
