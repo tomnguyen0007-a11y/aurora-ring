@@ -1,20 +1,301 @@
-/*
- * ------------------------------------------------------------
- * IMPORTANT: The contents of this file are auto-generated.
- *
- * This file may be updated by the Shopify admin theme editor
- * or related systems. Please exercise caution as any changes
- * made to this file may be overwritten.
- * ------------------------------------------------------------
- */
 {
   "sections": {
-    "instant-swGeFD3IIjRj24nY": {
-      "type": "instant-swGeFD3IIjRj24nY",
-      "settings": {}
+    "hero": {
+      "type": "aurora-hero",
+      "settings": {
+        "eyebrow": "The smart ring without the subscription",
+        "heading": "Sleep is the <em>whole</em> game.",
+        "subheading": "Aurora measures your nights and tells you one thing each morning: push, or hold back. Buy it once and every insight is yours for good.",
+        "cta_label": "Buy Aurora",
+        "show_price": true,
+        "assurance": "Free shipping · 60-night trial · No subscription, ever",
+        "padding-block-start": 0,
+        "padding-block-end": 24
+      }
+    },
+    "proof": {
+      "type": "aurora-proof",
+      "blocks": {
+        "sleep": {
+          "type": "item",
+          "settings": {
+            "title": "How well you slept",
+            "text": "One score for the night, and the two or three things that shaped it."
+          }
+        },
+        "readiness": {
+          "type": "item",
+          "settings": {
+            "title": "Whether to push today",
+            "text": "Aurora compares last night against your own baseline and answers in a word, not a chart."
+          }
+        },
+        "activity": {
+          "type": "item",
+          "settings": {
+            "title": "What your effort actually cost",
+            "text": "Real sessions counted separately from walking about, so the numbers mean something."
+          }
+        }
+      },
+      "block_order": [
+        "sleep",
+        "readiness",
+        "activity"
+      ],
+      "settings": {
+        "anchor": "aurora-how",
+        "heading": "Three things it tells you.",
+        "subheading": "Not forty charts. Three answers, every morning.",
+        "spec_line": "Grade 5 titanium · 2.8 mm thin · 4 grams · 7-day battery · water-resistant to 100 m",
+        "padding-block-start": 128,
+        "padding-block-end": 128
+      }
+    },
+    "night": {
+      "type": "aurora-night",
+      "settings": {
+        "eyebrow": "While you sleep",
+        "heading": "The eight hours you never get to watch.",
+        "body": "Aurora reads every stage of your night — deep, REM, light, and the wakings you will not remember — and has an answer waiting before you reach for the kettle.",
+        "stat_value": "7×",
+        "stat_label": "A week of nights on one charge, so the data never has gaps.",
+        "padding-block-start": 144,
+        "padding-block-end": 144
+      }
+    },
+    "ownership": {
+      "type": "aurora-comparison",
+      "blocks": {
+        "ours_1": {
+          "type": "ours",
+          "settings": {
+            "text": "One payment, then nothing"
+          }
+        },
+        "ours_2": {
+          "type": "ours",
+          "settings": {
+            "text": "Every metric unlocked on day one"
+          }
+        },
+        "ours_3": {
+          "type": "ours",
+          "settings": {
+            "text": "Export your raw data whenever you like"
+          }
+        },
+        "ours_4": {
+          "type": "ours",
+          "settings": {
+            "text": "Still works in five years, untouched"
+          }
+        },
+        "theirs_1": {
+          "type": "theirs",
+          "settings": {
+            "text": "A subscription fee every month, indefinitely"
+          }
+        },
+        "theirs_2": {
+          "type": "theirs",
+          "settings": {
+            "text": "The useful metrics sit behind the paywall"
+          }
+        },
+        "theirs_3": {
+          "type": "theirs",
+          "settings": {
+            "text": "Export is limited or unavailable"
+          }
+        },
+        "theirs_4": {
+          "type": "theirs",
+          "settings": {
+            "text": "Stop paying and it stops telling you anything"
+          }
+        }
+      },
+      "block_order": [
+        "ours_1",
+        "ours_2",
+        "ours_3",
+        "ours_4",
+        "theirs_1",
+        "theirs_2",
+        "theirs_3",
+        "theirs_4"
+      ],
+      "settings": {
+        "eyebrow": "Own it outright",
+        "heading": "Pay once. Not every month, forever.",
+        "subheading": "Most tracking rings and straps put your own numbers behind a monthly fee. Aurora does not have one.",
+        "ours_title": "With Aurora",
+        "theirs_title": "With a subscription tracker",
+        "disclaimer": "Based on publicly advertised subscription plans at time of writing, for general guidance only. Competitor pricing changes — please check their current terms. Prices shown include VAT.",
+        "padding-block-start": 128,
+        "padding-block-end": 128
+      }
+    },
+    "faq": {
+      "type": "aurora-faq",
+      "blocks": {
+        "sub": {
+          "type": "faq",
+          "settings": {
+            "question": "Is there really no subscription?",
+            "answer": "<p>Correct. You buy the ring once and every metric, trend and export is unlocked permanently. There is no paid tier, and nothing stops working later.</p>"
+          }
+        },
+        "medical": {
+          "type": "faq",
+          "settings": {
+            "question": "Is Aurora a medical device?",
+            "answer": "<p>No. Aurora is a wellness tracker. It reports trends in sleep, activity and recovery to help you understand your own patterns. It is not intended to diagnose, treat, cure or prevent any disease, and it should never replace advice from a qualified clinician.</p>"
+          }
+        },
+        "sizing": {
+          "type": "faq",
+          "settings": {
+            "question": "How do I get the right size?",
+            "answer": "<p>Every order includes a free sizing kit. Wear the sizer for 24 hours — finger size shifts with temperature and time of day — then confirm your size and we ship the ring.</p>"
+          }
+        },
+        "water": {
+          "type": "faq",
+          "settings": {
+            "question": "Can I wear it in water?",
+            "answer": "<p>Yes. Aurora is water-resistant to 100 metres, so showering, swimming and washing up are all fine.</p>"
+          }
+        },
+        "data": {
+          "type": "faq",
+          "settings": {
+            "question": "What happens to my data?",
+            "answer": "<p>It stays yours. Data is encrypted in transit and at rest, never sold to third parties, and exportable in full at any time. You can delete your account and everything attached to it from within the app.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "sub",
+        "medical",
+        "sizing",
+        "water",
+        "data"
+      ],
+      "settings": {
+        "eyebrow": "Before you buy",
+        "heading": "The questions that actually matter.",
+        "support_text": "Still deciding? Real answers, no sales script.",
+        "support_link_label": "Talk to us",
+        "open_first": true,
+        "padding-block-start": 128,
+        "padding-block-end": 128
+      }
+    },
+    "close": {
+      "type": "aurora-close",
+      "blocks": {
+        "trial": {
+          "type": "item",
+          "settings": {
+            "title": "60-night trial",
+            "text": "Full refund, return shipping included."
+          }
+        },
+        "warranty": {
+          "type": "item",
+          "settings": {
+            "title": "No subscription, ever",
+            "text": "Every metric is unlocked at purchase and stays unlocked."
+          }
+        },
+        "sizing": {
+          "type": "item",
+          "settings": {
+            "title": "Free sizing kit",
+            "text": "Ships before your ring does, so the fit is right first time."
+          }
+        }
+      },
+      "block_order": [
+        "trial",
+        "warranty",
+        "sizing"
+      ],
+      "settings": {
+        "eyebrow": "No risk",
+        "heading": "Wear it for 60 nights. Decide after.",
+        "subheading": "A tracker only earns its place once it changes what you actually do. Two months is long enough to know either way.",
+        "cta_label": "Buy Aurora",
+        "show_price": true,
+        "disclaimer": "<p>Your statutory right to withdraw within 14 days of delivery applies to every EU order, no reason required. Aurora's 60-night trial is a voluntary extra on top of that right, not a replacement for it — full terms are in our refund policy.</p><p>Aurora is a general wellness product. It measures and reports trends in sleep, activity and recovery to support your own understanding of your habits. It is not a medical device and is not intended to diagnose, treat, cure or prevent any disease or condition.</p><p>Nothing shown in the app or on this site is medical advice. If you have a health concern, speak to a qualified healthcare professional.</p>",
+        "padding-block-start": 128,
+        "padding-block-end": 128
+      }
+    },
+    "sticky": {
+      "type": "aurora-sticky-atc",
+      "settings": {
+        "button_label": "Buy Aurora",
+        "note": "Free shipping",
+        "watch_selector": "#aurora-hero-cta"
+      }
+    },
+    "box": {
+      "type": "aurora-box",
+      "blocks": {
+        "ring": {
+          "type": "item",
+          "settings": {
+            "title": "The Aurora ring",
+            "text": "In the size and finish you confirmed."
+          }
+        },
+        "sizer": {
+          "type": "item",
+          "settings": {
+            "title": "Sizing kit",
+            "text": "Posted first, so the fit is right before we ship."
+          }
+        },
+        "dock": {
+          "type": "item",
+          "settings": {
+            "title": "Charging dock",
+            "text": "Full charge in about 90 minutes."
+          }
+        },
+        "cable": {
+          "type": "item",
+          "settings": {
+            "title": "USB-C cable",
+            "text": "No proprietary connector to lose."
+          }
+        }
+      },
+      "block_order": [
+        "ring",
+        "sizer",
+        "dock",
+        "cable"
+      ],
+      "settings": {
+        "eyebrow": "What arrives",
+        "heading": "In the box.",
+        "padding-block-start": 128,
+        "padding-block-end": 128
+      }
     }
   },
   "order": [
-    "instant-swGeFD3IIjRj24nY"
+    "hero",
+    "proof",
+    "night",
+    "box",
+    "ownership",
+    "faq",
+    "close",
+    "sticky"
   ]
 }

@@ -1,0 +1,204 @@
+{%- comment -%}
+  What Aurora tells you — stated once, in plain words.
+
+  Deliberately has no cards, gauges or dashboards. Three sentences carry more
+  weight than three screenshots, and they leave the page quiet enough that the
+  price and the guarantee stay the loudest things on it.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+-%}
+
+<section
+  id="{{ s.anchor | default: 'aurora-how' }}"
+  class="aurora aurora-proof"
+  style="{% render 'aurora-spacing', settings: section.settings %}"
+>
+  <div class="aurora__inner">
+    <div class="aurora-proof__lead">
+      <h2 class="aurora__h2 aurora-reveal">{{ s.heading }}</h2>
+      {%- if s.subheading != blank -%}
+        <p class="aurora__lede aurora-reveal" style="--aur-reveal-delay: 90ms">{{ s.subheading }}</p>
+      {%- endif -%}
+    </div>
+
+    <ol class="aurora-proof__list">
+      {%- for block in section.blocks -%}
+        <li
+          class="aurora-proof__item aurora-reveal"
+          style="--aur-reveal-delay: {{ forloop.index0 | times: 90 | plus: 140 }}ms"
+          {{ block.shopify_attributes }}
+        >
+          <h3 class="aurora-proof__title">{{ block.settings.title }}</h3>
+          <p class="aurora-proof__text">{{ block.settings.text }}</p>
+        </li>
+      {%- endfor -%}
+    </ol>
+
+    {%- if s.spec_line != blank -%}
+      <p class="aurora-proof__spec aurora-reveal">{{ s.spec_line }}</p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .aurora-proof {
+    background: var(--aur-bg);
+    padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
+  }
+
+  .aurora-proof__lead {
+    max-width: 34rem;
+    margin-bottom: clamp(3rem, 7vw, 5.5rem);
+  }
+
+  .aurora-proof__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0;
+  }
+
+  /* Hairlines only. No boxes — the space between items is the structure. */
+  .aurora-proof__item {
+    padding-block: clamp(1.75rem, 3.5vw, 2.75rem);
+    border-top: 1px solid var(--aur-line);
+    max-width: 42rem;
+  }
+
+  .aurora-proof__item:last-child {
+    border-bottom: 1px solid var(--aur-line);
+  }
+
+  .aurora-proof__title {
+    font-family: var(--aur-font-display);
+    font-size: clamp(1.5rem, 3vw, 2.125rem);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin: 0 0 0.625rem;
+    color: var(--aur-text);
+  }
+
+  .aurora-proof__text {
+    margin: 0;
+    color: var(--aur-text-muted);
+    max-width: 52ch;
+  }
+
+  .aurora-proof__spec {
+    margin: clamp(2.5rem, 5vw, 4rem) 0 0;
+    font-family: var(--aur-font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--aur-text-dim);
+    line-height: 2;
+  }
+
+  @media screen and (min-width: 990px) {
+    /* Indent the items so the heading column stays the anchor and the list
+       reads as an answer to it, rather than a second column of equal weight. */
+    .aurora-proof__item {
+      margin-left: clamp(0px, 12vw, 11rem);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Aurora proof",
+  "tag": "section",
+  "class": "aurora-section",
+  "settings": [
+    { "type": "text", "id": "anchor", "label": "Anchor id", "default": "aurora-how" },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Three things it tells you."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Not forty charts. Three answers, every morning."
+    },
+    {
+      "type": "text",
+      "id": "spec_line",
+      "label": "Spec line",
+      "default": "Grade 5 titanium · 2.8mm · 4g · 7-day battery · water-resistant to 100m"
+    },
+    { "type": "header", "content": "Padding" },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 240,
+      "step": 4,
+      "unit": "px",
+      "default": 128
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 240,
+      "step": 4,
+      "unit": "px",
+      "default": 128
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Item",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "How well you slept" },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text",
+          "default": "One score for the night, and the two or three things that shaped it."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [
+    {
+      "name": "Aurora proof",
+      "category": "Aurora",
+      "blocks": {
+        "item": {
+          "type": "item",
+          "settings": {
+            "title": "How well you slept",
+            "text": "One score for the night, and the two or three things that shaped it."
+          }
+        },
+        "item_2": {
+          "type": "item",
+          "settings": {
+            "title": "Whether to push today",
+            "text": "Aurora compares last night against your own baseline and answers in a word, not a chart."
+          }
+        },
+        "item_3": {
+          "type": "item",
+          "settings": {
+            "title": "What your effort actually cost",
+            "text": "Real sessions counted separately from walking about, so the numbers mean something."
+          }
+        }
+      },
+      "block_order": ["item", "item_2", "item_3"]
+    }
+  ]
+}
+{% endschema %}

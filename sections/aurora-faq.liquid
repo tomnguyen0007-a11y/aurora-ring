@@ -1,0 +1,351 @@
+{%- liquid
+  assign s = section.settings
+-%}
+
+<section
+  class="aurora aurora-faq"
+  style="{% render 'aurora-spacing', settings: section.settings %}"
+>
+  <div class="aurora__inner aurora-faq__inner">
+    <header class="aurora-faq__head">
+      {%- if s.eyebrow != blank -%}
+        <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
+      {%- endif -%}
+      <h2 class="aurora__h2 aurora-reveal" style="--aur-reveal-delay: 70ms">{{ s.heading }}</h2>
+      {%- if s.support_text != blank -%}
+        <p class="aurora__lede aurora-reveal" style="--aur-reveal-delay: 140ms">{{ s.support_text }}</p>
+      {%- endif -%}
+      {%- if s.support_link_label != blank and s.support_link != blank -%}
+        <a class="aurora-faq__support aurora-reveal" style="--aur-reveal-delay: 180ms" href="{{ s.support_link }}">
+          {{ s.support_link_label }}
+        </a>
+      {%- endif -%}
+    </header>
+
+    <div class="aurora-faq__list" data-aurora-accordion>
+      {%- for block in section.blocks -%}
+        <details
+          class="aurora-faq__item aurora-reveal"
+          style="--aur-reveal-delay: {{ forloop.index0 | times: 50 | plus: 100 }}ms"
+          {% if forloop.first and s.open_first %}open{% endif %}
+          {{ block.shopify_attributes }}
+        >
+          <summary class="aurora-faq__q">
+            <span>{{ block.settings.question }}</span>
+            <span class="aurora-faq__icon" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 4v12"/><path d="M4 10h12"/></svg>
+            </span>
+          </summary>
+          <div class="aurora-faq__a">{{ block.settings.answer }}</div>
+        </details>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{%- comment -%} FAQPage structured data — answers are stripped to plain text. {%- endcomment -%}
+{%- if section.blocks.size > 0 -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {%- for block in section.blocks -%}
+          {
+            "@type": "Question",
+            "name": {{ block.settings.question | strip_html | json }},
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": {{ block.settings.answer | strip_html | strip_newlines | json }}
+            }
+          }{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      ]
+    }
+  </script>
+{%- endif -%}
+
+{% stylesheet %}
+  .aurora-faq {
+    background: var(--aur-bg-alt);
+    padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
+    border-top: 1px solid var(--aur-line);
+  }
+
+  .aurora-faq__inner {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--aur-stack-loose);
+    align-items: start;
+  }
+
+  .aurora-faq__support {
+    display: inline-block;
+    margin-top: var(--aur-stack);
+    font-size: 0.875rem;
+    color: var(--aur-accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s var(--aur-ease-out);
+  }
+
+  .aurora-faq__support:hover {
+    border-color: currentColor;
+  }
+
+  .aurora-faq__list {
+    border-top: 1px solid var(--aur-line);
+  }
+
+  .aurora-faq__item {
+    border-bottom: 1px solid var(--aur-line);
+  }
+
+  .aurora-faq__q {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.375rem 0;
+    cursor: pointer;
+    list-style: none;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--aur-text-soft);
+    transition: color 0.3s var(--aur-ease-out);
+  }
+
+  .aurora-faq__q::-webkit-details-marker {
+    display: none;
+  }
+
+  .aurora-faq__q:hover,
+  .aurora-faq__item[open] .aurora-faq__q {
+    color: var(--aur-text);
+  }
+
+  .aurora-faq__icon {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    flex-shrink: 0;
+    border: 1px solid var(--aur-line);
+    border-radius: 50%;
+    color: var(--aur-text-muted);
+    transition: transform 0.4s var(--aur-ease-out), color 0.3s var(--aur-ease-out),
+      border-color 0.3s var(--aur-ease-out);
+  }
+
+  .aurora-faq__icon svg {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
+  .aurora-faq__item[open] .aurora-faq__icon {
+    transform: rotate(135deg);
+    color: var(--aur-accent);
+    border-color: var(--aur-line);
+  }
+
+  .aurora-faq__a {
+    padding: 0 0 1.5rem;
+    max-width: 62ch;
+    color: var(--aur-text-muted);
+    font-size: 0.9375rem;
+    line-height: 1.7;
+  }
+
+  .aurora-faq__a > :first-child {
+    margin-top: 0;
+  }
+
+  .aurora-faq__a > :last-child {
+    margin-bottom: 0;
+  }
+
+  .aurora-faq__a a {
+    color: var(--aur-accent);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .aurora-faq__item[open] .aurora-faq__a {
+      animation: aurora-faq-in 0.4s var(--aur-ease-out);
+    }
+  }
+
+  @keyframes aurora-faq-in {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .aurora-faq__inner {
+      grid-template-columns: 0.8fr 1.2fr;
+      gap: clamp(3rem, 6vw, 6rem);
+    }
+
+    .aurora-faq__head {
+      position: sticky;
+      top: 6rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Aurora FAQ",
+  "tag": "section",
+  "class": "aurora-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Before you buy"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "The questions that actually matter."
+    },
+    {
+      "type": "textarea",
+      "id": "support_text",
+      "label": "Support text",
+      "default": "Still deciding? Real answers, no sales script."
+    },
+    {
+      "type": "text",
+      "id": "support_link_label",
+      "label": "Support link label",
+      "default": "Talk to us"
+    },
+    {
+      "type": "url",
+      "id": "support_link",
+      "label": "Support link"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_first",
+      "label": "Open first question",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 96
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 96
+    }
+  ],
+  "blocks": [
+    {
+      "type": "faq",
+      "name": "Question",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Question",
+          "default": "How accurate is it?"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "Answer",
+          "default": "<p>Add your answer.</p>"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 14,
+  "presets": [
+    {
+      "name": "Aurora FAQ",
+      "category": "Aurora",
+      "blocks": {
+        "faq": {
+          "type": "faq",
+          "settings": {
+            "question": "Is there really no subscription?",
+            "answer": "<p>Correct. You buy the ring once and every metric, trend and export is unlocked permanently. There is no paid tier, and nothing stops working later.</p>"
+          }
+        },
+        "faq_2": {
+          "type": "faq",
+          "settings": {
+            "question": "Is Aurora a medical device?",
+            "answer": "<p>No. Aurora is a wellness tracker. It reports trends in sleep, activity and recovery to help you understand your own patterns. It is not intended to diagnose, treat, cure or prevent any disease, and it should never replace advice from a qualified clinician.</p>"
+          }
+        },
+        "faq_3": {
+          "type": "faq",
+          "settings": {
+            "question": "How do I get the right size?",
+            "answer": "<p>Every order includes a free sizing kit. Wear the sizer for 24 hours — finger size shifts with temperature and time of day — then confirm your size and we ship the ring.</p>"
+          }
+        },
+        "faq_4": {
+          "type": "faq",
+          "settings": {
+            "question": "How long does the battery last?",
+            "answer": "<p>Around seven days of continuous tracking, and roughly 90 minutes from empty to full on the charging dock.</p>"
+          }
+        },
+        "faq_5": {
+          "type": "faq",
+          "settings": {
+            "question": "Can I wear it in water?",
+            "answer": "<p>Yes. Aurora is water-resistant to 100 metres, so showering, swimming and washing up are all fine.</p>"
+          }
+        },
+        "faq_6": {
+          "type": "faq",
+          "settings": {
+            "question": "What happens to my data?",
+            "answer": "<p>It stays yours. Data is encrypted in transit and at rest, never sold to third parties, and exportable in full at any time. You can delete your account and everything attached to it from within the app.</p>"
+          }
+        },
+        "faq_7": {
+          "type": "faq",
+          "settings": {
+            "question": "What if it does not suit me?",
+            "answer": "<p>Wear it for 60 nights. If it is not earning its place, send it back for a full refund — return shipping included.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "faq",
+        "faq_2",
+        "faq_3",
+        "faq_4",
+        "faq_5",
+        "faq_6",
+        "faq_7"
+      ]
+    }
+  ]
+}
+{% endschema %}
