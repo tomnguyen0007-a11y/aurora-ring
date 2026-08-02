@@ -12,15 +12,46 @@
 
 <section class="aurora aurora-own" style="{% render 'aurora-spacing', settings: section.settings %}">
   <div class="aurora__inner">
-    <header class="aurora-own__head">
-      {%- if s.eyebrow != blank -%}
-        <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
-      {%- endif -%}
-      <h2 class="aurora__h2 aurora-reveal" style="--aur-reveal-delay: 80ms">{{ s.heading }}</h2>
-      {%- if s.subheading != blank -%}
-        <p class="aurora__lede aurora-reveal" style="--aur-reveal-delay: 150ms">{{ s.subheading }}</p>
-      {%- endif -%}
-    </header>
+    {%- comment -%}
+      The argument sat alone against an empty half-width, so the finishes
+      photograph now holds the other side of the header.
+    {%- endcomment -%}
+    <div class="aurora-own__top">
+      <header class="aurora-own__head">
+        {%- if s.eyebrow != blank -%}
+          <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
+        {%- endif -%}
+        <h2 class="aurora__h2 aurora-reveal" style="--aur-reveal-delay: 80ms">{{ s.heading }}</h2>
+        {%- if s.subheading != blank -%}
+          <p class="aurora__lede aurora-reveal" style="--aur-reveal-delay: 150ms">{{ s.subheading }}</p>
+        {%- endif -%}
+      </header>
+
+      <div class="aurora-own__media aurora-reveal" style="--aur-reveal-delay: 180ms">
+        {%- if s.image != blank -%}
+          {{
+            s.image
+            | image_url: width: 1200
+            | image_tag:
+              widths: '460, 760, 1200',
+              sizes: '(max-width: 989px) 92vw, 46vw',
+              loading: 'lazy',
+              class: 'aurora-own__img',
+              alt: s.image.alt | default: s.image_alt
+          }}
+        {%- else -%}
+          <img
+            class="aurora-own__img"
+            src="{{ 'aurora-finishes.jpg' | asset_url }}"
+            width="1500"
+            height="1000"
+            loading="lazy"
+            decoding="async"
+            alt="{{ s.image_alt | escape }}"
+          >
+        {%- endif -%}
+      </div>
+    </div>
 
     <div class="aurora-own__columns">
       <div class="aurora-own__col aurora-own__col--ours aurora-reveal" style="--aur-reveal-delay: 200ms">
@@ -58,9 +89,29 @@
     padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
   }
 
+  .aurora-own__top {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(2rem, 5vw, 3.5rem);
+    align-items: center;
+    margin-bottom: var(--aur-stack-loose);
+  }
+
   .aurora-own__head {
     max-width: 34rem;
-    margin-bottom: var(--aur-stack-loose);
+  }
+
+  .aurora-own__img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  @media screen and (min-width: 990px) {
+    .aurora-own__top {
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(2.5rem, 6vw, 5rem);
+    }
   }
 
   .aurora-own__columns {
@@ -127,6 +178,13 @@
   "tag": "section",
   "class": "aurora-section",
   "settings": [
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text",
+      "default": "The Aurora ring in silver, gold and black finishes"
+    },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Own it outright" },
     {
       "type": "inline_richtext",

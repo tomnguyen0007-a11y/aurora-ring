@@ -110,22 +110,71 @@
             "text": "Nightly baseline, so a shift actually means something."
           }
         },
-        "s1": { "type": "spec", "settings": { "label": "Material", "value": "Titanium" } },
-        "s2": { "type": "spec", "settings": { "label": "Weight", "value": "3.3 g" } },
-        "s3": { "type": "spec", "settings": { "label": "Battery", "value": "7 days" } },
-        "s4": { "type": "spec", "settings": { "label": "Water", "value": "100 m" } },
-        "s5": { "type": "spec", "settings": { "label": "Sensors", "value": "6" } },
-        "s6": { "type": "spec", "settings": { "label": "Bluetooth", "value": "5.0" } }
+        "s1": {
+          "type": "spec",
+          "settings": {
+            "label": "Material",
+            "value": "Titanium"
+          }
+        },
+        "s2": {
+          "type": "spec",
+          "settings": {
+            "label": "Weight",
+            "value": "3.3 g"
+          }
+        },
+        "s3": {
+          "type": "spec",
+          "settings": {
+            "label": "Battery",
+            "value": "7 days"
+          }
+        },
+        "s4": {
+          "type": "spec",
+          "settings": {
+            "label": "Water",
+            "value": "100 m"
+          }
+        },
+        "s5": {
+          "type": "spec",
+          "settings": {
+            "label": "Sensors",
+            "value": "6"
+          }
+        },
+        "s6": {
+          "type": "spec",
+          "settings": {
+            "label": "Bluetooth",
+            "value": "5.0"
+          }
+        }
       },
-      "block_order": ["b1", "b2", "b3", "b4", "b5", "b6", "s1", "s2", "s3", "s4", "s5", "s6"],
+      "block_order": [
+        "b1",
+        "b2",
+        "b3",
+        "b4",
+        "b5",
+        "b6",
+        "s1",
+        "s2",
+        "s3",
+        "s4",
+        "s5",
+        "s6"
+      ],
       "settings": {
         "eyebrow": "Worn, not watched",
         "heading": "It disappears by the second day.",
         "body": "<p>Titanium, thinner than most wedding bands, with nothing on the outside to catch the light or announce itself. You stop noticing it long before it stops noticing you.</p><p>No screen to wake, no strap to tighten, no charging every night. It reads your body while you get on with the day.</p>",
-        "image_alt": "The Aurora ring worn on a hand in evening light",
+        "image_alt": "The Aurora ring with its display worn on a hand at sunset",
         "heading_screenless": "No screen. That is the point.",
         "body_screenless": "<p>A flat, unbroken band with the sensor window on the inside and nothing on the outside at all. From across a table it reads as jewellery, because that is what it looks like.</p><p>Everything it measures goes straight to your phone, where there is a proper screen to read it on.</p>",
-        "image_alt_screenless": "The screenless Aurora ring worn on a hand in golden evening light",
+        "image_alt_screenless": "The screenless Aurora ring in silver, worn on a hand gripping a bicycle bar at sunset",
         "benefits_title": "What it reads.",
         "padding-block-start": 128,
         "padding-block-end": 112
@@ -163,7 +212,12 @@
           }
         }
       },
-      "block_order": ["pair", "wear", "read", "keep"],
+      "block_order": [
+        "pair",
+        "wear",
+        "read",
+        "keep"
+      ],
       "settings": {
         "eyebrow": "The app",
         "heading": "Where the night turns into an answer.",
@@ -192,7 +246,10 @@
           }
         }
       },
-      "block_order": ["ring", "strip"],
+      "block_order": [
+        "ring",
+        "strip"
+      ],
       "settings": {
         "eyebrow": "Sizing",
         "heading": "Get the fit right the first time.",
@@ -265,7 +322,16 @@
           }
         }
       },
-      "block_order": ["delivery", "sub", "sizing", "water", "phone", "battery", "medical", "returns"],
+      "block_order": [
+        "delivery",
+        "sub",
+        "sizing",
+        "water",
+        "phone",
+        "battery",
+        "medical",
+        "returns"
+      ],
       "settings": {
         "eyebrow": "Before you buy",
         "heading": "The questions that actually matter.",
@@ -285,5 +351,12 @@
       }
     }
   },
-  "order": ["main", "band", "app", "fit", "faq", "sticky"]
+  "order": [
+    "main",
+    "band",
+    "app",
+    "fit",
+    "faq",
+    "sticky"
+  ]
 }

@@ -58,15 +58,19 @@
           }}
         {%- else -%}
           {%- if is_screenless -%}
-            {%- assign fallback_src = 'aurora-life-screenless.jpg' -%}
+            {%- assign fallback_src = 'aurora-wear-screenless.jpg' -%}
+            {%- assign fallback_w = 1400 -%}
+            {%- assign fallback_h = 1738 -%}
           {%- else -%}
-            {%- assign fallback_src = 'aurora-life-screen.jpg' -%}
+            {%- assign fallback_src = 'aurora-wear-screen.jpg' -%}
+            {%- assign fallback_w = 1100 -%}
+            {%- assign fallback_h = 1467 -%}
           {%- endif -%}
           <img
             class="aurora-band__img"
             src="{{ fallback_src | asset_url }}"
-            width="1200"
-            height="1500"
+            width="{{ fallback_w }}"
+            height="{{ fallback_h }}"
             loading="lazy"
             decoding="async"
             alt="{{ band_alt | escape }}"
@@ -201,7 +205,8 @@
     margin: 0;
     padding: 0;
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: clamp(1.25rem, 5vw, 2rem);
     border-top: 1px solid var(--aur-line);
   }
 
@@ -211,9 +216,19 @@
   }
 
   .aurora-band__icon {
-    display: block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 10px;
+    background: rgba(184, 67, 26, 0.07);
     color: var(--aur-accent);
     margin-bottom: 0.75rem;
+  }
+
+  .aurora--night .aurora-band__icon {
+    background: rgba(255, 126, 71, 0.12);
   }
 
   .aurora-band__benefit-title {
@@ -235,7 +250,7 @@
   /* ---- Spec strip ---- */
   .aurora-band__specs {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 0;
     margin: clamp(3rem, 6vw, 4.5rem) 0 0;
     border-top: 1px solid var(--aur-line);
@@ -243,7 +258,7 @@
   }
 
   .aurora-band__spec {
-    padding: 1.125rem 1rem;
+    padding: 1rem 0.75rem;
     border-right: 1px solid var(--aur-line);
     border-bottom: 1px solid var(--aur-line);
   }
@@ -258,18 +273,21 @@
 
   .aurora-band__spec-value {
     margin: 0.3125rem 0 0;
-    font-size: 1rem;
+    font-size: clamp(0.875rem, 3vw, 1rem);
     color: var(--aur-text);
+  }
+
+  .aurora-band__spec-label {
+    font-size: clamp(0.5625rem, 2vw, 0.6875rem);
   }
 
   @media screen and (min-width: 750px) {
     .aurora-band__grid {
-      grid-template-columns: repeat(2, 1fr);
       column-gap: clamp(1.5rem, 4vw, 3.5rem);
     }
 
-    .aurora-band__specs {
-      grid-template-columns: repeat(3, 1fr);
+    .aurora-band__spec {
+      padding: 1.125rem 1rem;
     }
   }
 

@@ -20,21 +20,27 @@
           "type": "item",
           "settings": {
             "title": "How well you slept",
-            "text": "One score for the night, and the two or three things that shaped it."
+            "text": "One score for the night, and the two or three things that shaped it.",
+            "readout": "85",
+            "readout_label": "Sleep score"
           }
         },
         "readiness": {
           "type": "item",
           "settings": {
             "title": "Whether to push today",
-            "text": "Aurora compares last night against your own baseline and answers in a word, not a chart."
+            "text": "Aurora compares last night against your own baseline and answers in a word, not a chart.",
+            "readout": "7.2",
+            "readout_label": "Readiness"
           }
         },
         "activity": {
           "type": "item",
           "settings": {
             "title": "What your effort actually cost",
-            "text": "Real sessions counted separately from walking about, so the numbers mean something."
+            "text": "Real sessions counted separately from walking about, so the numbers mean something.",
+            "readout": "62",
+            "readout_label": "Active minutes"
           }
         }
       },
@@ -49,7 +55,10 @@
         "subheading": "Not forty charts. Three answers, every morning.",
         "spec_line": "Grade 5 titanium · 2.8 mm thin · 4 grams · 7-day battery · water-resistant to 100 m",
         "padding-block-start": 128,
-        "padding-block-end": 128
+        "padding-block-end": 128,
+        "eyebrow": "Every morning",
+        "image_alt": "The Aurora ring worn on a hand resting on a bicycle bar at sunset",
+        "readout_note": "Figures shown are examples of the app's morning summary."
       }
     },
     "night": {
@@ -61,7 +70,9 @@
         "stat_value": "7×",
         "stat_label": "A week of nights on one charge, so the data never has gaps.",
         "padding-block-start": 144,
-        "padding-block-end": 144
+        "padding-block-end": 144,
+        "show_image": true,
+        "image_alt": "Two Aurora rings with the display lit, showing the time"
       }
     },
     "ownership": {
@@ -134,7 +145,8 @@
         "theirs_title": "With a subscription tracker",
         "disclaimer": "Based on publicly advertised subscription plans at time of writing, for general guidance only. Competitor pricing changes — please check their current terms. Prices shown include VAT.",
         "padding-block-start": 128,
-        "padding-block-end": 128
+        "padding-block-end": 128,
+        "image_alt": "The Aurora ring in silver, gold and black finishes"
       }
     },
     "faq": {

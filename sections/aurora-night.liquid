@@ -27,20 +27,65 @@
       {%- endif -%}
     </div>
 
-    {%- if s.stat_value != blank -%}
-      <figure class="aurora-night__stat aurora-reveal" style="--aur-reveal-delay: 220ms">
-        <span class="aurora-night__value aurora__num">{{ s.stat_value }}</span>
-        {%- if s.stat_label != blank -%}
-          <figcaption class="aurora-night__caption">{{ s.stat_label }}</figcaption>
-        {%- endif -%}
-      </figure>
-    {%- endif -%}
+    <div class="aurora-night__aside">
+      {%- comment -%}
+        The lit-display studio shot is the one photograph in the library that is
+        genuinely dark, so it belongs to the single dark section rather than
+        being forced onto a bone surface.
+      {%- endcomment -%}
+      {%- if s.image != blank or s.show_image -%}
+        <div class="aurora-night__media aurora-reveal" style="--aur-reveal-delay: 200ms">
+          {%- if s.image != blank -%}
+            {{
+              s.image
+              | image_url: width: 1200
+              | image_tag:
+                widths: '420, 800, 1200',
+                sizes: '(max-width: 989px) 92vw, 34vw',
+                loading: 'lazy',
+                class: 'aurora-night__img',
+                alt: s.image.alt | default: s.image_alt
+            }}
+          {%- else -%}
+            <img
+              class="aurora-night__img"
+              src="{{ 'aurora-screen-night.jpg' | asset_url }}"
+              width="1600"
+              height="1195"
+              loading="lazy"
+              decoding="async"
+              alt="{{ s.image_alt | escape }}"
+            >
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      {%- if s.stat_value != blank -%}
+        <figure class="aurora-night__stat aurora-reveal" style="--aur-reveal-delay: 260ms">
+          <span class="aurora-night__value aurora__num">{{ s.stat_value }}</span>
+          {%- if s.stat_label != blank -%}
+            <figcaption class="aurora-night__caption">{{ s.stat_label }}</figcaption>
+          {%- endif -%}
+        </figure>
+      {%- endif -%}
+    </div>
   </div>
 </section>
 
 {% stylesheet %}
   .aurora-night {
     padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
+  }
+
+  .aurora-night__img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .aurora-night__aside {
+    display: grid;
+    gap: clamp(1.75rem, 4vw, 2.5rem);
   }
 
   .aurora-night__inner {
@@ -90,6 +135,14 @@
   "tag": "section",
   "class": "aurora-section",
   "settings": [
+    { "type": "checkbox", "id": "show_image", "label": "Show image", "default": true },
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text",
+      "default": "Two Aurora rings with the display lit, showing the time"
+    },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "While you sleep" },
     {
       "type": "inline_richtext",
