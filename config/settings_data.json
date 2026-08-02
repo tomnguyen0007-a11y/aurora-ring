@@ -361,7 +361,7 @@
       },
       "scheme-f76d4739-396b-4986-9d53-72920c983eda": {
         "settings": {
-          "background": "#000000",
+          "background": "#ffffff",
           "foreground_heading": "#000000",
           "foreground": "#000000cf",
           "primary": "#000000cf",
@@ -401,7 +401,7 @@
       "scheme-8a223d0c-1a47-4e0e-8033-59e35bf5c940": {
         "settings": {
           "background": "#000000",
-          "foreground_heading": "#000000",
+          "foreground_heading": "#ffffff",
           "foreground": "#fff",
           "primary": "#000000cf",
           "primary_hover": "#000000",
