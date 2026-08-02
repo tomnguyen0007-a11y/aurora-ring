@@ -53,8 +53,8 @@
         {%- endcomment -%}
         <img
           src="{{ 'aurora-hero-rings.jpg' | asset_url }}"
-          width="1600"
-          height="1067"
+          width="1200"
+          height="1262"
           loading="eager"
           fetchpriority="high"
           alt="Three Aurora rings in black, rose gold and copper finishes"
@@ -77,15 +77,92 @@
     padding-block: clamp(1.5rem, 8vh, 6rem);
   }
 
-  /* Phones: the product leads.
-     Stacked in source order the whole first screen was type and the rings did
-     not appear until everything had been scrolled past — the one thing a buyer
-     is here to look at, below the fold. The photograph is pulled to the top and
-     run to both viewport edges so it reads as a scene, not an inset thumbnail. */
+  /* The product sits on the page itself — no card, no border, no shadow. The
+     studio backdrop is keyed to the page colour in the asset itself, so no
+     blend mode is needed (multiply would only darken the whole photograph).
+     Declared here, before the phone override below, so the mobile block's
+     object-fit: cover wins on source order rather than needing higher
+     specificity to beat an identical selector. */
+  .aurora-hero__media img,
+  .aurora-hero__media svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* Phones: the photograph is the background, not a block above the type.
+     Pulling it above the copy (the previous fix) stopped the rings from being
+     buried below the fold, but the section still read as two stacked halves.
+     The image now fills the section edge-to-edge behind the text, the way the
+     original theme's hero did — copy sits over it on a bone scrim so the type
+     stays fully legible without darkening or hiding the product. */
   @media screen and (max-width: 989px) {
+    .aurora-hero__inner {
+      position: relative;
+      display: block;
+      min-height: 88vh;
+      padding-block: 0;
+      /* Keeps the inherited .aurora__inner gutter for the copy below — only
+         the media layer needs to escape it. An earlier version tried to do
+         that by giving this element a negative margin equal to the gutter and
+         then padding it back in, but with box-sizing: border-box the two
+         don't cancel: an auto-width block's rendered width is the containing
+         block's width minus its margins, full stop, so a negative margin on
+         both sides grows the box by 2x the gutter instead of by 0. That
+         overflowed the viewport by exactly one gutter's width on every phone
+         breakpoint. The media element bleeds itself now (below), so this
+         element keeps its normal box. */
+    }
+
     .aurora-hero__media {
-      order: -1;
-      margin-inline: calc(var(--aur-gutter, 1.5rem) * -1);
+      position: absolute;
+      top: 0;
+      /* Standard viewport-relative bleed: independent of this element's own
+         padding or of any ancestor's max-width, and it cannot overflow the
+         document because it is sized from 100vw, not from a margin sum. */
+      left: 50%;
+      width: 100vw;
+      margin-left: -50vw;
+      order: initial;
+      height: 100%;
+    }
+
+    .aurora-hero__media img,
+    .aurora-hero__media svg {
+      height: 100%;
+      object-fit: cover;
+      /* Keeps the rings themselves in frame rather than centring the crop,
+         which on a tall narrow viewport pushed them toward the bottom edge. */
+      object-position: center 22%;
+    }
+
+    /* Bone scrim under the copy only — the top half of the photograph stays
+       fully clear so the product reads on its own. The eyebrow line is the
+       first thing the scrim has to cover, so the ramp starts underneath it
+       rather than at the headline. */
+    .aurora-hero__media::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(246, 244, 240, 0) 0%,
+        rgba(246, 244, 240, 0) 34%,
+        rgba(246, 244, 240, 0.75) 50%,
+        rgba(246, 244, 240, 0.94) 62%,
+        var(--aur-page) 78%,
+        var(--aur-page) 100%
+      );
+    }
+
+    .aurora-hero__copy {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 88vh;
+      justify-content: flex-end;
+      padding-block: clamp(1.75rem, 6vh, 3rem) clamp(1.25rem, 4vh, 2rem);
     }
 
     .aurora-hero__title {
@@ -93,7 +170,7 @@
     }
 
     .aurora-hero__action {
-      margin-top: clamp(1.5rem, 5vw, 2rem);
+      margin-top: clamp(1.25rem, 4vw, 1.75rem);
     }
   }
 
@@ -109,16 +186,6 @@
     margin: 1.125rem 0 0;
     font-size: 0.8125rem;
     color: var(--aur-text-muted);
-  }
-
-  /* The product sits on the page itself — no card, no border, no shadow. The
-     studio backdrop is keyed to the page colour in the asset itself, so no
-     blend mode is needed (multiply would only darken the whole photograph). */
-  .aurora-hero__media img,
-  .aurora-hero__media svg {
-    display: block;
-    width: 100%;
-    height: auto;
   }
 
   .aurora-hero__placeholder {
