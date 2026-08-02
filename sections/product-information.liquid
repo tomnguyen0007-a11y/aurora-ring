@@ -359,6 +359,87 @@
       white-space: nowrap;
     }
   }
+
+  /* ── Aurora: Oura-style accordion polish ── */
+  .product-information .accordion {
+    border-top: 1px solid rgba(255,255,255,.08);
+  }
+
+  .product-information .accordion .details {
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    border-top: none !important;
+  }
+
+  .product-information .accordion .details__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.82);
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    transition: color .2s ease;
+    min-height: 0;
+  }
+
+  .product-information .accordion .details__header::-webkit-details-marker { display: none; }
+  .product-information .accordion .details__header::marker { display: none; }
+
+  .product-information .accordion .details__header:hover {
+    color: #fff;
+  }
+
+  .product-information .accordion .details__header .icon-caret,
+  .product-information .accordion .details__header .icon-plus {
+    width: 14px;
+    height: 14px;
+    opacity: .5;
+    flex-shrink: 0;
+    transition: transform .35s cubic-bezier(.16,1,.3,1), opacity .2s ease;
+  }
+
+  .product-information .accordion .details[open] > .details__header .icon-caret {
+    transform: rotate(180deg);
+    opacity: .9;
+  }
+
+  .product-information .accordion .details[open] > .details__header .icon-plus {
+    transform: rotate(45deg);
+    opacity: .9;
+  }
+
+  .product-information .accordion .details-content {
+    padding: 0 0 22px;
+    font-size: 13px;
+    line-height: 1.75;
+    color: rgba(255,255,255,.55);
+    font-weight: 300;
+  }
+
+  .product-information .accordion .details-content p {
+    margin: 0 0 10px;
+  }
+
+  .product-information .accordion .details-content p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Trust strip — shipping/returns icons */
+  .product-information .group-block svg {
+    opacity: .6;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .product-information .accordion .details__header .icon-caret,
+    .product-information .accordion .details__header .icon-plus {
+      transition: none;
+    }
+  }
 {% endstylesheet %}
 
 {% schema %}

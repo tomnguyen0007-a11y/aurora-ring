@@ -125,6 +125,38 @@
                   },
                   "blocks": {}
                 },
+                "9741b66c5ac1d256": {
+                  "type": "shopify://apps/section-store/blocks/block-review-summary/d7a2e423-ea88-4344-b866-6d0fb487c3dd",
+                  "settings": {
+                    "star_style": "mild",
+                    "stars_count": 4.5,
+                    "stars_size": 14,
+                    "stars_gap": 1,
+                    "stars_color": "#c8a96e",
+                    "stars_bg_color": "#c8a96e",
+                    "stars_bg_half_color": "#e5e0d8",
+                    "avatars_position": "none",
+                    "avatars_size": 20,
+                    "avatars_animate": false,
+                    "first_text": "<p> </p>",
+                    "first_text_size": 12,
+                    "first_text_color": "#3a3a3a",
+                    "second_text": "<p>Rated 4.6 · <strong>55+ reviews</strong></p>",
+                    "second_text_size": 12,
+                    "second_text_color": "#3a3a3a",
+                    "border": "none",
+                    "border_thickness": 1,
+                    "border_color": "#e5e0d8",
+                    "radius": 0,
+                    "background": "",
+                    "background_gradient": "",
+                    "effect": "none",
+                    "block_padding_top": 0,
+                    "block_padding_bottom": 0,
+                    "padding_vertical": 4,
+                    "padding_horizontal": 0
+                  }
+                },
                 "price_tVjtKg": {
                   "type": "price",
                   "settings": {
@@ -150,6 +182,7 @@
               },
               "block_order": [
                 "text_xrnftG",
+                "9741b66c5ac1d256",
                 "price_tVjtKg"
               ]
             },
@@ -165,6 +198,31 @@
               },
               "blocks": {}
             },
+            "abfe52e7afff1dd2": {
+              "type": "shopify://apps/section-store/blocks/block-benefits-list/d7a2e423-ea88-4344-b866-6d0fb487c3dd",
+              "disabled": true,
+              "settings": {
+                "items_gap": 8,
+                "first_text": "<p><strong>Premium quality</strong> — crafted to last</p>",
+                "second_text": "<p><strong>Hassle-free returns</strong> — 30-day guarantee</p>",
+                "third_text": "<p><strong>Secure checkout</strong> — encrypted payments</p>",
+                "fourth_text": "",
+                "icon_selection": "icon_2",
+                "icon_size": 18,
+                "icon_color": "#c8a96e",
+                "text_size": 14,
+                "text_color": "#2a2a2a",
+                "content_align": "left",
+                "border": "none",
+                "border_thickness": 1,
+                "border_color": "#e5e0d8",
+                "radius": 0,
+                "background": "",
+                "background_gradient": "",
+                "padding_vertical": 8,
+                "padding_horizontal": 0
+              }
+            },
             "variant_picker_R3rGDr": {
               "type": "variant-picker",
               "settings": {
@@ -177,6 +235,31 @@
                 "padding-inline-end": 0
               },
               "blocks": {}
+            },
+            "1378413167853067": {
+              "type": "shopify://apps/section-store/blocks/block-shipping-info/d7a2e423-ea88-4344-b866-6d0fb487c3dd",
+              "settings": {
+                "use_dot": true,
+                "icon_color": "#4a8c5c",
+                "icon_size": 10,
+                "ships_by_text": "Ships by",
+                "shipping_within_days": 3,
+                "include_weekend": false,
+                "ships_by_font_size": 13,
+                "ships_by_text_color": "#2a2a2a",
+                "fast_shipping_text": "COUNTRY_FLAG <strong>Fast</strong> COUNTRY_CODE Shipping",
+                "allow_all_countries": false,
+                "allowed_countries": "AT,BE,BG,CZ,DE,DK,EE,ES,FI,FR",
+                "fast_shipping_text_for_rest_countries": "Fast European Shipping",
+                "fast_shipping_text_color": "#2a2a2a",
+                "border_style": "solid",
+                "border_width": 1,
+                "border_color": "#eaeaea",
+                "border_radius": 14,
+                "bg_color": "#f8f7f5",
+                "padding_vertical": 8,
+                "padding_horizontal": 14
+              }
             },
             "buy_buttons_eYQEYi": {
               "type": "buy-buttons",
@@ -192,6 +275,7 @@
               "blocks": {
                 "quantity": {
                   "type": "quantity",
+                  "disabled": true,
                   "static": true,
                   "settings": {},
                   "blocks": {}
@@ -213,9 +297,34 @@
               },
               "block_order": []
             },
+            "8432cd4653683700": {
+              "type": "shopify://apps/section-store/blocks/block-payment-icons-2/d7a2e423-ea88-4344-b866-6d0fb487c3dd",
+              "settings": {
+                "icons_layout": "fixed_grid",
+                "icons_per_row": 10,
+                "icons_per_row_mobile": 8,
+                "gap": 8,
+                "icons_align": "center",
+                "icons_monochrome": true,
+                "enable_first_image": false,
+                "enable_second_image": false,
+                "enable_third_image": false,
+                "icon_size": 20,
+                "border": "none",
+                "border_thickness": 1,
+                "border_color": "#e5e0d8",
+                "radius": 0,
+                "background": "",
+                "padding_top": 4,
+                "padding_bottom": 4,
+                "padding_left": 0,
+                "padding_right": 0
+              }
+            },
             "text_aEtTtq": {
               "type": "text",
               "name": "Product description",
+              "disabled": true,
               "settings": {
                 "text": "{{ closest.product.description }}",
                 "width": "100%",
@@ -238,14 +347,124 @@
                 "padding-inline-end": 0
               },
               "blocks": {}
+            },
+            "4a15ffebff3b3010": {
+              "type": "shopify://apps/section-store/blocks/block-tabs/d7a2e423-ea88-4344-b866-6d0fb487c3dd",
+              "disabled": true,
+              "settings": {
+                "default_tab": "first",
+                "tab_layout": "filled",
+                "enable_fourth_tab": false,
+                "product_description_tab": "second",
+                "review_tab": "first",
+                "show_payment_icons": "none",
+                "first_title": "Expert Review",
+                "first_text": "<p>Thoughtfully designed with an eye for detail, every AURORA product reflects a commitment to quality materials and refined European craftsmanship you can feel.</p>",
+                "second_title": "Description",
+                "second_text": "<p>Full product details provided by the brand.</p>",
+                "third_title": "Delivery & Returns",
+                "third_text": "<p><strong>Shipping:</strong> We deliver across the EU. Orders are dispatched within 1–2 business days with standard delivery in 3–5 days.</p><p><strong>Returns:</strong> Changed your mind? Return any unused item within 30 days for a full refund — no questions asked.</p><p><strong>Tracking:</strong> A tracking link is emailed the moment your order ships.</p>",
+                "fourth_title": "Specifications",
+                "fourth_text": "<p>Details vary by product.</p>",
+                "star_style": "mild",
+                "stars_count": 5,
+                "stars_color": "#c8a96e",
+                "stars_bg_half_color": "#e5e0d8",
+                "reviewer_name": "Elena Hartmann",
+                "review_date": "May 8, 2025",
+                "reviewer_subtext": "Independent Product Reviewer",
+                "show_verified_badge": true,
+                "verified_badge_color": "#2a2a2a",
+                "tab_text_size": 13,
+                "tab_font_weight": 500,
+                "content_text_size": 13,
+                "light_color": "#ffffff",
+                "dark_color": "#f8f7f5",
+                "tab_text_color": "#555555",
+                "text_color": "#2a2a2a",
+                "muted_text_color": "#7a7a7a",
+                "effect": "none",
+                "border": "solid",
+                "border_thickness": 1,
+                "border_color": "#eaeaea",
+                "radius": 14,
+                "padding_vertical": 18,
+                "padding_horizontal": 18
+              }
+            },
+            "1f6eddba83e7dcf0": {
+              "type": "shopify://apps/section-store/blocks/block-comments/d7a2e423-ea88-4344-b866-6d0fb487c3dd",
+              "disabled": true,
+              "settings": {
+                "content_alignment": "center",
+                "comment_verified_badge_position": "inline",
+                "verified_badge_color": "#c8a96e",
+                "verified_badge_text": "Verified Buyer",
+                "slide_style": "arrows",
+                "autoplay": 0,
+                "comment_name_1": "Lukas M.",
+                "comment_1": "The quality is outstanding — you can tell right away. Packaging was beautiful too. Will definitely be ordering more from AURORA.",
+                "comment_name_2": "Clara S.",
+                "comment_2": "Fast shipping to Germany and the product looks even better in person. Love the attention to detail. Highly recommend.",
+                "comment_name_3": "Thomas B.",
+                "comment_3": "Exactly what I was hoping for. Clean design, premium feel, and the whole experience from ordering to unboxing was seamless.",
+                "avatar_border_radius": 50,
+                "avatar_size": 44,
+                "author_font_size": 13,
+                "author_font_weight": 600,
+                "author_font_color": "#2a2a2a",
+                "star_style": "mild",
+                "star_color": "#c8a96e",
+                "star_size": 14,
+                "item_border_style": "solid",
+                "item_border_width": 1,
+                "item_border_color": "#eaeaea",
+                "item_border_radius": 14,
+                "item_bg_color": "#fafaf8",
+                "effect": "none",
+                "item_padding_vertical": 14,
+                "item_padding_horizontal": 18
+              }
+            },
+            "c4ac5706ac8ccf7e": {
+              "type": "shopify://apps/section-store/blocks/block-atc-style/d7a2e423-ea88-4344-b866-6d0fb487c3dd",
+              "settings": {
+                "background_color": "#1a1a1a",
+                "text_color": "#ffffff",
+                "hover_background_color": "#333333",
+                "hover_text_color": "#ffffff",
+                "font_size": 0,
+                "font_weight": "default",
+                "border_style": "none",
+                "border_width": 1,
+                "border_color": "#1a1a1a",
+                "border_radius": 14,
+                "padding_vertical": 0,
+                "background_effect": "none",
+                "gradient_color_end": "#333333",
+                "hover_effect": "lift",
+                "animation": "none",
+                "button_icon": "arrow_right",
+                "use_custom_text": false,
+                "button_text": "Add to cart",
+                "show_price": true,
+                "round_price": false,
+                "compare_at_price_color": "#999999"
+              }
             }
           },
           "block_order": [
             "group_icgrde",
             "divider_VJhene",
+            "abfe52e7afff1dd2",
             "variant_picker_R3rGDr",
+            "1378413167853067",
             "buy_buttons_eYQEYi",
-            "text_aEtTtq"
+            "8432cd4653683700",
+            "text_aEtTtq",
+            "4a15ffebff3b3010",
+            "1f6eddba83e7dcf0",
+            "c4ac5706ac8ccf7e"
           ]
         }
       },
@@ -408,21 +627,6 @@
     },
     "178181305580e74d4d": {
       "type": "_blocks",
-      "blocks": {
-        "judge_me_reviews_review_widget_hmqaRg": {
-          "type": "shopify://apps/judge-me-reviews/blocks/review_widget/61ccd3b1-a9f2-4160-9fe9-4fec8413e5d8",
-          "disabled": true,
-          "settings": {
-            "review_data": "sample_data",
-            "max_width": 1200,
-            "show_shop_reviews": false,
-            "empty_state": "empty_widget"
-          }
-        }
-      },
-      "block_order": [
-        "judge_me_reviews_review_widget_hmqaRg"
-      ],
       "settings": {
         "content_direction": "column",
         "vertical_on_mobile": true,
@@ -453,21 +657,6 @@
     },
     "1781813084f7794119": {
       "type": "_blocks",
-      "blocks": {
-        "judge_me_reviews_review_widget_UKdd8q": {
-          "type": "shopify://apps/judge-me-reviews/blocks/review_widget/61ccd3b1-a9f2-4160-9fe9-4fec8413e5d8",
-          "disabled": true,
-          "settings": {
-            "review_data": "sample_data",
-            "max_width": 1200,
-            "show_shop_reviews": false,
-            "empty_state": "empty_widget"
-          }
-        }
-      },
-      "block_order": [
-        "judge_me_reviews_review_widget_UKdd8q"
-      ],
       "settings": {
         "content_direction": "column",
         "vertical_on_mobile": true,
@@ -498,21 +687,6 @@
     },
     "17818131835f0ebddb": {
       "type": "_blocks",
-      "blocks": {
-        "judge_me_reviews_review_widget_gK3PpK": {
-          "type": "shopify://apps/judge-me-reviews/blocks/review_widget/61ccd3b1-a9f2-4160-9fe9-4fec8413e5d8",
-          "disabled": true,
-          "settings": {
-            "review_data": "sample_data",
-            "max_width": 1200,
-            "show_shop_reviews": false,
-            "empty_state": "empty_widget"
-          }
-        }
-      },
-      "block_order": [
-        "judge_me_reviews_review_widget_gK3PpK"
-      ],
       "settings": {
         "content_direction": "column",
         "vertical_on_mobile": true,
@@ -541,6 +715,20 @@
         "padding-block-end": 0
       }
     },
+    "products_tab_yCTWUA": {
+      "type": "products-tab",
+      "name": "Product tabs",
+      "settings": {
+        "color_scheme": "",
+        "corner_radius": 18,
+        "label_description": "Description",
+        "description_override": "",
+        "label_delivery": "Delivery & Returns",
+        "delivery_content": "<p>Free worldwide shipping on every order. Most orders arrive within 5–7 business days.</p><p>Not the right fit? Return it within 30 days for a full refund — no questions asked.</p>",
+        "padding-block-start": 24,
+        "padding-block-end": 24
+      }
+    },
     "aurora_app": {
       "type": "aurora-app",
       "settings": {}
@@ -549,6 +737,7 @@
   "order": [
     "main",
     "aurora_app",
+    "products_tab_yCTWUA",
     "aurora_reviews",
     "product_recommendations_qggXJq",
     "178181305580e74d4d",
