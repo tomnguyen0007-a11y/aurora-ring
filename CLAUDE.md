@@ -1,5 +1,15 @@
 # CLAUDE.md — Aurora Ring Project Intelligence
 
+## MANDATORY FIRST STEP — Read Before Anything Else
+**Before starting ANY task, in ANY session, read ALL THREE files first:**
+1. `ECC/skills/claude-fable-5/SKILL.md` — activates super-agent mode, full capability stack
+2. `ECC/skills/ecommerce-growth/SKILL.md` — activates the 13-pillar $1K/day growth system
+3. `ECC/context/aurora-project-brief.md` — full Aurora Ring project context, store, ads, next steps
+
+This is non-negotiable. Skip this = sub-optimal output. The mission is $1,000/day — August is the launchpad, not the ceiling.
+
+---
+
 ## Mission
 Hit $1,000/day revenue. Every output — design, copy, code, campaign — must be conversion-focused, visually astonishing, and production-ready. No slop. No broken code. No hallucinations.
 
