@@ -103,7 +103,16 @@
     --aur-size-body: clamp(1rem, 1.1vw, 1.125rem);
 
     /* ---- Rhythm: generous by default ---- */
-    --aur-gutter: clamp(1.5rem, 6vw, 7.5rem);
+    /* Matches the Horizon page gutter (--page-margin: 40px at >=750px) at the
+       upper bound. The previous 7.5rem cap pushed section content 86px inboard
+       of the container at 1440 on top of the centring margin, so Aurora
+       sections sat visibly further right than the theme's own. */
+    --aur-gutter: clamp(1.5rem, 4vw, 2.5rem);
+
+    /* Hero vertical rhythm. Held here rather than in the section so the hero
+       and any future full-bleed opener share one offset. */
+    --aur-hero-top: clamp(2rem, 5vh, 4rem);
+    --aur-hero-bottom: clamp(3rem, 7vh, 5.5rem);
     --aur-section-y: clamp(5rem, 13vh, 11rem);
     --aur-stack: 1.5rem;
     --aur-stack-loose: clamp(3rem, 6vw, 5.5rem);
