@@ -7,8 +7,7 @@
   <div class="aurora__inner aurora-hero__inner">
     <div class="aurora-hero__copy">
       
-      <!-- TOP GROUP: Pinned to top left -->
-      <div class="aurora-hero__top-group">
+      <div class="aurora-hero__top">
         {%- if s.eyebrow != blank -%}
           <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
         {%- endif -%}
@@ -18,10 +17,11 @@
         </h1>
       </div>
 
-      <!-- BOTTOM GROUP: Positioned under the black ring with localized glass/translucent backdrop -->
-      <div class="aurora-hero__bottom-group aurora-reveal" style="--aur-reveal-delay: 160ms">
+      <div class="aurora-hero__bottom aurora-reveal" style="--aur-reveal-delay: 160ms">
         {%- if s.subheading != blank -%}
-          <p class="aurora__lede">{{ s.subheading }}</p>
+          <div class="aurora__lede-wrapper">
+            <p class="aurora__lede">{{ s.subheading }}</p>
+          </div>
         {%- endif -%}
 
         <div class="aurora-hero__action">
@@ -86,13 +86,12 @@
     height: auto;
   }
 
-  /* --- MOBILE EDITORIAL LAYOUT --- */
   @media screen and (max-width: 989px) {
     .aurora-hero__inner {
       position: relative;
       display: flex;
       flex-direction: column;
-      height: 90vh;
+      height: 88vh;
       min-height: 650px;
       padding-block: 0;
     }
@@ -110,12 +109,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      object-position: center 25%;
-    }
-
-    /* Absolutely NO global overlays or dark filters */
-    .aurora-hero__media::after {
-      display: none !important;
+      object-position: center 28%;
     }
 
     .aurora-hero__copy {
@@ -123,9 +117,9 @@
       z-index: 1;
       display: flex;
       flex-direction: column;
-      justify-content: space-between; /* Creates the intentional empty middle space */
+      justify-content: space-between;
       height: 100%;
-      padding: 3rem 1.25rem 2rem;
+      padding: 7vh 1.25rem 5vh 1.25rem;
     }
 
     .aurora__eyebrow {
@@ -144,24 +138,23 @@
       max-width: 13ch;
     }
 
-    /* Localized translucent background & soft blur behind the lower text block */
-    .aurora-hero__bottom-group {
+    .aurora__lede-wrapper {
       background: rgba(255, 255, 255, 0.82);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      padding: 1.25rem;
-      border-radius: 14px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 1rem 1.125rem;
+      border-radius: 12px;
+      margin-bottom: 1.25rem;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
     }
 
     .aurora__lede {
-      color: #222222;
+      color: #1a1a1a;
       font-size: 0.9375rem;
       line-height: 1.45;
       font-weight: 400;
-      margin: 0 0 1.25rem 0;
-      text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+      margin: 0;
     }
 
     .aurora-hero__action {
@@ -187,7 +180,6 @@
     }
   }
 
-  /* --- DESKTOP STYLES --- */
   .aurora-hero__title {
     max-width: 12ch;
   }
@@ -213,26 +205,48 @@
     .aurora-hero__copy {
       display: block;
       padding-block-start: var(--aur-hero-top);
+      justify-content: flex-start;
+      height: auto;
     }
 
-    .aurora-hero__bottom-group {
+    .aurora-hero__bottom {
       margin-top: 2rem;
+    }
+
+    .aurora__lede-wrapper {
       background: transparent;
       backdrop-filter: none;
       -webkit-backdrop-filter: none;
       padding: 0;
       border-radius: 0;
-      box-shadow: none;
+      margin-bottom: 0;
       border: none;
+      box-shadow: none;
+    }
+
+    .aurora__lede {
+      color: var(--aur-text-main) !important;
+      margin-top: 1.5rem;
     }
 
     .aurora-hero__media {
+      position: relative;
+      inset: auto;
       margin-right: 0;
     }
-    
-    .aurora__lede {
-      color: var(--aur-text-main) !important;
-      text-shadow: none !important;
+
+    .aurora-hero__media img,
+    .aurora-hero__media svg {
+      width: 100%;
+      height: auto;
+      object-fit: initial;
+    }
+
+    .aurora-hero__assurance {
+      margin: 0.875rem 0 0;
+      font-size: 0.8125rem;
+      color: var(--aur-text-muted);
+      text-align: left;
     }
   }
 {% endstylesheet %}
