@@ -77,6 +77,12 @@
     padding-block: clamp(1.5rem, 8vh, 6rem);
   }
 
+  /* The product sits on the page itself — no card, no border, no shadow. The
+     studio backdrop is keyed to the page colour in the asset itself, so no
+     blend mode is needed (multiply would only darken the whole photograph).
+     Declared here, before the phone override below, so the mobile block's
+     object-fit: cover wins on source order rather than needing higher
+     specificity to beat an identical selector. */
   .aurora-hero__media img,
   .aurora-hero__media svg {
     display: block;
@@ -84,17 +90,35 @@
     height: auto;
   }
 
+  /* Phones: the photograph is the background, not a block above the type.
+     Pulling it above the copy (the previous fix) stopped the rings from being
+     buried below the fold, but the section still read as two stacked halves.
+     The image now fills the section edge-to-edge behind the text, the way the
+     original theme's hero did — copy sits over it cleanly with no shadow/scrim overlay. */
   @media screen and (max-width: 989px) {
     .aurora-hero__inner {
       position: relative;
       display: block;
       min-height: 88vh;
       padding-block: 0;
+      /* Keeps the inherited .aurora__inner gutter for the copy below — only
+         the media layer needs to escape it. An earlier version tried to do
+         that by giving this element a negative margin equal to the gutter and
+         then padding it back in, but with box-sizing: border-box the two
+         don't cancel: an auto-width block's rendered width is the containing
+         block's width minus its margins, full stop, so a negative margin on
+         both sides grows the box by 2x the gutter instead of by 0. That
+         overflowed the viewport by exactly one gutter's width on every phone
+         breakpoint. The media element bleeds itself now (below), so this
+         element keeps its normal box. */
     }
 
     .aurora-hero__media {
       position: absolute;
       top: 0;
+      /* Standard viewport-relative bleed: independent of this element's own
+         padding or of any ancestor's max-width, and it cannot overflow the
+         document because it is sized from 100vw, not from a margin sum. */
       left: 50%;
       width: 100vw;
       margin-left: -50vw;
@@ -106,6 +130,8 @@
     .aurora-hero__media svg {
       height: 100%;
       object-fit: cover;
+      /* Keeps the rings themselves in frame rather than centring the crop,
+         which on a tall narrow viewport pushed them toward the bottom edge. */
       object-position: center 22%;
     }
 
@@ -149,16 +175,27 @@
 
   @media screen and (min-width: 990px) {
     .aurora-hero__inner {
+      /* The product gets the larger share — it is the reason anyone is here */
       grid-template-columns: 0.9fr 1.1fr;
       gap: clamp(2.5rem, 5vw, 5rem);
+      /* No min-height. An 82vh floor made the grid row taller than either
+         column, and the inherited align-items: center then split the surplus
+         evenly above and below the copy — 218px of dead space over the eyebrow
+         at 1440x900. Sizing the row from its content removes the surplus at
+         source, so the offset below is the only thing setting the top edge. */
       align-items: start;
       padding-block: var(--aur-hero-top) var(--aur-hero-bottom);
     }
 
+    /* A deliberate drop, so the headline reads against the upper third of the
+       product rather than butting against the grid line. */
     .aurora-hero__copy {
       padding-block-start: var(--aur-hero-top);
     }
 
+    /* Contained, not bled. Running the photograph past the container clipped
+       the lower-right ring mid-band, which read as an accident rather than as
+       a crop. All three rings now sit inside the column, whole. */
     .aurora-hero__media {
       margin-right: 0;
     }
