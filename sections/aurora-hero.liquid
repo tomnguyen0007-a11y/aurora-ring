@@ -15,9 +15,7 @@
       </h1>
 
       {%- if s.subheading != blank -%}
-        <div class="aurora__lede-container aurora-reveal" style="--aur-reveal-delay: 160ms">
-          <p class="aurora__lede">{{ s.subheading }}</p>
-        </div>
+        <p class="aurora__lede aurora-reveal" style="--aur-reveal-delay: 160ms">{{ s.subheading }}</p>
       {%- endif -%}
 
       {%- comment -%} One call to action. Nothing competes with it. {%- endcomment -%}
@@ -93,21 +91,35 @@
   }
 
   /* Phones: the photograph is the background, not a block above the type.
-     Pulling it above the copy stopped the rings from being buried below the
-     fold. To maintain absolute readability on mobile without darkening the
-     photograph with a global overlay, we apply a refined, localized glass
-     backdrop behind the text copy block. */
+     Pulling it above the copy (the previous fix) stopped the rings from being
+     buried below the fold, but the section still read as two stacked halves.
+     The image now fills the section edge-to-edge behind the text, the way the
+     original theme's hero did — copy sits over it on a bone scrim so the type
+     stays fully legible without darkening or hiding the product. */
   @media screen and (max-width: 989px) {
     .aurora-hero__inner {
       position: relative;
       display: block;
       min-height: 88vh;
       padding-block: 0;
+      /* Keeps the inherited .aurora__inner gutter for the copy below — only
+         the media layer needs to escape it. An earlier version tried to do
+         that by giving this element a negative margin equal to the gutter and
+         then padding it back in, but with box-sizing: border-box the two
+         don't cancel: an auto-width block's rendered width is the containing
+         block's width minus its margins, full stop, so a negative margin on
+         both sides grows the box by 2x the gutter instead of by 0. That
+         overflowed the viewport by exactly one gutter's width on every phone
+         breakpoint. The media element bleeds itself now (below), so this
+         element keeps its normal box. */
     }
 
     .aurora-hero__media {
       position: absolute;
       top: 0;
+      /* Standard viewport-relative bleed: independent of this element's own
+         padding or of any ancestor's max-width, and it cannot overflow the
+         document because it is sized from 100vw, not from a margin sum. */
       left: 50%;
       width: 100vw;
       margin-left: -50vw;
@@ -119,7 +131,28 @@
     .aurora-hero__media svg {
       height: 100%;
       object-fit: cover;
+      /* Keeps the rings themselves in frame rather than centring the crop,
+         which on a tall narrow viewport pushed them toward the bottom edge. */
       object-position: center 22%;
+    }
+
+    /* Bone scrim under the copy only — the top half of the photograph stays
+       fully clear so the product reads on its own. The eyebrow line is the
+       first thing the scrim has to cover, so the ramp starts underneath it
+       rather than at the headline. */
+    .aurora-hero__media::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(246, 244, 240, 0) 0%,
+        rgba(246, 244, 240, 0) 34%,
+        rgba(246, 244, 240, 0.75) 50%,
+        rgba(246, 244, 240, 0.94) 62%,
+        var(--aur-page) 78%,
+        var(--aur-page) 100%
+      );
     }
 
     .aurora-hero__copy {
@@ -132,45 +165,12 @@
       padding-block: clamp(1.75rem, 6vh, 3rem) clamp(1.25rem, 4vh, 2rem);
     }
 
-    .aurora__eyebrow {
-      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
-    }
-
     .aurora-hero__title {
       max-width: 18ch;
-      text-shadow: 0 1px 4px rgba(255, 255, 255, 0.9);
-    }
-
-    /* Localized backdrop blur and translucent warm ivory card behind the lede & action group to guarantee pristine readability */
-    .aurora__lede-container {
-      background: rgba(246, 244, 240, 0.85);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      padding: 1rem 1.125rem;
-      border-radius: 12px;
-      margin-top: 0.5rem;
-      border: 1px solid rgba(255, 255, 255, 0.5);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    }
-
-    .aurora__lede {
-      margin: 0;
-      color: #1a1a1a;
     }
 
     .aurora-hero__action {
       margin-top: clamp(1.25rem, 4vw, 1.75rem);
-      background: rgba(246, 244, 240, 0.85);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      padding: 1rem 1.125rem;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.5);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    }
-
-    .aurora-hero__assurance {
-      color: #333333;
     }
   }
 
@@ -198,34 +198,24 @@
       /* The product gets the larger share — it is the reason anyone is here */
       grid-template-columns: 0.9fr 1.1fr;
       gap: clamp(2.5rem, 5vw, 5rem);
+      /* No min-height. An 82vh floor made the grid row taller than either
+         column, and the inherited align-items: center then split the surplus
+         evenly above and below the copy — 218px of dead space over the eyebrow
+         at 1440x900. Sizing the row from its content removes the surplus at
+         source, so the offset below is the only thing setting the top edge. */
       align-items: start;
       padding-block: var(--aur-hero-top) var(--aur-hero-bottom);
     }
 
+    /* A deliberate drop, so the headline reads against the upper third of the
+       product rather than butting against the grid line. */
     .aurora-hero__copy {
       padding-block-start: var(--aur-hero-top);
     }
 
-    .aurora__lede-container {
-      background: transparent;
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      padding: 0;
-      border-radius: 0;
-      border: none;
-      box-shadow: none;
-    }
-
-    .aurora-hero__action {
-      background: transparent;
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      padding: 0;
-      border-radius: 0;
-      border: none;
-      box-shadow: none;
-    }
-
+    /* Contained, not bled. Running the photograph past the container clipped
+       the lower-right ring mid-band, which read as an accident rather than as
+       a crop. All three rings now sit inside the column, whole. */
     .aurora-hero__media {
       margin-right: 0;
     }
