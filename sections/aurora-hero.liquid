@@ -39,7 +39,7 @@
           | image_url: width: 1400
           | image_tag:
             widths: '500, 800, 1100, 1400',
-            sizes: '(max-width: 989px) 88vw, 48vw',
+            sizes: '(max-width: 989px) 100vw, 48vw',
             loading: 'eager',
             fetchpriority: 'high',
             alt: s.image.alt | default: s.heading | strip_html
@@ -78,33 +78,19 @@
     height: auto;
   }
 
+  /* Mobile: Clean vertical stack with studio canvas background */
   @media screen and (max-width: 989px) {
+    .aurora-hero {
+      background-color: #f3f1ec;
+    }
+
     .aurora-hero__inner {
-      position: relative;
       display: flex;
       flex-direction: column;
-      min-height: 85vh;
-      padding-block: 0;
-    }
-
-    .aurora-hero__media {
-      position: absolute;
-      top: 0;
-      left: 50%;
-      width: 100vw;
-      margin-left: -50vw;
-      height: 100%;
-    }
-
-    .aurora-hero__media img,
-    .aurora-hero__media svg {
-      height: 100%;
-      object-fit: cover;
-      object-position: center 25%;
-    }
-
-    .aurora-hero__media::after {
-      display: none;
+      gap: 1.75rem;
+      padding-block: 2rem 1rem;
+      padding-inline: 1.25rem;
+      min-height: auto;
     }
 
     .aurora-hero__copy {
@@ -112,37 +98,59 @@
       z-index: 1;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
-      padding-block-start: clamp(2rem, 5vh, 3.5rem);
-      padding-block-end: 2rem;
+      width: 100%;
+      padding: 0;
     }
 
-    /* Force solid black color and strong text isolation glow for all typography */
-    .aurora__eyebrow,
-    .aurora-hero__title,
-    .aurora__lede {
-      color: #000000 !important;
-      opacity: 1 !important;
-      text-shadow: 
-        0 0 16px #f6f4f0,
-        0 0 10px #f6f4f0,
-        0 0 4px #f6f4f0,
-        0 1px 2px #f6f4f0;
-    }
-
-    .aurora__lede {
-      font-weight: 500;
-      font-size: 0.9375rem;
-      line-height: 1.45;
-      margin-top: 0.75rem;
+    .aurora__eyebrow {
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(20, 21, 26, 0.6);
+      margin-bottom: 0.5rem;
     }
 
     .aurora-hero__title {
-      max-width: 16ch;
+      font-size: clamp(2.125rem, 8vw, 2.625rem);
+      line-height: 1.1;
+      color: #14151a !important;
+      max-width: 14ch;
+      text-shadow: none !important;
+    }
+
+    .aurora__lede {
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      color: rgba(20, 21, 26, 0.8) !important;
+      margin-top: 0.875rem;
+      text-shadow: none !important;
     }
 
     .aurora-hero__action {
-      margin-top: clamp(1.25rem, 4vw, 1.75rem);
+      margin-top: 1.35rem;
+    }
+
+    .aurora-hero__media {
+      position: relative;
+      top: auto;
+      left: auto;
+      width: 100%;
+      margin: 0;
+      height: auto;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .aurora-hero__media img,
+    .aurora-hero__media svg {
+      position: relative;
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+    }
+
+    .aurora-hero__media::after {
+      display: none;
     }
   }
 
@@ -155,7 +163,7 @@
   }
 
   .aurora-hero__assurance {
-    margin: 1.125rem 0 0;
+    margin: 0.875rem 0 0;
     font-size: 0.8125rem;
     color: var(--aur-text-muted);
   }
