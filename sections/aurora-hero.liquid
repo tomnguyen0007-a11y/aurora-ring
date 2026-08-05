@@ -18,15 +18,12 @@
         </h1>
       </div>
 
-      <!-- MIDDLE: The subheading, pushed down with a gap -->
-      <div class="aurora-hero__copy-mid aurora-reveal" style="--aur-reveal-delay: 160ms">
+      <!-- BOTTOM: Pushed down under the black ring -->
+      <div class="aurora-hero__copy-bottom aurora-reveal" style="--aur-reveal-delay: 160ms">
         {%- if s.subheading != blank -%}
           <p class="aurora__lede">{{ s.subheading }}</p>
         {%- endif -%}
-      </div>
 
-      <!-- BOTTOM: The CTA, sitting under the black ring -->
-      <div class="aurora-hero__copy-bottom aurora-reveal" style="--aur-reveal-delay: 240ms">
         <div class="aurora-hero__action">
           <a class="aurora__btn aurora__btn--primary" id="aurora-hero-cta" href="{{ s.cta_link | default: routes.all_products_collection_url }}">
             {{ s.cta_label }}
@@ -89,12 +86,13 @@
     height: auto;
   }
 
+  /* --- MOBILE STYLES: Clean, Split Layout --- */
   @media screen and (max-width: 989px) {
     .aurora-hero__inner {
       position: relative;
       display: flex;
       flex-direction: column;
-      height: 88vh; 
+      height: 90vh; /* Gives plenty of room to push the button down */
       min-height: 650px;
       padding-block: 0;
     }
@@ -115,56 +113,57 @@
       object-position: center 25%;
     }
 
-    .aurora-hero__media::after { display: none; }
+    /* ABSOLUTELY NO OVERLAYS OR FILTERS */
+    .aurora-hero__media::after { display: none !important; }
 
     .aurora-hero__copy {
       position: relative;
       z-index: 1;
       display: flex;
       flex-direction: column;
+      justify-content: space-between; /* This forces the massive gap in the middle */
       height: 100%;
       padding: 3rem 1.5rem 2rem;
-    }
-
-    /* Distributes the 3 sections to create the gaps */
-    .aurora-hero__copy-top {
-      margin-bottom: auto; /* Pushes everything else down */
-    }
-    
-    .aurora-hero__copy-mid {
-      margin-bottom: 2rem; /* Creates the gap above the button */
     }
 
     .aurora__eyebrow,
     .aurora-hero__title {
       color: #000000 !important;
       text-shadow: none !important;
+      margin: 0;
     }
 
-    /* Subheading changed to white with a shadow for readability on wood */
+    /* Softer dark grey, with a tiny white glow so it doesn't get lost in the wood grain */
     .aurora__lede {
-      color: #ffffff !important;
-      text-shadow: 0px 2px 6px rgba(0, 0, 0, 0.6) !important;
+      color: #4a4a4a !important; 
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7) !important;
       font-size: 0.9375rem;
       line-height: 1.45;
       font-weight: 500;
       max-width: 90%;
-      margin: 0;
+      margin: 0 0 1.25rem 0;
     }
 
     .aurora-hero__action {
       margin-top: 0;
     }
 
+    /* Keep CTA button dark for contrast */
+    .aurora__btn--primary {
+      background: #111111;
+      color: #ffffff;
+      border: none;
+    }
+
     .aurora-hero__assurance {
       margin-top: 0.75rem;
       font-size: 0.75rem;
-      color: #111111;
-      text-shadow: 0px 1px 3px rgba(255, 255, 255, 0.8); /* Ensures it's readable over wood */
+      color: #333333;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7);
     }
   }
 
-  /* Desktop retains standard stacking behavior */
+  /* --- DESKTOP STYLES --- */
   .aurora-hero__title {
     max-width: 12ch;
   }
@@ -190,10 +189,6 @@
     .aurora-hero__copy {
       display: block; 
       padding-block-start: var(--aur-hero-top);
-    }
-
-    .aurora-hero__copy-mid {
-      margin-top: 1.5rem;
     }
 
     .aurora-hero__copy-bottom {
