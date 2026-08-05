@@ -6,30 +6,38 @@
 <section class="aurora aurora-hero" style="{% render 'aurora-spacing', settings: section.settings %}">
   <div class="aurora__inner aurora-hero__inner">
     <div class="aurora-hero__copy">
-      {%- if s.eyebrow != blank -%}
-        <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
-      {%- endif -%}
-
-      <h1 class="aurora__display aurora-hero__title aurora-reveal" style="--aur-reveal-delay: 80ms">
-        {{ s.heading }}
-      </h1>
-
-      {%- if s.subheading != blank -%}
-        <p class="aurora__lede aurora-reveal" style="--aur-reveal-delay: 160ms">{{ s.subheading }}</p>
-      {%- endif -%}
-
-      <div class="aurora-hero__action aurora-reveal" style="--aur-reveal-delay: 240ms">
-        <a class="aurora__btn aurora__btn--primary" id="aurora-hero-cta" href="{{ s.cta_link | default: routes.all_products_collection_url }}">
-          {{ s.cta_label }}
-          {%- if product != blank and s.show_price -%}
-            <span class="aurora__price">{{ product.price | money }}</span>
-          {%- endif -%}
-        </a>
-
-        {%- if s.assurance != blank -%}
-          <p class="aurora-hero__assurance">{{ s.assurance }}</p>
+      
+      <!-- TOP GROUP: Pinned to the clean studio space -->
+      <div class="aurora-hero__copy-top">
+        {%- if s.eyebrow != blank -%}
+          <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
         {%- endif -%}
+
+        <h1 class="aurora__display aurora-hero__title aurora-reveal" style="--aur-reveal-delay: 80ms">
+          {{ s.heading }}
+        </h1>
       </div>
+
+      <!-- BOTTOM GROUP: Pinned to the bottom, below the main product focus -->
+      <div class="aurora-hero__copy-bottom aurora-reveal" style="--aur-reveal-delay: 160ms">
+        {%- if s.subheading != blank -%}
+          <p class="aurora__lede">{{ s.subheading }}</p>
+        {%- endif -%}
+
+        <div class="aurora-hero__action">
+          <a class="aurora__btn aurora__btn--primary" id="aurora-hero-cta" href="{{ s.cta_link | default: routes.all_products_collection_url }}">
+            {{ s.cta_label }}
+            {%- if product != blank and s.show_price -%}
+              <span class="aurora__price">{{ product.price | money }}</span>
+            {%- endif -%}
+          </a>
+
+          {%- if s.assurance != blank -%}
+            <p class="aurora-hero__assurance">{{ s.assurance }}</p>
+          {%- endif -%}
+        </div>
+      </div>
+
     </div>
 
     <div class="aurora-hero__media aurora-reveal" style="--aur-reveal-delay: 120ms">
@@ -39,7 +47,7 @@
           | image_url: width: 1400
           | image_tag:
             widths: '500, 800, 1100, 1400',
-            sizes: '(max-width: 989px) 88vw, 48vw',
+            sizes: '(max-width: 989px) 100vw, 48vw',
             loading: 'eager',
             fetchpriority: 'high',
             alt: s.image.alt | default: s.heading | strip_html
@@ -83,88 +91,79 @@
       position: relative;
       display: flex;
       flex-direction: column;
-      min-height: 85vh;
+      height: 88vh; /* Sets a strict full-screen canvas */
+      min-height: 600px;
       padding-block: 0;
     }
 
     .aurora-hero__media {
       position: absolute;
-      top: 0;
-      left: 50%;
-      width: 100vw;
-      margin-left: -50vw;
+      inset: 0;
+      width: 100%;
       height: 100%;
+      z-index: 0;
     }
 
     .aurora-hero__media img,
     .aurora-hero__media svg {
+      width: 100%;
       height: 100%;
       object-fit: cover;
       object-position: center 25%;
     }
 
-    .aurora-hero__media::after {
-      display: none;
-    }
+    /* Remove any lingering overlays or shadows */
+    .aurora-hero__media::after { display: none; }
 
     .aurora-hero__copy {
       position: relative;
       z-index: 1;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
-      padding-block-start: clamp(2rem, 5vh, 3.5rem);
-      padding-block-end: 2rem;
+      justify-content: space-between; /* This creates the intentional "gap" */
+      height: 100%;
+      padding: 3rem 1.5rem 2rem;
     }
 
-    /* Crisp solid black typography with zero glow or shadows */
     .aurora__eyebrow,
-    .aurora-hero__title,
-    .aurora__lede {
+    .aurora-hero__title {
       color: #000000 !important;
       text-shadow: none !important;
     }
 
     .aurora__lede {
+      color: #111111 !important;
+      text-shadow: none !important;
       font-size: 0.9375rem;
       line-height: 1.45;
-      margin-top: 0.75rem;
-      color: #111111 !important;
-    }
-
-    .aurora-hero__title {
-      max-width: 16ch;
+      font-weight: 500;
+      max-width: 90%;
     }
 
     .aurora-hero__action {
-      margin-top: clamp(1.25rem, 4vw, 1.75rem);
+      margin-top: 1.25rem;
     }
 
     .aurora-hero__assurance {
       margin-top: 0.75rem;
       font-size: 0.75rem;
       color: #333333;
-      text-shadow: none !important;
     }
   }
 
+  /* Desktop retains standard behavior */
   .aurora-hero__title {
     max-width: 12ch;
   }
 
   .aurora-hero__action {
-    margin-top: clamp(2rem, 4vw, 3rem);
+    margin-top: clamp(1.5rem, 4vw, 2rem);
   }
 
   .aurora-hero__assurance {
     margin: 0.875rem 0 0;
     font-size: 0.8125rem;
     color: var(--aur-text-muted);
-  }
-
-  .aurora-hero__placeholder {
-    background: var(--aur-page-alt);
-    fill: rgba(20, 21, 26, 0.12);
   }
 
   @media screen and (min-width: 990px) {
@@ -176,7 +175,12 @@
     }
 
     .aurora-hero__copy {
+      display: block; /* Normal stacking on desktop */
       padding-block-start: var(--aur-hero-top);
+    }
+
+    .aurora-hero__copy-bottom {
+      margin-top: 1.5rem;
     }
 
     .aurora-hero__media {
