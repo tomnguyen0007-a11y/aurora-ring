@@ -198,19 +198,26 @@
       /* The product gets the larger share — it is the reason anyone is here */
       grid-template-columns: 0.9fr 1.1fr;
       gap: clamp(2.5rem, 5vw, 5rem);
-      min-height: 82vh;
+      /* No min-height. An 82vh floor made the grid row taller than either
+         column, and the inherited align-items: center then split the surplus
+         evenly above and below the copy — 218px of dead space over the eyebrow
+         at 1440x900. Sizing the row from its content removes the surplus at
+         source, so the offset below is the only thing setting the top edge. */
+      align-items: start;
+      padding-block: var(--aur-hero-top) var(--aur-hero-bottom);
     }
 
-    /* Let the photograph run out to the right edge of the viewport rather than
-       stopping at the container, so it reads as a scene and not a thumbnail. */
-    .aurora-hero__media {
-      margin-right: calc(var(--aur-gutter) * -1);
+    /* A deliberate drop, so the headline reads against the upper third of the
+       product rather than butting against the grid line. */
+    .aurora-hero__copy {
+      padding-block-start: var(--aur-hero-top);
     }
-  }
 
-  @media screen and (min-width: 1400px) {
+    /* Contained, not bled. Running the photograph past the container clipped
+       the lower-right ring mid-band, which read as an accident rather than as
+       a crop. All three rings now sit inside the column, whole. */
     .aurora-hero__media {
-      margin-right: calc((100vw - var(--aur-max)) / -2 - var(--aur-gutter));
+      margin-right: 0;
     }
   }
 {% endstylesheet %}
