@@ -84,7 +84,7 @@
     height: auto;
   }
 
-  @media screen and (max-width: 989px) {
+@media screen and (max-width: 989px) {
     .aurora-hero__inner {
       position: relative;
       display: block;
@@ -109,23 +109,22 @@
       object-position: center 22%;
     }
 
-    /* Localized bone scrim: creates high contrast behind the text on the left, 
-       while leaving the bottom-right corner 100% clear for the 3rd ring. */
+    /* Frosted bone scrim: softens background textures and brightens dark shadows 
+       so black text has maximum contrast anywhere on mobile screens. */
     .aurora-hero__media::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(
-        circle at 20% 60%,
-        rgba(246, 244, 240, 0.95) 0%,
-        rgba(246, 244, 240, 0.85) 40%,
-        rgba(246, 244, 240, 0) 75%
-      ),
-      linear-gradient(
+      background: linear-gradient(
         to bottom,
-        transparent 80%,
+        rgba(246, 244, 240, 0.2) 0%,
+        rgba(246, 244, 240, 0.75) 28%,
+        rgba(246, 244, 240, 0.92) 50%,
+        rgba(246, 244, 240, 0.96) 75%,
         var(--aur-page) 100%
       );
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
     }
 
     .aurora-hero__copy {
@@ -145,14 +144,6 @@
     .aurora-hero__action {
       margin-top: clamp(1.25rem, 4vw, 1.75rem);
     }
-  }
-
-  .aurora-hero__title {
-    max-width: 12ch;
-  }
-
-  .aurora-hero__action {
-    margin-top: clamp(2rem, 4vw, 3rem);
   }
 
   .aurora-hero__assurance {
