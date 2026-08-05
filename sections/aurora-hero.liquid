@@ -83,7 +83,7 @@
       position: relative;
       display: flex;
       flex-direction: column;
-      min-height: 82vh;
+      min-height: 85vh;
       padding-block: 0;
     }
 
@@ -96,35 +96,42 @@
       height: 100%;
     }
 
+    /* Shifts photo focus to the right so clean background moves to the left behind text */
     .aurora-hero__media img,
     .aurora-hero__media svg {
       height: 100%;
       object-fit: cover;
-      object-position: center 30%;
+      object-position: 78% 25%;
     }
 
-    /* Shadows and scrim overlays removed completely */
     .aurora-hero__media::after {
       display: none;
     }
 
-    /* Position copy & CTA button directly at the top */
     .aurora-hero__copy {
       position: relative;
       z-index: 1;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
-      padding-block-start: clamp(2rem, 5vh, 3.5rem);
+      padding-block-start: clamp(1.5rem, 4vh, 2.5rem);
       padding-block-end: 2rem;
+      max-width: 65%; /* Restricts text width so it stays in the clean left space */
     }
 
     .aurora-hero__title {
-      max-width: 16ch;
+      font-size: clamp(2rem, 8vw, 2.5rem);
+      line-height: 1.1;
+    }
+
+    .aurora-hero__lede {
+      font-size: 0.9375rem;
+      line-height: 1.4;
+      margin-top: 0.75rem;
     }
 
     .aurora-hero__action {
-      margin-top: clamp(1rem, 3vw, 1.5rem);
+      margin-top: 1.25rem;
     }
   }
 
@@ -157,6 +164,7 @@
 
     .aurora-hero__copy {
       padding-block-start: var(--aur-hero-top);
+      max-width: 100%;
     }
 
     .aurora-hero__media {
