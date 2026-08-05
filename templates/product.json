@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "main": {
@@ -16,6 +25,7 @@
             "slideshow_mobile_controls_style": "dots",
             "thumbnail_position": "below",
             "thumbnail_width": 44,
+            "thumbnail_radius": 0,
             "aspect_ratio": "adapt",
             "constrain_to_viewport": true,
             "media_fit": "contain",
@@ -49,6 +59,9 @@
             "video_position": "cover",
             "background_image_position": "cover",
             "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_radius": 0,
             "padding-block-start": 0,
             "padding-block-end": 0,
             "padding-inline-start": 0,
@@ -57,7 +70,17 @@
           "blocks": {}
         }
       },
-      "settings": {}
+      "settings": {
+        "content_width": "content-center-aligned",
+        "desktop_media_position": "left",
+        "equal_columns": false,
+        "limit_details_width": false,
+        "gap": 16,
+        "enable_sticky_add_to_cart": true,
+        "color_scheme": "",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      }
     },
     "band": {
       "type": "aurora-spec-band",
@@ -168,6 +191,7 @@
         "s6"
       ],
       "settings": {
+        "model": "screenless",
         "eyebrow": "Worn, not watched",
         "heading": "It disappears by the second day.",
         "body": "<p>Titanium, thinner than most wedding bands, with nothing on the outside to catch the light or announce itself. You stop noticing it long before it stops noticing you.</p><p>No screen to wake, no strap to tighten, no charging every night. It reads your body while you get on with the day.</p>",
@@ -269,7 +293,7 @@
           "type": "faq",
           "settings": {
             "question": "How long does delivery take?",
-            "answer": "<p>Orders are dispatched from within the EU with tracked delivery included in the price. You will get the tracking number by email as soon as the parcel is handed over.</p>"
+            "answer": "<p>Orders are dispatched from within the EU with tracked delivery. You will get the tracking number by email as soon as the parcel is handed over.</p>"
           }
         },
         "sub": {
@@ -337,6 +361,7 @@
         "heading": "The questions that actually matter.",
         "support_text": "Still deciding? Real answers, no sales script.",
         "support_link_label": "Talk to us",
+        "support_link": "",
         "open_first": true,
         "padding-block-start": 0,
         "padding-block-end": 128
@@ -345,9 +370,12 @@
     "sticky": {
       "type": "aurora-sticky-atc",
       "settings": {
+        "product": "",
+        "short_title": "",
         "button_label": "Add to cart",
         "note": "Free EU delivery",
-        "watch_selector": ".product-form__submit, [name=add]"
+        "watch_selector": ".product-form__submit, [name=add]",
+        "form_selector": ""
       }
     }
   },

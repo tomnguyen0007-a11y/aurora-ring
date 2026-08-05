@@ -406,13 +406,6 @@
             "text": "Every metric is unlocked at purchase and stays unlocked."
           }
         },
-        "exchange": {
-          "type": "item",
-          "settings": {
-            "title": "Free size exchange",
-            "text": "If the fit is wrong, we send the right size at our cost."
-          }
-        },
         "data": {
           "type": "item",
           "settings": {
@@ -423,7 +416,6 @@
       },
       "block_order": [
         "trial",
-        "exchange",
         "data"
       ],
       "settings": {
