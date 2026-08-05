@@ -6,38 +6,31 @@
 <section class="aurora aurora-hero" style="{% render 'aurora-spacing', settings: section.settings %}">
   <div class="aurora__inner aurora-hero__inner">
     <div class="aurora-hero__copy">
-      
-      <div class="aurora-hero__top">
-        {%- if s.eyebrow != blank -%}
-          <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
-        {%- endif -%}
+      {%- if s.eyebrow != blank -%}
+        <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
+      {%- endif -%}
 
-        <h1 class="aurora__display aurora-hero__title aurora-reveal" style="--aur-reveal-delay: 80ms">
-          {{ s.heading }}
-        </h1>
-      </div>
+      <h1 class="aurora__display aurora-hero__title aurora-reveal" style="--aur-reveal-delay: 80ms">
+        {{ s.heading }}
+      </h1>
 
-      <div class="aurora-hero__bottom aurora-reveal" style="--aur-reveal-delay: 160ms">
-        {%- if s.subheading != blank -%}
-          <div class="aurora__lede-wrapper">
-            <p class="aurora__lede">{{ s.subheading }}</p>
-          </div>
-        {%- endif -%}
+      {%- if s.subheading != blank -%}
+        <p class="aurora__lede aurora-reveal" style="--aur-reveal-delay: 160ms">{{ s.subheading }}</p>
+      {%- endif -%}
 
-        <div class="aurora-hero__action">
-          <a class="aurora__btn aurora__btn--primary" id="aurora-hero-cta" href="{{ s.cta_link | default: routes.all_products_collection_url }}">
-            {{ s.cta_label }}
-            {%- if product != blank and s.show_price -%}
-              <span class="aurora__price">{{ product.price | money }}</span>
-            {%- endif -%}
-          </a>
-
-          {%- if s.assurance != blank -%}
-            <p class="aurora-hero__assurance">{{ s.assurance }}</p>
+      {%- comment -%} One call to action. Nothing competes with it. {%- endcomment -%}
+      <div class="aurora-hero__action aurora-reveal" style="--aur-reveal-delay: 240ms">
+        <a class="aurora__btn aurora__btn--primary" id="aurora-hero-cta" href="{{ s.cta_link | default: routes.all_products_collection_url }}">
+          {{ s.cta_label }}
+          {%- if product != blank and s.show_price -%}
+            <span class="aurora__price">{{ product.price | money }}</span>
           {%- endif -%}
-        </div>
-      </div>
+        </a>
 
+        {%- if s.assurance != blank -%}
+          <p class="aurora-hero__assurance">{{ s.assurance }}</p>
+        {%- endif -%}
+      </div>
     </div>
 
     <div class="aurora-hero__media aurora-reveal" style="--aur-reveal-delay: 120ms">
@@ -47,12 +40,17 @@
           | image_url: width: 1400
           | image_tag:
             widths: '500, 800, 1100, 1400',
-            sizes: '(max-width: 989px) 100vw, 48vw',
+            sizes: '(max-width: 989px) 88vw, 48vw',
             loading: 'eager',
             fetchpriority: 'high',
             alt: s.image.alt | default: s.heading | strip_html
         }}
       {%- else -%}
+        {%- comment -%}
+          Ships with real product photography rather than a grey placeholder, so
+          the theme is presentable the moment it is installed. Replace it by
+          setting a Product image in the theme editor.
+        {%- endcomment -%}
         <img
           src="{{ 'aurora-hero-rings.jpg' | asset_url }}"
           width="1200"
@@ -79,6 +77,12 @@
     padding-block: clamp(1.5rem, 8vh, 6rem);
   }
 
+  /* The product sits on the page itself — no card, no border, no shadow. The
+     studio backdrop is keyed to the page colour in the asset itself, so no
+     blend mode is needed (multiply would only darken the whole photograph).
+     Declared here, before the phone override below, so the mobile block's
+     object-fit: cover wins on source order rather than needing higher
+     specificity to beat an identical selector. */
   .aurora-hero__media img,
   .aurora-hero__media svg {
     display: block;
@@ -86,30 +90,69 @@
     height: auto;
   }
 
+  /* Phones: the photograph is the background, not a block above the type.
+     Pulling it above the copy (the previous fix) stopped the rings from being
+     buried below the fold, but the section still read as two stacked halves.
+     The image now fills the section edge-to-edge behind the text, the way the
+     original theme's hero did — copy sits over it on a bone scrim so the type
+     stays fully legible without darkening or hiding the product. */
   @media screen and (max-width: 989px) {
     .aurora-hero__inner {
       position: relative;
-      display: flex;
-      flex-direction: column;
-      height: 88vh;
-      min-height: 650px;
+      display: block;
+      min-height: 88vh;
       padding-block: 0;
+      /* Keeps the inherited .aurora__inner gutter for the copy below — only
+         the media layer needs to escape it. An earlier version tried to do
+         that by giving this element a negative margin equal to the gutter and
+         then padding it back in, but with box-sizing: border-box the two
+         don't cancel: an auto-width block's rendered width is the containing
+         block's width minus its margins, full stop, so a negative margin on
+         both sides grows the box by 2x the gutter instead of by 0. That
+         overflowed the viewport by exactly one gutter's width on every phone
+         breakpoint. The media element bleeds itself now (below), so this
+         element keeps its normal box. */
     }
 
     .aurora-hero__media {
       position: absolute;
-      inset: 0;
-      width: 100%;
+      top: 0;
+      /* Standard viewport-relative bleed: independent of this element's own
+         padding or of any ancestor's max-width, and it cannot overflow the
+         document because it is sized from 100vw, not from a margin sum. */
+      left: 50%;
+      width: 100vw;
+      margin-left: -50vw;
+      order: initial;
       height: 100%;
-      z-index: 0;
     }
 
     .aurora-hero__media img,
     .aurora-hero__media svg {
-      width: 100%;
       height: 100%;
       object-fit: cover;
-      object-position: center 28%;
+      /* Keeps the rings themselves in frame rather than centring the crop,
+         which on a tall narrow viewport pushed them toward the bottom edge. */
+      object-position: center 22%;
+    }
+
+    /* Bone scrim under the copy only — the top half of the photograph stays
+       fully clear so the product reads on its own. The eyebrow line is the
+       first thing the scrim has to cover, so the ramp starts underneath it
+       rather than at the headline. */
+    .aurora-hero__media::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(246, 244, 240, 0) 0%,
+        rgba(246, 244, 240, 0) 34%,
+        rgba(246, 244, 240, 0.75) 50%,
+        rgba(246, 244, 240, 0.94) 62%,
+        var(--aur-page) 78%,
+        var(--aur-page) 100%
+      );
     }
 
     .aurora-hero__copy {
@@ -117,66 +160,17 @@
       z-index: 1;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      height: 100%;
-      padding: 7vh 1.25rem 5vh 1.25rem;
-    }
-
-    .aurora__eyebrow {
-      color: #111111;
-      font-size: 0.75rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 0.75rem;
+      min-height: 88vh;
+      justify-content: flex-end;
+      padding-block: clamp(1.75rem, 6vh, 3rem) clamp(1.25rem, 4vh, 2rem);
     }
 
     .aurora-hero__title {
-      color: #111111;
-      font-size: clamp(2.25rem, 8.5vw, 2.75rem);
-      line-height: 1.1;
-      margin: 0;
-      max-width: 13ch;
-    }
-
-    .aurora__lede-wrapper {
-      background: rgba(255, 255, 255, 0.82);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      padding: 1rem 1.125rem;
-      border-radius: 12px;
-      margin-bottom: 1.25rem;
-      border: 1px solid rgba(255, 255, 255, 0.5);
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-    }
-
-    .aurora__lede {
-      color: #1a1a1a;
-      font-size: 0.9375rem;
-      line-height: 1.45;
-      font-weight: 400;
-      margin: 0;
+      max-width: 18ch;
     }
 
     .aurora-hero__action {
-      margin-top: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    .aurora__btn--primary {
-      background: #111111;
-      color: #ffffff;
-      border: none;
-      width: 100%;
-      justify-content: center;
-    }
-
-    .aurora-hero__assurance {
-      margin: 0;
-      font-size: 0.725rem;
-      color: #555555;
-      text-align: center;
+      margin-top: clamp(1.25rem, 4vw, 1.75rem);
     }
   }
 
@@ -185,68 +179,45 @@
   }
 
   .aurora-hero__action {
-    margin-top: clamp(1.5rem, 4vw, 2rem);
+    margin-top: clamp(2rem, 4vw, 3rem);
   }
 
   .aurora-hero__assurance {
-    margin: 0.875rem 0 0;
+    margin: 1.125rem 0 0;
     font-size: 0.8125rem;
     color: var(--aur-text-muted);
   }
 
+  .aurora-hero__placeholder {
+    background: var(--aur-page-alt);
+    fill: rgba(20, 21, 26, 0.12);
+  }
+
   @media screen and (min-width: 990px) {
     .aurora-hero__inner {
+      /* The product gets the larger share — it is the reason anyone is here */
       grid-template-columns: 0.9fr 1.1fr;
       gap: clamp(2.5rem, 5vw, 5rem);
+      /* No min-height. An 82vh floor made the grid row taller than either
+         column, and the inherited align-items: center then split the surplus
+         evenly above and below the copy — 218px of dead space over the eyebrow
+         at 1440x900. Sizing the row from its content removes the surplus at
+         source, so the offset below is the only thing setting the top edge. */
       align-items: start;
       padding-block: var(--aur-hero-top) var(--aur-hero-bottom);
     }
 
+    /* A deliberate drop, so the headline reads against the upper third of the
+       product rather than butting against the grid line. */
     .aurora-hero__copy {
-      display: block;
       padding-block-start: var(--aur-hero-top);
-      justify-content: flex-start;
-      height: auto;
     }
 
-    .aurora-hero__bottom {
-      margin-top: 2rem;
-    }
-
-    .aurora__lede-wrapper {
-      background: transparent;
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      padding: 0;
-      border-radius: 0;
-      margin-bottom: 0;
-      border: none;
-      box-shadow: none;
-    }
-
-    .aurora__lede {
-      color: var(--aur-text-main) !important;
-      margin-top: 1.5rem;
-    }
-
+    /* Contained, not bled. Running the photograph past the container clipped
+       the lower-right ring mid-band, which read as an accident rather than as
+       a crop. All three rings now sit inside the column, whole. */
     .aurora-hero__media {
-      position: relative;
-      inset: auto;
       margin-right: 0;
-    }
-
-    .aurora-hero__media img,
-    .aurora-hero__media svg {
-      width: 100%;
-      height: auto;
-      object-fit: initial;
-    }
-
-    .aurora-hero__assurance {
-      margin: 0.875rem 0 0;
-      font-size: 0.8125rem;
-      color: var(--aur-text-muted);
-      text-align: left;
     }
   }
 {% endstylesheet %}
@@ -281,7 +252,7 @@
       "type": "text",
       "id": "assurance",
       "label": "Assurance line",
-      "default": "Free Sizing Kit Included · 30-Day Risk-Free Trial · 2-Year Warranty"
+      "default": "Free EU delivery · Free size exchange · No subscription, ever"
     },
     { "type": "header", "content": "Padding" },
     {
