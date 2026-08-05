@@ -5,39 +5,31 @@
 
 <section class="aurora aurora-hero" style="{% render 'aurora-spacing', settings: section.settings %}">
   <div class="aurora__inner aurora-hero__inner">
-    <div class="aurora-hero__copy">
-      
-      <!-- TOP: Pinned to the clean upper space -->
-      <div class="aurora-hero__copy-top">
-        {%- if s.eyebrow != blank -%}
-          <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
-        {%- endif -%}
+    <div class="aurora-hero__copy aurora-reveal" style="--aur-reveal-delay: 80ms">
+      {%- if s.eyebrow != blank -%}
+        <p class="aurora__eyebrow">{{ s.eyebrow }}</p>
+      {%- endif -%}
 
-        <h1 class="aurora__display aurora-hero__title aurora-reveal" style="--aur-reveal-delay: 80ms">
-          {{ s.heading }}
-        </h1>
-      </div>
+      <h1 class="aurora__display aurora-hero__title">
+        {{ s.heading }}
+      </h1>
 
-      <!-- BOTTOM: Pushed down under the black ring -->
-      <div class="aurora-hero__copy-bottom aurora-reveal" style="--aur-reveal-delay: 160ms">
-        {%- if s.subheading != blank -%}
-          <p class="aurora__lede">{{ s.subheading }}</p>
-        {%- endif -%}
+      {%- if s.subheading != blank -%}
+        <p class="aurora__lede">{{ s.subheading }}</p>
+      {%- endif -%}
 
-        <div class="aurora-hero__action">
-          <a class="aurora__btn aurora__btn--primary" id="aurora-hero-cta" href="{{ s.cta_link | default: routes.all_products_collection_url }}">
-            {{ s.cta_label }}
-            {%- if product != blank and s.show_price -%}
-              <span class="aurora__price">{{ product.price | money }}</span>
-            {%- endif -%}
-          </a>
-
-          {%- if s.assurance != blank -%}
-            <p class="aurora-hero__assurance">{{ s.assurance }}</p>
+      <div class="aurora-hero__action">
+        <a class="aurora__btn aurora__btn--primary" id="aurora-hero-cta" href="{{ s.cta_link | default: routes.all_products_collection_url }}">
+          {{ s.cta_label }}
+          {%- if product != blank and s.show_price -%}
+            <span class="aurora__price">{{ product.price | money }}</span>
           {%- endif -%}
-        </div>
-      </div>
+        </a>
 
+        {%- if s.assurance != blank -%}
+          <p class="aurora-hero__assurance">{{ s.assurance }}</p>
+        {%- endif -%}
+      </div>
     </div>
 
     <div class="aurora-hero__media aurora-reveal" style="--aur-reveal-delay: 120ms">
@@ -86,14 +78,13 @@
     height: auto;
   }
 
-  /* --- MOBILE STYLES: Clean, Split Layout --- */
   @media screen and (max-width: 989px) {
     .aurora-hero__inner {
       position: relative;
       display: flex;
       flex-direction: column;
-      height: 90vh; /* Gives plenty of room to push the button down */
-      min-height: 650px;
+      height: 88vh;
+      min-height: 600px;
       padding-block: 0;
     }
 
@@ -113,57 +104,41 @@
       object-position: center 25%;
     }
 
-    /* ABSOLUTELY NO OVERLAYS OR FILTERS */
-    .aurora-hero__media::after { display: none !important; }
-
     .aurora-hero__copy {
       position: relative;
       z-index: 1;
       display: flex;
       flex-direction: column;
-      justify-content: space-between; /* This forces the massive gap in the middle */
+      justify-content: center;
       height: 100%;
       padding: 3rem 1.5rem 2rem;
     }
 
     .aurora__eyebrow,
     .aurora-hero__title {
-      color: #000000 !important;
-      text-shadow: none !important;
-      margin: 0;
+      color: #000000;
     }
 
-    /* Softer dark grey, with a tiny white glow so it doesn't get lost in the wood grain */
     .aurora__lede {
-      color: #4a4a4a !important; 
-      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7) !important;
+      color: #111111;
       font-size: 0.9375rem;
       line-height: 1.45;
       font-weight: 500;
-      max-width: 90%;
-      margin: 0 0 1.25rem 0;
+      margin-top: 1rem;
     }
 
     .aurora-hero__action {
-      margin-top: 0;
-    }
-
-    /* Keep CTA button dark for contrast */
-    .aurora__btn--primary {
-      background: #111111;
-      color: #ffffff;
-      border: none;
+      margin-top: 1.25rem;
     }
 
     .aurora-hero__assurance {
       margin-top: 0.75rem;
       font-size: 0.75rem;
       color: #333333;
-      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7);
     }
   }
 
-  /* --- DESKTOP STYLES --- */
+  /* Desktop retains standard behavior */
   .aurora-hero__title {
     max-width: 12ch;
   }
@@ -187,21 +162,11 @@
     }
 
     .aurora-hero__copy {
-      display: block; 
       padding-block-start: var(--aur-hero-top);
-    }
-
-    .aurora-hero__copy-bottom {
-      margin-top: 2rem;
     }
 
     .aurora-hero__media {
       margin-right: 0;
-    }
-    
-    .aurora__lede {
-      color: var(--aur-text-main) !important;
-      text-shadow: none !important;
     }
   }
 {% endstylesheet %}
