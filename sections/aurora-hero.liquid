@@ -51,7 +51,13 @@
       </div>
     </div>
 
-    <div class="aurora-hero__media aurora-reveal" style="--aur-reveal-delay: 120ms">
+    {%- comment -%}
+      Deliberately not a .aurora-reveal. This image is the LCP element — it
+      carries fetchpriority="high" — and fading it in holds the largest paint
+      back by the length of the transition, for motion that neither guides
+      attention nor communicates state nor preserves continuity.
+    {%- endcomment -%}
+    <div class="aurora-hero__media">
       {%- if s.image != blank -%}
         {{
           s.image
@@ -95,15 +101,27 @@
     padding-block: clamp(1.5rem, 8vh, 6rem);
   }
 
-  /* The product sits on the page itself — no card, no border, no shadow. The
-     studio backdrop is keyed to the page colour in the asset itself, so no
-     blend mode is needed (multiply would only darken the whole photograph). */
   .aurora-hero__media img,
   .aurora-hero__media svg {
     display: block;
     width: 100%;
     height: auto;
   }
+
+  /* No blend and no tint on the photograph, deliberately.
+
+     The asset's backdrop samples at rgb(245, 244, 240) against a page of
+     rgb(246, 244, 240) — it was shot and graded to this exact page tone, so it
+     already meets the page with no edge, and there is nothing here for a
+     mix-blend-mode to fix.
+
+     It is also why the atmosphere below is kept off the product. Any tone
+     behind the frame that is deeper than the backdrop brings the rectangle
+     back, and re-keying it with darken would cost the photograph its
+     highlights: measured against the deeper bone, that clips 11.5% of the
+     product's pixels and takes up to 25/255 off the rose gold's speculars.
+     A background effect does not get to dull the product on a jewellery
+     page. */
 
   /* Phones: type first, then the photograph in its own full-width band.
      The previous treatment laid the copy over a full-height cover crop of the
@@ -117,38 +135,111 @@
      and the photograph renders at its own aspect ratio underneath, so all
      three rings read whole. The action still lands above the fold. */
   @media screen and (max-width: 989px) {
+    /* Atmosphere, kept behind the type and clear of the frame. A soft lift in
+       the deeper bone sits under the headline and has fully resolved back to
+       the page tone by 55% — above where the photograph starts — so the
+       product is always on the one tone its backdrop was graded to.
+
+       Radial rather than a top-to-bottom ramp for the same reason: every edge
+       of the section returns to the page tone, so it meets the header above
+       and the trust bar below with no seam, which a linear ramp cannot do
+       without leaving a step at one end. */
+    .aurora.aurora-hero {
+      background:
+        radial-gradient(130% 34% at 50% 6%, var(--aur-page-alt), transparent 55%),
+        var(--aur-bg);
+    }
+
     .aurora-hero__inner {
-      gap: clamp(1.5rem, 5vh, 2.5rem);
-      padding-block: clamp(1.5rem, 5vh, 2.5rem) 0;
+      gap: 0;
+      padding-block: clamp(1.25rem, 4vh, 2rem) 0;
     }
 
     /* Edge to edge, so the photograph is the width of the phone rather than a
        card inset by the gutter. Expressed as one margin pair rather than as a
        relative offset: the box's own layout width stays 100vw and its used
        position lands on the viewport edges, so nothing overhangs the document
-       and no horizontal scroll appears. */
+       and no horizontal scroll appears.
+
+       Tucked up under the copy as well, to close the dead space that made the
+       two halves read as two sections rather than one composition.
+
+       The lift is sized from the asset, not by eye. The frame carries 70px of
+       empty backdrop above its topmost ring — 5.5% of its height — and at this
+       ratio the frame is 1.052x the viewport width, so that band is 5.78vw. A
+       5vw lift takes nearly all of it and still leaves clearance; 6vw would
+       have started cutting into the rose gold. There is no matching band at
+       the bottom: the plinths run to the frame's edge, which is also why a
+       synthetic contact shadow would have had nowhere to go. */
     .aurora-hero__media {
       width: 100vw;
       margin-inline: calc(50% - 50vw);
+      margin-top: -5vw;
     }
 
-    /* No crop at all in the normal case — height follows the asset's own
-       ratio. object-fit only engages if the cap below clamps an unusually
-       tall merchant upload, and contain letterboxes onto the page colour the
-       studio backdrop is already keyed to, so the bars are invisible. */
+    /* Positioned only so the copy stays above the photograph in paint order,
+       since the frame is pulled up under it. */
+    .aurora-hero__copy {
+      position: relative;
+    }
+
+    /* Poster scale. The display token floors at 2.75rem, and 8vw does not
+       clear that floor until about 550px wide — so on every phone the headline
+       was being set by the floor rather than by the viewport, and arrived the
+       same size it takes on a tablet. Sized from the viewport here, against a
+       shorter lede below, the step between the two is a step rather than a
+       slope.
+
+       Scoped through the inner so it outranks .aurora__display, which sets the
+       same three properties from the globally rendered token snippet — equal
+       specificity there would leave the winner down to stylesheet order. */
+    .aurora-hero__inner .aurora-hero__title {
+      font-size: clamp(3.25rem, 14vw, 5rem);
+      line-height: 0.9;
+      letter-spacing: -0.03em;
+      max-width: 14ch;
+    }
+
+    /* One line rather than two — at the token's tracking the eyebrow wrapped on
+       every phone, which put a broken label above the headline — and a hairline
+       under it. The rule is the same structural device the ownership columns
+       and the box list already use, and it gives the copy a masthead to open
+       from instead of three type sizes stacked in a column. */
+    .aurora-hero__inner .aurora__eyebrow {
+      font-size: 0.6875rem;
+      letter-spacing: 0.1em;
+      margin-bottom: 1.25rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--aur-line);
+    }
+
+    .aurora-hero__inner .aurora__lede {
+      font-size: 1rem;
+      max-width: 32ch;
+    }
+
+    /* Scoped through the inner for the same reason as the title. The base
+       .aurora-hero__action rule is declared after this block at equal
+       specificity, so an unscoped override here would lose to it on source
+       order and the phone spacing would silently never apply — which is what
+       was happening before. */
+    .aurora-hero__inner .aurora-hero__action {
+      margin-top: clamp(1.5rem, 5vw, 2rem);
+    }
+  }
+
+  /* Landscape phones only. Portrait has the height to run the photograph at
+     its own ratio, and capping it there is what inset the frame and shrank the
+     product. Landscape genuinely does not have the height, so the cap stays
+     for that case — contain rather than cover, so the three rings survive
+     whole either way, and the bars it leaves are the page tone the backdrop
+     already matches, which makes them invisible. */
+  @media screen and (max-width: 989px) and (orientation: landscape) {
     .aurora-hero__media img,
     .aurora-hero__media svg {
-      max-height: 62vh;
-      max-height: 62svh;
+      max-height: 70vh;
+      max-height: 70svh;
       object-fit: contain;
-    }
-
-    .aurora-hero__title {
-      max-width: 18ch;
-    }
-
-    .aurora-hero__action {
-      margin-top: clamp(1.25rem, 4vw, 1.75rem);
     }
   }
 
