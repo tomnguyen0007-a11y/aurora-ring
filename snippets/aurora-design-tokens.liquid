@@ -294,6 +294,16 @@
     opacity: 0.6;
   }
 
+  /* The figure stated beneath the action rather than inside it, for the case
+     where no product is connected and the button therefore carries none.
+     Lives here rather than in either section: the hero and the close both use
+     it, and a section-level copy in each would ship the rule twice. */
+  .aur-price-signal {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--aur-text-muted);
+  }
+
   /* ---- Scroll reveal ----
      Gated on [data-aurora-js] so that without scripting nothing is ever left
      stuck at opacity 0. */

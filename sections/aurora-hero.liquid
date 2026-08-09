@@ -1,6 +1,15 @@
 {%- liquid
   assign s = section.settings
   assign product = s.product
+
+  comment
+    The live product price and the static price line are mutually exclusive, so
+    the two can never disagree in front of a buyer.
+  endcomment
+  assign show_live_price = false
+  if product != blank and s.show_price
+    assign show_live_price = true
+  endif
 -%}
 
 <section class="aurora aurora-hero" style="{% render 'aurora-spacing', settings: section.settings %}">
@@ -22,10 +31,19 @@
       <div class="aurora-hero__action aurora-reveal" style="--aur-reveal-delay: 240ms">
         <a class="aurora__btn aurora__btn--primary" id="aurora-hero-cta" href="{{ s.cta_link | default: routes.all_products_collection_url }}">
           {{ s.cta_label }}
-          {%- if product != blank and s.show_price -%}
+          {%- if show_live_price -%}
             <span class="aurora__price">{{ product.price | money }}</span>
           {%- endif -%}
         </a>
+
+        {%- comment -%}
+          The price sits at the point of decision. Without a product connected
+          the button carries no figure at all, so the cost of the one thing this
+          page is selling was never stated above the fold.
+        {%- endcomment -%}
+        {%- if show_live_price == false and s.price_note != blank -%}
+          <div class="aur-price-signal">{{ s.price_note }}</div>
+        {%- endif -%}
 
         {%- if s.assurance != blank -%}
           <p class="aurora-hero__assurance">{{ s.assurance }}</p>
@@ -40,7 +58,7 @@
           | image_url: width: 1400
           | image_tag:
             widths: '500, 800, 1100, 1400',
-            sizes: '(max-width: 989px) 88vw, 48vw',
+            sizes: '(max-width: 989px) 100vw, 48vw',
             loading: 'eager',
             fetchpriority: 'high',
             alt: s.image.alt | default: s.heading | strip_html
@@ -79,10 +97,7 @@
 
   /* The product sits on the page itself — no card, no border, no shadow. The
      studio backdrop is keyed to the page colour in the asset itself, so no
-     blend mode is needed (multiply would only darken the whole photograph).
-     Declared here, before the phone override below, so the mobile block's
-     object-fit: cover wins on source order rather than needing higher
-     specificity to beat an identical selector. */
+     blend mode is needed (multiply would only darken the whole photograph). */
   .aurora-hero__media img,
   .aurora-hero__media svg {
     display: block;
@@ -90,79 +105,42 @@
     height: auto;
   }
 
-  /* Phones: the photograph is the background, not a block above the type.
-     Pulling it above the copy (the previous fix) stopped the rings from being
-     buried below the fold, but the section still read as two stacked halves.
-     The image now fills the section edge-to-edge behind the text, the way the
-     original theme's hero did — copy sits over it on a bone scrim so the type
-     stays fully legible without darkening or hiding the product. */
+  /* Phones: type first, then the photograph in its own full-width band.
+     The previous treatment laid the copy over a full-height cover crop of the
+     asset, which produced two faults that pulled against each other. Cover
+     against a 0.53-ratio viewport with a 0.95-ratio asset scales to fill the
+     height and throws away ~45% of the frame's width, so only the middle ring
+     survived the crop; and the copy then had to be pushed into the lower half
+     to clear what was left of the product, which is why the eyebrow started
+     mid-screen. Neither could be fixed without making the other worse.
+     Stacking settles both at once: the type starts at the top of the section,
+     and the photograph renders at its own aspect ratio underneath, so all
+     three rings read whole. The action still lands above the fold. */
   @media screen and (max-width: 989px) {
     .aurora-hero__inner {
-      position: relative;
-      display: block;
-      min-height: 88vh;
-      padding-block: 0;
-      /* Keeps the inherited .aurora__inner gutter for the copy below — only
-         the media layer needs to escape it. An earlier version tried to do
-         that by giving this element a negative margin equal to the gutter and
-         then padding it back in, but with box-sizing: border-box the two
-         don't cancel: an auto-width block's rendered width is the containing
-         block's width minus its margins, full stop, so a negative margin on
-         both sides grows the box by 2x the gutter instead of by 0. That
-         overflowed the viewport by exactly one gutter's width on every phone
-         breakpoint. The media element bleeds itself now (below), so this
-         element keeps its normal box. */
+      gap: clamp(1.5rem, 5vh, 2.5rem);
+      padding-block: clamp(1.5rem, 5vh, 2.5rem) 0;
     }
 
+    /* Edge to edge, so the photograph is the width of the phone rather than a
+       card inset by the gutter. Expressed as one margin pair rather than as a
+       relative offset: the box's own layout width stays 100vw and its used
+       position lands on the viewport edges, so nothing overhangs the document
+       and no horizontal scroll appears. */
     .aurora-hero__media {
-      position: absolute;
-      top: 0;
-      /* Standard viewport-relative bleed: independent of this element's own
-         padding or of any ancestor's max-width, and it cannot overflow the
-         document because it is sized from 100vw, not from a margin sum. */
-      left: 50%;
       width: 100vw;
-      margin-left: -50vw;
-      order: initial;
-      height: 100%;
+      margin-inline: calc(50% - 50vw);
     }
 
+    /* No crop at all in the normal case — height follows the asset's own
+       ratio. object-fit only engages if the cap below clamps an unusually
+       tall merchant upload, and contain letterboxes onto the page colour the
+       studio backdrop is already keyed to, so the bars are invisible. */
     .aurora-hero__media img,
     .aurora-hero__media svg {
-      height: 100%;
-      object-fit: cover;
-      /* Keeps the rings themselves in frame rather than centring the crop,
-         which on a tall narrow viewport pushed them toward the bottom edge. */
-      object-position: center 22%;
-    }
-
-    /* Bone scrim under the copy only — the top half of the photograph stays
-       fully clear so the product reads on its own. The eyebrow line is the
-       first thing the scrim has to cover, so the ramp starts underneath it
-       rather than at the headline. */
-    .aurora-hero__media::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        to bottom,
-        rgba(246, 244, 240, 0) 0%,
-        rgba(246, 244, 240, 0) 34%,
-        rgba(246, 244, 240, 0.75) 50%,
-        rgba(246, 244, 240, 0.94) 62%,
-        var(--aur-page) 78%,
-        var(--aur-page) 100%
-      );
-    }
-
-    .aurora-hero__copy {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      min-height: 88vh;
-      justify-content: flex-end;
-      padding-block: clamp(1.75rem, 6vh, 3rem) clamp(1.25rem, 4vh, 2rem);
+      max-height: 62vh;
+      max-height: 62svh;
+      object-fit: contain;
     }
 
     .aurora-hero__title {
@@ -248,6 +226,13 @@
     { "type": "url", "id": "cta_link", "label": "Button link" },
     { "type": "product", "id": "product", "label": "Product (for live price)" },
     { "type": "checkbox", "id": "show_price", "label": "Show price in button", "default": true },
+    {
+      "type": "text",
+      "id": "price_note",
+      "label": "Price line",
+      "info": "Shown under the button when no product is connected above.",
+      "default": "€249 (VAT incl.)"
+    },
     {
       "type": "text",
       "id": "assurance",
