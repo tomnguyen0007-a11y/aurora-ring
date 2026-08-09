@@ -18,6 +18,11 @@
     id: 'product-details',
     closest.product: closest.product
   %}
+  <aside class="vg-buy-reassurance" aria-label="Purchase benefits">
+    <div><span aria-hidden="true"></span><p><strong>Free tracked shipping</strong><small>Delivered in 4–8 business days</small></p></div>
+    <div><span aria-hidden="true"></span><p><strong>30-day returns</strong><small>Easy returns and free size exchanges</small></p></div>
+    <div><span aria-hidden="true"></span><p><strong>Two-year warranty</strong><small>Direct support from Aurora</small></p></div>
+  </aside>
 {% endcapture %}
 
 {% capture additional_blocks %}
@@ -363,6 +368,152 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+  }
+
+  /* Vilgain-inspired product shell: clean, factual and purchase-first. */
+  [data-testid='product-information'] {
+    --vg-product-green: #67ad2d;
+    --vg-product-ink: #171916;
+    --vg-product-muted: #686d65;
+    --vg-product-line: #e4e7df;
+    --vg-product-surface: #f4f6f1;
+    background: #fff;
+    color: var(--vg-product-ink);
+    padding-block: 24px 56px;
+  }
+
+  [data-testid='product-information'] .product-details > .group-block {
+    gap: 18px !important;
+  }
+
+  [data-testid='product-information'] h1 {
+    font-family: var(--aurora-font, sans-serif);
+    font-size: clamp(30px, 3.1vw, 46px);
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  [data-testid='product-information'] .text-block:first-child strong {
+    color: #d99a00;
+    letter-spacing: 0.08em;
+  }
+
+  [data-testid='product-information'] .text-block:first-child a {
+    color: var(--vg-product-muted);
+    margin-left: 8px;
+    text-decoration-color: var(--vg-product-line);
+    text-underline-offset: 4px;
+  }
+
+  [data-testid='product-information'] .price {
+    font-size: 22px;
+    font-weight: 650;
+  }
+
+  [data-testid='product-information'] variant-selects fieldset {
+    gap: 8px;
+  }
+
+  [data-testid='product-information'] variant-selects label {
+    border-color: var(--vg-product-line);
+    border-radius: 8px;
+    background: #fff;
+    transition: border-color .18s ease, box-shadow .18s ease;
+  }
+
+  [data-testid='product-information'] variant-selects label:hover {
+    border-color: var(--vg-product-green);
+  }
+
+  [data-testid='product-information'] variant-selects input:checked + label {
+    border-color: var(--vg-product-green);
+    box-shadow: inset 0 0 0 1px var(--vg-product-green);
+  }
+
+  [data-testid='product-information'] .add-to-cart-button,
+  [data-testid='product-information'] button[name='add'] {
+    min-height: 56px;
+    border-radius: 8px;
+    border-color: var(--vg-product-green);
+    background: var(--vg-product-green);
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  [data-testid='product-information'] .add-to-cart-button:hover,
+  [data-testid='product-information'] button[name='add']:hover {
+    background: #578f29;
+    border-color: #578f29;
+  }
+
+  [data-testid='product-information-media'] .product-media {
+    background: var(--vg-product-surface);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .vg-buy-reassurance {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    margin-top: 20px;
+    overflow: hidden;
+    border: 1px solid var(--vg-product-line);
+    border-radius: 10px;
+    background: var(--vg-product-line);
+  }
+
+  .vg-buy-reassurance > div {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    background: #fff;
+    padding: 14px 12px;
+  }
+
+  .vg-buy-reassurance > div > span {
+    width: 8px;
+    height: 8px;
+    flex: 0 0 auto;
+    margin-top: 5px;
+    border-radius: 50%;
+    background: var(--vg-product-green);
+  }
+
+  .vg-buy-reassurance p {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin: 0;
+  }
+
+  .vg-buy-reassurance strong {
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .vg-buy-reassurance small {
+    color: var(--vg-product-muted);
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  @media screen and (max-width: 749px) {
+    [data-testid='product-information'] {
+      padding-block-start: 0;
+    }
+
+    [data-testid='product-information'] .product-details {
+      padding-block: 24px 8px;
+    }
+
+    .vg-buy-reassurance {
+      grid-template-columns: 1fr;
+      margin-inline: 0;
     }
   }
 {% endstylesheet %}

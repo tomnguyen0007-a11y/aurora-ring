@@ -17,9 +17,9 @@
           "static": true,
           "settings": {
             "media_presentation": "grid",
-            "media_columns": "two",
-            "image_gap": 4,
-            "large_first_image": false,
+            "media_columns": "one",
+            "image_gap": 12,
+            "large_first_image": true,
             "icons_style": "none",
             "slideshow_controls_style": "counter",
             "slideshow_mobile_controls_style": "dots",
@@ -105,6 +105,32 @@
                 "padding-inline-end": 0
               },
               "blocks": {
+                "text_trust_rating": {
+                  "type": "text",
+                  "name": "Product rating",
+                  "settings": {
+                    "text": "<p><strong>★★★★★ 4.8</strong> <a href=\"#avr\">852 verified reviews</a></p>",
+                    "width": "100%",
+                    "max_width": "normal",
+                    "alignment": "left",
+                    "type_preset": "paragraph",
+                    "font": "var(--font-body--family)",
+                    "font_size": "0.875rem",
+                    "line_height": "normal",
+                    "letter_spacing": "normal",
+                    "case": "none",
+                    "wrap": "pretty",
+                    "color": "var(--color-foreground)",
+                    "background": false,
+                    "background_color": "#00000000",
+                    "corner_radius": 0,
+                    "padding-block-start": 0,
+                    "padding-block-end": 0,
+                    "padding-inline-start": 0,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                },
                 "text_xrnftG": {
                   "type": "text",
                   "name": "Product title",
@@ -155,6 +181,7 @@
                 }
               },
               "block_order": [
+                "text_trust_rating",
                 "text_xrnftG",
                 "price_tVjtKg"
               ]
