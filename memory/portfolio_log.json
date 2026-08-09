@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-08-09",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -10,6 +10,69 @@
     "notes": "Read-only research log. No trades are ever placed by this routine."
   },
   "runs": [
+    {
+      "timestamp": "2026-08-09",
+      "data_as_of": "2026-08-07 (last completed US session; markets closed Sun 2026-08-09, so this is Friday's close, not live premarket)",
+      "account": {
+        "nav_eur_base": 1025,
+        "nav_usd_equiv": 1184.63,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -252.18,
+        "daily_pnl_usd_fri": 75.39,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 12.0699997,
+          "prior_close": 11.7,
+          "gap_pct": 3.16,
+          "since_last_run_pct": -5.41,
+          "market_value": 832.83,
+          "nav_pct": 70.3,
+          "unrealized_pnl": -155.87,
+          "daily_pnl_fri": 25.53,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still 78 of 80 required events as of the last company disclosure (May 11, 2026) - no incremental event-count update found despite ~3 months elapsed; final analysis triggers on 80th event, topline still guided for 2H 2026",
+            "next_check": "watch for 8-K / press release announcing 80th event; check for Q2 2026 earnings update on event count"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 70.3% of NAV vs 35% trim threshold (up from 69.8% last run)"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 134.09599305,
+          "prior_close": 114.92,
+          "gap_pct": 16.69,
+          "since_last_run_pct": -8.1,
+          "market_value": 348.65,
+          "nav_pct": 29.43,
+          "unrealized_pnl": -96.27,
+          "daily_pnl_fri": 49.86,
+          "catalyst": {
+            "name": "Post-IPO lockup tranche (911.5M shares, ~$123B) unlocked Aug 6, 2026; Q2 2026 earnings (first as public co.) reported Aug 4",
+            "status": "Stock initially sold off on $18.4B Q2 capex disclosure ($15.8B AI infra) but then rallied +23% over two days (Aug 6-8) on AI-monetization optimism, capped by an Argus upgrade to Buy/$160 PT on Aug 8 citing sub-1-year AI compute payback. Lockup absorbed without depressing price. Still ~21.6% below our avg cost of $171.12.",
+            "next_check": "next lockup tranches (7% blocks) Aug-Oct 2026; full lockup expires Dec 8 2026"
+          },
+          "risk_flag": "WATCH - de-risked from prior lockup overhang (event has now passed and was absorbed well); still down since last run and below cost basis"
+        }
+      ],
+      "flags": [
+        "Data snapshot is Friday 2026-08-07 close - US markets closed today (Sunday); no live premarket session exists for 2026-08-09. Re-run Monday premarket for a true gap read.",
+        "SLS over-concentration worsened to 70.3% of NAV (vs 69.8% last run, vs 35% threshold) with still no fresh REGAL event-count disclosure since May 11 (78/80) - binary catalyst timing remains unresolved.",
+        "SPCX's flagged lockup risk from the prior run has now passed (unlocked Aug 6) and was absorbed without a selloff - stock instead rallied +23% into Aug 8 on AI-capex optimism. Risk flag downgraded from 'upcoming supply event' to routine monitoring.",
+        "Zero USD cash buffer persists - fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
+        "CING checked per routine but is not a current position: FDA issued a Complete Response Letter for CTx-1301 (ADHD) on June 2, 2026, citing only CMC/manufacturing deficiencies (no clinical/efficacy concerns); resubmission timing not yet confirmed as of Aug 9."
+      ]
+    },
     {
       "timestamp": "2026-07-11",
       "account": {
