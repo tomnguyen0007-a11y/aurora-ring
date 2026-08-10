@@ -162,11 +162,35 @@
        5vw lift takes nearly all of it and still leaves clearance; 6vw would
        have started cutting into the rose gold. There is no matching band at
        the bottom: the plinths run to the frame's edge, which is also why a
-       synthetic contact shadow would have had nowhere to go. */
+       synthetic contact shadow would have had nowhere to go.
+
+       overflow is clipped because the photograph inside is wider than this
+       box — see below. */
     .aurora-hero__media {
       width: 100vw;
       margin-inline: calc(50% - 50vw);
-      margin-top: -5vw;
+      margin-top: -6vw;
+      overflow: hidden;
+    }
+
+    /* The product is scaled past the frame to fill the phone.
+
+       The asset wastes 9.8% of its width on the left and 9.7% on the right as
+       empty backdrop, so the rings only span 80.5% of the frame — on a 390px
+       phone that is 76px of nothing down the sides, and the product read as
+       small and adrift in the page. Running the photograph at 112% and letting
+       the box clip it takes those margins off and brings the product to 90% of
+       the viewport. Nothing is lost: what gets cut is backdrop, in the page's
+       own tone.
+
+       This also rescales the empty band above the topmost ring that the tuck
+       above is sized against — 5.5% of a frame now 1.12x taller is 6.5vw, so
+       -6vw still clears the rose gold. */
+    .aurora-hero__media img,
+    .aurora-hero__media svg {
+      width: 112%;
+      max-width: none;
+      margin-inline: -6%;
     }
 
     /* Positioned only so the copy stays above the photograph in paint order,
@@ -217,6 +241,23 @@
        was happening before. */
     .aurora-hero__inner .aurora-hero__action {
       margin-top: clamp(1.5rem, 5vw, 2rem);
+    }
+  }
+
+  /* Tablets. The phone treatment has to run to 989px because that is where the
+     two-column desktop layout begins, but a full-bleed near-square frame is
+     905px tall at 768 — the product stops being a hero and becomes a slab, and
+     the copy holds barely half the width beside it. Capped and centred it
+     reads as a product shot again, and the lede gets its full measure back
+     since there is room for it. */
+  @media screen and (min-width: 750px) and (max-width: 989px) {
+    .aurora-hero__media {
+      width: min(100vw, 32rem);
+      margin-inline: auto;
+    }
+
+    .aurora-hero__inner .aurora__lede {
+      max-width: 42ch;
     }
   }
 
