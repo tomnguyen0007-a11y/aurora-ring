@@ -90,7 +90,7 @@
     .aurora-hero__inner {
       position: relative;
       display: block;
-      min-height: 65vh; /* Shortened from 88vh to crop the bottom wood display */
+      min-height: 68vh; /* Shortened section height to prevent it from feeling too long */
       padding-block: 0;
     }
 
@@ -108,7 +108,9 @@
     .aurora-hero__media svg {
       height: 100%;
       object-fit: cover;
-      object-position: center 20%;
+      /* Shifts the crop to the bottom right. This cuts off the bottom wood display 
+         and keeps the top-left area beautifully empty for the text. */
+      object-position: 85% 75%;
     }
 
     .aurora-hero__copy {
@@ -116,9 +118,10 @@
       z-index: 1;
       display: flex;
       flex-direction: column;
-      min-height: 65vh;
-      justify-content: center; /* Changed from flex-end to center to push text higher */
-      padding-block: clamp(2rem, 8vh, 4rem) clamp(1.25rem, 4vh, 2rem);
+      min-height: 68vh;
+      /* Anchors the text to the very top, well clear of the rings */
+      justify-content: flex-start; 
+      padding-block: clamp(3rem, 10vh, 5rem) clamp(1.25rem, 4vh, 2rem);
     }
 
     /* Explicit dark colors for readability over the raw background */
@@ -237,8 +240,3 @@
   "presets": [{ "name": "Aurora hero", "category": "Aurora" }]
 }
 {% endschema %}
-```eof
-
-I've made two key changes to the mobile CSS:
-1. Changed `min-height: 88vh` to `65vh`. This effectively cuts off the bottom quarter of the section, heavily truncating the lowest wooden display so the image doesn't feel so long.
-2. Changed `justify-content: flex-end` to `justify-content: center` on the `.aurora-hero__copy` container. This moves the text block up so it sits nicely in the middle of this new, shorter section. Let me know how that framing looks!
