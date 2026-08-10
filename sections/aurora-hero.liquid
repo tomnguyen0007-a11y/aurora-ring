@@ -85,13 +85,12 @@
     height: auto;
   }
 
-  /* Phones: Photograph is the absolute background again. 
-     The scrim overlay has been removed for a raw, clean look. */
+  /* Phones: Photograph is the absolute background again. */
   @media screen and (max-width: 989px) {
     .aurora-hero__inner {
       position: relative;
       display: block;
-      min-height: 88vh;
+      min-height: 65vh; /* Shortened from 88vh to crop the bottom wood display */
       padding-block: 0;
     }
 
@@ -109,19 +108,17 @@
     .aurora-hero__media svg {
       height: 100%;
       object-fit: cover;
-      object-position: center 22%;
+      object-position: center 20%;
     }
-
-    /* Gradient/Shadow Scrim Removed Completely */
 
     .aurora-hero__copy {
       position: relative;
       z-index: 1;
       display: flex;
       flex-direction: column;
-      min-height: 88vh;
-      justify-content: flex-end;
-      padding-block: clamp(1.75rem, 6vh, 3rem) clamp(1.25rem, 4vh, 2rem);
+      min-height: 65vh;
+      justify-content: center; /* Changed from flex-end to center to push text higher */
+      padding-block: clamp(2rem, 8vh, 4rem) clamp(1.25rem, 4vh, 2rem);
     }
 
     /* Explicit dark colors for readability over the raw background */
@@ -240,3 +237,8 @@
   "presets": [{ "name": "Aurora hero", "category": "Aurora" }]
 }
 {% endschema %}
+```eof
+
+I've made two key changes to the mobile CSS:
+1. Changed `min-height: 88vh` to `65vh`. This effectively cuts off the bottom quarter of the section, heavily truncating the lowest wooden display so the image doesn't feel so long.
+2. Changed `justify-content: flex-end` to `justify-content: center` on the `.aurora-hero__copy` container. This moves the text block up so it sits nicely in the middle of this new, shorter section. Let me know how that framing looks!
