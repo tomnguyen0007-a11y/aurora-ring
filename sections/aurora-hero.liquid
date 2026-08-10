@@ -77,12 +77,7 @@
     padding-block: clamp(1.5rem, 8vh, 6rem);
   }
 
-  /* The product sits on the page itself — no card, no border, no shadow. The
-     studio backdrop is keyed to the page colour in the asset itself, so no
-     blend mode is needed (multiply would only darken the whole photograph).
-     Declared here, before the phone override below, so the mobile block's
-     object-fit: cover wins on source order rather than needing higher
-     specificity to beat an identical selector. */
+  /* The product sits on the page itself — no card, no border, no shadow. */
   .aurora-hero__media img,
   .aurora-hero__media svg {
     display: block;
@@ -90,9 +85,8 @@
     height: auto;
   }
 
-  /* Phones: the photograph is the background, not a block above the type.
-     The image now fills the section edge-to-edge behind the text. 
-     The overlay scrim has been completely removed for a 100% clean photo. */
+  /* Phones: Photograph is the absolute background again. 
+     The scrim overlay has been removed for a raw, clean look. */
   @media screen and (max-width: 989px) {
     .aurora-hero__inner {
       position: relative;
@@ -115,13 +109,10 @@
     .aurora-hero__media svg {
       height: 100%;
       object-fit: cover;
-      /* Keeps the rings themselves in frame rather than centring the crop,
-         which on a tall narrow viewport pushed them toward the bottom edge. */
       object-position: center 22%;
     }
 
-    /* Scrim completely removed. Text readability is now handled entirely 
-       by solid, dark font colors contrasted against the bone backdrop */
+    /* Gradient/Shadow Scrim Removed Completely */
 
     .aurora-hero__copy {
       position: relative;
@@ -133,17 +124,17 @@
       padding-block: clamp(1.75rem, 6vh, 3rem) clamp(1.25rem, 4vh, 2rem);
     }
 
-    /* Enforcing high-contrast text colors for the light theme */
+    /* Explicit dark colors for readability over the raw background */
     .aurora__eyebrow {
-      color: #5c5a55;
+      color: #3f3d38;
       font-weight: 600;
     }
 
     .aurora-hero__title {
       max-width: 18ch;
-      color: #14151a; 
+      color: #14151a;
     }
-
+    
     .aurora__lede {
       color: #3f3d38;
       font-weight: 500;
@@ -154,6 +145,7 @@
     }
   }
 
+  /* Desktop Settings (Unchanged) */
   .aurora-hero__title {
     max-width: 12ch;
   }
@@ -175,27 +167,16 @@
 
   @media screen and (min-width: 990px) {
     .aurora-hero__inner {
-      /* The product gets the larger share — it is the reason anyone is here */
       grid-template-columns: 0.9fr 1.1fr;
       gap: clamp(2.5rem, 5vw, 5rem);
-      /* No min-height. An 82vh floor made the grid row taller than either
-         column, and the inherited align-items: center then split the surplus
-         evenly above and below the copy — 218px of dead space over the eyebrow
-         at 1440x900. Sizing the row from its content removes the surplus at
-         source, so the offset below is the only thing setting the top edge. */
       align-items: start;
       padding-block: var(--aur-hero-top) var(--aur-hero-bottom);
     }
 
-    /* A deliberate drop, so the headline reads against the upper third of the
-       product rather than butting against the grid line. */
     .aurora-hero__copy {
       padding-block-start: var(--aur-hero-top);
     }
 
-    /* Contained, not bled. Running the photograph past the container clipped
-       the lower-right ring mid-band, which read as an accident rather than as
-       a crop. All three rings now sit inside the column, whole. */
     .aurora-hero__media {
       margin-right: 0;
     }
