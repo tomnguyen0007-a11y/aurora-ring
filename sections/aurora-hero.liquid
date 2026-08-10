@@ -135,21 +135,13 @@
      and the photograph renders at its own aspect ratio underneath, so all
      three rings read whole. The action still lands above the fold. */
   @media screen and (max-width: 989px) {
-    /* Atmosphere, kept behind the type and clear of the frame. A soft lift in
-       the deeper bone sits under the headline and has fully resolved back to
-       the page tone by 55% — above where the photograph starts — so the
-       product is always on the one tone its backdrop was graded to.
-
-       Radial rather than a top-to-bottom ramp for the same reason: every edge
-       of the section returns to the page tone, so it meets the header above
-       and the trust bar below with no seam, which a linear ramp cannot do
-       without leaving a step at one end. */
-    .aurora.aurora-hero {
-      background:
-        radial-gradient(130% 34% at 50% 6%, var(--aur-page-alt), transparent 55%),
-        var(--aur-bg);
-    }
-
+    /* No tint behind the type either. A radial lift in the deeper bone was
+       tried here and taken out: on a section whose whole job is one product
+       and one sentence, a tone that is only just perceptible is not doing
+       work, and one strong enough to see reads as a stain behind the
+       headline. The type earns its hierarchy from scale and the hairline
+       instead, and the section stays the one flat page tone the photograph
+       was graded to. */
     .aurora-hero__inner {
       gap: 0;
       padding-block: clamp(1.25rem, 4vh, 2rem) 0;
@@ -345,11 +337,12 @@
       "type": "range",
       "id": "padding-block-end",
       "label": "Bottom",
+      "info": "The photograph is cropped flush at its base — the plinths run to the frame's edge — so it needs clear air before the trust bar's rule, or the two read as one crowded block.",
       "min": 0,
       "max": 200,
       "step": 4,
       "unit": "px",
-      "default": 24
+      "default": 56
     }
   ],
   "presets": [{ "name": "Aurora hero", "category": "Aurora" }]
