@@ -5,30 +5,6 @@
 
 <section class="aurora aurora-hero" style="{% render 'aurora-spacing', settings: section.settings %}">
   <div class="aurora__inner aurora-hero__inner">
-    <div class="aurora-hero__media aurora-reveal" style="--aur-reveal-delay: 120ms">
-      {%- if s.image != blank -%}
-        {{
-          s.image
-          | image_url: width: 1400
-          | image_tag:
-            widths: '500, 800, 1100, 1400',
-            sizes: '(max-width: 989px) 100vw, 48vw',
-            loading: 'eager',
-            fetchpriority: 'high',
-            alt: s.image.alt | default: s.heading | strip_html
-        }}
-      {%- else -%}
-        <img
-          src="{{ 'aurora-hero-rings.jpg' | asset_url }}"
-          width="1200"
-          height="1262"
-          loading="eager"
-          fetchpriority="high"
-          alt="Three Aurora rings in black, rose gold and copper finishes"
-        >
-      {%- endif -%}
-    </div>
-
     <div class="aurora-hero__copy">
       {%- if s.eyebrow != blank -%}
         <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
@@ -42,6 +18,7 @@
         <p class="aurora__lede aurora-reveal" style="--aur-reveal-delay: 160ms">{{ s.subheading }}</p>
       {%- endif -%}
 
+      {%- comment -%} One call to action. Nothing competes with it. {%- endcomment -%}
       <div class="aurora-hero__action aurora-reveal" style="--aur-reveal-delay: 240ms">
         <a class="aurora__btn aurora__btn--primary" id="aurora-hero-cta" href="{{ s.cta_link | default: routes.all_products_collection_url }}">
           {{ s.cta_label }}
@@ -55,13 +32,41 @@
         {%- endif -%}
       </div>
     </div>
+
+    <div class="aurora-hero__media aurora-reveal" style="--aur-reveal-delay: 120ms">
+      {%- if s.image != blank -%}
+        {{
+          s.image
+          | image_url: width: 1400
+          | image_tag:
+            widths: '500, 800, 1100, 1400',
+            sizes: '(max-width: 989px) 88vw, 48vw',
+            loading: 'eager',
+            fetchpriority: 'high',
+            alt: s.image.alt | default: s.heading | strip_html
+        }}
+      {%- else -%}
+        {%- comment -%}
+          Ships with real product photography rather than a grey placeholder, so
+          the theme is presentable the moment it is installed. Replace it by
+          setting a Product image in the theme editor.
+        {%- endcomment -%}
+        <img
+          src="{{ 'aurora-hero-rings.jpg' | asset_url }}"
+          width="1200"
+          height="1262"
+          loading="eager"
+          fetchpriority="high"
+          alt="Three Aurora rings in black, rose gold and copper finishes"
+        >
+      {%- endif -%}
+    </div>
   </div>
 </section>
 
 {% stylesheet %}
   .aurora-hero {
     padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
-    background-color: var(--aur-page, #f6f4f0);
   }
 
   .aurora-hero__inner {
@@ -72,6 +77,12 @@
     padding-block: clamp(1.5rem, 8vh, 6rem);
   }
 
+  /* The product sits on the page itself — no card, no border, no shadow. The
+     studio backdrop is keyed to the page colour in the asset itself, so no
+     blend mode is needed (multiply would only darken the whole photograph).
+     Declared here, before the phone override below, so the mobile block's
+     object-fit: cover wins on source order rather than needing higher
+     specificity to beat an identical selector. */
   .aurora-hero__media img,
   .aurora-hero__media svg {
     display: block;
@@ -79,87 +90,70 @@
     height: auto;
   }
 
-  /* --- Mobile Optimization --- */
+  /* Phones: the photograph is the background, not a block above the type.
+     The image now fills the section edge-to-edge behind the text. 
+     The overlay scrim has been completely removed for a 100% clean photo. */
   @media screen and (max-width: 989px) {
-    .aurora-hero {
-      overflow: hidden;
-    }
-
     .aurora-hero__inner {
-      display: flex;
-      flex-direction: column;
-      padding-block: 0 clamp(2.5rem, 6vh, 4rem);
-      gap: 0;
+      position: relative;
+      display: block;
+      min-height: 88vh;
+      padding-block: 0;
     }
 
-    /* Edge-to-edge product display without dirty gradient overlays */
     .aurora-hero__media {
+      position: absolute;
+      top: 0;
+      left: 50%;
       width: 100vw;
-      margin-left: calc(50% - 50vw);
-      height: 52vh;
-      min-height: 340px;
-      max-height: 480px;
-      position: relative;
+      margin-left: -50vw;
+      order: initial;
+      height: 100%;
     }
 
     .aurora-hero__media img,
     .aurora-hero__media svg {
-      width: 100%;
       height: 100%;
       object-fit: cover;
-      object-position: center 30%;
+      /* Keeps the rings themselves in frame rather than centring the crop,
+         which on a tall narrow viewport pushed them toward the bottom edge. */
+      object-position: center 22%;
     }
 
-    /* Content block sitting cleanly on the bone background */
+    /* Scrim completely removed. Text readability is now handled entirely 
+       by solid, dark font colors contrasted against the bone backdrop */
+
     .aurora-hero__copy {
-      width: 100%;
-      padding-top: clamp(1.5rem, 4vh, 2.5rem);
+      position: relative;
+      z-index: 1;
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
-      text-align: left;
+      min-height: 88vh;
+      justify-content: flex-end;
+      padding-block: clamp(1.75rem, 6vh, 3rem) clamp(1.25rem, 4vh, 2rem);
     }
 
+    /* Enforcing high-contrast text colors for the light theme */
     .aurora__eyebrow {
       color: #5c5a55;
-      font-size: 0.75rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
       font-weight: 600;
-      margin-bottom: 0.75rem;
     }
 
     .aurora-hero__title {
-      max-width: 100%;
-      color: #14151a;
-      line-height: 1.08;
+      max-width: 18ch;
+      color: #14151a; 
     }
 
     .aurora__lede {
       color: #3f3d38;
-      font-size: 0.98rem;
-      line-height: 1.5;
-      margin-top: 0.85rem;
+      font-weight: 500;
     }
 
     .aurora-hero__action {
-      margin-top: 1.75rem;
-      width: 100%;
-    }
-
-    .aurora__btn--primary {
-      width: 100%;
-      justify-content: center;
-      text-align: center;
-    }
-
-    .aurora-hero__assurance {
-      color: #68655e;
-      text-align: center;
+      margin-top: clamp(1.25rem, 4vw, 1.75rem);
     }
   }
 
-  /* --- Desktop Base --- */
   .aurora-hero__title {
     max-width: 12ch;
   }
@@ -171,24 +165,38 @@
   .aurora-hero__assurance {
     margin: 1.125rem 0 0;
     font-size: 0.8125rem;
-    color: var(--aur-text-muted, #68655e);
+    color: var(--aur-text-muted);
+  }
+
+  .aurora-hero__placeholder {
+    background: var(--aur-page-alt);
+    fill: rgba(20, 21, 26, 0.12);
   }
 
   @media screen and (min-width: 990px) {
     .aurora-hero__inner {
+      /* The product gets the larger share — it is the reason anyone is here */
       grid-template-columns: 0.9fr 1.1fr;
       gap: clamp(2.5rem, 5vw, 5rem);
+      /* No min-height. An 82vh floor made the grid row taller than either
+         column, and the inherited align-items: center then split the surplus
+         evenly above and below the copy — 218px of dead space over the eyebrow
+         at 1440x900. Sizing the row from its content removes the surplus at
+         source, so the offset below is the only thing setting the top edge. */
       align-items: start;
       padding-block: var(--aur-hero-top) var(--aur-hero-bottom);
     }
 
+    /* A deliberate drop, so the headline reads against the upper third of the
+       product rather than butting against the grid line. */
     .aurora-hero__copy {
-      order: 1;
       padding-block-start: var(--aur-hero-top);
     }
 
+    /* Contained, not bled. Running the photograph past the container clipped
+       the lower-right ring mid-band, which read as an accident rather than as
+       a crop. All three rings now sit inside the column, whole. */
     .aurora-hero__media {
-      order: 2;
       margin-right: 0;
     }
   }
