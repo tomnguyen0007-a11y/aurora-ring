@@ -85,12 +85,13 @@
     height: auto;
   }
 
-  /* Phones: Photograph is the absolute background again. */
+  /* Phones: Photograph is the absolute background again. 
+     The scrim overlay has been removed for a raw, clean look. */
   @media screen and (max-width: 989px) {
     .aurora-hero__inner {
       position: relative;
       display: block;
-      min-height: 68vh; /* Shortened section height to prevent it from feeling too long */
+      min-height: 88vh;
       padding-block: 0;
     }
 
@@ -108,20 +109,19 @@
     .aurora-hero__media svg {
       height: 100%;
       object-fit: cover;
-      /* Shifts the crop to the bottom right. This cuts off the bottom wood display 
-         and keeps the top-left area beautifully empty for the text. */
-      object-position: 85% 75%;
+      object-position: center 22%;
     }
+
+    /* Gradient/Shadow Scrim Removed Completely */
 
     .aurora-hero__copy {
       position: relative;
       z-index: 1;
       display: flex;
       flex-direction: column;
-      min-height: 68vh;
-      /* Anchors the text to the very top, well clear of the rings */
-      justify-content: flex-start; 
-      padding-block: clamp(3rem, 10vh, 5rem) clamp(1.25rem, 4vh, 2rem);
+      min-height: 88vh;
+      justify-content: flex-end;
+      padding-block: clamp(1.75rem, 6vh, 3rem) clamp(1.25rem, 4vh, 2rem);
     }
 
     /* Explicit dark colors for readability over the raw background */
