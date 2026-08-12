@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-08-12",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,67 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-08-12",
+      "account": {
+        "nav_usd": 1113.6863,
+        "nav_eur_base": 964.0477,
+        "cash_usd": 3.21,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -323.14052208,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 11.02000045,
+          "prior_close": null,
+          "gap_pct": null,
+          "since_last_run_pct": -13.64,
+          "market_value": 760.38003105,
+          "nav_pct": 68.28,
+          "unrealized_pnl": -228.31686895,
+          "daily_pnl": -2.06996895,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "80th of 80 required events STILL not reported as of Aug 10-11, 2026 (91 days past the May 11 78-event update). Company's own guidance has slipped from '2H 2026' topline to 'Q4 2026' for both REGAL and the SLS009 Phase 2 AML readout. Market commentary (incl. M. Shkreli) speculates data could slip as late as December.",
+            "next_check": "watch for 8-K / press release announcing 80th event; no August 2026 8-K found yet in SEC EDGAR search"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 68.3% of NAV vs 35% trim threshold; position down 13.6% since last log run and ~23% below cost basis while catalyst timeline continues to slip"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 134.65359495,
+          "prior_close": 138.74,
+          "gap_pct": -2.95,
+          "since_last_run_pct": -7.72,
+          "market_value": 350.09934687,
+          "nav_pct": 31.44,
+          "unrealized_pnl": -94.82365313,
+          "daily_pnl": 3.54534687,
+          "catalyst": {
+            "name": "Staggered post-IPO lockup unlock schedule",
+            "status": "First tranche (20% of restricted holdings, ~$123B in shares) unlocked Aug 6, 2026, two trading days after Q2 2026 earnings (Aug 4). Stock did NOT sell off on the unlock - closed +6.1% that day, bucking the typical dilution-fear pattern. Q2 2026 results: revenue $7.8B (+92% YoY), Starlink subs doubled to 12M, backlog $47.5B, cash $100B. Five more ~7% time-based tranches drip through late Oct 2026; a larger ~28% tranche follows Q3 earnings; full lockup expires Dec 8, 2026.",
+            "next_check": "Q3 2026 earnings date (triggers next major ~28% unlock wave); cumulative float growth into Sept/Oct"
+          },
+          "risk_flag": "WATCH - within 35% cap; first lockup event absorbed well but cumulative supply overhang (5 smaller tranches + one large post-Q3 tranche) still ahead before Dec 8 full expiry"
+        }
+      ],
+      "flags": [
+        "SLS still severely over-concentrated at 68.3% of NAV (vs 35% threshold) and the REGAL 80th-event catalyst has NOT triggered - guidance has slipped from '2H 2026' to 'Q4 2026', with some chatter suggesting a possible slip into December. Position is down 13.6% since the last log run.",
+        "SPCX's first lockup tranche (20%, ~$123B in shares) unlocked Aug 6, 2026 and the stock absorbed it well (+6.1% that day) - but 5 more time-based tranches through late Oct plus a larger ~28% wave after Q3 earnings remain ahead of the Dec 8, 2026 full lockup expiry.",
+        "CING is NOT currently a held position in this account (referenced in the routine's search list but absent from live IBKR positions). For completeness: FDA issued a CRL on CTx-1301 (ADHD) on June 2, 2026 for CMC/manufacturing reasons only (no clinical concerns raised); company guided a prompt resubmission with ~$30M cash into 2027. No new CING-specific news since.",
+        "Cash buffer remains negligible (~EUR 2.78 / ~USD 3.21) - account effectively fully invested with no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
+        "Data quality note: IBKR's live price-snapshot feed returned no prior-close for SLS (thin/illiquid quote); gap % could not be computed from broker data. Used the company's reported Aug 11 day range ($10.80-$11.39) as context instead. SPCX's IBKR 'change' field also appeared stale/inconsistent with the actual Aug 11 close ($138.74) sourced from the web - the higher-confidence prior close was used for SPCX's gap calc."
       ]
     }
   ]
