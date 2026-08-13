@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-08-13",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,66 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-08-13",
+      "account": {
+        "nav_usd": 1194.904,
+        "nav_eur_base": 1039.7133,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -236.97,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 11.8199997,
+          "prior_close": 11.77,
+          "gap_pct": 0.42,
+          "since_last_run_pct": -7.37,
+          "market_value": 815.5799793,
+          "nav_pct": 68.25,
+          "unrealized_pnl": -173.1169207,
+          "daily_pnl": 3.4499793,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "80th event still NOT reached as of Aug 11 2026 Q2 update (78 events reported as of May 11 2026, ~13 weeks stale); readout guidance softened from \"2H 2026\" to \"Q4 2026\"; market commentary (Shkreli, Jul 2026) has floated a possible slip to year-end",
+            "next_check": "watch for 8-K / press release announcing the 80th event trigger (database lock -> unblind -> topline)"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 68.25% of NAV vs 35% trim threshold; ~33.6 sh over the cap"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 146.6000061,
+          "prior_close": 146.15,
+          "gap_pct": 0.31,
+          "since_last_run_pct": 0.47,
+          "market_value": 381.16001586,
+          "nav_pct": 31.9,
+          "unrealized_pnl": -63.76298414,
+          "daily_pnl": 1.17001586,
+          "catalyst": {
+            "name": "First IPO lockup tranche (20%, ~911.5M sh / ~$101B) expired Aug 6 2026, two days after Q2 earnings (Aug 4)",
+            "status": "Stock sank -14% Aug 5 to an all-time low of $108.27, then rallied ~26% off that low through Aug 10-12 on a Q2 revenue beat ($7.81B vs $6.93B est, Citi reiterated buy) and reclaimed the $135 IPO price for the first time since mid-July; conditional second 20% tranche only unlocks if shares trade 30%+ above $135 for 5-of-10 sessions before next earnings (not yet triggered); further 7% tranches unlock Aug-Oct; full lockup expires Dec 8 2026",
+            "next_check": "monitor insider-selling flow into the Aug-Oct 7% tranches and the next earnings date"
+          },
+          "risk_flag": "WATCH - de-risked since last review (earnings beat, first unlock absorbed well) but still the #2 position with more unlock tranches ahead"
+        }
+      ],
+      "flags": [
+        "SLS remains massively over-concentrated at 68.25% of NAV (vs 35% cap) in a pre-binary-catalyst biotech; the REGAL 80th event still has not triggered ~13 weeks past the 78-event mark, and guidance language softened from 2H 2026 to Q4 2026 - modest delay risk.",
+        "Zero USD cash buffer persists - fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
+        "SPCX's first lockup unlock (Aug 6) has already played out with extreme volatility (-14% then +26%) and the stock absorbed it well on a Q2 earnings beat - risk flagged in the last review is largely realized and priced through, but three more unlock tranches remain before Dec 8.",
+        "Portfolio NAV down ~$66.3 USD / -5.26% (-6.14% EUR-base) since the Jul 11 review, driven entirely by SLS's -7.37% mark-to-mark decline; SPCX is roughly flat net but that masks a violent intra-period round trip."
       ]
     }
   ]
