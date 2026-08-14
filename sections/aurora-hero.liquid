@@ -40,7 +40,7 @@
           | image_url: width: 1400
           | image_tag:
             widths: '500, 800, 1100, 1400',
-            sizes: '(max-width: 989px) 88vw, 48vw',
+            sizes: '(max-width: 989px) 100vw, 48vw',
             loading: 'eager',
             fetchpriority: 'high',
             alt: s.image.alt | default: s.heading | strip_html
@@ -68,9 +68,26 @@
   .aurora-hero {
     padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
 
-    /* Page cream as raw channels so the fade can use alpha stops.
-       Change this one value to match a different page background. */
-    --aur-hero-wash: 247, 246, 243;
+    /* Warm ink family — reads as ink on bone, not black on white.
+       Measured on #f7f6f3: 15.1:1 / 11.0:1 / 6.0:1. All pass WCAG AA. */
+    --aur-hero-ink: #241f1a;
+    --aur-hero-ink-soft: #3d362d;
+    --aur-hero-ink-quiet: #6b5b48;
+  }
+
+  .aurora-hero .aurora__eyebrow {
+    color: var(--aur-hero-ink-quiet);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+  }
+
+  .aurora-hero__title {
+    color: var(--aur-hero-ink);
+    max-width: 12ch;
+  }
+
+  .aurora-hero .aurora__lede {
+    color: var(--aur-hero-ink-soft);
   }
 
   .aurora-hero__inner {
@@ -89,89 +106,56 @@
     height: auto;
   }
 
-  /* Phones: photograph is the absolute background. The lower half dissolves
-     into the page colour so the copy has a genuinely readable surface —
-     the rings still read as raw, uncropped product photography up top. */
+  /* Phones: copy owns the top-left on clean page colour, photograph owns the
+     bottom edge-to-edge. Nothing sits on top of the product, so the type needs
+     no scrim and the photo stays raw. */
   @media screen and (max-width: 989px) {
     .aurora-hero__inner {
       position: relative;
-      display: block;
-      min-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      min-height: 90vh;
       padding-block: 0;
     }
 
+    .aurora-hero__copy {
+      position: relative;
+      z-index: 2;
+      flex: 0 0 auto;
+      padding-block: clamp(1.25rem, 3.5vh, 2rem) clamp(1.75rem, 4.5vh, 2.5rem);
+    }
+
+    /* Full-bleed out of the padded container, then takes every remaining pixel.
+       Because it is now a flex item rather than inset:0, the cover-scaled image
+       finally has vertical overflow — which is what makes object-position work. */
     .aurora-hero__media {
-      position: absolute;
-      top: 0;
-      left: 50%;
+      position: relative;
+      z-index: 1;
+      flex: 1 1 auto;
       width: 100vw;
-      margin-left: -50vw;
-      order: initial;
-      height: 100%;
+      margin-left: calc(50% - 50vw);
+      margin-top: calc(-1 * clamp(1.5rem, 4.5vh, 2.25rem));
+      min-height: 46vh;
     }
 
     .aurora-hero__media img,
     .aurora-hero__media svg {
       height: 100%;
       object-fit: cover;
-      /* Ring cluster stays in the clear upper half. */
-      object-position: center 18%;
+      object-position: center 60%;
+      /* Top edge dissolves into the page instead of being a cut rectangle. */
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 15%);
+      mask-image: linear-gradient(to bottom, transparent 0, #000 15%);
     }
 
-    /* Photo → page fade. Not a grey scrim: it resolves to the exact
-       page colour, so the image reads as bleeding into the layout. */
-    .aurora-hero__media::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background: linear-gradient(
-        to bottom,
-        rgba(var(--aur-hero-wash), 0) 34%,
-        rgba(var(--aur-hero-wash), 0.55) 46%,
-        rgba(var(--aur-hero-wash), 0.88) 56%,
-        rgba(var(--aur-hero-wash), 0.98) 66%,
-        rgb(var(--aur-hero-wash)) 76%
-      );
-    }
-
-    .aurora-hero__copy {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      min-height: 88vh;
-      /* Copy lives in the resolved-to-cream lower half. */
-      justify-content: flex-end;
-      padding-block: clamp(1rem, 4vh, 2rem) clamp(2rem, 7vh, 3.5rem);
-    }
-
-    /* Type colours tuned for the wash — all well past WCAG AA. */
-    .aurora__eyebrow {
-      color: #5c584f;
-      font-weight: 600;
-      letter-spacing: 0.16em;
-    }
-
-    .aurora-hero__title {
-      max-width: 18ch;
-      color: #101116;
-    }
-
-    .aurora__lede {
-      color: #33312c;
-      font-weight: 500;
-      max-width: 34ch;
+    .aurora-hero .aurora__lede {
+      max-width: 33ch;
     }
 
     .aurora-hero__action {
-      margin-top: clamp(1.25rem, 4vw, 1.75rem);
+      margin-top: clamp(1.5rem, 4.5vh, 2rem);
     }
-  }
-
-  /* Desktop Settings (Unchanged) */
-  .aurora-hero__title {
-    max-width: 12ch;
   }
 
   .aurora-hero__action {
@@ -181,7 +165,7 @@
   .aurora-hero__assurance {
     margin: 1.125rem 0 0;
     font-size: 0.8125rem;
-    color: var(--aur-text-muted);
+    color: var(--aur-hero-ink-quiet);
   }
 
   .aurora-hero__placeholder {
