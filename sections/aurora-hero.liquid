@@ -85,7 +85,7 @@
     height: auto;
   }
 
-  /* Phones: Photograph is the absolute background again. 
+  /* Phones: Photograph is the absolute background again.
      The scrim overlay has been removed for a raw, clean look. */
   @media screen and (max-width: 989px) {
     .aurora-hero__inner {
@@ -109,7 +109,8 @@
     .aurora-hero__media svg {
       height: 100%;
       object-fit: cover;
-      object-position: center 22%;
+      /* Rings sit lower in frame so the copy lands on clean background. */
+      object-position: center 14%;
     }
 
     /* Gradient/Shadow Scrim Removed Completely */
@@ -120,8 +121,10 @@
       display: flex;
       flex-direction: column;
       min-height: 88vh;
-      justify-content: flex-end;
-      padding-block: clamp(1.75rem, 6vh, 3rem) clamp(1.25rem, 4vh, 2rem);
+      /* Copy is vertically centred, then nudged up by the heavier
+         bottom padding — it no longer hangs off the bottom edge. */
+      justify-content: center;
+      padding-block: clamp(1rem, 4vh, 2rem) clamp(3.5rem, 14vh, 7rem);
     }
 
     /* Explicit dark colors for readability over the raw background */
@@ -134,7 +137,7 @@
       max-width: 18ch;
       color: #14151a;
     }
-    
+
     .aurora__lede {
       color: #3f3d38;
       font-weight: 500;
