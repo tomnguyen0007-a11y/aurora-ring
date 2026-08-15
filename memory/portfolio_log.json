@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-08-15",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,66 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-08-15",
+      "account": {
+        "nav_usd": 1248.68,
+        "nav_eur_base": 1082.02,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -184.94,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 12.77999975,
+          "prior_close": 12.36,
+          "gap_pct": 3.4,
+          "since_last_run_pct": 0.16,
+          "market_value": 881.81998275,
+          "nav_pct": 70.62,
+          "unrealized_pnl": -106.87691725,
+          "daily_pnl": 28.97998275,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "80th required event STILL not reached as of Aug 10, 2026 update - 91 days past the 78-event mark (May 11, 2026); company entered a quiet period on trial-specific updates per Q2 2026 earnings call (Aug 11, 2026); catalyst guidance narrowed to Q4 2026 for both REGAL topline and separate SLS009 Phase 2 AML readout; cash position ~$138.3M as of 6/30/26 (healthy runway, no dilution pressure). Martin Shkreli publicly speculated data could slip to year-end.",
+            "next_check": "watch for 8-K / press release announcing 80th event; Q4 2026 window now the base case"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 70.6% of NAV vs 35% trim threshold - unresolved for 2nd consecutive run, trim needed ~34.8 shares to reach 35% cap"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 140.56100465,
+          "prior_close": 141.29,
+          "gap_pct": -0.52,
+          "since_last_run_pct": -3.67,
+          "market_value": 365.45861209,
+          "nav_pct": 29.27,
+          "unrealized_pnl": -79.46438791,
+          "daily_pnl": -1.89538791,
+          "catalyst": {
+            "name": "Staggered IPO lockup unlock schedule (post $75B IPO priced $135/sh, June 12 2026)",
+            "status": "First tranche (~20% of lockup block, ~911M shares) UNLOCKED Thu Aug 13 2026 - earlier/larger than prior estimate; next tranche ~319M shares unlocks Aug 20 2026 (5 days out); further ~700M-share tranches expected in Sept and Oct; cumulative insider-sellable float could reach ~44% by early September - materially bigger supply overhang than modeled in the 7/11 run. No negative bond/credit news found.",
+            "next_check": "Aug 20 2026 unlock tranche; stock reaction and volume around each unlock date"
+          },
+          "risk_flag": "WATCH - within 35% cap (29.3%) but escalating technical supply risk through Q3; first unlock tranche already live"
+        }
+      ],
+      "flags": [
+        "SLS at 70.6% of NAV remains roughly double the 35% single-name trim threshold - now the 2nd consecutive run flagging this with no trim executed; REGAL 80th event still pending and company has gone quiet on timing.",
+        "SPCX lockup unlocks are materially ahead of and larger than what was modeled last run: first tranche already unlocked Aug 13, next tranche Aug 20, with up to ~44% of total float becoming sellable by early September - meaningfully raises near-term supply/volatility risk on the 2nd-largest position.",
+        "Zero USD cash buffer persists - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
+        "Account NAV down ~1.0% and unrealized loss widened by ~$12.5 since the 7/11 run, driven mostly by SPCX price decline; SLS roughly flat over the same period."
       ]
     }
   ]
