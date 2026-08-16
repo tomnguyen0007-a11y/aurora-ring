@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-08-16",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,68 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-08-16",
+      "note": "Run falls on a Sunday (no live session); figures reflect Friday 2026-08-14 close vs Thursday 2026-08-13 prior close.",
+      "account": {
+        "nav_usd": 1248.682,
+        "nav_eur_base": 1082.02,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -186.34,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 12.77999975,
+          "prior_close": 12.36,
+          "gap_pct": 3.4,
+          "since_last_run_pct": 0.16,
+          "market_value": 881.81998275,
+          "nav_pct": 70.62,
+          "unrealized_pnl": -106.87691725,
+          "daily_pnl": 28.97998275,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "80th event still NOT reached as of Aug 11 2026 Q2 update (78 events as of May 11 update carried forward). Guidance narrowed from '2H 2026' to specifically Q4 2026 for both REGAL topline and SLS009 Phase 2 AML readout.",
+            "next_check": "watch for 8-K / press release announcing 80th event"
+          },
+          "other_news": "Lost binding arbitration vs 3D Medicines (decision 2026-07-24); ordered to pay ~$1.0M of 3D Medicines' legal fees/costs. Immaterial vs $138.3M cash on hand (as of 6/30/26 per Q2 8-K filed 8/11/26).",
+          "risk_flag": "OVER_CONCENTRATED - 70.6% of NAV vs 35% trim threshold (worse than last run's 69.8%)"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 140.56100465,
+          "prior_close": 141.29,
+          "gap_pct": -0.52,
+          "since_last_run_pct": -3.67,
+          "market_value": 365.45861209,
+          "nav_pct": 29.27,
+          "unrealized_pnl": -79.46438791,
+          "daily_pnl": -1.89538791,
+          "catalyst": {
+            "name": "IPO lockup schedule + $60B stock-for-stock Cursor acquisition",
+            "status": "First lockup tranche (911.5M insider shares, ~20% block) unlocked 2026-08-06; stock rose +6.1% that session despite supply fears. $60B Cursor (AI coding startup) acquisition CLOSED 2026-08-14, issuing 389,289,254 new SpaceX Class A shares (deal originally announced mid-June, so largely priced in). Further 7% lockup tranches due ~Aug 21 and ~Sep 10; full lockup expires Dec 8 2026.",
+            "next_check": "stock/volume reaction into the Aug 21 and Sep 10 unlock tranches; any post-merger guidance on Cursor integration"
+          },
+          "risk_flag": "WATCH - within cap; dilution + rolling lockup supply overhang are the live risks, though market absorbed the first unlock and merger close without a selloff"
+        }
+      ],
+      "flags": [
+        "SLS at 70.6% of NAV, still nearly double the 35% trim threshold; catalyst guidance narrowed to Q4 2026, meaning the overweight persists longer with no confirmed near-term resolution.",
+        "SPCX underwent a major, confirmed dilution event (389.29M new shares from the Cursor deal closing) plus its first lockup unlock within the same 10-day window; despite that, price action has been resilient (+6.1% on unlock day) with total decline since last run only -3.67%.",
+        "Zero USD cash buffer persists - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
+        "Combined unrealized P&L deepened to -$186.34 from -$172.41 at last run, driven mainly by SPCX's cost basis (avg $171.12 vs mark $140.56, -17.9% underwater) rather than SLS."
       ]
     }
   ]
