@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-08-18",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,69 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-08-18",
+      "account": {
+        "nav_usd": 1276.23,
+        "nav_eur_base": 1105.5965,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -163.05,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 13.035,
+          "prior_close": 13.00,
+          "gap_pct": 0.27,
+          "since_last_run_pct": 2.16,
+          "market_value": 897,
+          "nav_pct": 70.29,
+          "unrealized_pnl": -91.6969,
+          "daily_pnl": 0,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still short of 80th required event as of Aug 11, 2026 Q2 update (last disclosed count: 78/80 as of May 11, 2026); readout language shifted from '2H 2026' to guided Q4 2026",
+            "next_check": "watch for 8-K / press release announcing 80th event and database lock"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 70.3% of NAV vs 35% trim threshold, unchanged from last run",
+          "news_since_last_run": "Q2 2026 results (Aug 11, 8-K): cash $138.3M as of 6/30/26. Lost binding arbitration vs 3D Medicines (July 24 decision); ordered to pay ~$1.0M of 3D Medicines' legal fees - immaterial to cash runway, does not affect REGAL thesis."
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 143.8,
+          "prior_close": 146.23,
+          "gap_pct": -1.66,
+          "since_last_run_pct": -1.45,
+          "market_value": 373.56798102,
+          "nav_pct": 29.27,
+          "unrealized_pnl": -71.35501898,
+          "daily_pnl": -6.63001898,
+          "catalyst": {
+            "name": "Staggered IPO lockup unlock schedule",
+            "status": "First tranche (20% of insider block, ~911.5M shares eligible) unlocked Aug 6, 2026 following Q2 earnings; next 7% tranche ~Aug 21, 2026 (imminent); another 7% ~Sept 10, 2026; full lockup expires Dec 8, 2026. Up to ~44% of insider shares could reach the market by early Sept, per press estimates.",
+            "next_check": "Price action into and after Aug 21 unlock tranche; any secondary-market volume/block-trade reports"
+          },
+          "risk_flag": "WATCH - within 35% cap; lockup overhang now live and next tranche is 3 days out, more urgent than prior run's '2-3 weeks out' framing",
+          "news_since_last_run": "First lockup tranche unlocked Aug 6, 2026 as scheduled. No negative credit/bond news (bond remains investment-grade). Stock down 1.45% since last run, in line with lockup supply pressure plus broader market weakness."
+        }
+      ],
+      "flags": [
+        "SLS concentration has not improved (69.8% -> 70.3% of NAV) - still roughly double the 35% trim threshold. No catalyst confirmation (80th REGAL event still not reported) and readout guidance has softened from '2H 2026' to 'Q4 2026'.",
+        "SPCX lockup risk is now live, not theoretical: first 20% insider tranche already unlocked Aug 6, and the next 7% tranche is ~3 days away (Aug 21) as of this run. This is the dominant near-term risk on the position.",
+        "Zero USD cash buffer persists - account fully invested, no dry powder (not on margin, so no forced-liquidation risk).",
+        "Broad market backdrop is risk-off this morning: S&P 500 futures -0.41%, Nasdaq 100 futures -0.76%, cited to Middle East geopolitical risk and rising bond yields - adds headwind to both gap-sensitive positions.",
+        "CING was searched per this routine's standing query list but is NOT a current IBKR position (only SLS and SPCX are held) - flagging for user review in case the routine's ticker list is stale or CING was meant to be added to the watchlist."
       ]
     }
   ]
