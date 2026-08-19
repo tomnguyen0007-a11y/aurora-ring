@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-08-19",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,66 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-08-19",
+      "account": {
+        "nav_usd": 1275.83,
+        "nav_eur_base": 1100.1135,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -159.17,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 13.02,
+          "prior_close": 13.1,
+          "gap_pct": -0.61,
+          "since_last_run_pct": 2.04,
+          "market_value": 903.9000276,
+          "nav_pct": 70.85,
+          "unrealized_pnl": -84.7968724,
+          "daily_pnl": 0.0000276,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still 78 of 80 required events as of Q2 2026 report (Aug 11, 2026) - no progress on event count since the May 11 update despite 3 months elapsed; cash position strong at $138.3M with an undrawn $150M ATM, so funding is not a near-term risk regardless of readout timing. Martin Shkreli publicly speculated in July that data could slip to year-end (Christmas).",
+            "next_check": "watch for 8-K / press release announcing 80th event; no confirmed date"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 70.85% of NAV vs 35% trim threshold, worse than the prior run (69.8%)"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 143.22,
+          "prior_close": 143.34,
+          "gap_pct": -0.08,
+          "since_last_run_pct": -1.85,
+          "market_value": 372.37200312,
+          "nav_pct": 29.19,
+          "unrealized_pnl": -72.55099688,
+          "daily_pnl": -0.31199688,
+          "catalyst": {
+            "name": "Staggered IPO lockup unwind",
+            "status": "First lockup tranche (911.5M shares, ~$123B potential supply) unlocked Aug 6, 2026. Stock fell to an all-time low near $105-108 into the unlock, then reversed and rallied 26%+, closing back above the $135 IPO price on Aug 10 as feared panic-selling failed to materialize. Next employee-equity tranche (7%) unlocks ~Aug 21, 2026 (imminent), then again ~Sept 10, 2026; full lockup expires Dec 8, 2026.",
+            "next_check": "Aug 21, 2026 employee unlock tranche - watch for renewed supply/volume vs. the orderly Aug 6 unlock"
+          },
+          "risk_flag": "WATCH - within cap; first lockup event absorbed better than feared, but a second tranche unlocks in ~2 days"
+        }
+      ],
+      "flags": [
+        "SLS concentration worsened to 70.85% of NAV (vs 69.8% last run) with zero progress on the REGAL event count in the Q2 report - the binary catalyst is now more overdue than expected, and public skepticism (Shkreli) about a Christmas-timeline slip adds sentiment risk without new negative trial data.",
+        "Zero USD cash buffer persists - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
+        "SPCX's first lockup unlock (Aug 6) resolved far more bullishly than the market feared - stock round-tripped from an ATH low near $105-108 back above the $135 IPO price. A second, smaller (7%) employee unlock lands ~Aug 21 - two trading days out - worth watching for a repeat of Aug-6-style volatility.",
+        "Broader tape: US futures modestly red this morning (S&P -0.18%, Nasdaq -0.37%) on an overseas market rout and ahead of FOMC minutes, with elevated Middle East tension - a risk-off backdrop that could pressure both illiquid biotech and recently-IPO'd names disproportionately."
       ]
     }
   ]
