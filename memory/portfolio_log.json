@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-08-21",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,65 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-08-21",
+      "account": {
+        "nav_usd": 1278.998,
+        "nav_eur_base": 1096.6575,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -154.62,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 13.4499998,
+          "prior_close": 13.40,
+          "gap_pct": 0.37,
+          "since_last_run_pct": 5.41,
+          "market_value": 928.0499862,
+          "nav_pct": 72.56,
+          "unrealized_pnl": -60.6469138,
+          "daily_pnl": 3.4499862,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still 78 of 80 required events as of company's Aug 11, 2026 Q2 update - unchanged from the May 11 count over 3 months prior; topline for REGAL and the SLS009 Phase 2 AML readout both guided for Q4 2026; $138.3M cash as of 6/30/26 (no near-term dilution pressure)",
+            "next_check": "watch for 8-K / press release announcing the 80th event; note public bear commentary (Martin Shkreli, Jul 2026) speculating the readout could slip toward year-end"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 72.6% of NAV vs 35% trim threshold, WORSENED from 69.8% on 2026-07-11; script computes trim of ~35.7 shares to reach the cap"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 135,
+          "prior_close": 134,
+          "gap_pct": 0.75,
+          "since_last_run_pct": -7.48,
+          "market_value": 351,
+          "nav_pct": 27.44,
+          "unrealized_pnl": -93.923,
+          "daily_pnl": 2.6,
+          "catalyst": {
+            "name": "Staggered post-IPO lockup unlock schedule",
+            "status": "20% initial tranche (~911.5M shares, ~$123B) unlocked Aug 6 2026 right after Q2 earnings; stock rallied ~6% that day and has since recovered to roughly its $135 IPO print; a smaller ~7% time-based 'day-70' tranche unlocks today, Aug 21 2026; next 7% tranche ~Sept 10; full 180-day lockup expires Dec 8 2026",
+            "next_check": "intraday price/volume reaction to today's unlock tranche; Sept 10 next tranche date"
+          },
+          "risk_flag": "WATCH - within cap at 27.4% of NAV (down from 30.1% on 2026-07-11); live lockup-unlock day today, no bond/credit distress news found"
+        }
+      ],
+      "flags": [
+        "SLS concentration worsened since last run: 69.8% -> 72.6% of NAV (now over 2x the 35% trim policy), while the REGAL 80th-event catalyst has been stuck at 78/80 for over 3 months (last confirmed unchanged as of Aug 11, 2026); public commentary (Shkreli, Jul 2026) suggests the topline readout could slip toward year-end rather than land imminently.",
+        "Zero USD cash buffer persists - account remains fully invested with no dry powder, unchanged from last run.",
+        "SPCX's scheduled ~7% lockup unlock tranche lands today (Aug 21, 2026); stock is gapping +0.75% pre-market with no sign of unlock-driven selling pressure so far, echoing the market's shrug-off of the larger 20% tranche on Aug 6."
       ]
     }
   ]
