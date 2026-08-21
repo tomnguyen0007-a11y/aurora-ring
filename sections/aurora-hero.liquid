@@ -7,7 +7,7 @@
   <div class="aurora__inner aurora-hero__inner">
     <div class="aurora-hero__copy">
       {%- if s.eyebrow != blank -%}
-        <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
+        <p class="aurora__eyebrow aurora-hero__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
       {%- endif -%}
 
       <h1 class="aurora__display aurora-hero__title aurora-reveal" style="--aur-reveal-delay: 80ms">
@@ -24,41 +24,74 @@
           {{ s.cta_label }}
           {%- if product != blank and s.show_price -%}
             <span class="aurora__price">{{ product.price | money }}</span>
+          {%- else -%}
+            {%- comment -%} Phones only: the pill runs full width there, and a bare centred label in it reads as a placeholder. {%- endcomment -%}
+            <span class="aurora-hero__cta-arrow" aria-hidden="true">&rarr;</span>
           {%- endif -%}
         </a>
 
+        {%- comment -%}
+          Split on the middot so each promise is its own phrase rather than one
+          grey run-on: each can be kept whole at a line break, and each can
+          carry its own mark on phones.
+        {%- endcomment -%}
         {%- if s.assurance != blank -%}
-          <p class="aurora-hero__assurance">{{ s.assurance }}</p>
+          <p class="aurora-hero__assurance">
+            {%- assign assurances = s.assurance | split: '·' -%}
+            {%- for assurance in assurances -%}
+              <span>{{ assurance | strip }}</span>
+            {%- endfor -%}
+          </p>
         {%- endif -%}
       </div>
     </div>
 
-    <div class="aurora-hero__media aurora-reveal" style="--aur-reveal-delay: 120ms">
-      {%- if s.image != blank -%}
-        {{
-          s.image
-          | image_url: width: 1400
-          | image_tag:
-            widths: '500, 800, 1100, 1400',
-            sizes: '(max-width: 989px) 88vw, 48vw',
-            loading: 'eager',
-            fetchpriority: 'high',
-            alt: s.image.alt | default: s.heading | strip_html
-        }}
-      {%- else -%}
-        {%- comment -%}
-          Ships with real product photography rather than a grey placeholder, so
-          the theme is presentable the moment it is installed. Replace it by
-          setting a Product image in the theme editor.
-        {%- endcomment -%}
-        <img
-          src="{{ 'aurora-hero-rings.jpg' | asset_url }}"
-          width="1200"
-          height="1262"
-          loading="eager"
-          fetchpriority="high"
-          alt="Three Aurora rings in black, rose gold and copper finishes"
-        >
+    <div class="aurora-hero__media aurora-reveal">
+      <figure class="aurora-hero__frame">
+        {%- if s.image != blank -%}
+          {{
+            s.image
+            | image_url: width: 1400
+            | image_tag:
+              widths: '500, 800, 1100, 1400',
+              sizes: '(max-width: 989px) 88vw, 48vw',
+              loading: 'eager',
+              fetchpriority: 'high',
+              alt: s.image.alt | default: s.heading | strip_html
+          }}
+        {%- else -%}
+          {%- comment -%}
+            Ships with real product photography rather than a grey placeholder, so
+            the theme is presentable the moment it is installed. Replace it by
+            setting a Product image in the theme editor.
+          {%- endcomment -%}
+          <img
+            src="{{ 'aurora-hero-rings.jpg' | asset_url }}"
+            width="1200"
+            height="1262"
+            loading="eager"
+            fetchpriority="high"
+            alt="Three Aurora rings in black, rose gold and copper finishes"
+          >
+        {%- endif -%}
+      </figure>
+
+      {%- comment -%}
+        Straddles the bottom edge of the frame on phones, over the plinths —
+        the one part of the photograph with nothing to look at. Gives the
+        finishes a name at the point where the eye is already on them, and
+        gives the flat stack a layer. Hidden on desktop, where the copy column
+        already carries the detail.
+      {%- endcomment -%}
+      {%- if s.finishes != blank -%}
+        <p class="aurora-hero__chip">
+          <span class="aurora-hero__swatches" aria-hidden="true">
+            <span class="aurora-hero__swatch aurora-hero__swatch--black"></span>
+            <span class="aurora-hero__swatch aurora-hero__swatch--rose"></span>
+            <span class="aurora-hero__swatch aurora-hero__swatch--copper"></span>
+          </span>
+          {{ s.finishes }}
+        </p>
       {%- endif -%}
     </div>
   </div>
@@ -90,92 +123,30 @@
     height: auto;
   }
 
-  /* Phones: the photograph is the background, not a block above the type.
-     Pulling it above the copy (the previous fix) stopped the rings from being
-     buried below the fold, but the section still read as two stacked halves.
-     The image now fills the section edge-to-edge behind the text, the way the
-     original theme's hero did — copy sits over it on a bone scrim so the type
-     stays fully legible without darkening or hiding the product. */
-  @media screen and (max-width: 989px) {
-    .aurora-hero__inner {
-      position: relative;
-      display: block;
-      min-height: 88vh;
-      padding-block: 0;
-      /* Keeps the inherited .aurora__inner gutter for the copy below — only
-         the media layer needs to escape it. An earlier version tried to do
-         that by giving this element a negative margin equal to the gutter and
-         then padding it back in, but with box-sizing: border-box the two
-         don't cancel: an auto-width block's rendered width is the containing
-         block's width minus its margins, full stop, so a negative margin on
-         both sides grows the box by 2x the gutter instead of by 0. That
-         overflowed the viewport by exactly one gutter's width on every phone
-         breakpoint. The media element bleeds itself now (below), so this
-         element keeps its normal box. */
-    }
+  /* Desktop: the photograph arrives with the headline, in the column beside
+     it. Set here rather than inline so the phone breakpoint, where it is the
+     last thing on the page, can put it last in the sequence too. */
+  .aurora-hero__media {
+    --aur-reveal-delay: 120ms;
+  }
 
-    .aurora-hero__media {
-      position: absolute;
-      top: 0;
-      /* Standard viewport-relative bleed: independent of this element's own
-         padding or of any ancestor's max-width, and it cannot overflow the
-         document because it is sized from 100vw, not from a margin sum. */
-      left: 50%;
-      width: 100vw;
-      margin-left: -50vw;
-      order: initial;
-      height: 100%;
-    }
-
-    .aurora-hero__media img,
-    .aurora-hero__media svg {
-      height: 100%;
-      object-fit: cover;
-      /* Keeps the rings themselves in frame rather than centring the crop,
-         which on a tall narrow viewport pushed them toward the bottom edge. */
-      object-position: center 22%;
-    }
-
-    /* Bone scrim under the copy only — the top half of the photograph stays
-       fully clear so the product reads on its own. The eyebrow line is the
-       first thing the scrim has to cover, so the ramp starts underneath it
-       rather than at the headline. */
-    .aurora-hero__media::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        to bottom,
-        rgba(246, 244, 240, 0) 0%,
-        rgba(246, 244, 240, 0) 34%,
-        rgba(246, 244, 240, 0.75) 50%,
-        rgba(246, 244, 240, 0.94) 62%,
-        var(--aur-page) 78%,
-        var(--aur-page) 100%
-      );
-    }
-
-    .aurora-hero__copy {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      min-height: 88vh;
-      justify-content: flex-end;
-      padding-block: clamp(1.75rem, 6vh, 3rem) clamp(1.25rem, 4vh, 2rem);
-    }
-
-    .aurora-hero__title {
-      max-width: 18ch;
-    }
-
-    .aurora-hero__action {
-      margin-top: clamp(1.25rem, 4vw, 1.75rem);
-    }
+  /* figure carries a 1em/40px UA margin. Zeroed here rather than in the phone
+     block, where it would leave the desktop column 80px narrower than the
+     grid track it sits in. */
+  .aurora-hero__frame {
+    position: relative;
+    margin: 0;
   }
 
   .aurora-hero__title {
     max-width: 12ch;
+  }
+
+  /* The one word the whole proposition turns on, in the one accent the brand
+     rations. It is set in the display italic already, so this adds warmth
+     rather than a second typographic idea. */
+  .aurora-hero__title em {
+    color: var(--aur-accent);
   }
 
   .aurora-hero__action {
@@ -188,12 +159,263 @@
     color: var(--aur-text-muted);
   }
 
+  .aurora-hero__assurance span {
+    white-space: nowrap;
+  }
+
+  /* On the preceding phrase rather than the following one, so a wrap never
+     starts a line with a separator. */
+  .aurora-hero__assurance span:not(:last-child)::after {
+    content: '·';
+    margin: 0 0.375rem;
+    color: var(--aur-text-dim);
+  }
+
   .aurora-hero__placeholder {
     background: var(--aur-page-alt);
     fill: rgba(20, 21, 26, 0.12);
   }
 
+  /* Phones and tablets: the type block is the top of the page, the product is
+     a plate below it. The previous pass ran the photograph behind the copy and
+     paid for it twice — a bone scrim had to wash over the middle of the
+     product to make ink type legible, and the headline could only start where
+     the scrim was opaque, which was halfway down the screen. Here nothing
+     overlaps the type: the eyebrow starts at the top gutter on flat bone, and
+     the photograph gets its own frame underneath, bleeding off the right edge
+     so the section does not read as two centred stacked boxes. */
+  @media screen and (max-width: 989px) {
+    .aurora-hero__inner {
+      display: block;
+      padding-block: clamp(1.25rem, 4vh, 2.25rem) 0;
+    }
+
+    /* The measure lives on the headline and the lede, which set their own
+       below. Capping the whole column would take the button down with it and
+       leave a 12px ledge on its right edge that reads as a mistake. */
+
+    /* Mono for the kicker: the same face the site already uses for readouts
+       and prices, so the technical register belongs to the product rather than
+       being decoration. The ember rule above it is the only accent in the
+       viewport. */
+    .aurora-hero__eyebrow {
+      font-family: var(--aur-font-mono);
+      font-size: 0.65625rem;
+      font-weight: 400;
+      /* Mono sets wide. At 11px/0.13em the line broke three ways on a 390px
+         screen and the kicker took more height than the lede. */
+      letter-spacing: 0.1em;
+      line-height: 1.5;
+      color: var(--aur-text-muted);
+      margin: 0 0 1rem;
+    }
+
+    .aurora-hero__eyebrow::before {
+      content: '';
+      display: block;
+      width: 2rem;
+      height: 2px;
+      margin-bottom: 1.125rem;
+      background: var(--aur-accent);
+    }
+
+    /* Scale contrast is doing the work here: 52px display against an 11px
+       kicker and a 15px lede. The clamp keeps it off the gutters at 320px and
+       stops it running away on a large tablet. */
+    .aurora-hero__title {
+      font-size: clamp(2.875rem, 12.5vw, 3.75rem);
+      line-height: 0.94;
+      letter-spacing: -0.025em;
+      max-width: 11ch;
+    }
+
+    .aurora-hero .aurora__lede {
+      margin-top: 1.125rem;
+      font-size: 0.9375rem;
+      line-height: 1.62;
+      max-width: 33ch;
+    }
+
+    .aurora-hero__action {
+      margin-top: clamp(1.5rem, 4vh, 2rem);
+    }
+
+    /* Full-width tap target. At 390px an auto-width pill left a third of the
+       row empty next to the single thing the section is asking for. */
+    .aurora-hero__action .aurora__btn--primary {
+      display: flex;
+      width: 100%;
+      /* Stops the pill from growing into a slab on a 599px-wide phone held
+         sideways. */
+      max-width: 26rem;
+      justify-content: space-between;
+      padding: 1rem 1.25rem 1rem 1.5rem;
+      line-height: 1.3;
+    }
+
+    .aurora-hero__cta-arrow {
+      font-size: 1.125rem;
+      line-height: 1;
+      opacity: 0.7;
+    }
+
+    /* Three promises, marked rather than run together. A separator between
+       them left a dot stranded at the end of a wrapped line; a mark in front
+       of each survives the wrap and reads as a list of guarantees, which is
+       what it is. */
+    .aurora-hero__assurance {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.375rem 1.0625rem;
+      /* Hangs the marks in the gutter — dot width plus its gap — so the words
+         still line up with the headline and the button above them. */
+      margin: 1.0625rem 0 0 -0.625rem;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      color: var(--aur-text-dim);
+    }
+
+    .aurora-hero__assurance span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4375rem;
+    }
+
+    .aurora-hero__assurance span:not(:last-child)::after {
+      content: none;
+    }
+
+    .aurora-hero__assurance span::before {
+      content: '';
+      width: 0.1875rem;
+      height: 0.1875rem;
+      flex: none;
+      border-radius: 50%;
+      background: var(--aur-accent);
+    }
+
+    /* Bleeds the right gutter only. Symmetry would put it back in the box the
+       rest of the page is already in; the asymmetric edge is what tells you
+       the plate continues past the screen. */
+    .aurora-hero__media {
+      position: relative;
+      margin-top: clamp(1.75rem, 5vh, 2.75rem);
+      margin-right: calc(var(--aur-gutter) * -1);
+      /* Last in the sequence here, after the call to action. */
+      --aur-reveal-delay: 320ms;
+    }
+
+    .aurora-hero__frame {
+      overflow: hidden;
+      border-radius: 1.25rem 0 0 1.25rem;
+      background: var(--aur-page-alt);
+      /* A hairline ring plus a long, low shadow. The studio backdrop in the
+         photograph is the same bone as the page, so without the ring the plate
+         has no edge at all across its top-left corner. */
+      box-shadow: 0 0 0 1px var(--aur-line-soft), 0 1.75rem 3.5rem -2.5rem rgba(20, 21, 26, 0.55);
+    }
+
+    .aurora-hero__frame img,
+    .aurora-hero__frame svg {
+      height: clamp(15rem, 42vh, 23rem);
+      object-fit: cover;
+      /* Holds all three rings in frame and crops the plinths, which are the
+         part of the shot with nothing in them. */
+      object-position: 50% 20%;
+    }
+
+    .aurora-hero__chip {
+      position: absolute;
+      left: 0;
+      bottom: -0.875rem;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.625rem;
+      margin: 0;
+      padding: 0.5rem 0.9375rem 0.5rem 0.75rem;
+      border: 1px solid var(--aur-line);
+      border-radius: var(--aur-r-pill);
+      background: var(--aur-page);
+      box-shadow: 0 0.75rem 1.75rem -1rem rgba(20, 21, 26, 0.45);
+      font-family: var(--aur-font-mono);
+      font-size: 0.625rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--aur-text-soft);
+      white-space: nowrap;
+    }
+
+    .aurora-hero__swatches {
+      display: inline-flex;
+    }
+
+    .aurora-hero__swatch {
+      width: 0.6875rem;
+      height: 0.6875rem;
+      border-radius: 50%;
+      border: 1px solid var(--aur-page);
+      /* Just enough overlap to read as a set of three, not as a smudge. */
+      margin-right: -0.125rem;
+    }
+
+    .aurora-hero__swatch--black {
+      background: linear-gradient(145deg, #3a3a3d, #131315);
+    }
+
+    .aurora-hero__swatch--rose {
+      background: linear-gradient(145deg, #f0cdbd, #c98f75);
+    }
+
+    .aurora-hero__swatch--copper {
+      background: linear-gradient(145deg, #e2a06a, #a75f30);
+    }
+  }
+
+  /* Tablets: the measure has stopped growing with the viewport, so the plate
+     takes the extra width instead — indented from the left so the type column
+     still leads, and shown at the photograph's own proportions. Cropping it to
+     a band at this width blew the rings up to half a metre across and cut them
+     at both edges. */
+  @media screen and (min-width: 600px) and (max-width: 989px) {
+    .aurora-hero__inner {
+      padding-block-start: clamp(2rem, 6vh, 3.5rem);
+    }
+
+    /* A full-width pill is a phone affordance. Stretched across a 989px
+       tablet it becomes a 1200px slab with two words in it. */
+    .aurora-hero__action .aurora__btn--primary {
+      /* Back to the base pill. width: auto alone is not enough — the phone
+         rule also switches it to a block-level flex container, which fills the
+         line box whatever the width is set to. */
+      display: inline-flex;
+      width: auto;
+      justify-content: center;
+      padding: 1.0625rem 2rem;
+    }
+
+    .aurora-hero__cta-arrow {
+      display: none;
+    }
+
+    .aurora-hero__media {
+      margin-left: 20%;
+      margin-top: clamp(2rem, 6vh, 3.5rem);
+    }
+
+    .aurora-hero__frame img,
+    .aurora-hero__frame svg {
+      height: auto;
+    }
+  }
+
   @media screen and (min-width: 990px) {
+    /* Phone and tablet furniture. */
+    .aurora-hero__chip,
+    .aurora-hero__cta-arrow {
+      display: none;
+    }
+
     .aurora-hero__inner {
       /* The product gets the larger share — it is the reason anyone is here */
       grid-template-columns: 0.9fr 1.1fr;
@@ -248,6 +470,13 @@
     { "type": "url", "id": "cta_link", "label": "Button link" },
     { "type": "product", "id": "product", "label": "Product (for live price)" },
     { "type": "checkbox", "id": "show_price", "label": "Show price in button", "default": true },
+    {
+      "type": "text",
+      "id": "finishes",
+      "label": "Finish list (phones only)",
+      "info": "Sits on the product photograph on small screens. Leave empty to hide it.",
+      "default": "Black · Rose gold · Copper"
+    },
     {
       "type": "text",
       "id": "assurance",
