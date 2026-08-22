@@ -296,15 +296,19 @@
     }
   }
 
-  /* Short screens — an SE, an older Android. A full-width photograph is 1.05x
-     the screen width tall, which on a 667px viewport puts the button under the
-     fold. Here alone the shot comes back inside the gutter and is capped, so
-     the whole section lands on one screen; at this width the letterbox it
-     leaves is ~17px a side rather than the 10-67px the cap used to leave at
-     every width. */
-  @media screen and (max-width: 989px) and (max-height: 720px) {
+  /* ---- The screens people actually hold ----
+     A 390x844 phone gives the page ~734px once Safari's address bar is on
+     screen, so this block is keyed to 860px rather than to an SE.
+
+     The cap is 52vh and the photograph keeps its bleed. That number is not
+     arbitrary: the shot carries a 2.5% bone inset, so at 52vh of 734 it
+     paints 364 of 390px and the rings' optical left edge lands at 22px
+     against the 24px type axis. The previous 46vh cap painted 308px and put
+     the rings 49px inboard — the same misalignment the block above exists to
+     remove. */
+  @media screen and (max-width: 989px) and (max-height: 860px) {
     .aurora-hero__title {
-      font-size: clamp(2.25rem, 11vw, 2.75rem);
+      font-size: clamp(2.125rem, 10.5vw, 2.5rem);
     }
 
     .aurora-hero .aurora__lede {
@@ -313,19 +317,22 @@
     }
 
     .aurora-hero__media {
-      margin-inline: 0;
-      margin-top: 0.75rem;
+      margin-top: 0.5rem;
     }
 
     .aurora-hero__media img,
     .aurora-hero__media svg {
-      max-height: 46vh;
+      max-height: 52vh;
       object-fit: contain;
     }
 
     .aurora-hero__action {
       margin-top: 0.75rem;
       padding-top: 0.75rem;
+    }
+
+    .aurora-hero__assurance {
+      margin-top: 0.625rem;
     }
   }
 
