@@ -133,9 +133,13 @@
     padding-block: clamp(1.5rem, 8vh, 6rem);
   }
 
-  /* The product sits on the page itself — no card, no border, no shadow. */
-  .aurora-hero__media img,
-  .aurora-hero__media svg {
+  /* Child-scoped on purpose. This rule exists for the single photograph the
+     image picker can put here; written as a descendant selector it also
+     matched all three rings of the still life below, forced each to 390px and
+     stacked them on top of one another. */
+  .aurora-hero__media > img,
+  .aurora-hero__media > svg,
+  .aurora-hero__media > picture img {
     display: block;
     width: 100%;
     height: auto;
@@ -162,6 +166,12 @@
     position: relative;
     width: 100%;
     aspect-ratio: 39 / 31;
+    /* The graphite ring starts at -6% and the silver runs past 100% so the
+       cluster reads edge to edge. Only white frame sits in those overhangs,
+       so clipping costs nothing visible and removes 15px of horizontal
+       document scroll. `overflow: hidden` on its own does not open a stacking
+       context, so the blend still resolves against the page. */
+    overflow: hidden;
   }
 
   .aurora-still__ring {
@@ -280,16 +290,13 @@
       margin: 0.875rem calc(-1 * var(--aur-gutter)) 0;
     }
 
-    .aurora-hero__media img,
-    .aurora-hero__media svg {
+    .aurora-hero__media > img,
+    .aurora-hero__media > svg,
+    .aurora-hero__media > picture img {
       width: 100%;
       height: auto;
       max-height: none;
       object-fit: contain;
-    }
-
-    .aurora-hero__media .aurora-still__ring {
-      width: auto;
     }
 
     .aurora-hero__action {
