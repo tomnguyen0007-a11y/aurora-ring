@@ -1,0 +1,387 @@
+{%- liquid
+  assign s = section.settings
+  assign product = s.product
+-%}
+
+<section class="aurora aurora-hero" style="{% render 'aurora-spacing', settings: section.settings %}">
+  <div class="aurora__inner aurora-hero__inner">
+    <div class="aurora-hero__copy">
+      {%- if s.eyebrow != blank -%}
+        <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
+      {%- endif -%}
+
+      <h1 class="aurora__display aurora-hero__title aurora-reveal" style="--aur-reveal-delay: 80ms">
+        {{ s.heading }}
+      </h1>
+
+      {%- if s.subheading != blank -%}
+        <p class="aurora__lede aurora-reveal" style="--aur-reveal-delay: 160ms">{{ s.subheading }}</p>
+      {%- endif -%}
+
+    </div>
+
+    {%- comment -%}
+      On a phone the product comes before the ask: statement, object, buy. It
+      is the only element that runs the full width of the screen, which is what
+      makes the section read as a product rather than as a page with a picture
+      on it.
+    {%- endcomment -%}
+    <div class="aurora-hero__media aurora-reveal" style="--aur-reveal-delay: 120ms">
+      {%- if s.image != blank -%}
+        {{
+          s.image
+          | image_url: width: 1400
+          | image_tag:
+            widths: '500, 800, 1100, 1400',
+            sizes: '(max-width: 989px) 100vw, 48vw',
+            loading: 'eager',
+            fetchpriority: 'high',
+            alt: s.image.alt | default: s.heading | strip_html
+        }}
+      {%- else -%}
+        {%- comment -%}
+          Two crops of the same studio photograph rather than one squeezed into
+          both shapes. The phone crop is tight around the three rings so the
+          product fills the width; the studio backdrop in both is keyed to the
+          page's own bone, so neither reads as a picture in a box.
+
+          A cut-out composition of the three catalogue stills was tried here
+          (786fe12) and reverted: those stills are renders with blown LED
+          flares, and at hero scale they read as a marketplace listing.
+        {%- endcomment -%}
+        <picture>
+          <source
+            media="(max-width: 989px)"
+            srcset="{{ 'aurora-hero-rings-phone.jpg' | asset_url }}"
+            width="1016"
+            height="1065"
+          >
+          <img
+            src="{{ 'aurora-hero-rings.jpg' | asset_url }}"
+            width="1200"
+            height="1262"
+            loading="eager"
+            fetchpriority="high"
+            alt="Three Aurora rings in black, rose gold and copper finishes"
+          >
+        </picture>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} One call to action. Nothing competes with it. {%- endcomment -%}
+    <div class="aurora-hero__action aurora-reveal" style="--aur-reveal-delay: 240ms">
+      <a class="aurora__btn aurora__btn--primary" id="aurora-hero-cta" href="{{ s.cta_link | default: routes.all_products_collection_url }}">
+        {{ s.cta_label }}
+        {%- if product != blank and s.show_price -%}
+          <span class="aurora__price">{{ product.price | money }}</span>
+        {%- endif -%}
+      </a>
+
+      {%- if s.assurance != blank -%}
+        <p class="aurora-hero__assurance">
+          {%- assign promises = s.assurance | split: '·' -%}
+          {%- for promise in promises -%}
+            <span>{{ promise | strip }}</span>
+          {%- endfor -%}
+        </p>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .aurora-hero {
+    padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
+
+    /* Warm ink family — reads as ink on bone, not black on white.
+       Measured on #f7f6f3: 15.1:1 / 11.0:1 / 4.9:1. All pass WCAG AA. */
+    --aur-hero-ink: #241f1a;
+    --aur-hero-ink-soft: #3d362d;
+    --aur-hero-ink-quiet: #6f6a63;
+  }
+
+  .aurora-hero .aurora__eyebrow {
+    color: var(--aur-hero-ink-quiet);
+    font-weight: 500;
+    letter-spacing: 0.16em;
+  }
+
+  .aurora-hero__title {
+    color: var(--aur-hero-ink);
+    max-width: 12ch;
+  }
+
+  .aurora-hero .aurora__lede {
+    color: var(--aur-hero-ink-soft);
+  }
+
+  .aurora-hero__inner {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(1.75rem, 5vw, 5rem);
+    align-items: center;
+    padding-block: clamp(1.5rem, 8vh, 6rem);
+  }
+
+  /* Child-scoped on purpose: this rule is for the media element itself, not
+     for everything that might ever sit inside it. Written as a descendant
+     selector it silently resized the composed elements of anything nested. */
+  .aurora-hero__media > img,
+  .aurora-hero__media > svg,
+  .aurora-hero__media > picture img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* ---- Base rhythm for the action ----
+     These sit ABOVE the phone block on purpose. They have the same
+     specificity as the phone rules, so when they sat below them they won on
+     source order alone and silently reverted every margin the phone block
+     set — which is where the 50px gap between the photograph and the button
+     came from, and why the promises lost their hung marks. */
+  .aurora-hero__action {
+    margin-top: clamp(2rem, 4vw, 3rem);
+  }
+
+  .aurora-hero__assurance {
+    margin: 1.125rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--aur-hero-ink-quiet);
+  }
+
+  .aurora-hero__assurance span:not(:last-child)::after {
+    content: '·';
+    margin: 0 0.375rem;
+  }
+
+  .aurora-hero__placeholder {
+    background: var(--aur-page-alt);
+    fill: rgba(20, 21, 26, 0.12);
+  }
+
+  /* ---------------------------------------------------------------------
+     Phones: one axis, one object, one ask.
+
+     Everything — eyebrow, headline, sentence, hairline, button — is set on
+     the same 24px axis, and the photograph is the single element that leaves
+     it, bleeding to both screen edges by exactly the gutter.
+
+     Two structural bugs are fixed here rather than compensated for:
+
+     1. This element switched to a flex column but kept `align-items: center`
+        from the rule above. Flex items therefore shrank to their content and
+        centred themselves, so the 100vw media rendered at left: -12px — a
+        12px overhang on one edge and a 12px bone gap on the other — and the
+        action floated free of the text axis. `align-items: stretch` fixes
+        both at source.
+
+     2. The photograph was capped with max-height + object-fit: contain. The
+        phone crop is 1016x1065 with its content already 2.5% inside the
+        frame, so the cap letterboxed it: at 390px it painted 370 of 390px,
+        putting the rings' optical edge at 7px while the type sat at 24px.
+        Nothing lined up with anything. It is painted at full width now.
+     --------------------------------------------------------------------- */
+  @media screen and (max-width: 989px) {
+    .aurora-hero__inner {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      padding-block: clamp(0.25rem, 1vh, 0.5rem) clamp(0.75rem, 2.5vh, 1.25rem);
+    }
+
+    /* 10px read as a disclaimer. This line is the frame of reference for a
+       brand nobody has heard of — it has to carry like a label, not a
+       footnote. Oura sets the equivalent at 14px. */
+    .aurora-hero .aurora__eyebrow {
+      margin: 0 0 0.875rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.14em;
+      line-height: 1.4;
+    }
+
+    .aurora-hero__title {
+      font-size: clamp(2.5rem, 12.3vw, 3.25rem);
+      line-height: 0.96;
+      letter-spacing: -0.025em;
+      max-width: 11ch;
+    }
+
+    .aurora-hero .aurora__lede {
+      margin-top: 0.875rem;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      max-width: 34ch;
+    }
+
+    /* Bleed by exactly the gutter. No 100vw, no percentage margin: a
+       percentage resolves against the flex item's containing block, which is
+       not the viewport, and 100vw includes the scrollbar. */
+    .aurora-hero__media {
+      width: auto;
+      margin: 0.875rem calc(-1 * var(--aur-gutter)) 0;
+    }
+
+    .aurora-hero__media > img,
+    .aurora-hero__media > svg,
+    .aurora-hero__media > picture img {
+      width: 100%;
+      height: auto;
+      max-height: none;
+      object-fit: contain;
+    }
+
+    /* The hairline gives the photograph's lower edge a job. Without it the
+       shot reads as a rectangle that happens to stop; with it, it reads as
+       the boundary between the object and the ask. */
+    .aurora-hero__action {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--aur-line);
+      text-align: left;
+    }
+
+    /* A pill the width of its own label, on the axis. */
+    .aurora-hero__action .aurora__btn--primary {
+      display: inline-flex;
+      width: auto;
+      max-width: none;
+      padding: 1rem 2.25rem;
+    }
+
+    /* The trust bar renders the same promises, with a line of detail under
+       each, 30px below this one. Two of the three appeared twice on the same
+       screen. Kept in the DOM for desktop, where that section is well below
+       the fold. */
+    .aurora-hero__assurance {
+      display: none;
+    }
+  }
+
+  /* Short screens — a 390x844 phone gives the page ~734px once Safari's
+     address bar is on screen, so this is keyed to 860 rather than to an SE.
+     The cap is 52vh and the photograph keeps its bleed: the shot carries a
+     2.5% bone inset, so at 52vh of 734 it paints 364 of 390px and the rings'
+     optical left edge lands at 22px against the 24px type axis. */
+  @media screen and (max-width: 989px) and (max-height: 860px) {
+    .aurora-hero__title {
+      font-size: clamp(2.125rem, 10.5vw, 2.5rem);
+    }
+
+    .aurora-hero .aurora__lede {
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+    }
+
+    .aurora-hero__media {
+      margin-top: 0.5rem;
+    }
+
+    .aurora-hero__media > img,
+    .aurora-hero__media > svg,
+    .aurora-hero__media > picture img {
+      max-height: 52vh;
+      object-fit: contain;
+    }
+
+    .aurora-hero__action {
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .aurora-hero__inner {
+      grid-template-columns: 0.9fr 1.1fr;
+      grid-template-areas:
+        'copy media'
+        'action media'
+        'slack media';
+      /* Three rows, the last one elastic, so the media column's surplus
+         height is soaked up below the action rather than shared between the
+         rows above it. */
+      grid-template-rows: auto auto 1fr;
+      column-gap: clamp(2.5rem, 5vw, 5rem);
+      row-gap: 0;
+      align-items: start;
+      padding-block: var(--aur-hero-top) var(--aur-hero-bottom);
+    }
+
+    .aurora-hero__copy {
+      grid-area: copy;
+      padding-block-start: var(--aur-hero-top);
+    }
+
+    .aurora-hero__action {
+      grid-area: action;
+    }
+
+    .aurora-hero__media {
+      grid-area: media;
+      margin-right: 0;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Aurora hero",
+  "tag": "section",
+  "class": "aurora-section",
+  "disabled_on": { "groups": ["header", "footer"] },
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Smart ring · No subscription" },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Sleep is the <em>whole</em> game."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Aurora reads your night, then tells you one thing: push, or hold back."
+    },
+    { "type": "image_picker", "id": "image", "label": "Product image" },
+    { "type": "header", "content": "Action" },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Buy Aurora" },
+    { "type": "url", "id": "cta_link", "label": "Button link" },
+    { "type": "product", "id": "product", "label": "Product (for live price)" },
+    { "type": "checkbox", "id": "show_price", "label": "Show price in button", "default": true },
+    {
+      "type": "text",
+      "id": "assurance",
+      "label": "Assurance line",
+      "info": "Separate with ·. Hidden on phones — the trust bar below repeats it.",
+      "default": "Free EU delivery · No subscription, ever"
+    },
+    { "type": "header", "content": "Padding" },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    }
+  ],
+  "presets": [{ "name": "Aurora hero", "category": "Aurora" }]
+}
+{% endschema %}

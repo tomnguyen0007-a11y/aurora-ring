@@ -1,0 +1,8 @@
+# Keep theme-check aligned with .shopifyignore — `backup/theme-original` is a
+# frozen copy of the pre-rebuild theme kept for reference. It is never uploaded,
+# and linting it drowns real findings in ~1,200 warnings from code we do not own.
+ignore:
+  - backup/**
+  - calibrate/**
+  - ECC/**
+  - scripts/**

@@ -1,0 +1,365 @@
+{%- comment -%}
+  Fit Finder. Sits directly beneath the buy box so the size decision — the one
+  thing that stops people committing to a ring they cannot try on — is settled
+  before they scroll away.
+
+  Two measuring methods, both tool-free, then the chart. The exchange promise
+  is last because it only reassures once someone has already worried.
+
+  Deliberately no "sizing kit included" claim here: that belongs to the box
+  contents section and only once the supplier confirms it actually ships.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+-%}
+
+<section class="aurora aurora-fit" style="{% render 'aurora-spacing', settings: section.settings %}">
+  <div class="aurora__inner">
+    <div class="aurora-fit__head">
+      {%- if s.eyebrow != blank -%}
+        <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
+      {%- endif -%}
+      <h2 class="aurora__h2 aurora-fit__title aurora-reveal" style="--aur-reveal-delay: 80ms">{{ s.heading }}</h2>
+      {%- if s.subheading != blank -%}
+        <p class="aurora__lede aurora-reveal" style="--aur-reveal-delay: 140ms">{{ s.subheading }}</p>
+      {%- endif -%}
+    </div>
+
+    <ol class="aurora-fit__methods">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'method' -%}
+          <li
+            class="aurora-fit__method aurora-reveal"
+            style="--aur-reveal-delay: {{ forloop.index0 | times: 90 | plus: 180 }}ms"
+            {{ block.shopify_attributes }}
+          >
+            <span class="aurora-fit__step aurora__num" aria-hidden="true">{{ forloop.index }}</span>
+            <div class="aurora-fit__method-body">
+              <h3 class="aurora-fit__method-title">{{ block.settings.title }}</h3>
+              <p class="aurora-fit__method-text">{{ block.settings.text }}</p>
+            </div>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ol>
+
+    <details class="aurora-fit__chart aurora-reveal" style="--aur-reveal-delay: 360ms">
+      <summary class="aurora-fit__summary">
+        <span>{{ s.chart_label }}</span>
+        <svg class="aurora-fit__chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </summary>
+
+      <div class="aurora-fit__tablewrap">
+        <table class="aurora-fit__table">
+          <caption class="aurora__visually-hidden">
+            Ring size conversion: US size to inner diameter and inner circumference in millimetres
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">US size</th>
+              <th scope="col">Inner diameter</th>
+              <th scope="col">Circumference</th>
+            </tr>
+          </thead>
+          <tbody>
+            {%- comment -%}
+              Standard US sizing. Diameter drives the fit; circumference is what
+              the paper-strip method actually measures, so both are shown.
+            {%- endcomment -%}
+            {%- assign sizes = '6,7,8,9,10,11,12,13' | split: ',' -%}
+            {%- assign diameters = '16.5,17.3,18.1,19.0,19.8,20.6,21.4,22.2' | split: ',' -%}
+            {%- assign circumferences = '51.9,54.4,57.0,59.5,62.1,64.6,67.2,69.7' | split: ',' -%}
+            {%- for size in sizes -%}
+              <tr>
+                <th scope="row" class="aurora__num">{{ size }}</th>
+                <td class="aurora__num">{{ diameters[forloop.index0] }} mm</td>
+                <td class="aurora__num">{{ circumferences[forloop.index0] }} mm</td>
+              </tr>
+            {%- endfor -%}
+          </tbody>
+        </table>
+      </div>
+
+      {%- if s.chart_tip != blank -%}
+        <p class="aurora-fit__tip">{{ s.chart_tip }}</p>
+      {%- endif -%}
+    </details>
+
+    {%- if s.exchange_text != blank -%}
+      <p class="aurora-fit__exchange aurora-reveal" style="--aur-reveal-delay: 420ms">
+        <strong>{{ s.exchange_title }}</strong>
+        {{ s.exchange_text }}
+      </p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .aurora-fit {
+    padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
+  }
+
+  .aurora-fit__title {
+    max-width: 16ch;
+  }
+
+  .aurora-fit__head .aurora__lede {
+    max-width: 46ch;
+  }
+
+  /* Numbered hairline rows, not cards. The rule is the structure. */
+  .aurora-fit__methods {
+    list-style: none;
+    margin: clamp(2.5rem, 5vw, 3.75rem) 0 0;
+    padding: 0;
+    border-top: 1px solid var(--aur-line);
+  }
+
+  .aurora-fit__method {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr;
+    gap: 0 1.25rem;
+    align-items: baseline;
+    padding-block: clamp(1.5rem, 3vw, 2.25rem);
+    border-bottom: 1px solid var(--aur-line);
+  }
+
+  .aurora-fit__step {
+    font-size: 0.8125rem;
+    color: var(--aur-text-dim);
+  }
+
+  .aurora-fit__method-title {
+    font-family: var(--aur-font-body);
+    font-size: 1.0625rem;
+    font-weight: 500;
+    line-height: 1.35;
+    margin: 0;
+    color: var(--aur-text);
+  }
+
+  .aurora-fit__method-text {
+    margin: 0.5rem 0 0;
+    font-size: 0.9375rem;
+    color: var(--aur-text-muted);
+    max-width: 54ch;
+  }
+
+  /* ---- Size chart ---- */
+  .aurora-fit__chart {
+    border-bottom: 1px solid var(--aur-line);
+  }
+
+  .aurora-fit__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: clamp(1.25rem, 2.5vw, 1.75rem);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--aur-text);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .aurora-fit__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .aurora-fit__summary:hover {
+    color: var(--aur-accent);
+  }
+
+  .aurora-fit__chev {
+    flex: none;
+    color: var(--aur-text-muted);
+    transition: transform 0.35s var(--aur-ease-out);
+  }
+
+  .aurora-fit__chart[open] .aurora-fit__chev {
+    transform: rotate(180deg);
+  }
+
+  /* Wide tables scroll inside their own box rather than pushing page width. */
+  .aurora-fit__tablewrap {
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+
+  .aurora-fit__table {
+    width: 100%;
+    min-width: 22rem;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  .aurora-fit__table th,
+  .aurora-fit__table td {
+    padding: 0.75rem 1rem 0.75rem 0;
+    border-bottom: 1px solid var(--aur-line-soft);
+    font-weight: 400;
+  }
+
+  .aurora-fit__table thead th {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--aur-text-muted);
+    border-bottom-color: var(--aur-line);
+  }
+
+  .aurora-fit__table tbody th {
+    color: var(--aur-text);
+    font-size: 0.9375rem;
+  }
+
+  .aurora-fit__table tbody td {
+    color: var(--aur-text-muted);
+    font-size: 0.875rem;
+  }
+
+  .aurora-fit__table tbody tr:last-child th,
+  .aurora-fit__table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .aurora-fit__tip {
+    margin: 1rem 0 1.75rem;
+    font-size: 0.875rem;
+    color: var(--aur-text-muted);
+    max-width: 58ch;
+  }
+
+  .aurora-fit__exchange {
+    margin: clamp(1.75rem, 3vw, 2.5rem) 0 0;
+    font-size: 0.9375rem;
+    color: var(--aur-text-muted);
+    max-width: 56ch;
+  }
+
+  .aurora-fit__exchange strong {
+    color: var(--aur-text);
+    font-weight: 500;
+  }
+
+  @media screen and (min-width: 750px) {
+    .aurora-fit__method {
+      grid-template-columns: 4rem 22ch 1fr;
+      align-items: start;
+      gap: 0 2rem;
+    }
+
+    .aurora-fit__method-body {
+      display: contents;
+    }
+
+    .aurora-fit__method-text {
+      margin-top: 0;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Aurora fit finder",
+  "tag": "section",
+  "class": "aurora-section",
+  "disabled_on": { "groups": ["header", "footer"] },
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Sizing" },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Get the fit right the first time."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Two ways to measure, both under a minute, neither needs a kit. If the size is wrong when it arrives, we swap it."
+    },
+    { "type": "header", "content": "Size chart" },
+    { "type": "text", "id": "chart_label", "label": "Toggle label", "default": "Size chart (US 6–13)" },
+    {
+      "type": "textarea",
+      "id": "chart_tip",
+      "label": "Chart note",
+      "default": "Measure at the end of the day, when your hands are warmest — finger size moves by up to half a size between morning and evening. Between two sizes, take the larger one: the ring should clear the knuckle with a little resistance."
+    },
+    { "type": "header", "content": "Exchange" },
+    { "type": "text", "id": "exchange_title", "label": "Exchange title", "default": "Free size exchange." },
+    {
+      "type": "textarea",
+      "id": "exchange_text",
+      "label": "Exchange text",
+      "default": "If the ring does not fit, tell us and we send the right size at our cost."
+    },
+    { "type": "header", "content": "Padding" },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 112
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 112
+    }
+  ],
+  "blocks": [
+    {
+      "type": "method",
+      "name": "Measuring method",
+      "limit": 4,
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "Measure a ring you already wear" },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text",
+          "default": "Take a ring that fits the finger you want to track, measure straight across the inside in millimetres, and read it off the chart."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Aurora fit finder",
+      "category": "Aurora",
+      "blocks": {
+        "ring": {
+          "type": "method",
+          "settings": {
+            "title": "Measure a ring you already wear",
+            "text": "Take a ring that fits the finger you want to track, measure straight across the inside in millimetres, and read it off the chart."
+          }
+        },
+        "strip": {
+          "type": "method",
+          "settings": {
+            "title": "Wrap a strip of paper",
+            "text": "Wrap paper or string around the base of the finger, mark where it overlaps, then lay it flat against a ruler. That length is your circumference."
+          }
+        }
+      },
+      "block_order": ["ring", "strip"]
+    }
+  ]
+}
+{% endschema %}

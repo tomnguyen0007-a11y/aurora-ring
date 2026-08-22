@@ -677,42 +677,43 @@
   }
 
   .hero[data-blur-shadow='true'] {
-    --blurred-reflection-filter-saturate: saturate(1.5);
-    --blurred-reflection-mask-image: linear-gradient(to bottom, #000 0%, #000 60%, transparent 100%);
-    --blurred-reflection-box-shadow: rgb(0 0 0 / 5%) 0 0 1rem;
-    --blurred-reflection-filter-blur: blur(20px);
-    --blurred-reflection-scale: scale(2, 1.25);
-    --blurred-reflection-padding-block-end: 60px;
-  }
+  --blurred-reflection-filter-saturate: saturate(1.5);
+  --blurred-reflection-mask-image: linear-gradient(to bottom, #000 0%, #000 80%, transparent 98%);
+  --blurred-reflection-box-shadow: rgb(0 0 0 / 5%) 0 0 1rem;
+  --blurred-reflection-filter-blur: blur(20px);
+  --blurred-reflection-scale: scale(2, 1.25);
+  --blurred-reflection-padding-block-end: 60px;
+}
 
-  .hero[data-blur-shadow='true'] .hero__container::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    box-shadow: var(--blurred-reflection-box-shadow);
-    mix-blend-mode: overlay;
-    pointer-events: none;
-    z-index: -1;
-  }
+.hero[data-blur-shadow='true'] .hero__container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: var(--blurred-reflection-box-shadow);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: -1;
+}
 
-  .hero__blurred-image {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    mask-image: var(--blurred-reflection-mask-image);
-    filter: var(--blurred-reflection-filter-saturate);
-    pointer-events: none;
-    transform: translateY(50%);
-    overflow: hidden;
-  }
+.hero__blurred-image {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  mask-image: var(--blurred-reflection-mask-image);
+  -webkit-mask-image: var(--blurred-reflection-mask-image);
+  filter: var(--blurred-reflection-filter-saturate);
+  pointer-events: none;
+  transform: translateY(50%);
+  overflow: hidden;
+}
 
-  .hero__blurred-image--desktop {
-    display: none;
+.hero__blurred-image--desktop {
+  display: none;
 
-    @media screen and (min-width: 750px) {
-      display: block;
-    }
+  @media screen and (min-width: 750px) {
+    display: block;
   }
+}
 
   .hero__blurred-image--mobile {
     display: block;
