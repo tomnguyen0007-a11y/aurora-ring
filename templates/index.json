@@ -12,9 +12,9 @@
     "hero": {
       "type": "aurora-hero",
       "settings": {
-        "eyebrow": "The smart ring without the subscription",
+        "eyebrow": "Smart ring · No subscription",
         "heading": "Sleep is the <em>whole</em> game.",
-        "subheading": "Aurora measures your nights and tells you one thing each morning: push, or hold back. Buy it once and every insight is yours for good.",
+        "subheading": "Aurora reads your night, then tells you one thing: push, or hold back.",
         "cta_label": "Buy Aurora",
         "cta_link": "",
         "product": "",
