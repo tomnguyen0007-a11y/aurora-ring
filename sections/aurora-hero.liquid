@@ -40,31 +40,41 @@
         }}
       {%- else -%}
         {%- comment -%}
-          Ships with real product photography rather than a grey placeholder, so
-          the theme is presentable the moment it is installed. Replace it by
-          setting a Product image in the theme editor.
+          The still life. Three finishes, no props, no card, no ground.
 
-          Two crops of the same shot rather than one squeezed into both
-          shapes. The phone crop is crop-tight around the three rings so the
-          product fills the width; the studio backdrop in both is the page's
-          own bone, so neither reads as a picture in a box.
+          Each source still is photographed on pure white, and the blend mode
+          in the stylesheet turns that white into the page — so these are
+          cut-outs without being cut-out files. Do not replace these with
+          images shot on any other backdrop: a grey or gradient studio floor
+          will blend to a visible grey shape.
         {%- endcomment -%}
-        <picture>
-          <source
-            media="(max-width: 989px)"
-            srcset="{{ 'aurora-hero-rings-phone.jpg' | asset_url }}"
-            width="1016"
-            height="1065"
-          >
+        <div class="aurora-still">
           <img
-            src="{{ 'aurora-hero-rings.jpg' | asset_url }}"
-            width="1200"
-            height="1262"
+            class="aurora-still__ring aurora-still__ring--gold"
+            src="{{ s.ring_gold }}&width=900"
+            width="1000"
+            height="1000"
             loading="eager"
             fetchpriority="high"
-            alt="Three Aurora rings in black, rose gold and copper finishes"
+            alt="The Aurora ring in gold"
           >
-        </picture>
+          <img
+            class="aurora-still__ring aurora-still__ring--graphite"
+            src="{{ s.ring_graphite }}&width=700"
+            width="1000"
+            height="1000"
+            loading="eager"
+            alt="The Aurora ring in graphite"
+          >
+          <img
+            class="aurora-still__ring aurora-still__ring--silver"
+            src="{{ s.ring_silver }}&width=650"
+            width="1000"
+            height="1000"
+            loading="eager"
+            alt="The Aurora ring in silver"
+          >
+        </div>
       {%- endif -%}
     </div>
 
@@ -94,10 +104,7 @@
     padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
 
     /* Warm ink family — reads as ink on bone, not black on white.
-       Measured on #f7f6f3: 15.1:1 / 11.0:1 / 4.9:1. All pass WCAG AA.
-       The quiet tone was #6b5b48, a warm brown that appeared nowhere else in
-       the token set; against the photograph's own warm props it read as a
-       fourth, unplanned colour. Neutralised, not cooled. */
+       Measured on #f7f6f3: 15.1:1 / 11.0:1 / 4.9:1. All pass WCAG AA. */
     --aur-hero-ink: #241f1a;
     --aur-hero-ink-soft: #3d362d;
     --aur-hero-ink-quiet: #6f6a63;
@@ -134,6 +141,57 @@
     height: auto;
   }
 
+  /* ---- The still life ----
+     Three finishes arranged, rather than a photograph of three rings on props.
+
+     How the cut-out works, because it is not obvious from the markup: every
+     source still is shot on pure white — measured, corner pixel is exactly
+     255,255,255 and the ring occupies 13.6%–86.4% of the frame. `darken`
+     keeps whichever channel is lower, so against bone every white pixel
+     resolves to bone and only the ring survives. The result is a cut-out with
+     no alpha channel, no generated asset, and no rectangle edge anywhere —
+     which is the one thing the wooden-prop photograph could never lose, since
+     its content ran to the bottom of its own frame.
+
+     Requirement: the stills must stay on white. A grey or gradient studio
+     backdrop will blend to a visible grey shape instead of disappearing.
+
+     Everything is a percentage of the container, so one composition serves
+     every width. */
+  .aurora-still {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 39 / 31;
+  }
+
+  .aurora-still__ring {
+    position: absolute;
+    display: block;
+    height: auto;
+    mix-blend-mode: darken;
+    /* Three sensor arrays in one frame: the LEDs photograph hotter than they
+       read in life and were the first thing the eye landed on. */
+    filter: saturate(0.92);
+  }
+
+  .aurora-still__ring--gold {
+    width: 70%;
+    left: 18%;
+    top: -3%;
+  }
+
+  .aurora-still__ring--graphite {
+    width: 50%;
+    left: -6%;
+    top: 28%;
+  }
+
+  .aurora-still__ring--silver {
+    width: 46%;
+    left: 58%;
+    top: 42%;
+  }
+
   /* ---- Base rhythm for the action ----
      These sit ABOVE the phone block on purpose. They have the same
      specificity as the phone rules, so when they sat below them they won on
@@ -163,9 +221,9 @@
   /* ---------------------------------------------------------------------
      Phones: one axis, one object, one ask.
 
-     Everything — eyebrow, headline, sentence, hairline, button, promises —
-     is set on the same 24px axis, and the photograph is the single element
-     that leaves it, bleeding to both screen edges by exactly the gutter.
+     Everything — eyebrow, headline, sentence, hairline, button — is set on
+     the same 24px axis, and the still life is the single element that leaves
+     it, bleeding to both screen edges by exactly the gutter.
 
      Two structural bugs are fixed here rather than compensated for:
 
@@ -176,11 +234,10 @@
         action floated free of the text axis. `align-items: stretch` fixes
         both at source.
 
-     2. The photograph was capped with max-height + object-fit: contain. The
-        phone crop is 1016x1065 with its content already 2.5% inside the
-        frame, so the cap letterboxed it: at 390px it painted 370 of 390px,
-        putting the rings' optical edge at 7px while the type sat at 24px.
-        Nothing lined up with anything. It is painted at full width now.
+     2. The photograph was capped with max-height + object-fit: contain, which
+        letterboxed it and put the rings' optical edge at 7px against a 24px
+        type axis. The still life needs no cap: it is sized by its own
+        aspect-ratio box.
      --------------------------------------------------------------------- */
   @media screen and (max-width: 989px) {
     .aurora-hero__inner {
@@ -191,16 +248,16 @@
       padding-block: clamp(0.25rem, 1vh, 0.5rem) clamp(0.75rem, 2.5vh, 1.25rem);
     }
 
+    /* 10px read as a disclaimer. This line is the frame of reference for a
+       brand nobody has heard of — it has to carry like a label, not a
+       footnote. Oura sets the equivalent at 14px. */
     .aurora-hero .aurora__eyebrow {
       margin: 0 0 0.875rem;
-      font-size: 0.625rem;
-      letter-spacing: 0.16em;
+      font-size: 0.75rem;
+      letter-spacing: 0.14em;
       line-height: 1.4;
     }
 
-    /* Scale carries the hierarchy: a 48px headline over a 14px sentence, so
-       the eye lands on the claim, then on the object. Sized to hold on two
-       lines at 390px without hyphenating. */
     .aurora-hero__title {
       font-size: clamp(2.5rem, 12.3vw, 3.25rem);
       line-height: 0.96;
@@ -217,12 +274,10 @@
 
     /* Bleed by exactly the gutter. No 100vw, no percentage margin: a
        percentage resolves against the flex item's containing block, which is
-       not the viewport, and 100vw includes the scrollbar. A negative inline
-       margin equal to the padding that created the gutter lands on the screen
-       edge on every width, and cannot overflow the document. */
+       not the viewport, and 100vw includes the scrollbar. */
     .aurora-hero__media {
       width: auto;
-      margin: 1rem calc(-1 * var(--aur-gutter)) 0;
+      margin: 0.875rem calc(-1 * var(--aur-gutter)) 0;
     }
 
     .aurora-hero__media img,
@@ -233,26 +288,21 @@
       object-fit: contain;
     }
 
-    /* The hairline gives the photograph's lower edge a job. Without it the
-       shot reads as a rectangle that happens to stop; with it, it reads as
-       the boundary between the object and the ask.
+    .aurora-hero__media .aurora-still__ring {
+      width: auto;
+    }
 
-       Flex column, not a block: under the inner's align-items: stretch the
-       promises paragraph would otherwise stretch to the full column instead
-       of sitting at its own width. */
     .aurora-hero__action {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      margin-top: 1rem;
-      padding-top: 1rem;
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
       border-top: 1px solid var(--aur-line);
       text-align: left;
     }
 
-    /* A pill the width of its own label, on the axis. A full-width slab is
-       what every Shopify theme ships; it also reads as urgency, which is the
-       opposite of what a considered purchase wants. */
+    /* A pill the width of its own label, on the axis. */
     .aurora-hero__action .aurora__btn--primary {
       display: inline-flex;
       width: auto;
@@ -260,59 +310,19 @@
       padding: 1rem 2.25rem;
     }
 
+    /* The trust bar renders the same promises, with a line of detail under
+       each, 30px below this one — measured 655 against 687. Two of the three
+       appeared twice on the same screen. Kept in the DOM for desktop, where
+       that section is well below the fold. */
     .aurora-hero__assurance {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.375rem 0.875rem;
-      /* Marks hung in the gutter, so the words line up with the button and
-         the headline above them. */
-      margin: 0.75rem 0 0 -0.5625rem;
-      font-size: 0.6875rem;
-      line-height: 1.5;
-    }
-
-    /* Three promises wrap to a second line at every phone width and that line
-       lands under the fold — it was cut off at 863px on an 844px viewport.
-       Two hold on one line. The third promise is the eyebrow's claim word for
-       word, so the phone loses nothing; desktop still shows all three. */
-    .aurora-hero__assurance span:nth-child(n + 3) {
       display: none;
-    }
-
-    .aurora-hero__assurance span {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4375rem;
-    }
-
-    /* The desktop separator would otherwise double up with the mark. Scoped
-       one level deeper so it wins on specificity rather than on the order the
-       two blocks happen to sit in. */
-    .aurora-hero .aurora-hero__assurance span:not(:last-child)::after {
-      content: none;
-    }
-
-    .aurora-hero__assurance span::before {
-      content: '';
-      flex: none;
-      width: 0.1875rem;
-      height: 0.1875rem;
-      border-radius: 50%;
-      background: currentColor;
-      opacity: 0.55;
     }
   }
 
-  /* ---- The screens people actually hold ----
-     A 390x844 phone gives the page ~734px once Safari's address bar is on
-     screen, so this block is keyed to 860px rather than to an SE.
-
-     The cap is 52vh and the photograph keeps its bleed. That number is not
-     arbitrary: the shot carries a 2.5% bone inset, so at 52vh of 734 it
-     paints 364 of 390px and the rings' optical left edge lands at 22px
-     against the 24px type axis. The previous 46vh cap painted 308px and put
-     the rings 49px inboard — the same misalignment the block above exists to
-     remove. */
+  /* Short screens. A 390x844 phone gives the page ~734px once Safari's
+     address bar is on screen, so this is keyed to 860 rather than to an SE.
+     The still life is sized by aspect-ratio rather than capped, so it needs
+     no letterbox here — only the type and the gaps tighten. */
   @media screen and (max-width: 989px) and (max-height: 860px) {
     .aurora-hero__title {
       font-size: clamp(2.125rem, 10.5vw, 2.5rem);
@@ -324,40 +334,25 @@
     }
 
     .aurora-hero__media {
-      margin-top: 0.5rem;
-    }
-
-    .aurora-hero__media img,
-    .aurora-hero__media svg {
-      max-height: 52vh;
-      object-fit: contain;
+      margin-top: 0.75rem;
     }
 
     .aurora-hero__action {
-      margin-top: 0.75rem;
-      padding-top: 0.75rem;
-    }
-
-    .aurora-hero__assurance {
-      margin-top: 0.625rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
     }
   }
 
   @media screen and (min-width: 990px) {
-    /* Unchanged from before, only re-plumbed: the action is a sibling now, so
-       it is placed back into the left column under the copy by name. Row gap
-       is zero because the action already carries its own top margin — the
-       column gap is the only gap the layout ever wanted. */
     .aurora-hero__inner {
       grid-template-columns: 0.9fr 1.1fr;
       grid-template-areas:
         'copy media'
         'action media'
         'slack media';
-      /* Three rows, the last one elastic. The photograph spans the column, and
-         with only two rows its surplus height is shared out between them —
-         which pushed the button 55px below where it has always sat. The 1fr
-         row soaks that surplus up underneath the action instead. */
+      /* Three rows, the last one elastic, so the media column's surplus
+         height is soaked up below the action rather than shared between the
+         rows above it. */
       grid-template-rows: auto auto 1fr;
       column-gap: clamp(2.5rem, 5vw, 5rem);
       row-gap: 0;
@@ -388,7 +383,7 @@
   "class": "aurora-section",
   "disabled_on": { "groups": ["header", "footer"] },
   "settings": [
-    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "The smart ring without the subscription" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Smart ring · No subscription" },
     {
       "type": "inline_richtext",
       "id": "heading",
@@ -399,9 +394,32 @@
       "type": "textarea",
       "id": "subheading",
       "label": "Subheading",
-      "default": "Aurora measures your nights and tells you one thing each morning: push, or hold back. Buy it once and every insight is yours for good."
+      "default": "Aurora reads your night, then tells you one thing: push, or hold back."
     },
-    { "type": "image_picker", "id": "image", "label": "Product image" },
+    { "type": "image_picker", "id": "image", "label": "Product image (overrides the still life)" },
+    { "type": "header", "content": "Still life" },
+    {
+      "type": "paragraph",
+      "content": "Three finishes, floated on the page. The stills MUST be photographed on pure white — the white is blended away to reveal the page. A grey or gradient backdrop will show as a grey shape."
+    },
+    {
+      "type": "text",
+      "id": "ring_gold",
+      "label": "Gold ring image URL",
+      "default": "https://cdn.shopify.com/s/files/1/0958/6281/7034/files/IMG_9648.webp?v=1785881926"
+    },
+    {
+      "type": "text",
+      "id": "ring_graphite",
+      "label": "Graphite ring image URL",
+      "default": "https://cdn.shopify.com/s/files/1/0958/6281/7034/files/IMG_9649.webp?v=1785881926"
+    },
+    {
+      "type": "text",
+      "id": "ring_silver",
+      "label": "Silver ring image URL",
+      "default": "https://cdn.shopify.com/s/files/1/0958/6281/7034/files/IMG_9647.webp?v=1785677211"
+    },
     { "type": "header", "content": "Action" },
     { "type": "text", "id": "cta_label", "label": "Button label", "default": "Buy Aurora" },
     { "type": "url", "id": "cta_link", "label": "Button link" },
@@ -411,8 +429,8 @@
       "type": "text",
       "id": "assurance",
       "label": "Assurance line",
-      "info": "Separate with ·. Phones show the first two.",
-      "default": "Free EU delivery · Free size exchange · No subscription, ever"
+      "info": "Separate with ·. Hidden on phones — the trust bar below repeats it.",
+      "default": "Free EU delivery · No subscription, ever"
     },
     { "type": "header", "content": "Padding" },
     {
