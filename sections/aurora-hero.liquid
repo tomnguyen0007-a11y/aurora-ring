@@ -167,7 +167,7 @@
      is set on the same 24px axis, and the photograph is the single element
      that leaves it, bleeding to both screen edges by exactly the gutter.
 
-     Two structural bugs are fixed here rather than compensated for:
+     Three structural bugs are fixed here rather than compensated for:
 
      1. This element switched to a flex column but kept `align-items: center`
         from the rule above. Flex items therefore shrank to their content and
@@ -181,6 +181,11 @@
         frame, so the cap letterboxed it: at 390px it painted 370 of 390px,
         putting the rings' optical edge at 7px while the type sat at 24px.
         Nothing lined up with anything. It is painted at full width now.
+
+     3. The button is an inline-flex anchor, so in a block container it sat in
+        a line box and inherited the section's 1.6 leading: 18px of space
+        above the pill that appears in no margin and in no computed style.
+        The action is a flex column here, which has no line boxes.
      --------------------------------------------------------------------- */
   @media screen and (max-width: 989px) {
     .aurora-hero__inner {
@@ -237,6 +242,9 @@
        shot reads as a rectangle that happens to stop; with it, it reads as
        the boundary between the object and the ask. */
     .aurora-hero__action {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
       margin-top: 1rem;
       padding-top: 1rem;
       border-top: 1px solid var(--aur-line);
