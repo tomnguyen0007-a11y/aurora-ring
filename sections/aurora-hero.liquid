@@ -1,0 +1,281 @@
+{%- liquid
+  assign s = section.settings
+  assign product = s.product
+-%}
+
+<section class="aurora aurora-hero" style="{% render 'aurora-spacing', settings: section.settings %}">
+  <div class="aurora__inner aurora-hero__inner">
+    <div class="aurora-hero__copy">
+      {%- if s.eyebrow != blank -%}
+        <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
+      {%- endif -%}
+
+      <h1 class="aurora__display aurora-hero__title aurora-reveal" style="--aur-reveal-delay: 80ms">
+        {{ s.heading }}
+      </h1>
+
+      {%- if s.subheading != blank -%}
+        <p class="aurora__lede aurora-reveal" style="--aur-reveal-delay: 160ms">{{ s.subheading }}</p>
+      {%- endif -%}
+
+      {%- comment -%} One call to action. Nothing competes with it. {%- endcomment -%}
+      <div class="aurora-hero__action aurora-reveal" style="--aur-reveal-delay: 240ms">
+        <a class="aurora__btn aurora__btn--primary" id="aurora-hero-cta" href="{{ s.cta_link | default: routes.all_products_collection_url }}">
+          {{ s.cta_label }}
+          {%- if product != blank and s.show_price -%}
+            <span class="aurora__price">{{ product.price | money }}</span>
+          {%- endif -%}
+        </a>
+
+        {%- if s.assurance != blank -%}
+          <p class="aurora-hero__assurance">{{ s.assurance }}</p>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <div class="aurora-hero__media aurora-reveal" style="--aur-reveal-delay: 120ms">
+      {%- if s.image != blank -%}
+        {{
+          s.image
+          | image_url: width: 1400
+          | image_tag:
+            widths: '500, 800, 1100, 1400',
+            sizes: '(max-width: 989px) 88vw, 48vw',
+            loading: 'eager',
+            fetchpriority: 'high',
+            alt: s.image.alt | default: s.heading | strip_html
+        }}
+      {%- else -%}
+        {%- comment -%}
+          Ships with real product photography rather than a grey placeholder, so
+          the theme is presentable the moment it is installed. Replace it by
+          setting a Product image in the theme editor.
+        {%- endcomment -%}
+        <img
+          src="{{ 'aurora-hero-rings.jpg' | asset_url }}"
+          width="1200"
+          height="1262"
+          loading="eager"
+          fetchpriority="high"
+          alt="Three Aurora rings in black, rose gold and copper finishes"
+        >
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .aurora-hero {
+    padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
+  }
+
+  .aurora-hero__inner {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(1.75rem, 5vw, 5rem);
+    align-items: center;
+    padding-block: clamp(1.5rem, 8vh, 6rem);
+  }
+
+  /* The product sits on the page itself — no card, no border, no shadow. The
+     studio backdrop is keyed to the page colour in the asset itself, so no
+     blend mode is needed (multiply would only darken the whole photograph).
+     Declared here, before the phone override below, so the mobile block's
+     object-fit: cover wins on source order rather than needing higher
+     specificity to beat an identical selector. */
+  .aurora-hero__media img,
+  .aurora-hero__media svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* Phones: the photograph is the background, not a block above the type.
+     Pulling it above the copy (the previous fix) stopped the rings from being
+     buried below the fold, but the section still read as two stacked halves.
+     The image now fills the section edge-to-edge behind the text, the way the
+     original theme's hero did — copy sits over it on a bone scrim so the type
+     stays fully legible without darkening or hiding the product. */
+  @media screen and (max-width: 989px) {
+    .aurora-hero__inner {
+      position: relative;
+      display: block;
+      min-height: 88vh;
+      padding-block: 0;
+      /* Keeps the inherited .aurora__inner gutter for the copy below — only
+         the media layer needs to escape it. An earlier version tried to do
+         that by giving this element a negative margin equal to the gutter and
+         then padding it back in, but with box-sizing: border-box the two
+         don't cancel: an auto-width block's rendered width is the containing
+         block's width minus its margins, full stop, so a negative margin on
+         both sides grows the box by 2x the gutter instead of by 0. That
+         overflowed the viewport by exactly one gutter's width on every phone
+         breakpoint. The media element bleeds itself now (below), so this
+         element keeps its normal box. */
+    }
+
+    .aurora-hero__media {
+      position: absolute;
+      top: 0;
+      /* Standard viewport-relative bleed: independent of this element's own
+         padding or of any ancestor's max-width, and it cannot overflow the
+         document because it is sized from 100vw, not from a margin sum. */
+      left: 50%;
+      width: 100vw;
+      margin-left: -50vw;
+      order: initial;
+      height: 100%;
+    }
+
+    .aurora-hero__media img,
+    .aurora-hero__media svg {
+      height: 100%;
+      object-fit: cover;
+      /* Keeps the rings themselves in frame rather than centring the crop,
+         which on a tall narrow viewport pushed them toward the bottom edge. */
+      object-position: center 22%;
+    }
+
+    /* Bone scrim under the copy only — the top half of the photograph stays
+       fully clear so the product reads on its own. The eyebrow line is the
+       first thing the scrim has to cover, so the ramp starts underneath it
+       rather than at the headline. */
+    .aurora-hero__media::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(246, 244, 240, 0) 0%,
+        rgba(246, 244, 240, 0) 34%,
+        rgba(246, 244, 240, 0.75) 50%,
+        rgba(246, 244, 240, 0.94) 62%,
+        var(--aur-page) 78%,
+        var(--aur-page) 100%
+      );
+    }
+
+    .aurora-hero__copy {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 88vh;
+      justify-content: flex-end;
+      padding-block: clamp(1.75rem, 6vh, 3rem) clamp(1.25rem, 4vh, 2rem);
+    }
+
+    .aurora-hero__title {
+      max-width: 18ch;
+    }
+
+    .aurora-hero__action {
+      margin-top: clamp(1.25rem, 4vw, 1.75rem);
+    }
+  }
+
+  .aurora-hero__title {
+    max-width: 12ch;
+  }
+
+  .aurora-hero__action {
+    margin-top: clamp(2rem, 4vw, 3rem);
+  }
+
+  .aurora-hero__assurance {
+    margin: 1.125rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--aur-text-muted);
+  }
+
+  .aurora-hero__placeholder {
+    background: var(--aur-page-alt);
+    fill: rgba(20, 21, 26, 0.12);
+  }
+
+  @media screen and (min-width: 990px) {
+    .aurora-hero__inner {
+      /* The product gets the larger share — it is the reason anyone is here */
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: clamp(2.5rem, 5vw, 5rem);
+      /* No min-height. An 82vh floor made the grid row taller than either
+         column, and the inherited align-items: center then split the surplus
+         evenly above and below the copy — 218px of dead space over the eyebrow
+         at 1440x900. Sizing the row from its content removes the surplus at
+         source, so the offset below is the only thing setting the top edge. */
+      align-items: start;
+      padding-block: var(--aur-hero-top) var(--aur-hero-bottom);
+    }
+
+    /* A deliberate drop, so the headline reads against the upper third of the
+       product rather than butting against the grid line. */
+    .aurora-hero__copy {
+      padding-block-start: var(--aur-hero-top);
+    }
+
+    /* Contained, not bled. Running the photograph past the container clipped
+       the lower-right ring mid-band, which read as an accident rather than as
+       a crop. All three rings now sit inside the column, whole. */
+    .aurora-hero__media {
+      margin-right: 0;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Aurora hero",
+  "tag": "section",
+  "class": "aurora-section",
+  "disabled_on": { "groups": ["header", "footer"] },
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "The smart ring without the subscription" },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Sleep is the <em>whole</em> game."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Aurora measures your nights and tells you one thing each morning: push, or hold back. Buy it once and every insight is yours for good."
+    },
+    { "type": "image_picker", "id": "image", "label": "Product image" },
+    { "type": "header", "content": "Action" },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Buy Aurora" },
+    { "type": "url", "id": "cta_link", "label": "Button link" },
+    { "type": "product", "id": "product", "label": "Product (for live price)" },
+    { "type": "checkbox", "id": "show_price", "label": "Show price in button", "default": true },
+    {
+      "type": "text",
+      "id": "assurance",
+      "label": "Assurance line",
+      "default": "Free EU delivery · Free size exchange · No subscription, ever"
+    },
+    { "type": "header", "content": "Padding" },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    }
+  ],
+  "presets": [{ "name": "Aurora hero", "category": "Aurora" }]
+}
+{% endschema %}

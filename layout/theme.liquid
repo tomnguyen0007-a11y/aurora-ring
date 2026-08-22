@@ -7,11 +7,8 @@
 >
   <head>
     {%- if settings.favicon != blank -%}
-      <link
-        rel="icon"
-        type="image/png"
-        href="{{ settings.favicon | image_url: width: 32, height: 32 }}"
-      >
+      <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+      <link rel="apple-touch-icon" href="{{ settings.favicon | image_url: width: 180, height: 180 }}">
     {%- endif -%}
 
     {% # theme-check-disable RemoteAsset %}
@@ -36,32 +33,11 @@
     {% endif %}
 
     {%- render 'aurora-design-tokens' -%}
+    <script src="{{ 'aurora.js' | asset_url }}" type="module"></script>
 
     {{ content_for_header }}
     {% # theme-check-enable RemoteAsset %}
     <meta name="facebook-domain-verification" content="rgshzcsmjohmib8a9gplutrd7d9lu9" />
-
-<style>
-/* Overlay fix */
-body::after {
-  content: '' !important;
-  display: block !important;
-  position: fixed !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  width: 200px !important;
-  height: 60px !important;
-  background: #000000 !important;
-  z-index: 2147483647 !important;
-  pointer-events: none !important;
-}
-</style>
-
-{% unless template == 'index' %}
-<style>
-body::after { display: none !important; }
-</style>
-{% endunless %}
 
 <!-- Meta Pixel Code -->
 <script>

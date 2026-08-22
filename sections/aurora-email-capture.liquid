@@ -1,0 +1,255 @@
+{%- liquid
+  assign s = section.settings
+-%}
+
+<section
+  class="aurora aurora-capture"
+  style="{% render 'aurora-spacing', settings: section.settings %}"
+>
+  <div class="aurora__inner">
+    <div class="aurora-capture__card aurora-reveal">
+      <div class="aurora-capture__copy">
+        {%- if s.eyebrow != blank -%}
+          <p class="aurora__eyebrow">{{ s.eyebrow }}</p>
+        {%- endif -%}
+        <h2 class="aurora__h2 aurora-capture__heading">{{ s.heading }}</h2>
+        {%- if s.subheading != blank -%}
+          <p class="aurora-capture__lede">{{ s.subheading }}</p>
+        {%- endif -%}
+      </div>
+
+      <div class="aurora-capture__form-wrap">
+        {%- if s.klaviyo_form_id != blank -%}
+          {%- comment -%}
+            Klaviyo renders into this container once its onsite script is
+            installed via the Klaviyo app. Nothing else is needed here.
+          {%- endcomment -%}
+          <div class="klaviyo-form-{{ s.klaviyo_form_id }}"></div>
+        {%- else -%}
+          {%- form 'customer', class: 'aurora-capture__form' -%}
+            <input type="hidden" name="contact[tags]" value="{{ s.list_tag | default: 'newsletter' }}">
+            <input type="hidden" name="contact[accepts_marketing]" value="true">
+
+            <label class="aurora__visually-hidden" for="aurora-capture-email-{{ section.id }}">
+              {{ s.placeholder | default: 'Email address' }}
+            </label>
+
+            <div class="aurora-capture__field">
+              <input
+                id="aurora-capture-email-{{ section.id }}"
+                class="aurora-capture__input"
+                type="email"
+                name="contact[email]"
+                placeholder="{{ s.placeholder | default: 'Email address' | escape }}"
+                autocomplete="email"
+                required
+              >
+              <button class="aurora__btn aurora__btn--primary aurora-capture__submit" type="submit">
+                {{ s.button_label | default: 'Get the code' }}
+              </button>
+            </div>
+
+            {%- if form.posted_successfully? -%}
+              <p class="aurora-capture__msg aurora-capture__msg--ok" role="status">
+                {{ s.success_message | default: 'You are in — check your inbox.' }}
+              </p>
+            {%- elsif form.errors -%}
+              <p class="aurora-capture__msg aurora-capture__msg--err" role="alert">
+                {{ form.errors.messages.email | default: 'That email did not look right. Try again?' }}
+              </p>
+            {%- endif -%}
+          {%- endform -%}
+        {%- endif -%}
+
+        {%- if s.consent_text != blank -%}
+          <p class="aurora-capture__consent">{{ s.consent_text }}</p>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .aurora-capture {
+    background: var(--aur-bg);
+    padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
+  }
+
+  .aurora-capture__card {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--aur-stack-loose);
+    align-items: center;
+    padding: clamp(2rem, 5vw, 3.75rem);
+    border: 1px solid var(--aur-line);
+    border-radius: var(--aur-r-soft);
+    background: var(--aur-surface);
+    isolation: isolate;
+  }
+
+  .aurora-capture__heading {
+    max-width: 18ch;
+  }
+
+  .aurora-capture__lede {
+    margin: var(--aur-stack) 0 0;
+    color: var(--aur-text-muted);
+    max-width: 44ch;
+  }
+
+  .aurora-capture__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  .aurora-capture__input {
+    flex: 1;
+    min-width: 0;
+    padding: 1rem 1.125rem;
+    border-radius: var(--aur-r-pill);
+    border: 1px solid var(--aur-line);
+    background: var(--aur-page);
+    color: var(--aur-text);
+    font-family: var(--aur-font-body);
+    font-size: 0.9375rem;
+    transition: border-color 0.3s var(--aur-ease-out), background-color 0.3s var(--aur-ease-out);
+  }
+
+  .aurora-capture__input::placeholder {
+    color: var(--aur-text-dim);
+  }
+
+  .aurora-capture__input:hover {
+    border-color: var(--aur-text-dim);
+  }
+
+  .aurora-capture__input:focus {
+    outline: none;
+    border-color: var(--aur-accent);
+    background: var(--aur-page-alt);
+  }
+
+  .aurora-capture__submit {
+    flex-shrink: 0;
+  }
+
+  .aurora-capture__msg {
+    margin: 0.875rem 0 0;
+    font-size: 0.8125rem;
+  }
+
+  .aurora-capture__msg--ok {
+    color: var(--aur-accent);
+  }
+
+  .aurora-capture__msg--err {
+    color: var(--aur-ember);
+  }
+
+  .aurora-capture__consent {
+    margin: 1rem 0 0;
+    font-size: 0.75rem;
+    line-height: 1.55;
+    color: var(--aur-text-dim);
+    max-width: 46ch;
+  }
+
+  .aurora-capture__consent a {
+    color: var(--aur-text-muted);
+  }
+
+  @media screen and (min-width: 750px) {
+    .aurora-capture__field {
+      flex-direction: row;
+      align-items: center;
+      padding: 0.375rem;
+      border: 1px solid var(--aur-line);
+      border-radius: var(--aur-r-pill);
+      background: var(--aur-page);
+      gap: 0.5rem;
+    }
+
+    .aurora-capture__input {
+      border-color: transparent;
+      background: transparent;
+    }
+
+    .aurora-capture__input:hover,
+    .aurora-capture__input:focus {
+      border-color: transparent;
+      background: transparent;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .aurora-capture__card {
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(2.5rem, 5vw, 5rem);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Aurora email capture",
+  "tag": "section",
+  "class": "aurora-section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "10% off your first Aurora" },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Join the early list."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "One email when your size is back in stock, one when the next drop opens. Nothing else."
+    },
+    { "type": "text", "id": "placeholder", "label": "Placeholder", "default": "Email address" },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Get the code" },
+    { "type": "text", "id": "list_tag", "label": "Customer tag", "default": "newsletter" },
+    { "type": "text", "id": "success_message", "label": "Success message", "default": "You are in — check your inbox." },
+    {
+      "type": "richtext",
+      "id": "consent_text",
+      "label": "Consent text",
+      "default": "<p>By subscribing you agree to receive marketing emails. Unsubscribe any time.</p>"
+    },
+    { "type": "header", "content": "Klaviyo" },
+    {
+      "type": "text",
+      "id": "klaviyo_form_id",
+      "label": "Klaviyo form ID",
+      "info": "Optional. Enter the ID (e.g. XyZ123) to use a Klaviyo embedded form instead of the built-in one. Requires the Klaviyo app installed."
+    },
+    { "type": "header", "content": "Padding" },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    }
+  ],
+  "presets": [{ "name": "Aurora email capture", "category": "Aurora" }]
+}
+{% endschema %}

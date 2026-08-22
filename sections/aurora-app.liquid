@@ -1,0 +1,286 @@
+{%- comment -%}
+  The app. A ring is a sensor; the app is the product people actually use every
+  morning, and leaving it unexplained is the single largest unanswered question
+  on the page — nobody buys a tracker without knowing what the screen looks
+  like.
+
+  Screenshot on one side, the four things that happen on the other. The steps
+  are numbered because the value here is sequence, not features.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+-%}
+
+<section class="aurora aurora-app" style="{% render 'aurora-spacing', settings: section.settings %}">
+  <div class="aurora__inner aurora-app__inner">
+    <div class="aurora-app__media aurora-reveal">
+      {%- if s.image != blank -%}
+        {{
+          s.image
+          | image_url: width: 900
+          | image_tag:
+            widths: '380, 600, 900',
+            sizes: '(max-width: 989px) 78vw, 38vw',
+            loading: 'lazy',
+            class: 'aurora-app__shot',
+            alt: s.image.alt | default: s.image_alt
+        }}
+      {%- else -%}
+        {%- comment -%}
+          Backdrop keyed to --aur-page-alt in the asset itself, so the
+          screenshot sits on the page rather than floating in a white box. Same
+          approach as the hero photograph; a blend mode cannot do this because
+          the source backdrop is a white-to-pale-blue gradient, not flat white.
+        {%- endcomment -%}
+        <img
+          class="aurora-app__shot"
+          src="{{ 'aurora-app-screens.webp' | asset_url }}"
+          width="1000"
+          height="1000"
+          loading="lazy"
+          decoding="async"
+          alt="{{ s.image_alt | escape }}"
+        >
+      {%- endif -%}
+    </div>
+
+    <div class="aurora-app__copy">
+      {%- if s.eyebrow != blank -%}
+        <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
+      {%- endif -%}
+
+      <h2 class="aurora__h2 aurora-app__title aurora-reveal" style="--aur-reveal-delay: 80ms">{{ s.heading }}</h2>
+
+      {%- if s.subheading != blank -%}
+        <p class="aurora__lede aurora-reveal" style="--aur-reveal-delay: 140ms">{{ s.subheading }}</p>
+      {%- endif -%}
+
+      <ol class="aurora-app__steps">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'step' -%}
+            <li
+              class="aurora-app__step aurora-reveal"
+              style="--aur-reveal-delay: {{ forloop.index0 | times: 80 | plus: 200 }}ms"
+              {{ block.shopify_attributes }}
+            >
+              <span class="aurora-app__step-num aurora__num" aria-hidden="true">
+                {{- forloop.index | prepend: '0' | slice: -2, 2 -}}
+              </span>
+              <div>
+                <h3 class="aurora-app__step-title">{{ block.settings.title }}</h3>
+                <p class="aurora-app__step-text">{{ block.settings.text }}</p>
+              </div>
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ol>
+
+      {%- if s.spec_line != blank -%}
+        <p class="aurora-app__spec aurora__num aurora-reveal" style="--aur-reveal-delay: 520ms">{{ s.spec_line }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .aurora-app {
+    padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
+    background: var(--aur-bg-alt);
+  }
+
+  .aurora-app__inner {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(2.5rem, 6vw, 5rem);
+    align-items: center;
+  }
+
+  .aurora-app__media {
+    /* The screenshot is a tall portrait; capping it stops it dominating the
+       column on wide viewports while still reading as a real phone. */
+    max-width: 22rem;
+    margin-inline: auto;
+  }
+
+  .aurora-app__shot {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .aurora-app__title {
+    max-width: 15ch;
+  }
+
+  .aurora-app__copy .aurora__lede {
+    max-width: 44ch;
+  }
+
+  .aurora-app__steps {
+    list-style: none;
+    margin: clamp(2.25rem, 4vw, 3rem) 0 0;
+    padding: 0;
+    border-top: 1px solid var(--aur-line);
+  }
+
+  .aurora-app__step {
+    display: grid;
+    grid-template-columns: 2.75rem 1fr;
+    gap: 0 1rem;
+    padding-block: 1.25rem;
+    border-bottom: 1px solid var(--aur-line);
+  }
+
+  .aurora-app__step-num {
+    font-size: 0.75rem;
+    color: var(--aur-text-dim);
+    padding-top: 0.2rem;
+  }
+
+  .aurora-app__step-title {
+    font-family: var(--aur-font-body);
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.35;
+    margin: 0;
+    color: var(--aur-text);
+  }
+
+  .aurora-app__step-text {
+    margin: 0.375rem 0 0;
+    font-size: 0.9375rem;
+    color: var(--aur-text-muted);
+    max-width: 50ch;
+  }
+
+  .aurora-app__spec {
+    margin: 1.5rem 0 0;
+    font-size: 0.75rem;
+    line-height: 1.7;
+    color: var(--aur-text-dim);
+  }
+
+  @media screen and (min-width: 990px) {
+    .aurora-app__inner {
+      grid-template-columns: 0.85fr 1.15fr;
+      gap: clamp(3rem, 7vw, 6rem);
+    }
+
+    .aurora-app__media {
+      max-width: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Aurora app",
+  "tag": "section",
+  "class": "aurora-section",
+  "disabled_on": { "groups": ["header", "footer"] },
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "The app" },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Where the night turns into an answer."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "The ring collects. The app is where you actually read it — one screen each morning, and the detail underneath only if you want it."
+    },
+    { "type": "image_picker", "id": "image", "label": "App screenshot" },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Screenshot alt text",
+      "default": "The Aurora companion app showing the overnight sleep summary"
+    },
+    {
+      "type": "textarea",
+      "id": "spec_line",
+      "label": "Spec line",
+      "info": "Shown in mono under the steps. Keep it to hard facts.",
+      "default": "iOS and Android · Bluetooth pairing · no account fee · full export at any time"
+    },
+    { "type": "header", "content": "Padding" },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 128
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 128
+    }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Step",
+      "limit": 6,
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "Pair it once" },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text",
+          "default": "Open the app, hold the ring near the phone, done."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Aurora app",
+      "category": "Aurora",
+      "blocks": {
+        "pair": {
+          "type": "step",
+          "settings": {
+            "title": "Pair it once",
+            "text": "Open the app, hold the ring near your phone and confirm. It stays paired after that."
+          }
+        },
+        "wear": {
+          "type": "step",
+          "settings": {
+            "title": "Wear it to bed",
+            "text": "No button to press and nothing to start. The ring records the whole night on its own."
+          }
+        },
+        "read": {
+          "type": "step",
+          "settings": {
+            "title": "Read one screen at breakfast",
+            "text": "Sleep stages, heart rate through the night and what your body did with the day before — summarised before you have finished the coffee."
+          }
+        },
+        "keep": {
+          "type": "step",
+          "settings": {
+            "title": "Keep the history",
+            "text": "Every night stays in the app and can be exported in full whenever you want it. Nothing is locked behind a tier."
+          }
+        }
+      },
+      "block_order": ["pair", "wear", "read", "keep"]
+    }
+  ]
+}
+{% endschema %}

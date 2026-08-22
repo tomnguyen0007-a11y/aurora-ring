@@ -1,0 +1,334 @@
+{%- comment -%}
+  What Aurora tells you.
+
+  Previously three sentences alone in a column, which left most of the width
+  empty and made the page read as a wall of text. It now runs as two columns:
+  the position and the photograph hold the left, the three answers hold the
+  right, each carrying the figure the app actually shows for it.
+
+  The figures are illustrative — labelled as such below the list — not a claim
+  about anyone's data.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+-%}
+
+<section
+  id="{{ s.anchor | default: 'aurora-how' }}"
+  class="aurora aurora-proof"
+  style="{% render 'aurora-spacing', settings: section.settings %}"
+>
+  <div class="aurora__inner aurora-proof__inner">
+    <div class="aurora-proof__stage">
+      <div class="aurora-proof__lead">
+        {%- if s.eyebrow != blank -%}
+          <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
+        {%- endif -%}
+        <h2 class="aurora__h2 aurora-reveal" style="--aur-reveal-delay: 60ms">{{ s.heading }}</h2>
+        {%- if s.subheading != blank -%}
+          <p class="aurora__lede aurora-reveal" style="--aur-reveal-delay: 120ms">{{ s.subheading }}</p>
+        {%- endif -%}
+      </div>
+
+      <div class="aurora-proof__media aurora-reveal" style="--aur-reveal-delay: 180ms">
+        {%- if s.image != blank -%}
+          {{
+            s.image
+            | image_url: width: 1200
+            | image_tag:
+              widths: '460, 760, 1200',
+              sizes: '(max-width: 989px) 92vw, 42vw',
+              loading: 'lazy',
+              class: 'aurora-proof__img',
+              alt: s.image.alt | default: s.image_alt
+          }}
+        {%- else -%}
+          <img
+            class="aurora-proof__img"
+            src="{{ 'aurora-wear-screenless.jpg' | asset_url }}"
+            width="1400"
+            height="1738"
+            loading="lazy"
+            decoding="async"
+            alt="{{ s.image_alt | escape }}"
+          >
+        {%- endif -%}
+      </div>
+    </div>
+
+    <div class="aurora-proof__answers">
+      <ol class="aurora-proof__list">
+        {%- for block in section.blocks -%}
+          <li
+            class="aurora-proof__item aurora-reveal"
+            style="--aur-reveal-delay: {{ forloop.index0 | times: 90 | plus: 140 }}ms"
+            {{ block.shopify_attributes }}
+          >
+            {%- if block.settings.readout != blank -%}
+              <p class="aurora-proof__readout">
+                <span class="aurora-proof__value aurora__num">{{ block.settings.readout }}</span>
+                {%- if block.settings.readout_label != blank -%}
+                  <span class="aurora-proof__unit">{{ block.settings.readout_label }}</span>
+                {%- endif -%}
+              </p>
+            {%- endif -%}
+            <h3 class="aurora-proof__title">{{ block.settings.title }}</h3>
+            <p class="aurora-proof__text">{{ block.settings.text }}</p>
+          </li>
+        {%- endfor -%}
+      </ol>
+
+      {%- if s.readout_note != blank -%}
+        <p class="aurora-proof__note aurora-reveal">{{ s.readout_note }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+
+  {%- if s.spec_line != blank -%}
+    <div class="aurora__inner">
+      <p class="aurora-proof__spec aurora-reveal">{{ s.spec_line }}</p>
+    </div>
+  {%- endif -%}
+</section>
+
+{% stylesheet %}
+  .aurora-proof {
+    background: var(--aur-bg);
+    padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
+  }
+
+  .aurora-proof__inner {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  .aurora-proof__lead {
+    max-width: 34rem;
+  }
+
+  .aurora-proof__media {
+    margin-top: clamp(2rem, 4vw, 3rem);
+  }
+
+  .aurora-proof__img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .aurora-proof__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0;
+  }
+
+  /* Hairlines only. No boxes — the space between items is the structure. */
+  .aurora-proof__item {
+    padding-block: clamp(1.75rem, 3.5vw, 2.5rem);
+    border-top: 1px solid var(--aur-line);
+  }
+
+  .aurora-proof__item:last-child {
+    border-bottom: 1px solid var(--aur-line);
+  }
+
+  /* The figure sits above the answer, at display scale, so the eye has
+     something to land on before it starts reading. */
+  .aurora-proof__readout {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin: 0 0 0.5rem;
+  }
+
+  /* Display serif, not mono, matching the night section's stat. At this size a
+     monospace decimal gets a full glyph advance and "7.2" reads as "7 . 2";
+     mono here is also reserved for prices and spec lines, which this is not. */
+  .aurora-proof__value {
+    font-family: var(--aur-font-display);
+    font-size: clamp(2.25rem, 5vw, 3.25rem);
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    color: var(--aur-text);
+  }
+
+  .aurora-proof__unit {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--aur-text-muted);
+  }
+
+  .aurora-proof__title {
+    font-family: var(--aur-font-display);
+    font-size: clamp(1.375rem, 2.6vw, 1.75rem);
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin: 0 0 0.5rem;
+    color: var(--aur-text);
+  }
+
+  .aurora-proof__text {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--aur-text-muted);
+    max-width: 46ch;
+  }
+
+  .aurora-proof__note {
+    margin: 1.25rem 0 0;
+    font-size: 0.75rem;
+    color: var(--aur-text-dim);
+  }
+
+  .aurora-proof__spec {
+    margin: clamp(2.5rem, 5vw, 4rem) 0 0;
+    padding-top: clamp(1.25rem, 3vw, 1.75rem);
+    border-top: 1px solid var(--aur-line);
+    font-family: var(--aur-font-mono);
+    font-size: clamp(0.625rem, 2.4vw, 0.6875rem);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--aur-text-dim);
+    line-height: 1.9;
+  }
+
+  @media screen and (min-width: 990px) {
+    .aurora-proof__inner {
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(3rem, 7vw, 6rem);
+      align-items: start;
+    }
+
+    .aurora-proof__answers {
+      /* Nudged down so the first hairline aligns near the heading baseline
+         rather than the top of the column. */
+      padding-top: 0.5rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Aurora proof",
+  "tag": "section",
+  "class": "aurora-section",
+  "settings": [
+    { "type": "text", "id": "anchor", "label": "Anchor id", "default": "aurora-how" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Every morning" },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Three things it tells you."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Not forty charts. Three answers, every morning."
+    },
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text",
+      "default": "The Aurora ring worn on a hand resting on a bicycle bar at sunset"
+    },
+    {
+      "type": "text",
+      "id": "readout_note",
+      "label": "Readout note",
+      "info": "Keep this — it marks the figures as illustrative rather than real data.",
+      "default": "Figures shown are examples of the app's morning summary."
+    },
+    {
+      "type": "text",
+      "id": "spec_line",
+      "label": "Spec line",
+      "default": "Grade 5 titanium · 2.8mm · 4g · 7-day battery · water-resistant to 100m"
+    },
+    { "type": "header", "content": "Padding" },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 240,
+      "step": 4,
+      "unit": "px",
+      "default": 128
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 240,
+      "step": 4,
+      "unit": "px",
+      "default": 128
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Item",
+      "settings": [
+        { "type": "text", "id": "readout", "label": "Figure", "default": "85" },
+        { "type": "text", "id": "readout_label", "label": "Figure label", "default": "Sleep score" },
+        { "type": "text", "id": "title", "label": "Title", "default": "How well you slept" },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text",
+          "default": "One score for the night, and the two or three things that shaped it."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [
+    {
+      "name": "Aurora proof",
+      "category": "Aurora",
+      "blocks": {
+        "item": {
+          "type": "item",
+          "settings": {
+            "readout": "85",
+            "readout_label": "Sleep score",
+            "title": "How well you slept",
+            "text": "One score for the night, and the two or three things that shaped it."
+          }
+        },
+        "item_2": {
+          "type": "item",
+          "settings": {
+            "readout": "7.2",
+            "readout_label": "Readiness",
+            "title": "Whether to push today",
+            "text": "Aurora compares last night against your own baseline and answers in a word, not a chart."
+          }
+        },
+        "item_3": {
+          "type": "item",
+          "settings": {
+            "readout": "62",
+            "readout_label": "Active minutes",
+            "title": "What your effort actually cost",
+            "text": "Real sessions counted separately from walking about, so the numbers mean something."
+          }
+        }
+      },
+      "block_order": ["item", "item_2", "item_3"]
+    }
+  ]
+}
+{% endschema %}

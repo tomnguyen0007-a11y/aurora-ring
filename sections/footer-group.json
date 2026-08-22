@@ -397,6 +397,7 @@
         "text_9qiA6Y",
         "accordion_EhRViA"
       ],
+      "disabled": true,
       "name": "t:names.faq_section",
       "settings": {
         "content_direction": "column",
@@ -437,7 +438,7 @@
             "font": "heading",
             "unit": "pixel",
             "percent_width": 100,
-            "pixel_height": 96,
+            "pixel_height": 120,
             "custom_mobile_size": false,
             "unit_mobile": "percent",
             "percent_width_mobile": 100,

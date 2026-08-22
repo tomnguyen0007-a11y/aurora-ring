@@ -1,0 +1,38 @@
+{%- doc -%}
+  Emits block padding custom properties for an aurora-* section.
+
+  Deliberately does not use the theme's `spacing-style` snippet: that one
+  multiplies by `--spacing-scale`, a variable defined by another snippet, so a
+  section carrying it is not self-contained and renders with collapsed padding
+  anywhere that variable is missing. This scales on its own, from roughly 45%
+  of the set value on a phone up to the full value at 1440px.
+
+  @param {object} settings - Section settings containing the padding values
+{%- enddoc -%}
+
+{%- liquid
+  assign keys = 'padding-block-start,padding-block-end' | split: ','
+
+  for key in keys
+    assign value = settings[key]
+
+    if value != blank and value > 0
+      assign floor = value | times: 0.45 | round
+      assign fluid = value | divided_by: 14.4
+
+      echo '--'
+      echo key
+      echo ': clamp('
+      echo floor
+      echo 'px, '
+      echo fluid
+      echo 'vw, '
+      echo value
+      echo 'px);'
+    else
+      echo '--'
+      echo key
+      echo ': 0px;'
+    endif
+  endfor
+-%}

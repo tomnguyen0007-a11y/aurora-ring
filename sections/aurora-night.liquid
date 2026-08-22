@@ -1,0 +1,175 @@
+{%- comment -%}
+  The one dark section on the site.
+
+  Its job is contrast, not information: after several screens of bone and space,
+  the page goes black for the part of the story that happens at night. Because
+  nothing else on the site is dark, this reads as intent rather than as theme.
+  Keep it to one statement and one number.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+-%}
+
+<section class="aurora aurora--night aurora-night" style="{% render 'aurora-spacing', settings: section.settings %}">
+  <div class="aurora__inner aurora-night__inner">
+    <div class="aurora-night__copy">
+      {%- if s.eyebrow != blank -%}
+        <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
+      {%- endif -%}
+
+      <h2 class="aurora__display aurora-night__heading aurora-reveal" style="--aur-reveal-delay: 80ms">
+        {{ s.heading }}
+      </h2>
+
+      {%- if s.body != blank -%}
+        <p class="aurora__lede aurora-reveal" style="--aur-reveal-delay: 160ms">{{ s.body }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="aurora-night__aside">
+      {%- comment -%}
+        The lit-display studio shot is the one photograph in the library that is
+        genuinely dark, so it belongs to the single dark section rather than
+        being forced onto a bone surface.
+      {%- endcomment -%}
+      {%- if s.image != blank or s.show_image -%}
+        <div class="aurora-night__media aurora-reveal" style="--aur-reveal-delay: 200ms">
+          {%- if s.image != blank -%}
+            {{
+              s.image
+              | image_url: width: 1200
+              | image_tag:
+                widths: '420, 800, 1200',
+                sizes: '(max-width: 989px) 92vw, 34vw',
+                loading: 'lazy',
+                class: 'aurora-night__img',
+                alt: s.image.alt | default: s.image_alt
+            }}
+          {%- else -%}
+            <img
+              class="aurora-night__img"
+              src="{{ 'aurora-screen-night.jpg' | asset_url }}"
+              width="1600"
+              height="1195"
+              loading="lazy"
+              decoding="async"
+              alt="{{ s.image_alt | escape }}"
+            >
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      {%- if s.stat_value != blank -%}
+        <figure class="aurora-night__stat aurora-reveal" style="--aur-reveal-delay: 260ms">
+          <span class="aurora-night__value aurora__num">{{ s.stat_value }}</span>
+          {%- if s.stat_label != blank -%}
+            <figcaption class="aurora-night__caption">{{ s.stat_label }}</figcaption>
+          {%- endif -%}
+        </figure>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .aurora-night {
+    padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
+  }
+
+  .aurora-night__img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .aurora-night__aside {
+    display: grid;
+    gap: clamp(1.75rem, 4vw, 2.5rem);
+  }
+
+  .aurora-night__inner {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(3rem, 6vw, 5rem);
+    align-items: end;
+  }
+
+  .aurora-night__heading {
+    max-width: 14ch;
+  }
+
+  .aurora-night__stat {
+    margin: 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--aur-line);
+  }
+
+  /* Bone, not ember. The accent is a warning colour against a black field and
+     fought the photograph beside it; on the one dark surface the figure carries
+     enough weight from scale alone. */
+  .aurora-night__value {
+    display: block;
+    font-family: var(--aur-font-display);
+    font-size: clamp(4rem, 11vw, 8rem);
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    color: var(--aur-text);
+  }
+
+  .aurora-night__caption {
+    margin-top: 0.875rem;
+    font-size: 0.875rem;
+    color: var(--aur-text-muted);
+    max-width: 26ch;
+  }
+
+  @media screen and (min-width: 990px) {
+    .aurora-night__inner {
+      grid-template-columns: 1.4fr 0.6fr;
+      gap: clamp(3rem, 8vw, 8rem);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Aurora night",
+  "tag": "section",
+  "class": "aurora-section",
+  "settings": [
+    { "type": "checkbox", "id": "show_image", "label": "Show image", "default": true },
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text",
+      "default": "Two Aurora rings with the display lit, showing the time"
+    },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "While you sleep" },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "The eight hours you never get to watch."
+    },
+    {
+      "type": "textarea",
+      "id": "body",
+      "label": "Body",
+      "default": "Aurora reads every stage of your night — deep, REM, light, and the wakings you will not remember — and has an answer waiting before you reach for the kettle."
+    },
+    { "type": "text", "id": "stat_value", "label": "Stat", "default": "7×" },
+    {
+      "type": "text",
+      "id": "stat_label",
+      "label": "Stat caption",
+      "default": "A week of nights on one charge, so the data never has gaps."
+    },
+    { "type": "header", "content": "Padding" },
+    { "type": "range", "id": "padding-block-start", "label": "Top", "min": 0, "max": 280, "step": 4, "unit": "px", "default": 144 },
+    { "type": "range", "id": "padding-block-end", "label": "Bottom", "min": 0, "max": 280, "step": 4, "unit": "px", "default": 144 }
+  ],
+  "presets": [{ "name": "Aurora night", "category": "Aurora" }]
+}
+{% endschema %}
