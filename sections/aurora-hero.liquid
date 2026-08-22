@@ -3,105 +3,75 @@
   assign product = s.product
 -%}
 
-{%- comment -%}
-  The night, and the morning after it.
-
-  The whole proposition is that Aurora measures the eight hours you cannot
-  watch and hands you one answer at breakfast. So the page opens inside the
-  night — the type sits on a dark sky, the ring stands lit at the horizon —
-  and by the bottom of the section the light has come up and the page is bone
-  again, which is where the rest of the site lives.
-
-  That gradient is not an effect laid over a photograph: it is in the
-  photograph. The shot is dark above and a lit floor below, so the section
-  only has to meet it at both ends. It also solves the problem that sank
-  every earlier pass on phones: white type on the night needs no scrim, and
-  the call to action sits on the lit floor in ink. Nothing is washed out to
-  make anything else readable.
-{%- endcomment -%}
-
 <section class="aurora aurora-hero" style="{% render 'aurora-spacing', settings: section.settings %}">
-  <div class="aurora-hero__stage">
-    {%- comment -%}
-      Sky. Two slow bodies of light — cold high up, warm at the horizon, the
-      way the real thing behaves. Blurred past the point of being a shape, so
-      it reads as weather rather than as decoration sitting on top.
-    {%- endcomment -%}
-    <div class="aurora-hero__sky" aria-hidden="true"></div>
-
-    <div class="aurora-hero__shot" aria-hidden="true">
-      {%- if s.image != blank -%}
-        {{
-          s.image
-          | image_url: width: 1600
-          | image_tag:
-            widths: '600, 900, 1200, 1600',
-            sizes: '100vw',
-            loading: 'eager',
-            fetchpriority: 'high',
-            class: 'aurora-hero__img',
-            alt: ''
-        }}
-      {%- else -%}
-        {%- comment -%}
-          Art direction rather than one file squeezed into both shapes: the
-          phone gets a crop built for a tall screen, with the sky extended
-          above the ring so the headline has somewhere to sit.
-        {%- endcomment -%}
-        <picture>
-          <source
-            media="(max-width: 989px)"
-            srcset="{{ 'aurora-hero-night-portrait.jpg' | asset_url }}"
-            width="1080"
-            height="2163"
-          >
-          <img
-            class="aurora-hero__img"
-            src="{{ 'aurora-hero-night.jpg' | asset_url }}"
-            width="2000"
-            height="1493"
-            loading="eager"
-            fetchpriority="high"
-            alt=""
-          >
-        </picture>
-      {%- endif -%}
-      <div class="aurora-hero__halo"></div>
-    </div>
-
-    {%- comment -%}
-      Fine grain over the whole stage. Dark gradients band badly on phone
-      panels; a little noise breaks the bands up and is the difference
-      between a black background and a photographed one.
-    {%- endcomment -%}
-    <div class="aurora-hero__grain" aria-hidden="true"></div>
-    <div class="aurora-hero__scrim" aria-hidden="true"></div>
-
+  <div class="aurora__inner aurora-hero__inner">
     <div class="aurora-hero__copy">
       {%- if s.eyebrow != blank -%}
-        <p class="aurora-hero__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
+        <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
       {%- endif -%}
 
-      <h1 class="aurora-hero__title aurora-reveal" style="--aur-reveal-delay: 90ms">
+      <h1 class="aurora__display aurora-hero__title aurora-reveal" style="--aur-reveal-delay: 80ms">
         {{ s.heading }}
       </h1>
 
       {%- if s.subheading != blank -%}
-        <p class="aurora-hero__lede aurora-reveal" style="--aur-reveal-delay: 180ms">{{ s.subheading }}</p>
+        <p class="aurora__lede aurora-reveal" style="--aur-reveal-delay: 160ms">{{ s.subheading }}</p>
       {%- endif -%}
+
     </div>
 
     {%- comment -%}
-      The action sits at the foot of the stage, on the lit part of the
-      photograph, so the pill is ink on light exactly like every other call to
-      action on the site rather than a second style invented for the dark.
+      On a phone the product comes before the ask: statement, object, buy. It
+      is the only element that runs the full width of the screen, which is what
+      makes the section read as a product rather than as a page with a picture
+      on it.
     {%- endcomment -%}
-    <div class="aurora-hero__act aurora-reveal" style="--aur-reveal-delay: 300ms">
-      <a
-        class="aurora__btn aurora__btn--primary aurora-hero__cta"
-        id="aurora-hero-cta"
-        href="{{ s.cta_link | default: routes.all_products_collection_url }}"
-      >
+    <div class="aurora-hero__media aurora-reveal" style="--aur-reveal-delay: 120ms">
+      {%- if s.image != blank -%}
+        {{
+          s.image
+          | image_url: width: 1400
+          | image_tag:
+            widths: '500, 800, 1100, 1400',
+            sizes: '(max-width: 989px) 100vw, 48vw',
+            loading: 'eager',
+            fetchpriority: 'high',
+            alt: s.image.alt | default: s.heading | strip_html
+        }}
+      {%- else -%}
+        {%- comment -%}
+          Ships with real product photography rather than a grey placeholder, so
+          the theme is presentable the moment it is installed. Replace it by
+          setting a Product image in the theme editor.
+        {%- endcomment -%}
+        {%- comment -%}
+          Two crops of the same shot rather than one squeezed into both
+          shapes. The phone crop is crop-tight around the three rings so the
+          product fills the width; the studio backdrop in both is the page's
+          own bone, so neither reads as a picture in a box.
+        {%- endcomment -%}
+        <picture>
+          <source
+            media="(max-width: 989px)"
+            srcset="{{ 'aurora-hero-rings-phone.jpg' | asset_url }}"
+            width="1016"
+            height="1065"
+          >
+          <img
+            src="{{ 'aurora-hero-rings.jpg' | asset_url }}"
+            width="1200"
+            height="1262"
+            loading="eager"
+            fetchpriority="high"
+            alt="Three Aurora rings in black, rose gold and copper finishes"
+          >
+        </picture>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} One call to action. Nothing competes with it. {%- endcomment -%}
+    <div class="aurora-hero__action aurora-reveal" style="--aur-reveal-delay: 240ms">
+      <a class="aurora__btn aurora__btn--primary" id="aurora-hero-cta" href="{{ s.cta_link | default: routes.all_products_collection_url }}">
         {{ s.cta_label }}
         {%- if product != blank and s.show_price -%}
           <span class="aurora__price">{{ product.price | money }}</span>
@@ -120,478 +90,239 @@
   </div>
 </section>
 
-<script>
-  {%- comment -%}
-    One rAF-throttled listener for the whole section: it publishes how far
-    through the hero the page has scrolled as --aur-hero-progress, and the
-    stylesheet decides what moves. Nothing animates unless the hero is on
-    screen, and nothing runs at all when the visitor has asked for less
-    motion.
-  {%- endcomment -%}
-  (() => {
-    const stage = document.currentScript.previousElementSibling?.querySelector('.aurora-hero__stage');
-    if (!stage || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    let ticking = false;
-    const update = () => {
-      ticking = false;
-      const rect = stage.getBoundingClientRect();
-      if (rect.bottom < 0 || rect.top > innerHeight) return;
-      const p = Math.min(1, Math.max(0, -rect.top / Math.max(1, rect.height)));
-      stage.style.setProperty('--aur-hero-progress', p.toFixed(4));
-    };
-
-    const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(update);
-    };
-
-    addEventListener('scroll', onScroll, { passive: true });
-    addEventListener('resize', onScroll, { passive: true });
-    update();
-  })();
-</script>
-
 {% stylesheet %}
   .aurora-hero {
     padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
-    /* Daylight. The night belongs to the stage, so any section padding
-       underneath it is page colour rather than a black bar. */
-    background: var(--aur-page);
+
+    /* Warm ink family — reads as ink on bone, not black on white.
+       Measured on #f7f6f3: 15.1:1 / 11.0:1 / 6.0:1. All pass WCAG AA. */
+    --aur-hero-ink: #241f1a;
+    --aur-hero-ink-soft: #3d362d;
+    --aur-hero-ink-quiet: #6b5b48;
   }
 
-  .aurora-hero__stage {
-    position: relative;
-    overflow: hidden;
-    isolation: isolate;
-    display: grid;
-    /* Two rows, not three. There are two children, and grid fills rows in
-       order — a third row would never be used and the action would sit in the
-       1fr row, stretched through the middle of the frame. */
-    grid-template-rows: auto 1fr;
-    min-height: 100svh;
-    padding-inline: var(--aur-gutter);
-    background: var(--aur-hero-night, #0a0b0e);
-    color: var(--aur-hero-ink, #f6f4f0);
-    --aur-hero-progress: 0;
-  }
-
-  /* ---- Sky ---------------------------------------------------------- */
-
-  /* Screened over the photograph rather than hidden behind it: an opaque
-     image covers anything underneath, and screen blending means the light
-     only ever adds — it lands on the night and disappears on the lit floor,
-     which is exactly how a sky behaves. */
-  .aurora-hero__sky {
-    position: absolute;
-    inset: -10% -20% auto;
-    height: 78%;
-    z-index: 1;
-    mix-blend-mode: screen;
-    pointer-events: none;
-  }
-
-  .aurora-hero__sky::before,
-  .aurora-hero__sky::after {
-    content: '';
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(70px);
-    will-change: transform;
-  }
-
-  /* Cold, high, and off to one side — the light the night is lit by. */
-  .aurora-hero__sky::before {
-    top: -18%;
-    left: 4%;
-    width: 78%;
-    height: 76%;
-    background: radial-gradient(closest-side, rgba(86, 178, 175, 0.34), rgba(86, 178, 175, 0) 72%);
-    animation: aurora-hero-drift-a 34s var(--aur-ease-out, ease-in-out) infinite alternate;
-  }
-
-  /* Warm, low, and small: the morning the section is heading toward. */
-  .aurora-hero__sky::after {
-    top: 34%;
-    right: 2%;
-    width: 62%;
-    height: 52%;
-    background: radial-gradient(closest-side, rgba(200, 108, 58, 0.24), rgba(200, 108, 58, 0) 70%);
-    animation: aurora-hero-drift-b 44s var(--aur-ease-out, ease-in-out) infinite alternate;
-  }
-
-  @keyframes aurora-hero-drift-a {
-    from { transform: translate3d(-4%, -2%, 0) scale(1); }
-    to { transform: translate3d(6%, 4%, 0) scale(1.14); }
-  }
-
-  @keyframes aurora-hero-drift-b {
-    from { transform: translate3d(3%, 2%, 0) scale(1.08); }
-    to { transform: translate3d(-5%, -3%, 0) scale(0.94); }
-  }
-
-  /* The header floats over this section on the homepage. On phones it lands
-     on night and needs nothing; on desktop the lit part of the photograph
-     reaches the top of the frame and the wordmark disappears into it. */
-  .aurora-hero__sky::before,
-  .aurora-hero__sky::after,
-  .aurora-hero__scrim {
-    pointer-events: none;
-  }
-
-  .aurora-hero__scrim {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-  }
-
-  .aurora-hero__scrim::before {
-    content: '';
-    position: absolute;
-    inset: 0 0 auto;
-    height: 9.5rem;
-    background: linear-gradient(to bottom, rgba(8, 9, 12, 0.72), rgba(8, 9, 12, 0));
-  }
-
-  /* ---- The product --------------------------------------------------- */
-
-  .aurora-hero__shot {
-    position: absolute;
-    /* Phones: the photograph is a band at the foot of the stage, not a full
-       cover. Covering the whole stage ties the ring's position to the height
-       of the screen — on a 667px phone the sky is cropped away, the ring
-       climbs, and the lede ends up sitting on it. As a band, the type always
-       has the same share of night above it, whatever the phone.
-
-       Its top edge is masked out over the first fifth so the photograph's own
-       sky dissolves into the section's rather than meeting it at a seam. */
-    inset: auto 0 0;
-    height: 58%;
-    z-index: 0;
-    pointer-events: none;
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 20%);
-    mask-image: linear-gradient(to bottom, transparent 0%, #000 20%);
-  }
-
-  .aurora-hero__img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    /* Anchored to the foot of the frame. A taller phone then gets more sky
-       above the ring — which is the part of the picture that was invented for
-       exactly that — instead of cropping the product or floating it in the
-       middle of the screen. */
-    object-fit: cover;
-    object-position: 50% 100%;
-    transform: translate3d(0, calc(var(--aur-hero-progress) * -4%), 0);
-    will-change: transform;
-  }
-
-  /* A slow breath of light behind the ring. Long enough to read as something
-     alive rather than as a blink. */
-  .aurora-hero__halo {
-    position: absolute;
-    mix-blend-mode: screen;
-    left: 50%;
-    top: 46%;
-    width: 96%;
-    aspect-ratio: 1;
-    transform: translate(-50%, -50%);
-    background: radial-gradient(closest-side, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0) 70%);
-    animation: aurora-hero-breathe 7s ease-in-out infinite;
-  }
-
-  @keyframes aurora-hero-breathe {
-    0%, 100% { opacity: 0.62; transform: translate(-50%, -50%) scale(1); }
-    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.06); }
-  }
-
-  /* ---- Texture and the hand-off to daylight -------------------------- */
-
-  .aurora-hero__grain {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    opacity: 0.28;
-    mix-blend-mode: overlay;
-    pointer-events: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
-  }
-
-  /* The last stretch of the stage dissolves into the page colour, so the
-     photograph's lit floor and the bone section below it are one surface
-     rather than two with a seam between them. */
-  .aurora-hero__stage::after {
-    content: '';
-    position: absolute;
-    inset: auto 0 0;
-    height: 26%;
-    z-index: 2;
-    pointer-events: none;
-    background: linear-gradient(to bottom, rgba(246, 244, 240, 0) 0%, rgba(246, 244, 240, 0.55) 62%, var(--aur-page) 100%);
-  }
-
-  /* ---- Type ---------------------------------------------------------- */
-
-  .aurora-hero__copy,
-  .aurora-hero__act {
-    position: relative;
-    z-index: 3;
-  }
-
-  .aurora-hero__copy {
-    padding-block-start: clamp(5.5rem, 16vh, 9rem);
-    opacity: calc(1 - var(--aur-hero-progress) * 0.85);
-  }
-
-  .aurora-hero__eyebrow {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin: 0 0 1.125rem;
-    font-family: var(--aur-font-mono);
-    font-size: 0.65625rem;
-    letter-spacing: 0.1em;
-    line-height: 1.5;
-    text-transform: uppercase;
-    color: rgba(246, 244, 240, 0.62);
-  }
-
-  .aurora-hero__eyebrow::before {
-    content: '';
-    flex: none;
-    width: 1.75rem;
-    height: 1px;
-    background: var(--aur-ember-bright, #ff7e47);
+  .aurora-hero .aurora__eyebrow {
+    color: var(--aur-hero-ink-quiet);
+    font-weight: 600;
+    letter-spacing: 0.16em;
   }
 
   .aurora-hero__title {
-    margin: 0;
-    max-width: 11ch;
-    font-family: var(--aur-font-display);
-    font-weight: 400;
-    font-size: clamp(3rem, 13vw, 4rem);
-    line-height: 0.94;
-    letter-spacing: -0.025em;
-    color: var(--aur-hero-ink, #f6f4f0);
-    text-wrap: balance;
+    color: var(--aur-hero-ink);
+    max-width: 12ch;
   }
 
-  .aurora-hero__title em {
-    font-style: italic;
-    color: var(--aur-ember-bright, #ff7e47);
+  .aurora-hero .aurora__lede {
+    color: var(--aur-hero-ink-soft);
   }
 
-  .aurora-hero__lede {
-    margin: 1.125rem 0 0;
-    max-width: 32ch;
-    font-family: var(--aur-font-body);
-    font-size: 0.9375rem;
-    line-height: 1.62;
-    color: rgba(246, 244, 240, 0.72);
-  }
-
-  /* ---- Action -------------------------------------------------------- */
-
-  .aurora-hero__act {
-    align-self: end;
-    padding-block-end: clamp(1.5rem, 5vh, 2.75rem);
-  }
-
-  .aurora-hero__cta {
-    /* Auto width, left-aligned with the type. A full-width pill lays a black
-       bar across the bottom of the photograph and takes the ring's foot with
-       it; at this size the pill sits on the empty part of the lit floor and
-       the product stays whole. */
-    display: inline-flex;
-    padding-block: 1.0625rem;
-    padding-inline: 2.25rem;
-    /* On the lit floor at the foot of the shot, so this is the same ink pill
-       the rest of the site uses. */
-    background: var(--aur-ink, #14151a);
-    color: var(--aur-page, #f6f4f0);
-    box-shadow: 0 1.25rem 2.5rem -1.5rem rgba(10, 11, 14, 0.7);
-  }
-
-  .aurora-hero__assurance {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.375rem 1.0625rem;
-    /* Hangs the marks in the gutter so the words line up with the pill. */
-    margin: 1rem 0 0 -0.625rem;
-    font-family: var(--aur-font-body);
-    font-size: 0.75rem;
-    line-height: 1.5;
-    color: var(--aur-ink-soft, #3d3e45);
-  }
-
-  .aurora-hero__assurance span {
-    display: inline-flex;
+  .aurora-hero__inner {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(1.75rem, 5vw, 5rem);
     align-items: center;
-    gap: 0.4375rem;
+    padding-block: clamp(1.5rem, 8vh, 6rem);
   }
 
-  .aurora-hero__assurance span::before {
-    content: '';
-    flex: none;
-    width: 0.1875rem;
-    height: 0.1875rem;
-    border-radius: 50%;
-    background: var(--aur-accent, #b8431a);
+  /* The product sits on the page itself — no card, no border, no shadow. */
+  .aurora-hero__media img,
+  .aurora-hero__media svg {
+    display: block;
+    width: 100%;
+    height: auto;
   }
 
-  /* Short screens — an SE, or anything in landscape. The type block is what
-     gives, so the product keeps its band. */
-  @media screen and (max-height: 700px) {
-    .aurora-hero__copy {
-      padding-block-start: clamp(4.25rem, 13vh, 6rem);
+  /* Phones: statement, product, ask — in that order, all on one screen.
+     The three rings are the only thing that runs edge to edge, so the product
+     is the largest element on the page rather than a picture underneath a
+     column of text. The shot's studio backdrop is the same bone as the page,
+     so it needs no frame, no card and no shadow: it simply sits on the page.
+
+     The previous pass cropped this photograph to a band with object-fit:
+     cover, which is what cut the rings about on every phone. It is shown
+     whole here and scaled to fit the screen instead. */
+  @media screen and (max-width: 989px) {
+    .aurora-hero__inner {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      padding-block: clamp(0.5rem, 2vh, 1.25rem) clamp(1.25rem, 4vh, 2rem);
     }
 
+    .aurora-hero .aurora__eyebrow {
+      margin-bottom: 0.875rem;
+      font-size: 0.6875rem;
+      letter-spacing: 0.14em;
+      line-height: 1.5;
+    }
+
+    /* The scale contrast is what carries the hierarchy: a 46px headline over
+       a 14.5px sentence, so the eye lands on the claim and then on the ring
+       without either of them being decorated. */
     .aurora-hero__title {
-      font-size: clamp(2.625rem, 11.5vw, 3.25rem);
+      font-size: clamp(2.625rem, 12vw, 3.5rem);
+      line-height: 0.95;
+      letter-spacing: -0.025em;
+      max-width: 11ch;
     }
 
-    .aurora-hero__lede {
+    .aurora-hero .aurora__lede {
       margin-top: 0.875rem;
-      font-size: 0.875rem;
-      max-width: 30ch;
-    }
-  }
-
-  /* The last of the small phones. Everything gives a little so the lede
-     still clears the top of the ring. */
-  @media screen and (max-height: 600px) {
-    .aurora-hero__shot {
-      height: 52%;
-    }
-
-    .aurora-hero__lede {
-      font-size: 0.8125rem;
-      max-width: 34ch;
-    }
-  }
-
-  /* ---- Tablet -------------------------------------------------------- */
-
-  @media screen and (min-width: 600px) {
-    .aurora-hero__title {
-      font-size: clamp(3.75rem, 8vw, 5rem);
-      max-width: 12ch;
-    }
-
-    .aurora-hero__lede {
-      font-size: 1rem;
+      font-size: 0.90625rem;
+      line-height: 1.55;
+      /* Wide enough to set in three lines rather than four, and to end level
+         with the button below it. */
       max-width: 38ch;
     }
 
-    .aurora-hero__cta {
-      width: auto;
-      display: inline-flex;
-      padding-inline: 2.25rem;
+    /* Out of the page gutter to both edges. It is not pulled up over the
+       sentence: the photograph is opaque bone at its top, so an overlap eats
+       the last line of the lede rather than tucking behind it. */
+    .aurora-hero__media {
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      margin-top: clamp(0.5rem, 2vh, 1.25rem);
     }
 
-    .aurora-hero__halo {
-      width: 56%;
-      top: 62%;
-    }
-  }
-
-  /* ---- Desktop ------------------------------------------------------- */
-
-  @media screen and (min-width: 990px) {
-    .aurora-hero__stage {
-      /* One column of type against the photograph, held off the left edge by
-         the page gutter and centred in the frame. */
-      grid-template-rows: auto auto;
-      align-content: center;
-      min-height: min(92svh, 54rem);
-      padding-inline: max(var(--aur-gutter), calc((100% - var(--aur-max)) / 2 + var(--aur-gutter)));
-    }
-
-    /* The film treatment: the left of the frame deepens so a column of type
-       can live on it. Masked out before the bottom of the stage, so the lit
-       floor the ring stands on keeps its light and the section still arrives
-       at daylight. */
-    .aurora-hero__scrim::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        to right,
-        rgba(8, 9, 12, 0.92) 0%,
-        rgba(8, 9, 12, 0.66) 30%,
-        rgba(8, 9, 12, 0) 62%
-      );
-      -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 84%);
-      mask-image: linear-gradient(to bottom, #000 62%, transparent 84%);
-    }
-
-    .aurora-hero__shot {
-      inset: 0;
+    /* Whole, never cropped. max-height lets a short screen shrink the product
+       instead of slicing it, and object-fit: contain letterboxes it in page
+       colour, which is invisible against the page. */
+    .aurora-hero__media img,
+    .aurora-hero__media svg {
+      width: 100%;
       height: auto;
-      -webkit-mask-image: none;
-      mask-image: none;
+      max-height: clamp(17rem, 46vh, 27rem);
+      object-fit: contain;
     }
 
-    .aurora-hero__img {
-      object-position: 62% 100%;
+    .aurora-hero__action {
+      margin-top: clamp(0.75rem, 2.5vh, 1.5rem);
     }
 
-    .aurora-hero__copy {
-      max-width: 34rem;
-      padding-block-start: 0;
-    }
-
-    .aurora-hero__act {
-      align-self: start;
-      padding-block: clamp(1.75rem, 4vh, 2.5rem) 0;
-    }
-
-    /* The column sits on the night here rather than on the lit floor, so the
-       pill inverts with it. */
-    .aurora-hero__cta {
-      background: var(--aur-page);
-      color: var(--aur-ink, #14151a);
-      box-shadow: 0 1.5rem 3rem -1.75rem rgba(8, 9, 12, 0.85);
-    }
-
-    .aurora-hero__cta:hover {
-      background: #ffffff;
+    .aurora-hero__action .aurora__btn--primary {
+      display: flex;
+      width: 100%;
+      max-width: 26rem;
+      padding-block: 1.0625rem;
     }
 
     .aurora-hero__assurance {
-      color: rgba(246, 244, 240, 0.72);
+      display: flex;
+      flex-wrap: wrap;
+      /* Sized to hold all three promises on one line at 390px: a wrapped
+         second line lands exactly on the fold and reads as a cut-off. */
+      gap: 0.375rem 0.875rem;
+      /* Marks hung in the gutter, so the words still line up with the button
+         and the headline above it. */
+      margin: 0.9375rem 0 0 -0.5625rem;
+      font-size: 0.71875rem;
+      line-height: 1.5;
+    }
+
+    .aurora-hero__assurance span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4375rem;
+    }
+
+    /* The desktop separator would otherwise double up with the mark. Scoped
+       one level deeper so it wins on specificity rather than on the order the
+       two blocks happen to sit in. */
+    .aurora-hero .aurora-hero__assurance span:not(:last-child)::after {
+      content: none;
     }
 
     .aurora-hero__assurance span::before {
-      background: var(--aur-ember-bright, #ff7e47);
-    }
-
-    .aurora-hero__halo {
-      left: 66%;
-      top: 56%;
-      width: 34%;
-    }
-
-    .aurora-hero__stage::after {
-      height: 20%;
+      content: '';
+      flex: none;
+      width: 0.1875rem;
+      height: 0.1875rem;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0.55;
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .aurora-hero__sky::before,
-    .aurora-hero__sky::after,
-    .aurora-hero__halo {
-      animation: none;
+  /* Short screens — an SE, an older Android. Everything gives a little so the
+     button still lands above the fold with the product whole above it. */
+  @media screen and (max-width: 989px) and (max-height: 720px) {
+    .aurora-hero__title {
+      font-size: clamp(2.375rem, 11vw, 3rem);
     }
 
-    .aurora-hero__img {
-      transform: none;
+    .aurora-hero .aurora__lede {
+      margin-top: 0.75rem;
+      font-size: 0.875rem;
+    }
+
+    .aurora-hero__media {
+      margin-top: clamp(0.375rem, 1.2vh, 0.75rem);
+    }
+
+    .aurora-hero__media img,
+    .aurora-hero__media svg {
+      max-height: 38vh;
+    }
+
+    .aurora-hero__action {
+      margin-top: clamp(0.5rem, 1.5vh, 1rem);
+    }
+  }
+
+  .aurora-hero__action {
+    margin-top: clamp(2rem, 4vw, 3rem);
+  }
+
+  .aurora-hero__assurance {
+    margin: 1.125rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--aur-hero-ink-quiet);
+  }
+
+  .aurora-hero__assurance span:not(:last-child)::after {
+    content: '·';
+    margin: 0 0.375rem;
+  }
+
+  .aurora-hero__placeholder {
+    background: var(--aur-page-alt);
+    fill: rgba(20, 21, 26, 0.12);
+  }
+
+  @media screen and (min-width: 990px) {
+    /* Unchanged from before, only re-plumbed: the action is a sibling now, so
+       it is placed back into the left column under the copy by name. Row gap
+       is zero because the action already carries its own top margin — the
+       column gap is the only gap the layout ever wanted. */
+    .aurora-hero__inner {
+      grid-template-columns: 0.9fr 1.1fr;
+      grid-template-areas:
+        'copy media'
+        'action media'
+        'slack media';
+      /* Three rows, the last one elastic. The photograph spans the column, and
+         with only two rows its surplus height is shared out between them —
+         which pushed the button 55px below where it has always sat. The 1fr
+         row soaks that surplus up underneath the action instead. */
+      grid-template-rows: auto auto 1fr;
+      column-gap: clamp(2.5rem, 5vw, 5rem);
+      row-gap: 0;
+      align-items: start;
+      padding-block: var(--aur-hero-top) var(--aur-hero-bottom);
     }
 
     .aurora-hero__copy {
-      opacity: 1;
+      grid-area: copy;
+      padding-block-start: var(--aur-hero-top);
+    }
+
+    .aurora-hero__action {
+      grid-area: action;
+    }
+
+    .aurora-hero__media {
+      grid-area: media;
+      margin-right: 0;
     }
   }
 {% endstylesheet %}
@@ -616,12 +347,7 @@
       "label": "Subheading",
       "default": "Aurora measures your nights and tells you one thing each morning: push, or hold back. Buy it once and every insight is yours for good."
     },
-    {
-      "type": "image_picker",
-      "id": "image",
-      "label": "Hero photograph",
-      "info": "Optional. Leave empty for the bundled night shot, which is cropped separately for phones and desktop."
-    },
+    { "type": "image_picker", "id": "image", "label": "Product image" },
     { "type": "header", "content": "Action" },
     { "type": "text", "id": "cta_label", "label": "Button label", "default": "Buy Aurora" },
     { "type": "url", "id": "cta_link", "label": "Button link" },
@@ -631,7 +357,6 @@
       "type": "text",
       "id": "assurance",
       "label": "Assurance line",
-      "info": "Separate each promise with a middot ( · ).",
       "default": "Free EU delivery · Free size exchange · No subscription, ever"
     },
     { "type": "header", "content": "Padding" },
@@ -653,7 +378,7 @@
       "max": 200,
       "step": 4,
       "unit": "px",
-      "default": 0
+      "default": 24
     }
   ],
   "presets": [{ "name": "Aurora hero", "category": "Aurora" }]
