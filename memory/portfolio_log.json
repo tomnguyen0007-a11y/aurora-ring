@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-08-29",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,90 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-08-29",
+      "account": {
+        "nav_usd": 1295.236,
+        "nav_eur_base": 1120.8452,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -138.38,
+        "daily_pnl_usd": -119.85,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 13.47000025,
+          "prior_close": 15.21,
+          "gap_pct": -11.44,
+          "since_last_run_pct": 5.56,
+          "day_high": 14.79,
+          "day_low": 13.15,
+          "day_open": 14.78,
+          "market_value": 929.43001725,
+          "nav_pct": 71.76,
+          "unrealized_pnl": -59.26688275,
+          "daily_pnl": -120.05998275,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Company's official count remains 78 of 80 required events as of Aug 11, 2026 Q2 update (last confirmed by GlobeNewswire/8-K); an unconfirmed German-media report claimed the 80th event had been hit, driving a run-up, but SELLAS has issued no press release or 8-K confirming it. Topline still guided for 2H 2026. No official filing since Aug 11.",
+            "next_check": "watch for 8-K / press release confirming 80th event and database lock"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 71.8% of NAV vs 35% trim threshold, worse than prior run (69.8%)",
+          "risk_sizing": {
+            "trim_shares_to_reach_35pct_nav": 35.35,
+            "two_pct_nav_target_value_usd": 25.9
+          },
+          "trade_idea": {
+            "news_sentiment_score": "neutral-to-negative (no confirmed negative trial data; move looks like rumor-fade + profit-taking after late-June run-up, plus ongoing dilution overhang from 2026 warrant exercises expanding share count to ~202M from 153.1M at YE2025)",
+            "setup": "gap-down fade / trim candidate - large gap (-11.44%) on no confirmed negative catalyst, but position is dangerously overconcentrated (71.8% NAV, zero cash buffer) heading into a binary readout with no set date"
+          }
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 140.94999695,
+          "prior_close": 140.87,
+          "gap_pct": 0.06,
+          "since_last_run_pct": -3.41,
+          "day_high": 143.29,
+          "day_low": 137.9,
+          "day_open": 139.52,
+          "market_value": 366.46999207,
+          "nav_pct": 28.29,
+          "unrealized_pnl": -78.45300793,
+          "daily_pnl": 0.20799207,
+          "catalyst": {
+            "name": "Staggered IPO lockup unlock schedule (180-day lockup expires Dec 8, 2026) + prior $25B investment-grade bond deal",
+            "status": "First lockup tranche (911M shares, ~20%) unlocked Aug 6, 2026 - stock rose +6.1% that day, absorbing the supply well. Day-70 tranche (~7%) unlocked Aug 20, 2026. ~1.23B shares (~14% of shares out) unlocked so far across 2 releases. Further 7% tranches continue through October; ~28% Q3-earnings-triggered tranche and full lockup expiry Dec 8, 2026 still ahead. Musk's 6.4B shares locked until June 12, 2027.",
+            "next_check": "next scheduled tranche date and Q3 2026 earnings date for the ~28% release"
+          },
+          "risk_flag": "WATCH - within cap, improved from 30.1% to 28.3% of NAV since last run; near-term unlocks have been absorbed without a selloff",
+          "risk_sizing": {
+            "trim_shares_to_reach_35pct_nav": 0,
+            "two_pct_nav_target_value_usd": 25.9
+          },
+          "trade_idea": {
+            "news_sentiment_score": "neutral-to-positive (unlocks absorbed better than feared; flat pre-market)",
+            "setup": "hold - no action indicated; monitor next unlock tranche and Q3 earnings date"
+          }
+        }
+      ],
+      "flags": [
+        "SLS concentration WORSENED since last run: 71.8% of NAV vs 69.8% on 2026-07-11, now nearly 2.1x the 35% single-name trim threshold, with zero cash buffer to rebalance from.",
+        "SLS gapped down -11.44% pre-market with no confirmed negative catalyst - move looks like fade of an unconfirmed 'REGAL hit 80th event' rumor (company's official count is still 78/80 as of the Aug 11 Q2 update) plus profit-taking after the late-June run-up.",
+        "SLS dilution overhang: 2026 warrant exercises have expanded shares outstanding to roughly 202M from 153.1M at YE2025, a headwind independent of trial outcome.",
+        "SPCX lockup unlocks (Aug 6, Aug 20) have been absorbed without a selloff so far - the supply-overhang risk flagged last run has not materialized yet, but larger tranches (~28% at Q3 earnings, full expiry Dec 8) are still ahead.",
+        "Zero USD cash buffer persists - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk)."
       ]
     }
   ]
