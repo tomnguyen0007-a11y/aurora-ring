@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-09-04",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,84 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-09-04",
+      "account": {
+        "nav_usd": 1339.984,
+        "nav_eur_base": 1154.16,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -93.64,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 13.6899996,
+          "prior_close": 13.70,
+          "gap_pct": -0.07,
+          "since_last_run_pct": 7.29,
+          "market_value": 944.6099724,
+          "nav_pct": 70.49,
+          "unrealized_pnl": -44.0869276,
+          "daily_pnl": -0.6900276,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still 78 of 80 required events as of company's latest public update (Q2 2026 report, Aug 11 2026); 80th event has NOT been announced as of Sep 4 2026. Timeline guidance has narrowed from '2H 2026' to a Q4 2026 topline target per third-party trackers, but this is not yet a company-confirmed date. Unverified retail/stocktwits chatter claiming the 80th event was hit is explicitly disputed and NOT corroborated by any company 8-K or press release.",
+            "next_check": "watch for 8-K / press release announcing 80th event, database lock, and unblinding"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 70.5% of NAV vs 35% trim threshold (worse than last run's 69.8%); trimming ~34.74 shares would bring position to the 35% cap",
+          "risk_sizing": {
+            "over_35pct_nav": true,
+            "trim_shares_to_reach_35pct": 34.74,
+            "two_pct_nav_target_value_usd": 26.80
+          },
+          "trade_idea": {
+            "news_sentiment_score": "neutral (0) - no confirmed new catalyst news; unverified bullish retail chatter offset by explicit skepticism/disputes in same reporting",
+            "setup": "hold - flat gap, no confirmed catalyst move; over-concentration risk unchanged and worsening, standing recommendation to trim toward 35% NAV cap independent of catalyst timing"
+          }
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 150.66000365,
+          "prior_close": 149.74,
+          "gap_pct": 0.61,
+          "since_last_run_pct": 3.25,
+          "market_value": 391.71600949,
+          "nav_pct": 29.23,
+          "unrealized_pnl": -53.20699051,
+          "daily_pnl": 2.39200949,
+          "catalyst": {
+            "name": "Staggered post-IPO lockup unlock schedule + continued Starlink/AI-cloud growth narrative",
+            "status": "First lockup tranche (tied to Q2 2026 earnings, reported Aug 4 2026) already occurred - stock absorbed it well, rallying despite the unlock. Next 7% tranche unlocks Sep 9 2026 (5 days out), then Sep 24, Oct 9, Oct 24, with full lockup expiry Dec 8 2026. Oppenheimer raised PT to $280 (from $250) on Sep 2 2026 on continued Starlink subscriber growth (12M, doubled) and AI-cloud compute build-out. Next Starship launch guided for Oct 13 2026.",
+            "next_check": "Sep 9 2026 lockup tranche unlock and stock reaction; Oct 13 Starship launch"
+          },
+          "risk_flag": "WATCH - within 35% cap; second-largest single-name risk; next lockup supply event ~5 days out, though first unlock was absorbed without a selloff and analyst sentiment is improving",
+          "risk_sizing": {
+            "over_35pct_nav": false,
+            "trim_shares_to_reach_35pct": 0,
+            "two_pct_nav_target_value_usd": 26.80
+          },
+          "trade_idea": {
+            "news_sentiment_score": "mildly positive (+1) - analyst PT raise and strong Q2 growth narrative, tempered by imminent lockup supply overhang",
+            "setup": "hold/watch - modest premarket gap up on positive analyst sentiment; monitor for supply-driven fade into the Sep 9 unlock given precedent that the first tranche did not trigger a selloff"
+          }
+        }
+      ],
+      "flags": [
+        "SLS concentration has WORSENED to 70.5% of NAV (from 69.8% last run on 2026-07-11), still roughly double the 35% single-name trim threshold, with the REGAL 80th-event catalyst still unconfirmed and now effectively overdue against the company's own implied pace.",
+        "Unverified retail claims that REGAL hit its 80th event are circulating but are explicitly disputed and not corroborated by any company filing or press release - treat as noise, not signal.",
+        "SPCX faces its next staggered lockup unlock in ~5 days (Sep 9 2026); the first tranche (early Aug) was absorbed without a selloff and analyst sentiment (Oppenheimer PT raise to $280) is improving, but supply risk into Sep 9 and the subsequent Sep 24/Oct 9/Oct 24 tranches remains worth monitoring.",
+        "Zero USD cash buffer persists - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk)."
       ]
     }
   ]
