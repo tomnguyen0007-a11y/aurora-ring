@@ -966,6 +966,12 @@ export const useStore = create<CalibrateState>()(
         if (version < 8) {
           // v8: navigation becomes data; taxonomies, habits and reminders arrive.
           if (!Array.isArray(p.sections) || !(p.sections as unknown[]).length) p.sections = seedSections.map((s) => ({ ...s }))
+          // Weekly Review predates the section registry; make sure it has a home.
+          const secs = p.sections as SectionDef[]
+          if (Array.isArray(secs) && !secs.some((x) => x.module === 'review')) {
+            const seeded = seedSections.find((x) => x.module === 'review')
+            if (seeded) secs.push({ ...seeded })
+          }
           if (!Array.isArray(p.groups) || !(p.groups as unknown[]).length) p.groups = seedGroups.map((g) => ({ ...g }))
           if (!p.customBlocks) p.customBlocks = {}
           if (!Array.isArray(p.golfCategories)) p.golfCategories = seedGolfCategories.map((t) => ({ ...t }))

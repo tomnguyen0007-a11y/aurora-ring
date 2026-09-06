@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react'
+import { setPendingAsk } from '../lib/ask'
 import { getSyncStatus, subscribeSyncStatus } from '../lib/supabase'
 import { useStore } from '../store/store'
 import type { SectionDef } from '../store/types'
@@ -144,7 +145,7 @@ function IndexSheet({ open, onClose, go }: { open: boolean; onClose: () => void;
   )
 }
 
-export function Shell({ children, onAsk }: { children: ReactNode; onAsk: (text: string) => void }) {
+export function Shell({ children }: { children: ReactNode }) {
   const view = useStore((s) => s.view)
   const setView = useStore((s) => s.setView)
   const sections = useStore((s) => s.sections)
@@ -319,7 +320,8 @@ export function Shell({ children, onAsk }: { children: ReactNode; onAsk: (text: 
         open={paletteOpen}
         onClose={() => setPaletteOpen(false)}
         onAsk={(t) => {
-          onAsk(t)
+          // Jarvis is code-split: park the question and let the module answer it on mount.
+          setPendingAsk(t)
           const j = sections.find((s) => s.module === 'jarvis')
           if (j) go(j.id)
         }}

@@ -1,34 +1,52 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { Shell } from './components/Shell'
-import { Books } from './modules/Books'
-import { Business } from './modules/Business'
-import { Custom } from './modules/Custom'
-import { Dashboard } from './modules/Dashboard'
-import { Goals } from './modules/Goals'
-import { Golf } from './modules/Golf'
-import { Grocery } from './modules/Grocery'
-import { Jarvis } from './modules/Jarvis'
-import { JarvisDock } from './modules/JarvisDock'
-import { Markets } from './modules/Markets'
-import { Mindset } from './modules/Mindset'
-import { News } from './modules/News'
-import { Notes } from './modules/Notes'
-import { Nutrition } from './modules/Nutrition'
-import { Recovery } from './modules/Recovery'
-import { Review } from './modules/Review'
-import { Schedule } from './modules/Schedule'
-import { Settings } from './modules/Settings'
-import { Training } from './modules/Training'
-import { useJarvis } from './modules/useJarvis'
 import { applyFavicon } from './lib/brand'
 import { startReminderLoop, updateBadge } from './lib/notify'
+import { Custom } from './modules/Custom'
+import { Dashboard } from './modules/Dashboard'
 import { useStore } from './store/store'
 import type { SectionDef } from './store/types'
 
+// Dashboard (the wake-up view) and the shell ship in the main bundle; every
+// other module loads on first visit — a smaller initial download and faster
+// first paint on mobile. The service worker caches each chunk after its first
+// fetch, so anything visited once still works offline. JarvisDock must be lazy
+// alongside Jarvis (it imports useJarvis from it) or the whole Jarvis module
+// would ride along in the main bundle anyway.
+const Jarvis = lazy(() => import('./modules/Jarvis').then((m) => ({ default: m.Jarvis })))
+const JarvisDock = lazy(() => import('./modules/JarvisDock').then((m) => ({ default: m.JarvisDock })))
+const Books = lazy(() => import('./modules/Books').then((m) => ({ default: m.Books })))
+const Business = lazy(() => import('./modules/Business').then((m) => ({ default: m.Business })))
+const Goals = lazy(() => import('./modules/Goals').then((m) => ({ default: m.Goals })))
+const Golf = lazy(() => import('./modules/Golf').then((m) => ({ default: m.Golf })))
+const Grocery = lazy(() => import('./modules/Grocery').then((m) => ({ default: m.Grocery })))
+const Markets = lazy(() => import('./modules/Markets').then((m) => ({ default: m.Markets })))
+const Mindset = lazy(() => import('./modules/Mindset').then((m) => ({ default: m.Mindset })))
+const News = lazy(() => import('./modules/News').then((m) => ({ default: m.News })))
+const Notes = lazy(() => import('./modules/Notes').then((m) => ({ default: m.Notes })))
+const Nutrition = lazy(() => import('./modules/Nutrition').then((m) => ({ default: m.Nutrition })))
+const Recovery = lazy(() => import('./modules/Recovery').then((m) => ({ default: m.Recovery })))
+const Review = lazy(() => import('./modules/Review').then((m) => ({ default: m.Review })))
+const Schedule = lazy(() => import('./modules/Schedule').then((m) => ({ default: m.Schedule })))
+const Settings = lazy(() => import('./modules/Settings').then((m) => ({ default: m.Settings })))
+const Training = lazy(() => import('./modules/Training').then((m) => ({ default: m.Training })))
+
+/** Hairline skeleton for the instant a module chunk is in flight (first visit only). */
+function ModuleLoading() {
+  return (
+    <div className="space-y-6" aria-busy="true" aria-label="Loading">
+      <div className="h-8 w-56 animate-breathe bg-ink-2" />
+      <div className="h-px bg-line" />
+      <div className="h-40 animate-breathe bg-ink-2" />
+      <div className="h-64 animate-breathe bg-ink-2" />
+    </div>
+  )
+}
+
 /**
- * Sections are data, so routing is a lookup rather than a switch on
- * hard-coded view names. A section carries the module that renders it and
- * the label it renders under — rename it and the page heading follows.
+ * Sections are data, so routing is a lookup rather than a switch on hard-coded
+ * view names. A section carries the module that renders it and the label it
+ * renders under — rename it and the page heading follows.
  */
 function Render({ section }: { section: SectionDef }) {
   const label = section.label
@@ -78,7 +96,6 @@ export default function App() {
   const brandMark = useStore((s) => s.settings.brandMark)
   const brandInvert = useStore((s) => s.settings.brandInvert)
   const brandName = useStore((s) => s.settings.brandName)
-  const { send } = useJarvis()
 
   const section = sections.find((x) => x.id === view) ?? sections.find((x) => !x.hidden) ?? sections[0]
 
@@ -99,8 +116,14 @@ export default function App() {
 
   return (
     <>
-      <Shell onAsk={(t) => void send(t)}>{section ? <Render section={section} /> : null}</Shell>
-      {section?.module !== 'jarvis' && <JarvisDock />}
+      <Shell>
+        <Suspense fallback={<ModuleLoading />}>{section ? <Render section={section} /> : null}</Suspense>
+      </Shell>
+      {section?.module !== 'jarvis' && (
+        <Suspense fallback={null}>
+          <JarvisDock />
+        </Suspense>
+      )}
     </>
   )
 }

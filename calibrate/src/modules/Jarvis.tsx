@@ -1,5 +1,7 @@
-import { Bot, ImagePlus, KeyRound, Mic, MicOff, SendHorizonal, Trash2, VolumeX, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { Icon } from '../components/icons'
+import { Eyebrow, Page, Scroller, Tools } from '../components/ui'
+import { takePendingAsk } from '../lib/ask'
 import { createDictation, createSpeechStream, speak, stopSpeaking, type Dictation, type SpeechProviders } from '../lib/speech'
 import { runLocalEngine } from '../lib/jarvis/engine'
 import { tryLocalFoodLog } from '../lib/jarvis/nutrition'
@@ -16,12 +18,16 @@ export function jarvisSourceLabel(source: CalibrateState['lastJarvisSource']): s
   return llmConfigured() ? 'UNIFIED BRAIN' : 'LOCAL ENGINE · FREE'
 }
 
-/** Semantic dot/text color pair for the same source — literal class names so Tailwind's scanner picks them up. */
+/**
+ * Monochrome status pair for the same source. The palette has no hue, so state
+ * is carried by weight: a live brain reads bright, a degraded one recedes.
+ * Literal class names so Tailwind's scanner picks them up.
+ */
 export function jarvisSourceColor(source: CalibrateState['lastJarvisSource']): { dot: string; text: string } {
-  if (source === 'local') return { dot: 'bg-affirm', text: 'text-affirm' }
-  if (source === 'rate-limited') return { dot: 'bg-alert', text: 'text-alert' }
-  if (source) return { dot: 'bg-arc', text: 'text-arc' }
-  return { dot: 'bg-signal-dim', text: 'text-signal-dim' }
+  if (source === 'local') return { dot: 'bg-paper', text: 'text-mute' }
+  if (source === 'rate-limited') return { dot: 'bg-ghost', text: 'text-faint' }
+  if (source) return { dot: 'bg-paper', text: 'text-mute' }
+  return { dot: 'bg-faint', text: 'text-faint' }
 }
 
 const SUGGESTIONS = [
@@ -163,7 +169,10 @@ export function useJarvis() {
   return { send, busy, draft }
 }
 
-export function Jarvis() {
+
+const MAX_PHOTOS = 4
+
+export function Jarvis({ label }: { label: string }) {
   const s = useStore()
   const { send, busy, draft } = useJarvis()
   const [input, setInput] = useState('')
@@ -173,7 +182,13 @@ export function Jarvis() {
   const fileRef = useRef<HTMLInputElement>(null)
   const recRef = useRef<Dictation | null>(null)
 
-  const MAX_PHOTOS = 4
+  // A question parked by the ⌘K palette gets answered the moment this mounts.
+  useEffect(() => {
+    const q = takePendingAsk()
+    if (q) void send(q)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const attachPhotos = async (files: FileList | File[]) => {
     try {
       const { fileToDataURL } = await import('../lib/image')
@@ -221,7 +236,7 @@ export function Jarvis() {
       // No native recognition (iPhone) and no transcription key configured
       s.pushChat({
         role: 'jarvis',
-        text: 'Voice input needs a transcription brain on this device, sir. Add an OpenAI, ElevenLabs or Gemini key in Settings and I will hear you perfectly.',
+        text: 'Voice input needs a transcription brain on this device. Add an OpenAI, ElevenLabs or Gemini key in Settings and I will hear you.',
       })
       return
     }
@@ -238,196 +253,192 @@ export function Jarvis() {
     setImages([])
   }
 
-  return (
-    <div className="mx-auto flex h-[calc(100dvh-10.5rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] max-w-3xl flex-col lg:h-[calc(100dvh-5rem)]">
-      <header className="mb-3 flex items-center justify-between px-1">
-        <div className="flex items-center gap-3">
-          <div
-            className={`relative flex h-11 w-11 items-center justify-center rounded-full border ${
-              busy || listening ? 'border-ice/50 shadow-[0_0_20px_rgba(234,244,255,0.45)]' : 'border-edge-strong'
-            }`}
-          >
-            <Bot size={20} className={busy || listening ? 'text-ice' : 'text-haze'} />
-            {(busy || listening) && <span className="absolute inset-0 animate-ping rounded-full border border-ice/40" />}
-          </div>
-          <div>
-            <h1 className="h-lumen text-2xl font-bold leading-none tracking-wide">JARVIS</h1>
-            <p className="hud-label !mb-0 mt-1 flex items-center gap-1.5 !text-[8px]">
-              {!listening && !busy && <span className={`h-1.5 w-1.5 rounded-full ${jarvisSourceColor(s.lastJarvisSource).dot}`} />}
-              {listening ? 'LISTENING…' : busy ? 'THINKING…' : jarvisSourceLabel(s.lastJarvisSource)}
-            </p>
-          </div>
-        </div>
+  const status = listening ? 'Listening…' : busy ? 'Thinking…' : jarvisSourceLabel(s.lastJarvisSource)
 
-        <div className="flex gap-1">
+  return (
+    <Page
+      title={label}
+      lede={
+        <span className="flex items-center gap-2">
+          <span
+            className={`inline-block h-1.5 w-1.5 shrink-0 ${jarvisSourceColor(s.lastJarvisSource).dot} ${
+              busy || listening ? 'animate-breathe' : ''
+            }`}
+          />
+          <span className={jarvisSourceColor(s.lastJarvisSource).text}>{status}</span>
+        </span>
+      }
+      actions={
+        <Tools>
           {!llmConfigured() && (
-            <button className="btn !py-1.5 !text-xs" onClick={() => s.setView('settings')}>
-              <KeyRound size={13} /> Unlock brain
+            <button className="btn btn-sm" onClick={() => s.setView('settings')}>
+              Unlock brain
             </button>
           )}
-          <button className="btn btn-ghost !px-2.5" aria-label="Stop speaking" onClick={stopSpeaking}>
-            <VolumeX size={16} />
+          <button className="btn btn-sm" aria-label="Stop speaking" onClick={stopSpeaking}>
+            Silence
           </button>
           {s.chat.length > 0 && (
-            <button className="btn btn-ghost !px-2.5" aria-label="Clear conversation" onClick={s.clearChat}>
-              <Trash2 size={16} />
+            <button className="btn btn-sm" aria-label="Clear conversation" onClick={s.clearChat}>
+              Clear
             </button>
           )}
-        </div>
-      </header>
-
-      <div className="glass flex-1 space-y-3 overflow-y-auto overscroll-contain rounded-2xl p-4">
-        {!s.chat.length && (
-          <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
-            <p className="max-w-sm text-sm leading-relaxed text-haze">
-              At your service, {s.settings.userName}. I know your plan, your philosophy and your numbers — golf,
-              training, fuel, AURORA. I can log, edit, strategise and remember. Speak or type.
-            </p>
-            <div className="flex max-w-md flex-wrap justify-center gap-1.5">
-              {SUGGESTIONS.map((sg) => (
-                <button key={sg} className="btn !py-1.5 !text-xs" onClick={() => send(sg)}>
-                  {sg}
-                </button>
-              ))}
+        </Tools>
+      }
+    >
+      <div className="flex h-[calc(100dvh-16rem)] flex-col lg:h-[calc(100dvh-15rem)]">
+        <div className="no-bar flex-1 overflow-y-auto overscroll-contain">
+          {!s.chat.length && (
+            <div className="flex h-full flex-col items-center justify-center gap-6 text-center">
+              <p className="max-w-md text-lede leading-relaxed text-mute">
+                At your service, {s.settings.userName}. I know your plan, your philosophy and your numbers — golf,
+                training, fuel, Aurora. I can log, edit, strategise and remember.
+              </p>
+              <Scroller className="max-w-xl justify-center">
+                {SUGGESTIONS.map((sg) => (
+                  <button key={sg} className="btn btn-sm shrink-0" onClick={() => send(sg)}>
+                    {sg}
+                  </button>
+                ))}
+              </Scroller>
             </div>
-          </div>
-        )}
+          )}
 
-        {s.chat.map((m) => (
-          <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div
-              className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[0.925rem] leading-relaxed ${
-                m.role === 'user'
-                  ? 'rounded-br-md bg-white/[0.08] text-ice ring-1 ring-white/15'
-                  : 'rounded-bl-md bg-black/35 text-ice/95 ring-1 ring-edge'
-              }`}
-            >
+          {s.chat.map((m) => (
+            <div key={m.id} className="border-b border-line py-5 last:border-b-0">
+              <Eyebrow className="mb-2">{m.role === 'user' ? s.settings.userName || 'You' : 'Jarvis'}</Eyebrow>
               {(m.images?.length || m.image) && (
-                <div className={`mb-2 grid gap-1.5 ${(m.images?.length ?? 1) > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                <div className={`mb-3 grid max-w-md gap-1.5 ${(m.images?.length ?? 1) > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
                   {(m.images ?? (m.image ? [m.image] : [])).map((img, i) => (
-                    <img key={i} src={img} alt={`attached reference ${i + 1}`} className="max-h-56 w-full rounded-lg object-cover" />
+                    <img
+                      key={i}
+                      src={img}
+                      alt={`attached reference ${i + 1}`}
+                      className="max-h-56 w-full border border-line object-cover"
+                    />
                   ))}
                 </div>
               )}
-              <div className="whitespace-pre-wrap">{m.text}</div>
+              <div
+                className={`max-w-2xl whitespace-pre-wrap text-lede leading-relaxed ${
+                  m.role === 'user' ? 'text-mute' : 'text-paper'
+                }`}
+              >
+                {m.text}
+              </div>
               {m.acted && m.acted.length > 0 && (
-                <ul className="mt-2 space-y-0.5 border-t border-edge pt-2">
+                <ul className="mt-3 border-t border-line pt-3">
                   {m.acted.map((a, i) => (
-                    <li key={i} className="flex items-center gap-1.5 text-xs text-affirm">
-                      <span className="inline-block h-1 w-1 rounded-full bg-affirm" /> {a}
+                    <li key={i} className="flex items-center gap-2 py-0.5 text-micro text-faint">
+                      <span className="inline-block h-1 w-1 shrink-0 bg-paper" /> {a}
                     </li>
                   ))}
                 </ul>
               )}
             </div>
-          </div>
-        ))}
+          ))}
 
-        {busy && draft && (
-          <div className="flex justify-start">
-            <div className="max-w-[85%] rounded-2xl rounded-bl-md bg-black/35 px-4 py-2.5 text-[0.925rem] leading-relaxed text-ice/95 ring-1 ring-edge">
-              <div className="whitespace-pre-wrap">
+          {busy && draft && (
+            <div className="border-b border-line py-5">
+              <Eyebrow className="mb-2">Jarvis</Eyebrow>
+              <div className="max-w-2xl whitespace-pre-wrap text-lede leading-relaxed text-paper">
                 {draft}
-                <span className="ml-0.5 inline-block h-4 w-[2px] animate-pulse-soft rounded-full bg-ice/80 align-middle" />
+                <span className="ml-0.5 inline-block h-4 w-px animate-breathe bg-paper align-middle" />
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {busy && !draft && (
-          <div className="flex justify-start">
-            <div className="rounded-2xl rounded-bl-md bg-black/35 px-4 py-3 ring-1 ring-edge">
+          {busy && !draft && (
+            <div className="py-5">
               <span className="flex gap-1.5">
                 {[0, 1, 2].map((i) => (
-                  <span
-                    key={i}
-                    className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-ice"
-                    style={{ animationDelay: `${i * 0.25}s` }}
-                  />
+                  <span key={i} className="h-1 w-1 animate-breathe bg-faint" style={{ animationDelay: `${i * 0.25}s` }} />
                 ))}
               </span>
             </div>
+          )}
+
+          <div ref={bottomRef} />
+        </div>
+
+        {images.length > 0 && (
+          <div className="mt-4 flex items-center gap-3 border-t border-line pt-4">
+            <div className="flex gap-1.5">
+              {images.map((img, i) => (
+                <span key={i} className="relative">
+                  <img src={img} alt={`attachment ${i + 1} preview`} className="h-14 w-14 border border-line object-cover" />
+                  <button
+                    type="button"
+                    aria-label={`Remove photo ${i + 1}`}
+                    onClick={() => setImages((prev) => prev.filter((_, j) => j !== i))}
+                    className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center border border-line bg-ink text-faint hover:text-paper"
+                  >
+                    <Icon name="close" size={10} />
+                  </button>
+                </span>
+              ))}
+            </div>
+            <span className="min-w-0 flex-1 text-micro text-faint">
+              {images.length > 1 ? `${images.length} photos attached` : 'Photo attached'} — ask, or say “log these”.
+            </span>
           </div>
         )}
 
-        <div ref={bottomRef} />
+        <form onSubmit={submit} className="mt-4 flex items-center gap-2.5 border-t border-line pt-4">
+          <button
+            type="button"
+            onClick={toggleMic}
+            aria-label={listening ? 'Stop listening' : 'Speak to Jarvis'}
+            className={`p-1.5 transition-colors ${listening ? 'animate-breathe text-paper' : 'text-faint hover:text-paper'}`}
+          >
+            <Icon name="mic" size={17} />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            aria-label="Attach a photo"
+            className={`p-1.5 transition-colors ${images.length ? 'text-paper' : 'text-faint hover:text-paper'}`}
+          >
+            <Icon name="image" size={16} />
+          </button>
+
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={(e) => e.target.files?.length && void attachPhotos(e.target.files)}
+          />
+
+          <input
+            className="min-w-0 flex-1 bg-transparent text-lede text-paper outline-none placeholder:text-faint"
+            placeholder={
+              listening
+                ? 'Listening…'
+                : images.length > 1
+                  ? 'Ask about the photos…'
+                  : images.length
+                    ? 'Ask about the photo…'
+                    : 'Speak or type to Jarvis…'
+            }
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onPaste={handlePaste}
+            aria-label="Message Jarvis"
+          />
+
+          <button
+            type="submit"
+            aria-label="Send"
+            disabled={(!input.trim() && !images.length) || busy}
+            className="p-1.5 text-faint transition-colors hover:text-paper disabled:opacity-30"
+          >
+            <Icon name="send" size={16} />
+          </button>
+        </form>
       </div>
-
-      {images.length > 0 && (
-        <div className="mt-3 flex items-center gap-2 rounded-xl border border-arc/30 bg-arc/[0.05] p-2">
-          <div className="flex gap-1.5">
-            {images.map((img, i) => (
-              <span key={i} className="relative">
-                <img src={img} alt={`attachment ${i + 1} preview`} className="h-14 w-14 rounded-lg object-cover" />
-                <button
-                  type="button"
-                  aria-label={`Remove photo ${i + 1}`}
-                  onClick={() => setImages((prev) => prev.filter((_, j) => j !== i))}
-                  className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/85 text-haze ring-1 ring-edge"
-                >
-                  <X size={11} />
-                </button>
-              </span>
-            ))}
-          </div>
-          <span className="min-w-0 flex-1 text-xs text-haze">
-            {images.length > 1 ? `${images.length} photos attached` : 'Photo attached'} — ask Jarvis, or say “log these”.
-          </span>
-        </div>
-      )}
-
-      <form onSubmit={submit} className="mt-3 flex items-center gap-2">
-        <button
-          type="button"
-          onClick={toggleMic}
-          aria-label={listening ? 'Stop listening' : 'Speak to Jarvis'}
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-all ${
-            listening
-              ? 'border-ice/50 bg-white/10 text-ice shadow-[0_0_18px_rgba(234,244,255,0.5)] animate-pulse-soft'
-              : 'border-edge-strong bg-black/30 text-haze hover:border-ice/40 hover:text-ice'
-          }`}
-        >
-          {listening ? <MicOff size={18} /> : <Mic size={18} />}
-        </button>
-
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          aria-label="Attach a photo"
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-all ${
-            images.length ? 'border-arc bg-arc/20 text-arc' : 'border-edge-strong bg-black/30 text-haze hover:border-arc/50 hover:text-ice'
-          }`}
-        >
-          <ImagePlus size={18} />
-        </button>
-
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/*"
-          multiple
-          className="hidden"
-          onChange={(e) => e.target.files?.length && attachPhotos(e.target.files)}
-        />
-
-        <input
-          className="field h-11 flex-1 !rounded-full !px-4"
-          placeholder={listening ? 'Listening…' : images.length > 1 ? 'Ask about the photos…' : images.length ? 'Ask about the photo…' : 'Speak or type to Jarvis…'}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onPaste={handlePaste}
-          aria-label="Message Jarvis"
-        />
-
-        <button
-          type="submit"
-          aria-label="Send"
-          disabled={(!input.trim() && !images.length) || busy}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/15 bg-gradient-to-b from-[#2a2f38] to-[#08090d] text-ice shadow-[0_0_18px_rgba(234,244,255,0.3),0_6px_20px_-6px_rgba(0,0,0,0.8)] transition-all disabled:opacity-50"
-        >
-          <SendHorizonal size={18} />
-        </button>
-      </form>
-    </div>
+    </Page>
   )
 }

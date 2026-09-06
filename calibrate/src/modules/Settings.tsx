@@ -1,573 +1,168 @@
-import { BrainCircuit, CheckCircle2, Download, FileText, Github, KeyRound, Play, Plus, RefreshCw, RotateCcw, Trash2, Upload, Volume2, XCircle } from 'lucide-react'
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
-import { HudLabel, Panel } from '../components/ui'
+import { Icon, PICKABLE_GLYPHS, type GlyphName } from '../components/icons'
+import {
+  Chip,
+  DangerBtn,
+  Empty,
+  Eyebrow,
+  IconBtn,
+  InlineArea,
+  InlineText,
+  NumCell,
+  Page,
+  Reorder,
+  Section,
+  Toggle,
+  Tools,
+} from '../components/ui'
 import { downloadBackup, isCalibrateBackup, restoreBackup } from '../lib/backup'
+import { fileToMark } from '../lib/brand'
+import { WEEKDAY_NAMES } from '../lib/dates'
 import { syncGithubKnowledge } from '../lib/jarvis/githubSync'
-import { llmConfigured, testProvider } from '../lib/jarvis/llm'
+import { testProvider } from '../lib/jarvis/llm'
+import { notifyPermission, requestNotifyPermission } from '../lib/notify'
 import { englishVoices, speak } from '../lib/speech'
 import { getSyncStatus, subscribeSyncStatus, syncNow } from '../lib/supabase'
 import { useStore } from '../store/store'
-import type { LlmProvider } from '../store/types'
+import type { LlmProvider, Weekday } from '../store/types'
 
-/** A real, cheap round-trip to the provider so a pasted key can be verified on the spot. */
-function TestConnectionButton({ provider }: { provider: LlmProvider }) {
-  const [state, setState] = useState<{ status: 'idle' | 'testing' | 'ok' | 'fail'; message: string }>({ status: 'idle', message: '' })
+/* Settings is where the app becomes yours: navigation, habits, reminders,
+   memory and the second-brain library all live here as editable data. */
 
-  const run = async () => {
-    setState({ status: 'testing', message: '' })
-    const res = await testProvider(provider)
-    setState({ status: res.ok ? 'ok' : 'fail', message: res.message })
-  }
+/* Settings is long by nature — it holds every knob in the app. This index
+   keeps it navigable instead of a scroll marathon. */
+const SETTINGS_INDEX = [
+  ['set-brand', 'Brand'],
+  ['set-navigation', 'Navigation'],
+  ['set-jarvis', 'Jarvis'],
+  ['set-consistency', 'Consistency'],
+  ['set-memory', 'Memory'],
+  ['set-github', 'GitHub'],
+  ['set-voice', 'Voice'],
+  ['set-sync', 'Sync'],
+  ['set-integrations', 'Integrations'],
+  ['set-sources', 'Sources'],
+  ['set-data', 'Data'],
+] as const
 
+function SettingsIndex() {
   return (
-    <div className="flex items-center gap-2">
-      <button type="button" className="btn !py-1.5 !text-xs" onClick={run} disabled={state.status === 'testing'}>
-        <RefreshCw size={12} className={state.status === 'testing' ? 'animate-spin' : ''} /> Test connection
-      </button>
-      {state.status === 'ok' && (
-        <span className="flex items-center gap-1 text-xs text-affirm" title={state.message}>
-          <CheckCircle2 size={13} className="shrink-0" /> {state.message === 'Connected' ? 'Working' : state.message}
-        </span>
-      )}
-      {state.status === 'fail' && (
-        <span className="flex items-center gap-1 text-xs text-alert" title={state.message}>
-          <XCircle size={13} className="shrink-0" /> {state.message.slice(0, 120)}
-        </span>
-      )}
+    <div className="no-bar -mx-5 mb-10 flex gap-1 overflow-x-auto px-5 sm:-mx-8 sm:px-8 lg:-mx-10 lg:px-10">
+      {SETTINGS_INDEX.map(([id, label]) => (
+        <button
+          key={id}
+          type="button"
+          className="btn btn-sm shrink-0"
+          onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+        >
+          {label}
+        </button>
+      ))}
     </div>
   )
 }
 
-export function Settings() {
+/* ── Brand ───────────────────────────────────────────────────────────
+   The mark, the wordmark and the tab icon are yours. Drop in any SVG or
+   PNG; it is stored with your state and never leaves your devices. */
+function BrandSection() {
   const s = useStore()
-  const fileRef = useRef<HTMLInputElement>(null)
-  const [confirmReset, setConfirmReset] = useState(false)
+  const ref = useRef<HTMLInputElement>(null)
+  const [err, setErr] = useState('')
 
-  // Full backup includes photo blobs from IndexedDB — raw localStorage alone
-  // stopped being a complete backup when photos moved out of the persist store.
-  const exportData = () => void downloadBackup()
-
-  const importData = (file: File) => {
-    const reader = new FileReader()
-    reader.onload = async () => {
-      try {
-        const parsed: unknown = JSON.parse(String(reader.result))
-        if (!confirm('Importing a backup REPLACES everything currently in the app. Continue?')) return
-        if (isCalibrateBackup(parsed)) {
-          await restoreBackup(parsed) // reloads on success
-          return
-        }
-        // Legacy backups are the raw persist payload ({ state, version }) with no photos
-        const legacy = parsed as { state?: unknown; version?: unknown }
-        if (legacy && typeof legacy === 'object' && legacy.state && typeof legacy.version === 'number') {
-          localStorage.setItem('calibrate-v1', String(reader.result))
-          location.reload()
-          return
-        }
-        alert('Not a valid Calibrate backup file.')
-      } catch {
-        alert('Not a valid Calibrate backup file.')
-      }
-    }
-    reader.readAsText(file)
-  }
-
-  return (
-    <div className="mx-auto max-w-2xl space-y-4">
-      <header className="px-1">
-        <h1 className="h-lumen text-3xl font-bold tracking-wide">SYSTEM CONFIG</h1>
-        <p className="mt-1 text-sm text-haze">Keys, voice, and data control. Everything is stored on this device only.</p>
-      </header>
-
-      <BrainPanel />
-
-      <Panel>
-        <HudLabel>
-          <BrainCircuit size={11} className="text-arc" /> Jarvis Memory — Who You Are
-        </HudLabel>
-        <p className="mb-3 text-xs text-fog">Everything here is fed to Jarvis so it knows you deeply. Edit freely — this is your memory, not a form.</p>
-        <div className="space-y-2.5">
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            <label className="col-span-2 block sm:col-span-1">
-              <span className="hud-label !mb-1 !text-[8px]">Name</span>
-              <input
-                className="field w-full"
-                value={s.profile.name}
-                onChange={(e) => {
-                  s.setProfile({ name: e.target.value })
-                  s.setSettings({ userName: e.target.value })
-                }}
-              />
-            </label>
-            <label className="block">
-              <span className="hud-label !mb-1 !text-[8px]">Age</span>
-              <input
-                className="field num w-full"
-                inputMode="numeric"
-                value={s.profile.age ?? ''}
-                onChange={(e) => s.setProfile({ age: e.target.value ? parseInt(e.target.value) : null })}
-              />
-            </label>
-            <label className="col-span-2 block sm:col-span-2">
-              <span className="hud-label !mb-1 !text-[8px]">Location</span>
-              <input className="field w-full" value={s.profile.location} onChange={(e) => s.setProfile({ location: e.target.value })} />
-            </label>
-          </div>
-          <label className="block">
-            <span className="hud-label !mb-1 !text-[8px]">Identity — who you are & what you're building</span>
-            <textarea className="field w-full" rows={2} value={s.profile.identity} onChange={(e) => s.setProfile({ identity: e.target.value })} />
-          </label>
-          <label className="block">
-            <span className="hud-label !mb-1 !text-[8px]">Operating philosophy</span>
-            <textarea className="field w-full" rows={2} value={s.profile.philosophy} onChange={(e) => s.setProfile({ philosophy: e.target.value })} />
-          </label>
-          <label className="block">
-            <span className="hud-label !mb-1 !text-[8px]">Inspiration</span>
-            <input className="field w-full" value={s.profile.inspiration} onChange={(e) => s.setProfile({ inspiration: e.target.value })} />
-          </label>
-
-          <div>
-            <span className="hud-label !mb-1.5 !text-[8px]">Facts Jarvis always remembers</span>
-            <ul className="space-y-1.5">
-              {s.profile.facts.map((f) => (
-                <li key={f.id} className="group flex items-center gap-2 rounded-lg bg-black/25 px-3 py-2">
-                  <span className="text-arc">•</span>
-                  <span className="flex-1 text-sm text-ice">{f.text}</span>
-                  <button className="transition-opacity focus-visible:opacity-100 lg:opacity-0 lg:group-hover:opacity-100" aria-label="Remove fact" onClick={() => s.removeFact(f.id)}>
-                    <Trash2 size={13} className="text-alert/70" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <form
-              className="mt-2 flex gap-2"
-              onSubmit={(e) => {
-                e.preventDefault()
-                const form = e.currentTarget as HTMLFormElement
-                const inp = form.elements.namedItem('fact') as HTMLInputElement
-                if (!inp.value.trim()) return
-                s.addFact(inp.value.trim())
-                form.reset()
-              }}
-            >
-              <input name="fact" className="field flex-1 !py-1.5 text-sm" placeholder="Add a fact Jarvis should know…" />
-              <button className="btn !px-3" type="submit" aria-label="Add fact">
-                <Plus size={15} />
-              </button>
-            </form>
-          </div>
-        </div>
-      </Panel>
-
-      <BrainFeedPanel />
-
-      <GithubSyncPanel />
-
-      <Panel>
-        <HudLabel>
-          <Volume2 size={11} className="text-steel" /> Voice
-        </HudLabel>
-        <label className="flex items-center justify-between">
-          <span className="text-sm text-haze">Jarvis speaks replies out loud</span>
-          <button
-            role="switch"
-            aria-checked={s.settings.speakReplies}
-            onClick={() => s.setSettings({ speakReplies: !s.settings.speakReplies })}
-            className={`relative h-6 w-11 rounded-full border transition-colors ${
-              s.settings.speakReplies ? 'border-signal/60 bg-signal/30' : 'border-edge-strong bg-black/40'
-            }`}
-          >
-            <span
-              className={`absolute top-0.5 h-4.5 w-4.5 rounded-full bg-ice transition-all ${s.settings.speakReplies ? 'left-[calc(100%-1.25rem)]' : 'left-0.5'}`}
-              style={{ height: '1.125rem', width: '1.125rem' }}
-            />
-          </button>
-        </label>
-        <VoicePicker />
-        <div className="mt-4 border-t border-edge pt-4">
-          <span className="hud-label !mb-1 block !text-[8px] text-signal">
-            The REAL movie voice — ElevenLabs (free tier: ~10 min speech/month)
-          </span>
-          <p className="mb-2 text-[11px] leading-relaxed text-fog">
-            Get a free key at elevenlabs.io → paste below. Jarvis switches to a cinematic neural British voice
-            ("Daniel"). Falls back to the browser voice if the quota runs out.
-          </p>
-          <div className="flex gap-2">
-            <input
-              className="field num flex-1"
-              type="password"
-              placeholder="ElevenLabs API key (optional)"
-              value={s.settings.elevenKey}
-              onChange={(e) => s.setSettings({ elevenKey: e.target.value.trim() })}
-            />
-            <button
-              className="btn"
-              onClick={() =>
-                speak(
-                  'Good evening, sir. All systems are calibrated and standing by.',
-                  s.settings.voiceURI,
-                  s.settings.elevenKey ? { key: s.settings.elevenKey, voiceId: s.settings.elevenVoiceId } : undefined,
-                  s.settings.openaiKey,
-                )
-              }
-            >
-              <Play size={14} /> Test
-            </button>
-          </div>
-        </div>
-        <div className="mt-4 border-t border-edge pt-4">
-          <span className="hud-label !mb-1 block !text-[8px]">Backup neural voice — OpenAI TTS (optional)</span>
-          <p className="mb-2 text-[11px] leading-relaxed text-fog">
-            Used automatically when ElevenLabs is unset or out of quota, before falling back to the robotic browser
-            voice. Any OpenAI API key works.
-          </p>
-          <input
-            className="field num w-full"
-            type="password"
-            placeholder="OpenAI API key (optional)"
-            value={s.settings.openaiKey ?? ''}
-            onChange={(e) => s.setSettings({ openaiKey: e.target.value.trim() })}
-          />
-        </div>
-        <div className="mt-4 border-t border-edge pt-4">
-          <label className="flex items-center justify-between">
-            <span className="text-sm text-haze">Reminders when nutrition / audit is behind (while app is open)</span>
-            <button
-              role="switch"
-              aria-checked={s.settings.notifyEnabled}
-              onClick={async () => {
-                if (!s.settings.notifyEnabled && 'Notification' in window && Notification.permission === 'default') {
-                  await Notification.requestPermission()
-                }
-                s.setSettings({ notifyEnabled: !s.settings.notifyEnabled })
-              }}
-              className={`relative h-6 w-11 rounded-full border transition-colors ${
-                s.settings.notifyEnabled ? 'border-signal/60 bg-signal/30' : 'border-edge-strong bg-black/40'
-              }`}
-            >
-              <span
-                className={`absolute top-0.5 rounded-full bg-ice transition-all ${s.settings.notifyEnabled ? 'left-[calc(100%-1.25rem)]' : 'left-0.5'}`}
-                style={{ height: '1.125rem', width: '1.125rem' }}
-              />
-            </button>
-          </label>
-        </div>
-        <p className="mt-2 text-[11px] text-fog">
-          For the browser voice, pick a British male above. On iPhone, install "Daniel (Enhanced)" via Settings →
-          Accessibility → Spoken Content → Voices. Voice input works best in Chrome.
-        </p>
-      </Panel>
-
-      <SyncPanel />
-
-      <IntegrationsPanel />
-
-      <Panel>
-        <HudLabel>Markets & News</HudLabel>
-        <div className="space-y-3">
-          <label className="block">
-            <span className="hud-label !mb-1 !text-[8px]">Finnhub API key — free at finnhub.io (stocks + market news)</span>
-            <input
-              className="field num w-full"
-              type="password"
-              placeholder="optional"
-              value={s.settings.finnhubKey}
-              onChange={(e) => s.setSettings({ finnhubKey: e.target.value.trim() })}
-            />
-          </label>
-          <label className="block">
-            <span className="hud-label !mb-1 !text-[8px]">GNews API key — free at gnews.io (world / politics / local news)</span>
-            <input
-              className="field num w-full"
-              type="password"
-              placeholder="optional — 100 requests/day free"
-              value={s.settings.gnewsKey}
-              onChange={(e) => s.setSettings({ gnewsKey: e.target.value.trim() })}
-            />
-          </label>
-        </div>
-      </Panel>
-
-      <Panel>
-        <HudLabel>Data Control</HudLabel>
-        <div className="flex flex-wrap gap-2">
-          <button className="btn" onClick={exportData}>
-            <Download size={15} /> Export backup
-          </button>
-          <button className="btn" onClick={() => fileRef.current?.click()}>
-            <Upload size={15} /> Import backup
-          </button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="application/json"
-            className="hidden"
-            onChange={(e) => e.target.files?.[0] && importData(e.target.files[0])}
-          />
-          {confirmReset ? (
-            <button
-              className="btn btn-danger"
-              onClick={() => {
-                s.resetAll()
-                setConfirmReset(false)
-              }}
-            >
-              Really reset everything?
-            </button>
-          ) : (
-            <button className="btn btn-danger" onClick={() => setConfirmReset(true)}>
-              <RotateCcw size={15} /> Factory reset
-            </button>
-          )}
-        </div>
-        <p className="mt-3 text-[11px] leading-relaxed text-fog">
-          All data lives on this device. Export includes everything — logs, settings, knowledge, and photos — in one
-          file; import it on another device to move your whole setup, or keep it as a safety net before clearing
-          browser data.
-        </p>
-      </Panel>
-    </div>
-  )
-}
-
-function BrainPanel() {
-  const s = useStore()
-  const hasBrain = llmConfigured()
-  return (
-      <Panel>
-        <HudLabel>
-          <KeyRound size={11} className="text-signal" /> Jarvis — Advanced Brain
-        </HudLabel>
-        <div className={`mb-3 flex items-start gap-2 rounded-lg border px-3 py-2 text-xs leading-relaxed ${hasBrain ? 'border-affirm/30 bg-affirm/[0.06] text-affirm' : 'border-alert/30 bg-alert/[0.06] text-alert'}`}>
-          <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${hasBrain ? 'bg-affirm' : 'bg-alert'}`} />
-          <span>
-            {hasBrain
-              ? 'A smart brain is connected — Jarvis has deep conversation, planning, live web search and photo vision.'
-              : 'No smart brain yet — Jarvis is running on the built-in engine only (logging, editing, stats). Paste ONE free key below to unlock deep conversation, planning, live web search and photo vision.'}
-          </span>
-        </div>
-        <p className="mb-3 text-xs leading-relaxed text-fog">
-          Free in ~60s, no card needed:{' '}
-          <a className="text-signal underline underline-offset-2" href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer">Gemini key</a>
-          {' · '}
-          <a className="text-signal underline underline-offset-2" href="https://console.groq.com/keys" target="_blank" rel="noreferrer">Groq key</a>
-          {' · '}
-          <a className="text-signal underline underline-offset-2" href="https://openrouter.ai/keys" target="_blank" rel="noreferrer">OpenRouter key</a>
-          . Pick the matching tab below, paste, and hit Test connection. Keys never leave this device — calls go
-          straight from your browser to the provider. Web search comes free on Claude &amp; Gemini.
-        </p>
-        <div className="mb-3 flex flex-wrap gap-1.5">
-          {(['none', 'anthropic', 'gemini', 'groq', 'openrouter'] as LlmProvider[]).map((p) => (
-            <button
-              key={p}
-              onClick={() => s.setSettings({ provider: p })}
-              className={`btn flex-1 !text-xs ${s.settings.provider === p ? '!border-signal/60 !bg-signal/15 !text-signal' : ''}`}
-            >
-              {p === 'none'
-                ? 'Built-in only'
-                : p === 'anthropic'
-                  ? 'Claude'
-                  : p === 'gemini'
-                    ? 'Gemini (free tier)'
-                    : p === 'groq'
-                      ? 'Groq (free, no card)'
-                      : 'OpenRouter (free backup)'}
-            </button>
-          ))}
-        </div>
-        {s.settings.provider === 'anthropic' && (
-          <div className="space-y-2">
-            <input
-              className="field num w-full"
-              type="password"
-              placeholder="sk-ant-…  (console.anthropic.com)"
-              value={s.settings.anthropicKey}
-              onChange={(e) => s.setSettings({ anthropicKey: e.target.value.trim() })}
-            />
-            <input
-              className="field num w-full"
-              placeholder="Model"
-              value={s.settings.anthropicModel}
-              onChange={(e) => s.setSettings({ anthropicModel: e.target.value.trim() })}
-            />
-            <p className="text-[11px] text-fog">Best quality. Costs cents per conversation, billed to your Anthropic account.</p>
-            <TestConnectionButton provider="anthropic" />
-          </div>
-        )}
-        {s.settings.provider === 'gemini' && (
-          <div className="space-y-2">
-            <input
-              className="field num w-full"
-              type="password"
-              placeholder="AI…  (aistudio.google.com — free API key)"
-              value={s.settings.geminiKey}
-              onChange={(e) => s.setSettings({ geminiKey: e.target.value.trim() })}
-            />
-            <input
-              className="field num w-full"
-              placeholder="Model"
-              value={s.settings.geminiModel}
-              onChange={(e) => s.setSettings({ geminiModel: e.target.value.trim() })}
-            />
-            <p className="text-[11px] text-fog">Google's free tier: generous daily quota at no cost — the free way to give Jarvis a real brain.</p>
-            <TestConnectionButton provider="gemini" />
-          </div>
-        )}
-        {s.settings.provider === 'groq' && (
-          <div className="space-y-2">
-            <input
-              className="field num w-full"
-              type="password"
-              placeholder="gsk_…  (console.groq.com — free, no card)"
-              value={s.settings.groqKey}
-              onChange={(e) => s.setSettings({ groqKey: e.target.value.trim() })}
-            />
-            <input
-              className="field num w-full"
-              placeholder="Model"
-              value={s.settings.groqModel}
-              onChange={(e) => s.setSettings({ groqModel: e.target.value.trim() })}
-            />
-            <p className="text-[11px] text-fog">
-              Runs on Groq's LPU hardware — extremely fast responses, genuinely free (no card, no credits system,
-              just rate limits). Best pick if you keep hitting Anthropic/Gemini limits. Trade-off: no live web search
-              and no photo vision on this provider.
-            </p>
-            <TestConnectionButton provider="groq" />
-          </div>
-        )}
-        {s.settings.provider === 'openrouter' && (
-          <div className="space-y-2">
-            <input
-              className="field num w-full"
-              type="password"
-              placeholder="sk-or-…  (openrouter.ai/keys — free, no card)"
-              value={s.settings.openrouterKey}
-              onChange={(e) => s.setSettings({ openrouterKey: e.target.value.trim() })}
-            />
-            <input
-              className="field num w-full"
-              placeholder="Model (default supports photos)"
-              value={s.settings.openrouterModel}
-              onChange={(e) => s.setSettings({ openrouterModel: e.target.value.trim() })}
-            />
-            <p className="text-[11px] text-fog">
-              One key routes to dozens of models — several genuinely free (":free" suffix). Self-healing: free models
-              get retired without notice, so if the one above ever 404s, Jarvis automatically finds a live free
-              replacement, saves it here, and retries. Trade-off: no live web search on the free models.
-            </p>
-            <TestConnectionButton provider="openrouter" />
-          </div>
-        )}
-        {s.settings.provider !== 'none' && (
-          <p className="mt-3 border-t border-edge pt-3 text-[11px] leading-relaxed text-fog">
-            <span className="text-affirm">Auto-failover is always on:</span> if your primary brain above errors out —
-            rate limit, quota, outage, bad key — Jarvis automatically retries with the next provider that has a key
-            configured (checked in this order: Claude → Gemini → Groq → OpenRouter). You'll see a small note under
-            its reply when that happens. Add keys for more than one provider to make this actually kick in.
-          </p>
-        )}
-      </Panel>
-  )
-}
-
-/** Total characters across the Brain Feed — mirrors the injection budget so the user sees when it's getting big. */
-const BRAIN_FEED_SOFT_BUDGET = 14000
-
-function BrainFeedPanel() {
-  const s = useStore()
-  const fileRef = useRef<HTMLInputElement>(null)
-  const [title, setTitle] = useState('')
-  const [body, setBody] = useState('')
-
-  const totalChars = s.knowledgeDocs.reduce((n, d) => n + d.body.length, 0)
-  const overBudget = totalChars > BRAIN_FEED_SOFT_BUDGET
-
-  const addPasted = () => {
-    if (!body.trim()) return
-    s.addKnowledgeDoc(title, body.trim(), 'pasted')
-    setTitle('')
-    setBody('')
-  }
-
-  const importFiles = async (files: FileList) => {
-    for (const file of Array.from(files)) {
-      const text = await file.text()
-      if (text.trim()) s.addKnowledgeDoc(file.name.replace(/\.(md|markdown|txt)$/i, ''), text, file.name)
+  const pick = async (file: File) => {
+    setErr('')
+    try {
+      const { dataUrl } = await fileToMark(file)
+      s.setSettings({ brandMark: dataUrl })
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : 'Could not read that file.')
     }
   }
 
   return (
-    <Panel>
-      <HudLabel>
-        <FileText size={11} className="text-arc" /> Brain Feed — Jarvis's Reading Material
-      </HudLabel>
-      <p className="mb-3 text-xs leading-relaxed text-fog">
-        Paste or upload your Obsidian notes, a coach's plan, a spec — anything. It rides along with every Jarvis
-        query, so it reasons from <span className="text-haze">your</span> material, not just its built-in knowledge.
-        Stored on this device; the newest ~{Math.round(BRAIN_FEED_SOFT_BUDGET / 1000)}k characters are sent each time.
+    <Section label="Brand">
+      <p className="mb-5 max-w-2xl text-body text-faint">
+        Your mark, your wordmark, your tab icon. SVG or PNG, up to 512px — it replaces the default everywhere and rides
+        along with sync. Nothing is uploaded anywhere.
       </p>
 
-      <div className="space-y-2">
-        <input
-          className="field w-full"
-          placeholder="Title — e.g. “My Hybrid Training Block” or “Ollie's Fuelling Notes”"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <textarea
-          className="field w-full"
-          rows={4}
-          placeholder="Paste note content here (Markdown is fine)…"
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-        />
-        <div className="flex flex-wrap items-center gap-2">
-          <button className="btn btn-signal" onClick={addPasted} disabled={!body.trim()}>
-            <Plus size={15} /> Add to Brain Feed
-          </button>
-          <button className="btn" onClick={() => fileRef.current?.click()}>
-            <Upload size={15} /> Upload .md / .txt
-          </button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept=".md,.markdown,.txt,text/markdown,text/plain"
-            multiple
-            className="hidden"
-            onChange={(e) => e.target.files && importFiles(e.target.files)}
-          />
-          <span className={`ml-auto text-[11px] ${overBudget ? 'text-alert' : 'text-fog'}`}>
-            {s.knowledgeDocs.length} note{s.knowledgeDocs.length === 1 ? '' : 's'} · {(totalChars / 1000).toFixed(1)}k chars
-            {overBudget ? ' — over budget, oldest get trimmed' : ''}
-          </span>
+      <div className="flex flex-wrap items-center gap-6 border-b border-line pb-6">
+        <div className="flex h-20 w-20 shrink-0 items-center justify-center border border-line">
+          {s.settings.brandMark ? (
+            <img
+              src={s.settings.brandMark}
+              alt="Current mark"
+              className="max-h-12 max-w-12 object-contain"
+              style={{ filter: s.settings.brandInvert ? 'invert(1)' : undefined }}
+            />
+          ) : (
+            <Icon name="jarvis" size={22} className="text-faint" />
+          )}
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button type="button" className="btn btn-sm" onClick={() => ref.current?.click()}>
+            {s.settings.brandMark ? 'Replace mark' : 'Upload mark'}
+          </button>
+          {s.settings.brandMark && (
+            <>
+              <button
+                type="button"
+                className="btn btn-sm"
+                onClick={() => s.setSettings({ brandInvert: !s.settings.brandInvert })}
+              >
+                {s.settings.brandInvert ? 'Un-invert' : 'Invert'}
+              </button>
+              <DangerBtn onConfirm={() => s.setSettings({ brandMark: undefined, brandInvert: false })} label="Remove" />
+            </>
+          )}
+          <input
+            ref={ref}
+            type="file"
+            accept="image/*,.svg"
+            className="hidden"
+            onChange={(e) => e.target.files?.[0] && void pick(e.target.files[0])}
+          />
+        </div>
+        {err && <span className="text-micro text-paper">{err}</span>}
       </div>
 
-      {s.knowledgeDocs.length > 0 && (
-        <ul className="mt-4 space-y-1.5">
-          {s.knowledgeDocs.map((d) => (
-            <li key={d.id} className="group flex items-center gap-2 rounded-lg bg-black/25 px-3 py-2">
-              <FileText size={13} className="shrink-0 text-arc/70" />
-              <span className="min-w-0 flex-1 truncate text-sm text-ice">{d.title}</span>
-              <span className="num shrink-0 text-[10px] text-fog">
-                {d.source !== 'pasted' && d.source !== 'jarvis' ? `${d.source} · ` : ''}
-                {(d.body.length / 1000).toFixed(1)}k
-              </span>
-              <button className="transition-opacity focus-visible:opacity-100 lg:opacity-0 lg:group-hover:opacity-100" aria-label={`Remove ${d.title}`} onClick={() => s.removeKnowledgeDoc(d.id)}>
-                <Trash2 size={13} className="text-alert/70" />
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </Panel>
+      <div className="grid gap-x-8 gap-y-1 sm:grid-cols-2">
+        <label className="flex items-baseline justify-between gap-3 border-b border-line py-3">
+          <Eyebrow>Wordmark</Eyebrow>
+          <input
+            className="field-line flex-1 text-right text-body text-paper"
+            value={s.settings.brandName ?? ''}
+            placeholder="CALIBRATE"
+            aria-label="Wordmark"
+            onChange={(e) => s.setSettings({ brandName: e.target.value })}
+          />
+        </label>
+        <label className="flex items-baseline justify-between gap-3 border-b border-line py-3">
+          <Eyebrow>Sub-line</Eyebrow>
+          <input
+            className="field-line flex-1 text-right text-body text-paper"
+            value={s.settings.brandTagline ?? ''}
+            placeholder="PERSONAL OS"
+            aria-label="Sub-line"
+            onChange={(e) => s.setSettings({ brandTagline: e.target.value })}
+          />
+        </label>
+      </div>
+    </Section>
   )
 }
 
+
+/* ── GitHub sync ─────────────────────────────────────────────────────
+   Point it at an Obsidian vault, the ECC skills repo, project docs —
+   markdown lands in the Brain Feed with no copy-paste. */
 function GithubSyncPanel() {
   const s = useStore()
-  const [state, setState] = useState<{ status: 'idle' | 'syncing' | 'ok' | 'fail'; message: string }>({ status: 'idle', message: '' })
+  const [state, setState] = useState<{ status: 'idle' | 'syncing' | 'ok' | 'fail'; message: string }>({
+    status: 'idle',
+    message: '',
+  })
   const syncedCount = s.knowledgeDocs.filter((d) => d.source.startsWith('github:')).length
 
   const run = async () => {
@@ -577,72 +172,505 @@ function GithubSyncPanel() {
   }
 
   return (
-    <Panel>
-      <HudLabel>
-        <Github size={11} className="text-arc" /> GitHub Sync — pull notes straight from a repo
-      </HudLabel>
-      <p className="mb-3 text-xs leading-relaxed text-fog">
-        Point this at an Obsidian vault you push to GitHub, the ECC skills repo, project docs — anything. Markdown/text
-        files sync into the Brain Feed above automatically, no copy-paste. Public repos need no token; private repos
-        need a{' '}
-        <a href="https://github.com/settings/tokens" target="_blank" rel="noreferrer" className="text-arc underline underline-offset-2">
+    <Section label="GitHub sync — pull notes straight from a repo">
+      <p className="mb-5 max-w-2xl text-body text-faint">
+        An Obsidian vault you push to GitHub, the ECC skills repo, project docs — any markdown or text syncs into the
+        reference library above. Public repos need no token; private ones need a{' '}
+        <a
+          href="https://github.com/settings/tokens"
+          target="_blank"
+          rel="noreferrer"
+          className="text-mute underline underline-offset-2 hover:text-paper"
+        >
           personal access token
         </a>{' '}
         with repo read access.
       </p>
 
       <div className="space-y-2">
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid gap-2 sm:grid-cols-2">
           <input
             className="field"
             placeholder="owner/repo"
+            aria-label="GitHub repository"
             value={s.settings.githubRepo ?? ''}
             onChange={(e) => s.setSettings({ githubRepo: e.target.value })}
           />
           <input
             className="field"
             placeholder="branch (main)"
+            aria-label="Branch"
             value={s.settings.githubBranch ?? ''}
             onChange={(e) => s.setSettings({ githubBranch: e.target.value })}
           />
         </div>
         <input
           className="field w-full"
-          placeholder="Optional folder filter — e.g. skills/ (leave blank for whole repo)"
+          placeholder="Optional folder filter — e.g. skills/ (blank syncs the whole repo)"
+          aria-label="Folder filter"
           value={s.settings.githubPath ?? ''}
           onChange={(e) => s.setSettings({ githubPath: e.target.value })}
         />
         <input
-          className="field w-full"
+          className="field num w-full"
           type="password"
-          placeholder="Personal access token (only needed for private repos / higher rate limits)"
+          placeholder="Personal access token — only for private repos or higher rate limits"
+          aria-label="GitHub token"
           value={s.settings.githubToken ?? ''}
           onChange={(e) => s.setSettings({ githubToken: e.target.value })}
         />
-        <div className="flex flex-wrap items-center gap-2 pt-1">
-          <button type="button" className="btn btn-signal !py-1.5 !text-xs" onClick={run} disabled={state.status === 'syncing' || !s.settings.githubRepo}>
-            <RefreshCw size={12} className={state.status === 'syncing' ? 'animate-spin' : ''} /> Sync now
+        <div className="flex flex-wrap items-center gap-3 pt-2">
+          <button
+            type="button"
+            className="btn btn-sm"
+            onClick={() => void run()}
+            disabled={state.status === 'syncing' || !s.settings.githubRepo}
+          >
+            {state.status === 'syncing' ? 'Syncing…' : 'Sync now'}
           </button>
-          {state.status === 'ok' && (
-            <span className="flex items-center gap-1 text-xs text-affirm" title={state.message}>
-              <CheckCircle2 size={13} className="shrink-0" /> {state.message}
-            </span>
-          )}
-          {state.status === 'fail' && (
-            <span className="flex items-center gap-1 text-xs text-alert" title={state.message}>
-              <XCircle size={13} className="shrink-0" /> {state.message}
-            </span>
-          )}
+          {state.status === 'ok' && <span className="text-micro text-paper">{state.message}</span>}
+          {state.status === 'fail' && <span className="text-micro text-mute">{state.message}</span>}
           {state.status === 'idle' && (
-            <span className="text-[11px] text-fog">
+            <span className="text-micro text-faint">
               {syncedCount > 0
-                ? `${syncedCount} file${syncedCount === 1 ? '' : 's'} synced${s.settings.githubSyncedAt ? ` · last sync ${new Date(s.settings.githubSyncedAt).toLocaleString()}` : ''}`
+                ? `${syncedCount} file${syncedCount === 1 ? '' : 's'} synced${
+                    s.settings.githubSyncedAt ? ` · last sync ${new Date(s.settings.githubSyncedAt).toLocaleString()}` : ''
+                  }`
                 : 'Not synced yet'}
             </span>
           )}
         </div>
       </div>
-    </Panel>
+    </Section>
+  )
+}
+
+function TestButton({ provider }: { provider: LlmProvider }) {
+  const [state, setState] = useState<{ status: 'idle' | 'testing' | 'ok' | 'fail'; message: string }>({ status: 'idle', message: '' })
+  return (
+    <div className="flex items-center gap-3">
+      <button
+        type="button"
+        className="btn btn-sm"
+        disabled={state.status === 'testing'}
+        onClick={async () => {
+          setState({ status: 'testing', message: '' })
+          const res = await testProvider(provider)
+          setState({ status: res.ok ? 'ok' : 'fail', message: res.message })
+        }}
+      >
+        {state.status === 'testing' ? 'Testing…' : 'Test connection'}
+      </button>
+      {state.status === 'ok' && <span className="text-micro text-paper">{state.message}</span>}
+      {state.status === 'fail' && (
+        <span className="text-micro text-faint" title={state.message}>
+          {state.message.slice(0, 64)}
+        </span>
+      )}
+    </div>
+  )
+}
+
+function NavigationPanel() {
+  const s = useStore()
+  const [iconFor, setIconFor] = useState<string | null>(null)
+
+  return (
+    <Section
+      label="Navigation"
+      aside={
+        <>
+          <button className="btn btn-sm" onClick={() => s.addGroup('New group')}>
+            + Group
+          </button>
+          <button className="btn btn-sm" onClick={() => s.addSection({ label: 'New section', module: 'custom', icon: 'custom' })}>
+            + Section
+          </button>
+          <DangerBtn onConfirm={s.resetSections} label="Reset navigation" glyph="refresh" />
+        </>
+      }
+    >
+      <p className="mb-6 max-w-2xl text-body text-faint">
+        Rename anything, move it between groups, reorder it, hide what you don't use, or invent new sections. Hiding a
+        built-in section keeps its data; deleting is only offered for pages you created.
+      </p>
+
+      <div className="space-y-8">
+        {[...s.groups]
+          .sort((a, b) => a.order - b.order)
+          .map((g) => {
+            const items = s.sections.filter((x) => x.group === g.id).sort((a, b) => a.order - b.order)
+            return (
+              <div key={g.id}>
+                <div className="group mb-2 flex items-center gap-3 border-b border-line-2 pb-2">
+                  <InlineText value={g.label} onChange={(v) => s.updateGroup(g.id, { label: v })} ariaLabel="Group name" className="eyebrow w-40" />
+                  <span className="num flex-1 text-micro text-ghost">{items.length}</span>
+                  <Tools>
+                    <DangerBtn onConfirm={() => s.removeGroup(g.id)} label={`Delete ${g.label}`} />
+                  </Tools>
+                </div>
+                <ul>
+                  {items.map((sec, i) => (
+                    <li key={sec.id} className="group border-b border-line py-2.5 last:border-b-0">
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => setIconFor(iconFor === sec.id ? null : sec.id)}
+                          aria-label="Change icon"
+                          className="p-1 text-faint transition-colors hover:text-paper"
+                        >
+                          <Icon name={(sec.icon as GlyphName) ?? 'custom'} size={15} />
+                        </button>
+                        <span className="min-w-0 flex-1">
+                          <InlineText
+                            value={sec.label}
+                            onChange={(v) => s.updateSection(sec.id, { label: v })}
+                            ariaLabel="Section name"
+                            className={`text-body ${sec.hidden ? 'text-faint line-through' : 'text-paper'}`}
+                          />
+                        </span>
+                        <select
+                          className="field !py-1 hidden text-micro sm:block"
+                          value={sec.group}
+                          aria-label="Group"
+                          onChange={(e) => s.updateSection(sec.id, { group: e.target.value })}
+                        >
+                          {s.groups.map((gr) => (
+                            <option key={gr.id} value={gr.id}>
+                              {gr.label}
+                            </option>
+                          ))}
+                        </select>
+                        <Chip active={sec.bar} onClick={() => s.updateSection(sec.id, { bar: !sec.bar })}>
+                          Bar
+                        </Chip>
+                        <IconBtn
+                          glyph={sec.hidden ? 'eyeOff' : 'eye'}
+                          label={sec.hidden ? 'Show section' : 'Hide section'}
+                          onClick={() => s.updateSection(sec.id, { hidden: !sec.hidden })}
+                        />
+                        <Tools>
+                          <Reorder onUp={() => s.moveSection(sec.id, -1)} onDown={() => s.moveSection(sec.id, 1)} first={i === 0} last={i === items.length - 1} />
+                          {sec.module === 'custom' && <DangerBtn onConfirm={() => s.removeSection(sec.id)} label={`Delete ${sec.label}`} />}
+                        </Tools>
+                      </div>
+                      {iconFor === sec.id && (
+                        <div className="mt-3 flex flex-wrap gap-1.5 pl-8">
+                          {PICKABLE_GLYPHS.map((gl) => (
+                            <button
+                              key={gl}
+                              onClick={() => {
+                                s.updateSection(sec.id, { icon: gl })
+                                setIconFor(null)
+                              }}
+                              aria-label={`Use ${gl} icon`}
+                              className={`border p-1.5 transition-colors ${sec.icon === gl ? 'border-paper text-paper' : 'border-line text-faint hover:text-paper'}`}
+                            >
+                              <Icon name={gl} size={14} />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
+          })}
+      </div>
+    </Section>
+  )
+}
+
+function ConsistencyPanel() {
+  const s = useStore()
+  const [perm, setPerm] = useState(notifyPermission())
+
+  return (
+    <>
+      <Section
+        label="Habits"
+        aside={
+          <button className="btn btn-sm" onClick={() => s.addHabit('New habit')}>
+            + Habit
+          </button>
+        }
+      >
+        <p className="mb-5 max-w-2xl text-body text-faint">
+          These drive the day score and the streaks. Where a habit has a natural source — water, protein, reading, the
+          session — it reads from your real logs, so there is never a second place to record the same thing.
+        </p>
+        <ul>
+          {[...s.habits]
+            .sort((a, b) => a.order - b.order)
+            .map((h, i) => (
+              <li key={h.id} className="group flex flex-wrap items-center gap-3 border-b border-line py-3 last:border-b-0">
+                <span className="min-w-[8rem] flex-1">
+                  <InlineText value={h.label} onChange={(v) => s.updateHabit(h.id, { label: v })} ariaLabel="Habit name" className="text-body text-paper" />
+                </span>
+                <select
+                  className="field !py-1 text-micro"
+                  value={h.kind}
+                  aria-label="Habit type"
+                  onChange={(e) => s.updateHabit(h.id, { kind: e.target.value as 'boolean' | 'count' })}
+                >
+                  <option value="boolean">Done / not</option>
+                  <option value="count">Count to target</option>
+                </select>
+                {h.kind === 'count' && (
+                  <span className="flex items-baseline gap-1">
+                    <NumCell value={h.target} onChange={(v) => s.updateHabit(h.id, { target: v ?? 1 })} ariaLabel="Target" width="w-12" />
+                    <span className="w-10">
+                      <InlineText value={h.unit} onChange={(v) => s.updateHabit(h.id, { unit: v })} ariaLabel="Unit" placeholder="unit" className="text-micro text-faint" />
+                    </span>
+                  </span>
+                )}
+                <Tools>
+                  <Reorder onUp={() => s.moveHabit(h.id, -1)} onDown={() => s.moveHabit(h.id, 1)} first={i === 0} last={i === s.habits.length - 1} />
+                  <DangerBtn onConfirm={() => s.removeHabit(h.id)} label={`Delete ${h.label}`} />
+                </Tools>
+              </li>
+            ))}
+        </ul>
+      </Section>
+
+      <Section
+        label="Reminders"
+        aside={
+          <button className="btn btn-sm" onClick={() => s.addReminder({ label: 'New reminder', time: '09:00' })}>
+            + Reminder
+          </button>
+        }
+      >
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-4 border-b border-line pb-5">
+          <div className="max-w-xl">
+            <div className="text-body text-paper">Scheduled reminders</div>
+            <p className="mt-1 text-micro leading-relaxed text-faint">
+              These fire while Calibrate is open or installed to your home screen. Install it as a PWA on iPhone — Share
+              → Add to Home Screen — and it can nudge you with the app in the background. There is no push server behind
+              a static site, so this is deliberately honest about its limits.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            {perm !== 'granted' && (
+              <button
+                className="btn btn-sm"
+                onClick={async () => {
+                  const ok = await requestNotifyPermission()
+                  setPerm(ok ? 'granted' : notifyPermission())
+                  if (ok) s.setSettings({ remindersEnabled: true })
+                }}
+              >
+                Allow notifications
+              </button>
+            )}
+            <Toggle
+              on={s.settings.remindersEnabled}
+              onChange={async (v) => {
+                if (v && notifyPermission() !== 'granted') {
+                  const ok = await requestNotifyPermission()
+                  setPerm(ok ? 'granted' : notifyPermission())
+                  if (!ok) return
+                }
+                s.setSettings({ remindersEnabled: v })
+              }}
+              label="Enable reminders"
+            />
+          </div>
+        </div>
+
+        <ul>
+          {s.reminders.map((r) => (
+            <li key={r.id} className="group border-b border-line py-3 last:border-b-0">
+              <div className="flex flex-wrap items-center gap-3">
+                <input
+                  type="time"
+                  className="field num !py-1 w-24"
+                  value={r.time}
+                  aria-label="Reminder time"
+                  onChange={(e) => s.updateReminder(r.id, { time: e.target.value })}
+                />
+                <span className="min-w-[8rem] flex-1">
+                  <InlineText value={r.label} onChange={(v) => s.updateReminder(r.id, { label: v })} ariaLabel="Reminder name" className="text-body text-paper" />
+                </span>
+                <Toggle on={r.enabled} onChange={(v) => s.updateReminder(r.id, { enabled: v })} label={`Enable ${r.label}`} />
+                <Tools>
+                  <DangerBtn onConfirm={() => s.removeReminder(r.id)} label={`Delete ${r.label}`} />
+                </Tools>
+              </div>
+              <InlineText
+                value={r.body}
+                onChange={(v) => s.updateReminder(r.id, { body: v })}
+                ariaLabel="Reminder message"
+                placeholder="What it should say…"
+                className="mt-1.5 text-micro text-faint"
+              />
+              <div className="mt-2.5 flex flex-wrap gap-1.5">
+                {WEEKDAY_NAMES.map((n, i) => {
+                  const on = r.days.length === 0 || r.days.includes(i as Weekday)
+                  return (
+                    <Chip
+                      key={n}
+                      active={on}
+                      onClick={() => {
+                        const current = r.days.length ? r.days : ([0, 1, 2, 3, 4, 5, 6] as Weekday[])
+                        const next = current.includes(i as Weekday) ? current.filter((d) => d !== i) : [...current, i as Weekday]
+                        s.updateReminder(r.id, { days: next.length === 7 ? [] : (next.sort() as Weekday[]) })
+                      }}
+                    >
+                      {n.slice(0, 2)}
+                    </Chip>
+                  )
+                })}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </Section>
+    </>
+  )
+}
+
+function MemoryPanel() {
+  const s = useStore()
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [openDoc, setOpenDoc] = useState<string | null>(null)
+
+  const importMarkdown = async (files: FileList) => {
+    for (const file of Array.from(files).slice(0, 40)) {
+      const text = await file.text()
+      s.addKnowledgeDoc(file.name.replace(/\.(md|markdown|txt)$/i, ''), text, file.name)
+    }
+  }
+
+  return (
+    <>
+      <Section label="Who you are">
+        <p className="mb-5 max-w-2xl text-body text-faint">
+          Everything here rides along in Jarvis's context. Write it as you would brief a chief of staff, not as a form.
+        </p>
+        <div className="grid gap-x-8 gap-y-1 sm:grid-cols-2">
+          <label className="flex items-baseline justify-between gap-3 border-b border-line py-3">
+            <Eyebrow>Name</Eyebrow>
+            <input
+              className="field-line flex-1 text-right text-body text-paper"
+              value={s.profile.name}
+              aria-label="Name"
+              onChange={(e) => {
+                s.setProfile({ name: e.target.value })
+                s.setSettings({ userName: e.target.value })
+              }}
+            />
+          </label>
+          <label className="flex items-baseline justify-between gap-3 border-b border-line py-3">
+            <Eyebrow>Location</Eyebrow>
+            <input
+              className="field-line flex-1 text-right text-body text-paper"
+              value={s.profile.location}
+              aria-label="Location"
+              onChange={(e) => s.setProfile({ location: e.target.value })}
+            />
+          </label>
+        </div>
+        <div className="mt-5 space-y-5">
+          <div>
+            <Eyebrow className="mb-2">Identity — who you are and what you're building</Eyebrow>
+            <InlineArea value={s.profile.identity} onChange={(v) => s.setProfile({ identity: v })} ariaLabel="Identity" />
+          </div>
+          <div>
+            <Eyebrow className="mb-2">Operating philosophy</Eyebrow>
+            <InlineArea value={s.profile.philosophy} onChange={(v) => s.setProfile({ philosophy: v })} ariaLabel="Philosophy" />
+          </div>
+        </div>
+      </Section>
+
+      <Section label={`Memory · ${s.profile.facts.length} facts`}>
+        <p className="mb-5 max-w-2xl text-body text-faint">
+          What Jarvis has committed to memory. Edit or delete any of it — importance decides what surfaces first.
+        </p>
+        <ul>
+          {s.profile.facts.map((f) => (
+            <li key={f.id} className="group flex items-center gap-3 border-b border-line py-2.5 last:border-b-0">
+              <span className="eyebrow w-16 shrink-0">{f.category}</span>
+              <span className="min-w-0 flex-1">
+                <InlineText value={f.text} onChange={(v) => s.updateFact(f.id, { text: v })} ariaLabel="Memory fact" className="text-body text-paper" />
+              </span>
+              <NumCell value={f.importance} onChange={(v) => s.updateFact(f.id, { importance: Math.max(1, Math.min(10, v ?? 5)) })} ariaLabel="Importance" width="w-8" />
+              <Tools>
+                <DangerBtn onConfirm={() => s.removeFact(f.id)} label="Forget this" />
+              </Tools>
+            </li>
+          ))}
+        </ul>
+        <form
+          className="mt-4 flex gap-2"
+          onSubmit={(e) => {
+            e.preventDefault()
+            const input = e.currentTarget.elements.namedItem('fact') as HTMLInputElement
+            if (!input.value.trim()) return
+            s.addFact(input.value.trim())
+            input.value = ''
+          }}
+        >
+          <input name="fact" className="field min-w-0 flex-1" placeholder="Something Jarvis should always know…" aria-label="New fact" />
+          <button className="btn" type="submit">
+            Remember
+          </button>
+        </form>
+      </Section>
+
+      <Section
+        label={`Reference library · ${s.knowledgeDocs.length}`}
+        aside={
+          <>
+            <button className="btn btn-sm" onClick={() => fileRef.current?.click()}>
+              Import markdown
+            </button>
+            <button className="btn btn-sm" onClick={() => setOpenDoc(s.addKnowledgeDoc('New document', '', 'manual'))}>
+              + Document
+            </button>
+          </>
+        }
+      >
+        <p className="mb-5 max-w-2xl text-body text-faint">
+          Your second brain, inside the app. Drop in markdown from your vault and Jarvis reads it — pinned documents ride
+          along every message, the rest surface when a question actually touches them.
+        </p>
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".md,.markdown,.txt,text/markdown,text/plain"
+          multiple
+          className="hidden"
+          onChange={(e) => e.target.files && importMarkdown(e.target.files)}
+        />
+        {s.knowledgeDocs.length ? (
+          <ul>
+            {s.knowledgeDocs.map((k) => (
+              <li key={k.id} className="group border-b border-line py-3 last:border-b-0">
+                <div className="flex items-center gap-3">
+                  <IconBtn glyph="pin" label="Always include" active={k.pinned} onClick={() => s.updateKnowledgeDoc(k.id, { pinned: !k.pinned })} />
+                  <span className="min-w-0 flex-1">
+                    <InlineText value={k.title} onChange={(v) => s.updateKnowledgeDoc(k.id, { title: v })} ariaLabel="Document title" className="text-body text-paper" />
+                  </span>
+                  <span className="num shrink-0 text-micro text-ghost">{Math.round(k.body.length / 100) / 10}k</span>
+                  <IconBtn glyph={openDoc === k.id ? 'chevronUp' : 'chevronDown'} label="Toggle body" onClick={() => setOpenDoc(openDoc === k.id ? null : k.id)} />
+                  <Tools>
+                    <DangerBtn onConfirm={() => s.removeKnowledgeDoc(k.id)} label={`Delete ${k.title}`} />
+                  </Tools>
+                </div>
+                {openDoc === k.id && (
+                  <div className="mt-3 border-l border-line pl-4">
+                    <InlineArea value={k.body} onChange={(v) => s.updateKnowledgeDoc(k.id, { body: v })} ariaLabel="Document body" minRows={6} placeholder="Paste your notes…" />
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <Empty>Nothing filed yet. Import a folder of markdown and Jarvis inherits it.</Empty>
+        )}
+      </Section>
+    </>
   )
 }
 
@@ -652,71 +680,50 @@ function SyncPanel() {
   const [syncing, setSyncing] = useState(false)
   const configured = !!(s.settings.supabaseUrl && s.settings.supabaseKey && s.settings.syncCode)
 
-  const runSync = async () => {
-    setSyncing(true)
-    try {
-      await syncNow()
-    } finally {
-      setSyncing(false)
-    }
-  }
-
   return (
-    <Panel>
-      <HudLabel>Cross-Device Sync</HudLabel>
-      <p className="mb-3 text-[11px] leading-relaxed text-fog">
-        Sync everything — water, workouts, meals, golf, Jarvis memory, chat, settings — across iPhone and desktop
-        through your own free Supabase project. One-time setup (~2 min): see <span className="text-haze">SUPABASE.md</span> in
-        the repo, then paste the same three values on every device.
+    <Section label="Cross-device sync">
+      <p className="mb-5 max-w-2xl text-body text-faint">
+        Everything — logs, memory, sections, chat — through your own free Supabase project. Paste the same three values
+        on every device. Setup is in SUPABASE.md in the repo.
       </p>
       <div className="space-y-2">
-        <input
-          className="field w-full"
-          placeholder="Supabase project URL — https://xxxx.supabase.co"
-          value={s.settings.supabaseUrl ?? ''}
-          onChange={(e) => s.setSettings({ supabaseUrl: e.target.value.trim() })}
-        />
-        <input
-          className="field num w-full"
-          type="password"
-          placeholder="Supabase anon public key"
-          value={s.settings.supabaseKey ?? ''}
-          onChange={(e) => s.setSettings({ supabaseKey: e.target.value.trim() })}
-        />
+        <input className="field w-full" placeholder="Supabase project URL" value={s.settings.supabaseUrl ?? ''} onChange={(e) => s.setSettings({ supabaseUrl: e.target.value.trim() })} aria-label="Supabase URL" />
+        <input className="field num w-full" type="password" placeholder="Supabase anon key" value={s.settings.supabaseKey ?? ''} onChange={(e) => s.setSettings({ supabaseKey: e.target.value.trim() })} aria-label="Supabase key" />
         <div className="flex gap-2">
-          <input
-            className="field num flex-1"
-            placeholder="Sync code — same on every device"
-            value={s.settings.syncCode ?? ''}
-            onChange={(e) => s.setSettings({ syncCode: e.target.value.trim() })}
-          />
-          <button
-            className="btn"
-            type="button"
-            onClick={() => s.setSettings({ syncCode: `cal-${crypto.randomUUID()}` })}
-            title="Generate a random sync code (copy it to your other devices)"
-          >
+          <input className="field num min-w-0 flex-1" placeholder="Sync code — identical on every device" value={s.settings.syncCode ?? ''} onChange={(e) => s.setSettings({ syncCode: e.target.value.trim() })} aria-label="Sync code" />
+          <button className="btn" type="button" onClick={() => s.setSettings({ syncCode: `cal-${crypto.randomUUID()}` })}>
             Generate
           </button>
         </div>
       </div>
-      <div className="mt-3 flex items-center justify-between">
-        <span className="text-[11px] text-fog">
+      <div className="mt-4 flex items-center justify-between">
+        <span className="text-micro text-faint">
           {!configured
-            ? 'Not configured — local-only storage.'
+            ? 'Not configured — local only.'
             : status.error
               ? `Sync error: ${status.error}`
               : status.lastSyncAt
-                ? `Synced ${new Date(status.lastSyncAt).toLocaleTimeString()}${status.pendingPush ? ' · pushing…' : ''}`
-                : 'Configured — waiting for first sync.'}
+                ? `Synced ${new Date(status.lastSyncAt).toLocaleTimeString()}${status.pendingPush ? ' · pushing' : ''}`
+                : 'Configured — waiting for the first sync.'}
         </span>
         {configured && (
-          <button className="btn !py-1.5 !text-xs" onClick={runSync} disabled={syncing}>
-            <RefreshCw size={13} className={syncing ? 'animate-spin' : ''} /> Sync now
+          <button
+            className="btn btn-sm"
+            disabled={syncing}
+            onClick={async () => {
+              setSyncing(true)
+              try {
+                await syncNow()
+              } finally {
+                setSyncing(false)
+              }
+            }}
+          >
+            {syncing ? 'Syncing…' : 'Sync now'}
           </button>
         )}
       </div>
-    </Panel>
+    </Section>
   )
 }
 
@@ -727,129 +734,347 @@ function IntegrationsPanel() {
   const [msg, setMsg] = useState('')
   const [syncing, setSyncing] = useState(false)
 
-  const syncHevy = async () => {
-    if (!s.settings.hevyKey) return setMsg('Paste your Hevy API key first (Hevy app → Settings → Developer → API key).')
-    setSyncing(true)
-    setMsg('')
-    try {
-      const { fetchHevyWorkouts } = await import('../lib/imports')
-      const sessions = await fetchHevyWorkouts(s.settings.hevyKey)
-      s.setHevySessions(sessions)
-      setMsg(`Synced ${sessions.length} workouts live from Hevy. They count toward your weekly lifts.`)
-    } catch (e) {
-      setMsg(
-        `${e instanceof Error ? e.message : 'Sync failed'}. If this keeps happening, use the CSV import below — same data, always works.`,
-      )
-    } finally {
-      setSyncing(false)
-    }
-  }
-
-  const importHevy = async (file: File) => {
-    const { parseHevyCSV } = await import('../lib/imports')
-    const sessions = parseHevyCSV(await file.text())
-    if (!sessions.length) return setMsg('Could not find workouts in that file — export the CSV from Hevy → Settings → Export Data.')
-    s.setHevySessions(sessions)
-    setMsg(`Imported ${sessions.length} Hevy workouts. They now count toward your weekly lifts.`)
-  }
-
-  const importGolfshot = async (file: File) => {
-    const { parseGolfshotCSV } = await import('../lib/imports')
-    const rounds = parseGolfshotCSV(await file.text())
-    if (!rounds.length) return setMsg('Could not find rounds in that file — export rounds as CSV from Golfshot (golfshot.com → Rounds → Export).')
-    s.setGolfRounds(rounds)
-    const avg = Math.round(rounds.slice(0, 20).reduce((a, r) => a + r.score, 0) / Math.min(rounds.length, 20))
-    s.setGolfStats({ avgScore: avg })
-    setMsg(`Imported ${rounds.length} rounds. Average score updated to ${avg}.`)
-  }
-
   return (
-    <Panel>
-      <HudLabel>Integrations — Hevy & Golfshot</HudLabel>
-
-      <span className="hud-label !mb-1 block !text-[8px] text-arc">Hevy — live sync (official API)</span>
-      <p className="mb-2 text-[11px] leading-relaxed text-fog">
-        In the Hevy app: Settings → Developer → generate API key (requires Hevy Pro). Paste it and hit Sync — your
-        workouts pull straight in.
-      </p>
-      <div className="mb-4 flex gap-2">
-        <input
-          className="field num flex-1"
-          type="password"
-          placeholder="Hevy API key"
-          value={s.settings.hevyKey}
-          onChange={(e) => s.setSettings({ hevyKey: e.target.value.trim() })}
-        />
-        <button className="btn btn-signal" onClick={syncHevy} disabled={syncing}>
-          {syncing ? 'Syncing…' : 'Sync now'}
-        </button>
+    <Section label="Integrations">
+      <div className="mb-6">
+        <Eyebrow className="mb-2">Hevy — live sync</Eyebrow>
+        <p className="mb-3 max-w-2xl text-micro leading-relaxed text-faint">
+          In Hevy: Settings → Developer → generate an API key. Workouts pull straight in and count toward the week.
+        </p>
+        <div className="flex gap-2">
+          <input className="field num min-w-0 flex-1" type="password" placeholder="Hevy API key" value={s.settings.hevyKey} onChange={(e) => s.setSettings({ hevyKey: e.target.value.trim() })} aria-label="Hevy key" />
+          <button
+            className="btn"
+            disabled={syncing}
+            onClick={async () => {
+              if (!s.settings.hevyKey) return setMsg('Paste the Hevy API key first.')
+              setSyncing(true)
+              setMsg('')
+              try {
+                const { fetchHevyWorkouts } = await import('../lib/imports')
+                const sessions = await fetchHevyWorkouts(s.settings.hevyKey)
+                s.setHevySessions(sessions)
+                setMsg(`Synced ${sessions.length} workouts.`)
+              } catch (e) {
+                setMsg(`${e instanceof Error ? e.message : 'Sync failed'} — the CSV import below always works.`)
+              } finally {
+                setSyncing(false)
+              }
+            }}
+          >
+            {syncing ? 'Syncing…' : 'Sync'}
+          </button>
+        </div>
       </div>
 
-      <span className="hud-label !mb-1 block !text-[8px]">CSV imports (no subscription needed)</span>
-      <p className="mb-2 text-[11px] leading-relaxed text-fog">
-        <span className="text-haze">Hevy:</span> Profile → Settings → Export Data.{' '}
-        <span className="text-haze">Golfshot:</span> golfshot.com → Rounds → Export (no public API exists).
-        Re-import any time; it replaces the previous import.
-      </p>
+      <Eyebrow className="mb-2">CSV imports</Eyebrow>
       <div className="flex flex-wrap gap-2">
         <button className="btn" onClick={() => hevyRef.current?.click()}>
-          <Upload size={15} /> Hevy CSV
-          {s.hevySessions.length > 0 && <span className="num text-xs text-affirm">({s.hevySessions.length})</span>}
+          Hevy CSV {s.hevySessions.length > 0 && <span className="num text-faint">{s.hevySessions.length}</span>}
         </button>
         <button className="btn" onClick={() => golfRef.current?.click()}>
-          <Upload size={15} /> Golfshot CSV
-          {s.golfRounds.length > 0 && <span className="num text-xs text-affirm">({s.golfRounds.length})</span>}
+          Golfshot CSV {s.golfRounds.length > 0 && <span className="num text-faint">{s.golfRounds.length}</span>}
         </button>
-        <input ref={hevyRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => e.target.files?.[0] && importHevy(e.target.files[0])} />
-        <input ref={golfRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(e) => e.target.files?.[0] && importGolfshot(e.target.files[0])} />
+        <input
+          ref={hevyRef}
+          type="file"
+          accept=".csv,text/csv"
+          className="hidden"
+          onChange={async (e) => {
+            const file = e.target.files?.[0]
+            if (!file) return
+            const { parseHevyCSV } = await import('../lib/imports')
+            const sessions = parseHevyCSV(await file.text())
+            if (!sessions.length) return setMsg('No workouts found in that file.')
+            s.setHevySessions(sessions)
+            setMsg(`Imported ${sessions.length} Hevy workouts.`)
+          }}
+        />
+        <input
+          ref={golfRef}
+          type="file"
+          accept=".csv,text/csv"
+          className="hidden"
+          onChange={async (e) => {
+            const file = e.target.files?.[0]
+            if (!file) return
+            const { parseGolfshotCSV } = await import('../lib/imports')
+            const rounds = parseGolfshotCSV(await file.text())
+            if (!rounds.length) return setMsg('No rounds found in that file.')
+            s.setGolfRounds(rounds)
+            const avg = Math.round(rounds.slice(0, 20).reduce((a, r) => a + r.score, 0) / Math.min(rounds.length, 20))
+            s.setGolfStats({ avgScore: avg })
+            setMsg(`Imported ${rounds.length} rounds. Average updated to ${avg}.`)
+          }}
+        />
       </div>
-      {msg && <p className="mt-3 rounded-lg bg-black/25 px-3 py-2 text-xs text-steel">{msg}</p>}
-    </Panel>
+      {msg && <p className="mt-4 text-micro text-mute">{msg}</p>}
+    </Section>
   )
 }
 
-function VoicePicker() {
+function VoicePanel() {
   const s = useStore()
   const [voices, setVoices] = useState(() => englishVoices())
-
   useEffect(() => {
     const refresh = () => setVoices(englishVoices())
     refresh()
-    // voices load asynchronously in most browsers
     if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = refresh
     return () => {
       if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = null
     }
   }, [])
 
-  if (!voices.length) return null
+  return (
+    <Section label="Voice">
+      <div className="flex items-center justify-between border-b border-line py-3">
+        <span className="text-body text-mute">Speak replies aloud</span>
+        <Toggle on={s.settings.speakReplies} onChange={(v) => s.setSettings({ speakReplies: v })} label="Speak replies" />
+      </div>
+      {voices.length > 0 && (
+        <div className="flex items-center justify-between gap-3 border-b border-line py-3">
+          <span className="text-body text-mute">Browser voice</span>
+          <div className="flex gap-2">
+            <select className="field max-w-[16rem]" value={s.settings.voiceURI} onChange={(e) => s.setSettings({ voiceURI: e.target.value })} aria-label="Voice">
+              <option value="">Auto — best British male</option>
+              {voices.map((v) => (
+                <option key={v.voiceURI} value={v.voiceURI}>
+                  {v.name} ({v.lang})
+                </option>
+              ))}
+            </select>
+            <button className="btn btn-sm" onClick={() => speak('Good evening, sir. All systems calibrated and standing by.', s.settings.voiceURI)}>
+              Test
+            </button>
+          </div>
+        </div>
+      )}
+      <div className="py-4">
+        <Eyebrow className="mb-2">ElevenLabs — the cinematic voice</Eyebrow>
+        <div className="flex gap-2">
+          <input className="field num min-w-0 flex-1" type="password" placeholder="ElevenLabs API key (optional)" value={s.settings.elevenKey} onChange={(e) => s.setSettings({ elevenKey: e.target.value.trim() })} aria-label="ElevenLabs key" />
+          <button
+            className="btn"
+            onClick={() =>
+              speak(
+                'Good evening, sir. All systems calibrated and standing by.',
+                s.settings.voiceURI,
+                s.settings.elevenKey ? { key: s.settings.elevenKey, voiceId: s.settings.elevenVoiceId } : undefined,
+                s.settings.openaiKey,
+              )
+            }
+          >
+            Test
+          </button>
+        </div>
+      </div>
+      <div className="border-t border-line py-4">
+        <Eyebrow className="mb-2">OpenAI — fallback voice, and iPhone dictation</Eyebrow>
+        <input className="field num w-full" type="password" placeholder="OpenAI API key (optional)" value={s.settings.openaiKey ?? ''} onChange={(e) => s.setSettings({ openaiKey: e.target.value.trim() })} aria-label="OpenAI key" />
+      </div>
+    </Section>
+  )
+}
+
+const PROVIDERS: { id: LlmProvider; label: string; note: string }[] = [
+  { id: 'none', label: 'Built-in only', note: 'Instant logging and edits. No reasoning, no cost, no key.' },
+  { id: 'anthropic', label: 'Claude', note: 'Best judgement and the most reliable tool use. Cents per conversation.' },
+  { id: 'gemini', label: 'Gemini', note: "Google's free tier — a generous daily quota at no cost. Reads photos." },
+  { id: 'groq', label: 'Groq', note: 'Genuinely free, no card, extremely fast. No vision.' },
+  { id: 'openrouter', label: 'OpenRouter', note: 'One key, many free models. The default reads photos.' },
+  { id: 'local', label: 'On-device', note: 'Ollama or LM Studio on this Mac. Private and free — but weaker at tools, and invisible to your phone.' },
+]
+
+export function Settings({ label }: { label: string }) {
+  const s = useStore()
+  const fileRef = useRef<HTMLInputElement>(null)
+  const p = s.settings.provider
+
+  const keyField = (
+    provider: LlmProvider,
+    keyProp: 'anthropicKey' | 'geminiKey' | 'groqKey' | 'openrouterKey',
+    modelProp: 'anthropicModel' | 'geminiModel' | 'groqModel' | 'openrouterModel',
+    placeholder: string,
+  ) => (
+    <div className="space-y-2">
+      <input
+        className="field num w-full"
+        type="password"
+        placeholder={placeholder}
+        value={s.settings[keyProp]}
+        onChange={(e) => s.setSettings({ [keyProp]: e.target.value.trim() } as never)}
+        aria-label="API key"
+      />
+      <input
+        className="field num w-full"
+        placeholder="Model"
+        value={s.settings[modelProp]}
+        onChange={(e) => s.setSettings({ [modelProp]: e.target.value.trim() } as never)}
+        aria-label="Model"
+      />
+      <TestButton provider={provider} />
+    </div>
+  )
 
   return (
-    <div className="mt-3 flex items-end gap-2">
-      <label className="block flex-1">
-        <span className="hud-label !mb-1 !text-[8px]">JARVIS voice</span>
-        <select
-          className="field w-full"
-          value={s.settings.voiceURI}
-          onChange={(e) => s.setSettings({ voiceURI: e.target.value })}
-          aria-label="Choose voice"
-        >
-          <option value="" className="bg-panel">
-            Auto — best British male
-          </option>
-          {voices.map((v) => (
-            <option key={v.voiceURI} value={v.voiceURI} className="bg-panel">
-              {v.name} ({v.lang})
-            </option>
+    <Page title={label} lede="Keys, memory, navigation and reminders. Everything is stored on this device unless you turn on sync.">
+      <SettingsIndex />
+
+      <div id="set-brand">
+        <BrandSection />
+      </div>
+
+      <div id="set-navigation">
+        <NavigationPanel />
+      </div>
+
+      <Section label="Jarvis — the brain" id="set-jarvis">
+        <div className="mb-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {PROVIDERS.map((pr) => (
+            <button
+              key={pr.id}
+              onClick={() => s.setSettings({ provider: pr.id })}
+              className={`border p-4 text-left transition-colors ${p === pr.id ? 'border-paper' : 'border-line hover:border-line-2'}`}
+            >
+              <div className={`text-body ${p === pr.id ? 'text-paper' : 'text-mute'}`}>{pr.label}</div>
+              <div className="mt-1.5 text-micro leading-relaxed text-faint">{pr.note}</div>
+            </button>
           ))}
-        </select>
-      </label>
-      <button
-        className="btn"
-        onClick={() => speak('Good evening, sir. All systems are calibrated and standing by.', s.settings.voiceURI)}
-      >
-        <Play size={14} /> Test
-      </button>
-    </div>
+        </div>
+
+        {p === 'anthropic' && keyField('anthropic', 'anthropicKey', 'anthropicModel', 'sk-ant-… (console.anthropic.com)')}
+        {p === 'gemini' && keyField('gemini', 'geminiKey', 'geminiModel', 'AI… (aistudio.google.com — free)')}
+        {p === 'groq' && keyField('groq', 'groqKey', 'groqModel', 'gsk_… (console.groq.com — free, no card)')}
+        {p === 'openrouter' && keyField('openrouter', 'openrouterKey', 'openrouterModel', 'sk-or-… (openrouter.ai/keys)')}
+        {p === 'local' && (
+          <div className="space-y-2">
+            <p className="max-w-2xl text-micro leading-relaxed text-faint">
+              Point this at an OpenAI-compatible server on this machine. Ollama runs one at{' '}
+              <span className="num text-mute">http://127.0.0.1:11434/v1</span>, LM Studio at{' '}
+              <span className="num text-mute">http://127.0.0.1:1234/v1</span>. Two things to know: the browser must be
+              allowed to call it — for Ollama that means launching it with{' '}
+              <span className="num text-mute">OLLAMA_ORIGINS="*"</span> — and your phone cannot reach this Mac's
+              localhost, so on-device only works on the desktop.
+            </p>
+            <input
+              className="field num w-full"
+              placeholder="http://127.0.0.1:11434/v1"
+              value={s.settings.localBaseUrl}
+              onChange={(e) => s.setSettings({ localBaseUrl: e.target.value.trim() })}
+              aria-label="Local server URL"
+            />
+            <input
+              className="field num w-full"
+              placeholder="Model — e.g. qwen3:8b"
+              value={s.settings.localModel}
+              onChange={(e) => s.setSettings({ localModel: e.target.value.trim() })}
+              aria-label="Local model"
+            />
+            <TestButton provider="local" />
+          </div>
+        )}
+
+        <div className="mt-6 space-y-1 border-t border-line pt-5">
+          <div className="flex items-center justify-between border-b border-line py-3">
+            <div className="max-w-lg">
+              <div className="text-body text-mute">Live web search</div>
+              <p className="mt-1 text-micro leading-relaxed text-faint">
+                Works on every provider — news, prices and specs come back sourced, and Jarvis is told to say it found
+                nothing rather than invent a number.
+              </p>
+            </div>
+            <Toggle on={s.settings.webSearch} onChange={(v) => s.setSettings({ webSearch: v })} label="Web search" />
+          </div>
+          <div className="flex items-center justify-between border-b border-line py-3">
+            <div className="max-w-lg">
+              <div className="text-body text-mute">Tool steps per message</div>
+              <p className="mt-1 text-micro leading-relaxed text-faint">
+                How many read → act → observe rounds Jarvis may take before it must answer. Higher finishes bigger
+                restructures unaided; lower is cheaper and faster.
+              </p>
+            </div>
+            <NumCell value={s.settings.agentSteps} onChange={(v) => s.setSettings({ agentSteps: Math.max(1, Math.min(12, v ?? 6)) })} ariaLabel="Agent steps" width="w-10" />
+          </div>
+          <div className="flex items-center justify-between py-3">
+            <span className="text-body text-mute">Automatic failover</span>
+            <span className="text-micro text-faint">Claude → Gemini → Groq → OpenRouter → on-device</span>
+          </div>
+        </div>
+      </Section>
+
+      <div id="set-consistency">
+        <ConsistencyPanel />
+      </div>
+      <div id="set-memory">
+        <MemoryPanel />
+      </div>
+      <div id="set-github">
+        <GithubSyncPanel />
+      </div>
+      <div id="set-voice">
+        <VoicePanel />
+      </div>
+      <div id="set-sync">
+        <SyncPanel />
+      </div>
+      <div id="set-integrations">
+        <IntegrationsPanel />
+      </div>
+
+      <Section label="Data sources" id="set-sources">
+        <label className="block border-b border-line py-3">
+          <Eyebrow className="mb-2">USDA FoodData Central — generic food macros (free key at fdc.nal.usda.gov)</Eyebrow>
+          <input className="field num w-full" type="password" placeholder="Optional — falls back to DEMO_KEY, which throttles" value={s.settings.usdaKey} onChange={(e) => s.setSettings({ usdaKey: e.target.value.trim() })} aria-label="USDA key" />
+          <p className="mt-2 text-micro leading-relaxed text-faint">
+            Branded and European products come from Open Food Facts, which needs no key at all.
+          </p>
+        </label>
+        <label className="block border-b border-line py-3">
+          <Eyebrow className="mb-2">Finnhub — stock quotes and the market wire (free at finnhub.io)</Eyebrow>
+          <input className="field num w-full" type="password" placeholder="Optional" value={s.settings.finnhubKey} onChange={(e) => s.setSettings({ finnhubKey: e.target.value.trim() })} aria-label="Finnhub key" />
+        </label>
+        <label className="block py-3">
+          <Eyebrow className="mb-2">GNews — optional upgrade for the news wire (it works without a key)</Eyebrow>
+          <input className="field num w-full" type="password" placeholder="Optional — the wire runs keyless by default" value={s.settings.gnewsKey} onChange={(e) => s.setSettings({ gnewsKey: e.target.value.trim() })} aria-label="GNews key" />
+        </label>
+      </Section>
+
+      <Section label="Data" id="set-data">
+        <div className="flex flex-wrap gap-2">
+          <button className="btn" onClick={() => void downloadBackup()}>
+            Export backup
+          </button>
+          <button className="btn" onClick={() => fileRef.current?.click()}>
+            Import backup
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="application/json"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (!file) return
+              const reader = new FileReader()
+              reader.onload = () => {
+                try {
+                  const parsed: unknown = JSON.parse(String(reader.result))
+                  if (!isCalibrateBackup(parsed)) throw new Error('bad shape')
+                  void restoreBackup(parsed) // reloads on success
+                } catch {
+                  alert('That is not a valid Calibrate backup.')
+                }
+              }
+              reader.readAsText(file)
+            }}
+          />
+          <DangerBtn onConfirm={s.resetAll} label="Factory reset" glyph="refresh" />
+        </div>
+        <p className="mt-4 max-w-2xl text-micro leading-relaxed text-faint">
+          Data lives in this browser unless sync is configured. The export carries your photo blobs too, not just the
+          text — take one before clearing site data, and import it on another device to move everything across.
+        </p>
+      </Section>
+    </Page>
   )
 }

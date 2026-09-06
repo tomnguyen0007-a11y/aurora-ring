@@ -439,6 +439,7 @@ export const seedSections: SectionDef[] = [
   S('today', 'dashboard', 'Today', 'now', 'today', 0, true),
   S('jarvis', 'jarvis', 'Jarvis', 'now', 'jarvis', 1, true),
   S('schedule', 'schedule', 'Blueprint', 'now', 'schedule', 2),
+  S('review', 'review', 'Review', 'now', 'flag', 3),
 
   S('training', 'training', 'Training', 'body', 'training', 0, true),
   S('nutrition', 'nutrition', 'Fuel', 'body', 'nutrition', 1),

@@ -1,5 +1,5 @@
-import { CalendarCheck, Flame, MoveDownRight, MoveRight, MoveUpRight } from 'lucide-react'
-import { Empty, HudLabel, Panel, StatTile } from '../components/ui'
+import { Icon } from '../components/icons'
+import { Empty, Eyebrow, Page, Section, Stat } from '../components/ui'
 import { fmtHours, lastNDates, todayISO, weekdayOf } from '../lib/dates'
 import { dayProgress, streaks, weeklyReview, type WeekSnapshot } from '../lib/stats'
 import { useStore } from '../store/store'
@@ -22,9 +22,14 @@ const PILLARS: PillarRow[] = [
   { label: 'Check-ins', key: 'checkIns', fmt: (v) => `${v}/7`, focus: 'discipline' },
 ]
 
+/** Direction only — monochrome, so the arrow carries the meaning, not a colour. */
 function Delta({ now, prev }: { now: number; prev: number }) {
-  if (now === prev) return <MoveRight size={13} className="text-fog" />
-  return now > prev ? <MoveUpRight size={13} className="text-affirm" /> : <MoveDownRight size={13} className="text-alert/80" />
+  if (now === prev) return <span className="num w-4 text-center text-micro text-ghost">—</span>
+  return (
+    <span className={`num w-4 text-center text-micro ${now > prev ? 'text-paper' : 'text-faint'}`}>
+      {now > prev ? '▲' : '▼'}
+    </span>
+  )
 }
 
 /**
@@ -51,9 +56,8 @@ function suggestFocus(current: WeekSnapshot, previous: WeekSnapshot): string {
 }
 
 /**
- * GitHub-style consistency heatmap: 13 weeks of schedule completion, one cell per
- * day. The point is the shape — streaks and gaps visible at a glance, the
- * discipline pillar made physical.
+ * 13 weeks of schedule completion, one cell per day. The point is the shape —
+ * streaks and gaps visible at a glance. Intensity is alpha, never hue.
  */
 function ConsistencyHeatmap() {
   const s = useStore()
@@ -65,85 +69,70 @@ function ConsistencyHeatmap() {
   const weeks: (string | null)[][] = []
   for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7))
 
-  const colorFor = (date: string | null): string => {
+  const STEPS = ['rgba(255,255,255,0.07)', 'rgba(255,255,255,0.28)', 'rgba(255,255,255,0.58)', 'rgba(255,255,255,0.92)']
+
+  const shadeFor = (date: string | null): string => {
     if (!date || date > today) return 'transparent'
     const wd = weekdayOf(new Date(date + 'T12:00:00'))
     const p = dayProgress(s, date, wd)
     if (p.total === 0) return 'rgba(255,255,255,0.04)'
-    if (p.pct === 0) return 'rgba(255,255,255,0.07)'
-    if (p.pct < 40) return 'rgba(93,211,158,0.25)'
-    if (p.pct < 80) return 'rgba(93,211,158,0.55)'
-    return 'rgba(93,211,158,0.95)'
+    if (p.pct === 0) return STEPS[0]
+    if (p.pct < 40) return STEPS[1]
+    if (p.pct < 80) return STEPS[2]
+    return STEPS[3]
   }
 
   return (
-    <Panel>
-      <HudLabel>
-        <Flame size={11} className="text-affirm" /> Consistency — 13 weeks of schedule execution
-      </HudLabel>
-      <div className="overflow-x-auto pb-1">
+    <Section label="Consistency — 13 weeks of schedule execution">
+      <div className="no-bar overflow-x-auto pb-1">
         <div className="flex gap-1" style={{ minWidth: 13 * 16 }}>
           {weeks.map((col, i) => (
             <div key={i} className="flex flex-col gap-1">
               {col.map((date, j) => (
-                <div
-                  key={j}
-                  title={date ?? undefined}
-                  className="h-3 w-3 rounded-[3px]"
-                  style={{ background: colorFor(date) }}
-                />
+                <div key={j} title={date ?? undefined} className="h-3 w-3" style={{ background: shadeFor(date) }} />
               ))}
             </div>
           ))}
         </div>
       </div>
-      <div className="mt-2 flex items-center gap-1.5 text-[10px] text-fog">
+      <div className="mt-3 flex items-center gap-1.5 text-micro text-faint">
         less
-        {['rgba(255,255,255,0.07)', 'rgba(93,211,158,0.25)', 'rgba(93,211,158,0.55)', 'rgba(93,211,158,0.95)'].map((c) => (
-          <span key={c} className="inline-block h-2.5 w-2.5 rounded-[3px]" style={{ background: c }} />
+        {STEPS.map((c) => (
+          <span key={c} className="inline-block h-2.5 w-2.5" style={{ background: c }} />
         ))}
         more
       </div>
-    </Panel>
+    </Section>
   )
 }
 
-/** The Sunday ritual: what actually happened this week, against last week, and where the focus goes next. */
-export function Review() {
+/** The Sunday ritual: what happened this week, against last, and where focus goes next. */
+export function Review({ label }: { label: string }) {
   const s = useStore()
   const { current, previous } = weeklyReview(s)
   const st = streaks(s)
   const anything = PILLARS.some((p) => current[p.key] > 0 || previous[p.key] > 0)
 
   return (
-    <div className="space-y-4">
-      <header className="flex flex-wrap items-end justify-between gap-3 px-1">
-        <div>
-          <h1 className="h-lumen text-3xl font-bold tracking-wide">WEEKLY REVIEW</h1>
-          <p className="mt-1 text-sm text-haze">What actually happened — this week against last, no memory bias.</p>
-        </div>
-        <div className="flex gap-2.5">
-          <StatTile label="Check-in streak" value={st.checkin} sub="days" accent="text-signal" />
-          <StatTile label="Reading streak" value={st.reading} sub="days ≥ 15m" accent="text-arc" />
-        </div>
-      </header>
+    <Page title={label} lede="What actually happened — this week against last, no memory bias.">
+      <div className="mb-10 grid grid-cols-2 gap-x-10 border-b border-line pb-6 sm:max-w-md">
+        <Stat label="Check-in streak" value={st.checkin} sub="days" strong />
+        <Stat label="Reading streak" value={st.reading} sub="days ≥ 15m" strong />
+      </div>
 
-      <Panel className="lit">
-        <HudLabel>
-          <CalendarCheck size={11} className="text-signal" /> This week vs last
-        </HudLabel>
+      <Section label="This week vs last">
         {anything ? (
-          <div className="space-y-1">
+          <div>
             {PILLARS.map((p) => {
               const now = current[p.key]
               const prev = previous[p.key]
               return (
-                <div key={p.key} className="flex items-center justify-between rounded-lg px-2 py-1.5 odd:bg-black/20">
-                  <span className="text-sm text-haze">{p.label}</span>
-                  <span className="flex items-center gap-2.5">
-                    <span className="num text-xs text-fog">{p.fmt(prev)}</span>
+                <div key={p.key} className="flex items-center justify-between border-b border-line py-3 last:border-b-0">
+                  <span className="min-w-0 flex-1 truncate text-body text-mute">{p.label}</span>
+                  <span className="flex shrink-0 items-center gap-3">
+                    <span className="num text-micro text-faint">{p.fmt(prev)}</span>
                     <Delta now={now} prev={prev} />
-                    <span className="num w-16 text-right text-sm font-semibold text-ice">{p.fmt(now)}</span>
+                    <span className="num w-20 text-right text-body text-paper">{p.fmt(now)}</span>
                   </span>
                 </div>
               )
@@ -153,19 +142,20 @@ export function Review() {
           <Empty>Nothing logged yet this week or last — the review builds itself from what you log.</Empty>
         )}
         {anything && (
-          <p className="mt-3 border-t border-edge pt-3 text-sm leading-relaxed text-steel">
-            <span className="hud-label !mb-1 block !text-[8px] text-affirm">Focus next week</span>
-            {suggestFocus(current, previous)}
-          </p>
+          <div className="mt-6 border-t border-line pt-5">
+            <Eyebrow className="mb-2">Focus next week</Eyebrow>
+            <p className="max-w-2xl text-lede leading-relaxed text-mute">{suggestFocus(current, previous)}</p>
+          </div>
         )}
-      </Panel>
+      </Section>
 
       <ConsistencyHeatmap />
 
-      <p className="px-1 text-xs text-fog">
-        Want the deeper cut? Ask Jarvis: <span className="text-haze">“review my week”</span> — he sees these same numbers plus your goals and
-        knowledge.
+      <p className="flex items-center gap-2 text-micro text-faint">
+        <Icon name="jarvis" size={12} />
+        Deeper cut: ask Jarvis <span className="text-mute">“review my week”</span> — he sees these numbers plus your goals
+        and knowledge.
       </p>
-    </div>
+    </Page>
   )
 }

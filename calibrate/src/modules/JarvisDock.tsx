@@ -1,9 +1,14 @@
-import { Bot, ImagePlus, SendHorizonal, X } from 'lucide-react'
 import { useRef, useState } from 'react'
+import { Icon } from '../components/icons'
+import { Eyebrow } from '../components/ui'
 import { useStore } from '../store/store'
 import { jarvisSourceColor, jarvisSourceLabel, useJarvis } from './Jarvis'
 
-/** Desktop-only command bar: talk to Jarvis from any screen — text, screenshots, paste. */
+/**
+ * Desktop command bar: talk to Jarvis from any screen — text, screenshots,
+ * paste. Pinned flush to the bottom of the main column with a hairline top;
+ * a floating rounded pill would read as a widget sitting on the page.
+ */
 export function JarvisDock() {
   const setView = useStore((s) => s.setView)
   const lastJarvis = useStore((s) => [...s.chat].reverse().find((m) => m.role === 'jarvis'))
@@ -46,81 +51,87 @@ export function JarvisDock() {
   }
 
   return (
-    <div className="pointer-events-none fixed bottom-4 left-56 right-0 z-30 hidden justify-center px-6 lg:flex">
-      <div className="pointer-events-auto w-full max-w-xl">
-        {flash && lastJarvis && (
-          <button
-            className="glass-strong mb-2 block w-full rounded-xl px-4 py-2.5 text-left text-sm text-ice/90 animate-rise"
-            onClick={() => setView('jarvis')}
-          >
-            <span className="hud-label !mb-1 block !text-[8px] text-signal-dim">JARVIS</span>
-            <span className="line-clamp-2">{lastJarvis.text}</span>
-          </button>
-        )}
-        {images.length > 0 && (
-          <div className="glass-strong mb-2 flex items-center gap-2 rounded-xl p-2 animate-rise">
-            {images.map((img, i) => (
-              <img key={i} src={img} alt={`attachment ${i + 1} preview`} className="h-10 w-10 rounded-lg object-cover" />
-            ))}
-            <span className="flex-1 text-xs text-haze">{images.length > 1 ? `${images.length} screenshots` : 'Screenshot'} attached — ask Jarvis.</span>
-            <button type="button" className="btn btn-ghost !px-1.5" aria-label="Remove images" onClick={() => setImages([])}>
-              <X size={14} />
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 hidden lg:block">
+      <div className="mx-auto max-w-[1440px] pl-[212px]">
+        <div className="pointer-events-auto border-t border-line bg-ink px-10 py-3">
+          {flash && lastJarvis && (
+            <button className="animate-lift mb-3 block w-full border border-line px-4 py-3 text-left" onClick={() => setView('jarvis')}>
+              <Eyebrow className="mb-1.5">Jarvis</Eyebrow>
+              <span className="line-clamp-2 text-body text-mute">{lastJarvis.text}</span>
             </button>
-          </div>
-        )}
-        <form onSubmit={submit} className="glass-strong flex items-center gap-2 rounded-full py-1.5 pl-2 pr-1.5">
-          <button
-            type="button"
-            onClick={() => setView('jarvis')}
-            aria-label="Open Jarvis"
-            title={jarvisSourceLabel(lastJarvisSource)}
-            className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all ${
-              busy ? 'border-signal text-signal shadow-[0_0_14px_rgba(233,237,242,0.4)]' : 'border-edge-strong text-haze hover:text-signal hover:border-signal/50'
-            }`}
-          >
-            <Bot size={17} />
-            {!busy && <span className={`absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full ring-2 ring-[#0a0b0d] ${jarvisSourceColor(lastJarvisSource).dot}`} />}
-          </button>
-          {!busy && (
-            <span className={`hidden shrink-0 items-center gap-1 pl-0.5 text-[9px] font-medium uppercase tracking-wider sm:flex ${jarvisSourceColor(lastJarvisSource).text}`}>
-              {jarvisSourceLabel(lastJarvisSource)}
-            </span>
           )}
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            aria-label="Attach a screenshot"
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all ${
-              images.length ? 'border-ice/40 text-ice' : 'border-edge-strong text-haze hover:border-ice/40 hover:text-ice'
-            }`}
-          >
-            <ImagePlus size={15} />
-          </button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={(e) => e.target.files?.length && attachPhotos(e.target.files)}
-          />
-          <input
-            className="min-w-0 flex-1 bg-transparent text-sm text-ice outline-none placeholder:text-fog"
-            placeholder={busy ? 'Jarvis is thinking…' : 'Jarvis — log, ask, plan… paste a screenshot (⌘V)'}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onPaste={handlePaste}
-            aria-label="Message Jarvis"
-          />
-          <button
-            type="submit"
-            aria-label="Send to Jarvis"
-            disabled={(!input.trim() && !images.length) || busy}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-b border border-white/15 from-[#2a2f38] to-[#08090d] text-ice transition-transform active:scale-95 disabled:opacity-35"
-          >
-            <SendHorizonal size={15} />
-          </button>
-        </form>
+
+          {images.length > 0 && (
+            <div className="animate-lift mb-3 flex items-center gap-3 border border-line p-2">
+              {images.map((img, i) => (
+                <img key={i} src={img} alt={`attachment ${i + 1} preview`} className="h-10 w-10 border border-line object-cover" />
+              ))}
+              <span className="flex-1 text-micro text-faint">
+                {images.length > 1 ? `${images.length} screenshots` : 'Screenshot'} attached — ask Jarvis.
+              </span>
+              <button type="button" className="p-1 text-faint hover:text-paper" aria-label="Remove images" onClick={() => setImages([])}>
+                <Icon name="close" size={13} />
+              </button>
+            </div>
+          )}
+
+          <form onSubmit={submit} className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => setView('jarvis')}
+              aria-label="Open Jarvis"
+              title={jarvisSourceLabel(lastJarvisSource)}
+              className={`relative p-1 transition-colors ${busy ? 'animate-breathe text-paper' : 'text-faint hover:text-paper'}`}
+            >
+              <Icon name="jarvis" size={16} />
+              {!busy && (
+                <span className={`absolute right-0 top-0 h-1 w-1 ${jarvisSourceColor(lastJarvisSource).dot}`} aria-hidden="true" />
+              )}
+            </button>
+
+            {!busy && (
+              <span className={`eyebrow hidden shrink-0 sm:block ${jarvisSourceColor(lastJarvisSource).text}`}>
+                {jarvisSourceLabel(lastJarvisSource)}
+              </span>
+            )}
+
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              aria-label="Attach a screenshot"
+              className={`p-1 transition-colors ${images.length ? 'text-paper' : 'text-faint hover:text-paper'}`}
+            >
+              <Icon name="image" size={15} />
+            </button>
+
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => e.target.files?.length && void attachPhotos(e.target.files)}
+            />
+
+            <input
+              className="min-w-0 flex-1 bg-transparent text-body text-paper outline-none placeholder:text-faint"
+              placeholder={busy ? 'Thinking…' : 'Log, ask, or restructure — paste a screenshot, ⌘K for the palette'}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onPaste={handlePaste}
+              aria-label="Message Jarvis"
+            />
+
+            <button
+              type="submit"
+              aria-label="Send to Jarvis"
+              disabled={(!input.trim() && !images.length) || busy}
+              className="p-1 text-faint transition-colors hover:text-paper disabled:opacity-30"
+            >
+              <Icon name="send" size={15} />
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   )

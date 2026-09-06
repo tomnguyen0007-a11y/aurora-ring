@@ -1,178 +1,219 @@
-import { Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import { Bars, CheckDot, Empty, HudLabel, Panel, StatTile } from '../components/ui'
+import { Bar, Chip, Cols, DangerBtn, Dot, Empty, Eyebrow, InlineText, NumCell, Page, Scroller, Section, Tools } from '../components/ui'
 import { fmtDateShort, todayISO } from '../lib/dates'
 import { revenueMonthlySeries, revenueSeries, revenueToday } from '../lib/stats'
 import { useStore } from '../store/store'
 
-const DAILY_TARGET = 1000
-
-/** The mission, made visible: today's progress toward $1k/day plus the honest run-rate. */
-function RevenueMission({ today, series }: { today: number; series: { date: string; value: number }[] }) {
-  const pct = Math.min(100, (today / DAILY_TARGET) * 100)
-  const last7 = series.slice(-7)
-  const avg7 = last7.reduce((a, p) => a + p.value, 0) / Math.max(1, last7.length)
-  const avg30 = series.reduce((a, p) => a + p.value, 0) / Math.max(1, series.length)
-  const revenueDays = series.filter((p) => p.value > 0).length
-  return (
-    <Panel glow={today >= DAILY_TARGET}>
-      <div className="mb-2 flex items-baseline justify-between">
-        <HudLabel className="!mb-0">Mission — $1,000 / day</HudLabel>
-        <span className="num text-sm font-bold text-ice">
-          ${today.toFixed(0)} <span className="text-xs font-normal text-fog">/ ${DAILY_TARGET.toLocaleString()}</span>
-        </span>
-      </div>
-      <div className="h-2.5 overflow-hidden rounded-full bg-black/40">
-        <div
-          className={`h-full rounded-full transition-all duration-700 ${today >= DAILY_TARGET ? 'bg-affirm shadow-[0_0_12px_rgba(93,211,158,0.6)]' : 'bg-signal'}`}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-      <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-fog">
-        <span>
-          7d run-rate <span className="num text-ice">${avg7.toFixed(0)}/day</span>
-        </span>
-        <span>
-          30d run-rate <span className="num text-ice">${avg30.toFixed(0)}/day</span>
-        </span>
-        <span>
-          revenue days <span className="num text-ice">{revenueDays}/30</span>
-        </span>
-      </div>
-    </Panel>
-  )
-}
-
-const AREAS = ['Content', 'Store', 'Marketing', 'Suppliers', 'Ops']
-
-export function Business() {
+export function Business({ label }: { label: string }) {
   const s = useStore()
   const [title, setTitle] = useState('')
-  const [area, setArea] = useState('Content')
+  const [area, setArea] = useState(s.bizAreas[0]?.id ?? 'ops')
   const [amount, setAmount] = useState('')
   const [source, setSource] = useState('')
+  const [filter, setFilter] = useState('all')
+  const [editAreas, setEditAreas] = useState(false)
 
   const today = revenueToday(s)
   const series = revenueSeries(s, 30)
   const total30 = series.reduce((a, p) => a + p.value, 0)
   const best = Math.max(...series.map((p) => p.value), 0)
-  const open = s.bizTasks.filter((t) => !t.done)
-  const done = s.bizTasks.filter((t) => t.done)
+  // Run-rate is the honest number: a $1k day means nothing if it was the only one.
+  const last7 = series.slice(-7)
+  const avg7 = last7.reduce((a, p) => a + p.value, 0) / Math.max(1, last7.length)
+  const avg30 = total30 / Math.max(1, series.length)
+  const revenueDays = series.filter((p) => p.value > 0).length
+  const openTasks = s.bizTasks.filter((t) => !t.done && (filter === 'all' || t.area === filter))
+  const doneTasks = s.bizTasks.filter((t) => t.done)
 
   return (
-    <div className="space-y-4">
-      <header className="px-1">
-        <h1 className="h-lumen text-3xl font-bold tracking-wide">AURORA COMMAND</h1>
-        <p className="mt-1 text-sm text-haze">Smart Ring operations. Target: $1,000/day. Protect the deep work windows.</p>
-      </header>
+    <Page title={label} lede={`Smart-ring operations. Target $${s.revenueTarget}/day. Protect the deep-work windows.`}>
+      <Section label="Revenue">
+        <div className="flex flex-wrap items-end justify-between gap-8">
+          <div>
+            <div className="flex items-baseline gap-3">
+              <span className="readout text-[2.75rem]">${today.toFixed(0)}</span>
+              <span className="flex items-baseline text-body text-faint">
+                / $
+                <NumCell value={s.revenueTarget} onChange={(v) => s.setRevenueTarget(v ?? 1000)} ariaLabel="Daily revenue target" width="w-14" />
+              </span>
+            </div>
+            <Eyebrow className="mt-2">Today</Eyebrow>
+          </div>
+          <div className="flex gap-10">
+            <div>
+              <div className="readout text-[1.375rem]">${total30.toFixed(0)}</div>
+              <Eyebrow className="mt-1.5">30 days</Eyebrow>
+            </div>
+            <div>
+              <div className="readout text-[1.375rem]">${best.toFixed(0)}</div>
+              <Eyebrow className="mt-1.5">Best day</Eyebrow>
+            </div>
+          </div>
+        </div>
+        <Bar pct={Math.min(100, (today / s.revenueTarget) * 100)} className="mt-6" />
 
-      <RevenueMission today={today} series={series} />
+        <div className="mt-5 flex flex-wrap gap-x-8 gap-y-2 text-micro text-faint">
+          <span>
+            7-day run rate <span className="num text-mute">${avg7.toFixed(0)}/day</span>
+          </span>
+          <span>
+            30-day run rate <span className="num text-mute">${avg30.toFixed(0)}/day</span>
+          </span>
+          <span>
+            Days with revenue <span className="num text-mute">{revenueDays}/{series.length}</span>
+          </span>
+        </div>
 
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-        <StatTile label="Today" value={`$${today.toFixed(0)}`} sub="of $1,000 target" accent={today >= 1000 ? 'text-affirm' : 'text-signal'} />
-        <StatTile label="30 days" value={`$${total30.toFixed(0)}`} sub="total revenue" />
-        <StatTile label="Best day" value={`$${best.toFixed(0)}`} sub="last 30 days" accent="text-affirm" />
-        <StatTile label="Open tasks" value={open.length} sub={`${done.length} completed`} accent="text-steel" />
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Panel>
-          <HudLabel>Revenue — last 30 days</HudLabel>
-          <Bars
+        <div className="mt-8">
+          <Cols
             data={series.filter((_, i) => i % 2 === 0).map((p) => ({ label: fmtDateShort(p.date).split(' ')[0], value: p.value }))}
-            color="var(--color-signal)"
             unit="$"
+            height={80}
           />
-          <form
-            className="mt-4 flex gap-2 border-t border-edge pt-4"
-            onSubmit={(e) => {
-              e.preventDefault()
-              const a = parseFloat(amount)
-              if (!a) return
-              s.addRevenue({ date: todayISO(), amount: a, source: source.trim() || 'store' })
-              setAmount('')
-              setSource('')
-            }}
-          >
-            <input className="field num w-28" placeholder="$ amount" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
-            <input className="field flex-1" placeholder="Source (store, ad, wholesale…)" value={source} onChange={(e) => setSource(e.target.value)} />
-            <button className="btn btn-signal !px-3" type="submit" aria-label="Log revenue">
-              <Plus size={15} />
-            </button>
-          </form>
-          {s.revenue.length > 0 && (
-            <ul className="mt-3 space-y-1">
-              {s.revenue.slice(0, 5).map((r) => (
-                <li key={r.id} className="group flex items-center justify-between rounded-lg bg-black/25 px-3 py-1.5 text-sm">
-                  <span className="num text-xs text-fog">{fmtDateShort(r.date)}</span>
-                  <span className="text-haze">{r.source}</span>
-                  <span className="num text-affirm">${r.amount.toFixed(0)}</span>
-                  <button className="transition-opacity focus-visible:opacity-100 lg:opacity-0 lg:group-hover:opacity-100" aria-label="Delete entry" onClick={() => s.removeRevenue(r.id)}>
-                    <Trash2 size={13} className="text-alert/70" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Panel>
+        </div>
 
-        <Panel>
-          <HudLabel>Execution Queue</HudLabel>
-          <form
-            className="flex flex-wrap gap-2"
-            onSubmit={(e) => {
-              e.preventDefault()
-              if (!title.trim()) return
-              s.addBizTask(title.trim(), area)
-              setTitle('')
-            }}
-          >
-            <input className="field min-w-0 flex-1" placeholder="High-leverage task…" value={title} onChange={(e) => setTitle(e.target.value)} />
-            <select className="field !py-2" value={area} onChange={(e) => setArea(e.target.value)} aria-label="Area">
-              {AREAS.map((a) => (
-                <option key={a} value={a} className="bg-panel">
-                  {a}
-                </option>
-              ))}
-            </select>
-            <button className="btn btn-signal !px-3" type="submit" aria-label="Add task">
-              <Plus size={15} />
-            </button>
-          </form>
+        <form
+          className="mt-7 flex flex-wrap gap-2 border-t border-line pt-5"
+          onSubmit={(e) => {
+            e.preventDefault()
+            const a = parseFloat(amount.replace(',', '.'))
+            if (!a) return
+            s.addRevenue({ date: todayISO(), amount: a, source: source.trim() || 'store' })
+            setAmount('')
+            setSource('')
+          }}
+        >
+          <input className="field num w-28" placeholder="$ amount" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} aria-label="Amount" />
+          <input className="field min-w-0 flex-1" placeholder="Source — store, ad, wholesale…" value={source} onChange={(e) => setSource(e.target.value)} aria-label="Source" />
+          <button className="btn btn-solid" type="submit">
+            Log
+          </button>
+        </form>
 
-          <ul className="mt-4 space-y-1.5">
-            {open.map((t) => (
-              <li key={t.id} className="group flex items-center gap-3 rounded-xl bg-black/25 px-3 py-2.5">
-                <CheckDot checked={false} onToggle={() => s.toggleBizTask(t.id)} label={t.title} />
-                <span className="min-w-0 flex-1 truncate text-sm text-ice">{t.title}</span>
-                <span className="hud-label !mb-0 shrink-0 !text-[8px] text-signal-dim">{t.area}</span>
-                <button className="transition-opacity focus-visible:opacity-100 lg:opacity-0 lg:group-hover:opacity-100" aria-label={`Delete ${t.title}`} onClick={() => s.removeBizTask(t.id)}>
-                  <Trash2 size={14} className="text-alert/70" />
-                </button>
+        {s.revenue.length > 0 && (
+          <ul className="mt-5">
+            {s.revenue.slice(0, 6).map((r) => (
+              <li key={r.id} className="group flex items-center gap-4 border-b border-line py-2 last:border-b-0">
+                <span className="num w-16 shrink-0 text-micro text-faint">{fmtDateShort(r.date)}</span>
+                <span className="min-w-0 flex-1 truncate text-body text-mute">
+                  <InlineText value={r.source} onChange={(v) => s.updateRevenue(r.id, { source: v })} ariaLabel="Revenue source" />
+                </span>
+                <span className="num flex shrink-0 items-baseline text-body text-paper">
+                  $
+                  <NumCell
+                    value={r.amount}
+                    onChange={(v) => s.updateRevenue(r.id, { amount: v ?? 0 })}
+                    ariaLabel="Revenue amount"
+                    width="w-16"
+                  />
+                </span>
+                <Tools>
+                  <DangerBtn onConfirm={() => s.removeRevenue(r.id)} label="Delete entry" />
+                </Tools>
               </li>
             ))}
           </ul>
-          {!open.length && <Empty>Queue clear. Next deep work block is on the schedule.</Empty>}
+        )}
+      </Section>
 
-          {done.length > 0 && (
-            <ul className="mt-3 space-y-1 border-t border-edge pt-3">
-              {done.slice(0, 6).map((t) => (
-                <li key={t.id} className="flex items-center gap-3 px-3 py-1 opacity-45">
-                  <CheckDot checked onToggle={() => s.toggleBizTask(t.id)} label={t.title} />
-                  <span className="truncate text-sm text-fog line-through">{t.title}</span>
+      <Section
+        label={`Execution queue · ${openTasks.length}`}
+        aside={
+          <button className="btn btn-sm" onClick={() => setEditAreas(!editAreas)}>
+            {editAreas ? 'Done' : 'Edit areas'}
+          </button>
+        }
+      >
+        {editAreas ? (
+          <div className="mb-6">
+            <ul>
+              {s.bizAreas.map((a) => (
+                <li key={a.id} className="group flex items-center gap-3 border-b border-line py-2.5">
+                  <span className="min-w-0 flex-1">
+                    <InlineText value={a.label} onChange={(v) => s.renameTaxon('bizAreas', a.id, v)} ariaLabel="Area name" className="text-body text-paper" />
+                  </span>
+                  <span className="num shrink-0 text-micro text-faint">{s.bizTasks.filter((t) => t.area === a.id).length}</span>
+                  <Tools>
+                    <DangerBtn onConfirm={() => s.removeTaxon('bizAreas', a.id)} label={`Delete ${a.label}`} />
+                  </Tools>
                 </li>
               ))}
             </ul>
-          )}
-        </Panel>
-      </div>
+            <button className="btn btn-sm mt-3" onClick={() => s.addTaxon('bizAreas', 'New area')}>
+              + Area
+            </button>
+          </div>
+        ) : (
+          <Scroller className="mb-5">
+            <Chip active={filter === 'all'} onClick={() => setFilter('all')}>
+              All
+            </Chip>
+            {s.bizAreas.map((a) => (
+              <Chip key={a.id} active={filter === a.id} onClick={() => setFilter(a.id)}>
+                {a.label}
+              </Chip>
+            ))}
+          </Scroller>
+        )}
+
+        <form
+          className="mb-5 flex flex-wrap gap-2"
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (!title.trim()) return
+            s.addBizTask(title.trim(), area)
+            setTitle('')
+          }}
+        >
+          <input className="field min-w-0 flex-1" placeholder="High-leverage task…" value={title} onChange={(e) => setTitle(e.target.value)} aria-label="Task" />
+          <select className="field" value={area} onChange={(e) => setArea(e.target.value)} aria-label="Area">
+            {s.bizAreas.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.label}
+              </option>
+            ))}
+          </select>
+          <button className="btn btn-solid" type="submit">
+            Queue
+          </button>
+        </form>
+
+        {openTasks.length ? (
+          <ul>
+            {openTasks.map((t) => (
+              <li key={t.id} className="group flex items-center gap-3 border-b border-line py-2.5 last:border-b-0">
+                <Dot checked={false} onToggle={() => s.toggleBizTask(t.id)} label={t.title} size={16} />
+                <span className="min-w-0 flex-1">
+                  <InlineText value={t.title} onChange={(v) => s.updateBizTask(t.id, { title: v })} ariaLabel="Task title" className="text-body text-paper" />
+                </span>
+                <span className="eyebrow shrink-0">{s.bizAreas.find((a) => a.id === t.area)?.label ?? t.area}</span>
+                <Tools>
+                  <DangerBtn onConfirm={() => s.removeBizTask(t.id)} label={`Delete ${t.title}`} />
+                </Tools>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <Empty>Queue clear. The next deep-work block is on the blueprint.</Empty>
+        )}
+
+        {doneTasks.length > 0 && (
+          <ul className="mt-5 border-t border-line pt-4">
+            {doneTasks.slice(0, 8).map((t) => (
+              <li key={t.id} className="flex items-center gap-3 py-1.5 opacity-45">
+                <Dot checked onToggle={() => s.toggleBizTask(t.id)} label={t.title} size={16} />
+                <span className="truncate text-body line-through">{t.title}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
 
       {s.revenue.length > 0 && (
-        <Panel>
-          <HudLabel>History — revenue per month</HudLabel>
-          <Bars data={revenueMonthlySeries(s)} color="var(--color-affirm)" unit="$" height={110} />
-        </Panel>
+        <Section label="History — revenue per month">
+          <Cols data={revenueMonthlySeries(s)} unit="$" height={100} />
+        </Section>
       )}
-    </div>
+    </Page>
   )
 }
