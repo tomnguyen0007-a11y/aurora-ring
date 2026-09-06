@@ -2,19 +2,20 @@ import type { CalibrateState } from '../store/store'
 import type { GolfCategory } from '../store/types'
 import { fmtMonthKey, lastNDates, lastNMonthKeys, monthKey, todayISO, weekDates } from './dates'
 
-export const GOLF_CATEGORIES: { id: GolfCategory; label: string }[] = [
-  { id: 'putting', label: 'Putting' },
-  { id: 'chipping', label: 'Chipping' },
-  { id: 'long-game', label: 'Long Game' },
-  { id: 'drills', label: 'Drills' },
-  { id: 'simulator', label: 'Simulator' },
-  { id: 'on-course', label: 'On-Course' },
-]
-
-export function golfMinutes(s: CalibrateState, dates: string[]): Record<GolfCategory, number> {
-  const out = { putting: 0, chipping: 0, 'long-game': 0, drills: 0, simulator: 0, 'on-course': 0 }
+/**
+ * Minutes per practice category. Categories are user-editable data now, so
+ * the map is keyed dynamically and seeded from the current taxonomy — a
+ * renamed or invented category still totals correctly, and a deleted one
+ * doesn't lose its history.
+ */
+export function golfMinutes(s: CalibrateState, dates: string[]): Record<string, number> {
+  const out: Record<string, number> = {}
+  for (const c of s.golfCategories) out[c.id] = 0
   const set = new Set(dates)
-  for (const g of s.golfSessions) if (set.has(g.date)) out[g.category] += g.minutes
+  for (const g of s.golfSessions) {
+    if (!set.has(g.date)) continue
+    out[g.category] = (out[g.category] ?? 0) + g.minutes
+  }
   return out
 }
 
@@ -146,14 +147,26 @@ export function exerciseInsight(s: CalibrateState, exerciseId: string, repLow: n
   return { best, last, sessions: logs.length, trend, suggestion }
 }
 
-// ——— Long-horizon history ———
-// Nothing is ever pruned from the store, so history views are pure aggregation:
-// bucket dated entries by month and sum.
+export function golfWeeklySeries(s: CalibrateState, weeks = 8): { label: string; value: number }[] {
+  const out: { label: string; value: number }[] = []
+  const now = new Date()
+  for (let w = weeks - 1; w >= 0; w--) {
+    const ref = new Date(now)
+    ref.setDate(now.getDate() - w * 7)
+    const dates = new Set(weekDates(ref))
+    const mins = s.golfSessions.filter((g) => dates.has(g.date)).reduce((a, g) => a + g.minutes, 0)
+    out.push({ label: w === 0 ? 'now' : `-${w}w`, value: Math.round((mins / 60) * 10) / 10 })
+  }
+  return out
+}
 
-/** Bucket dated values into the last `months` calendar months (oldest → current). */
+// ─────────────────────────────────────────────────────────────
+// HISTORY + WEEKLY REVIEW
+// ─────────────────────────────────────────────────────────────
+
 export function monthlySeries(entries: { date: string; value: number }[], months = 12): { label: string; value: number }[] {
   const keys = lastNMonthKeys(months)
-  const sums = new Map(keys.map((k) => [k, 0]))
+  const sums = new Map<string, number>(keys.map((k) => [k, 0]))
   for (const e of entries) {
     const k = monthKey(e.date)
     if (sums.has(k)) sums.set(k, sums.get(k)! + e.value)
@@ -179,11 +192,14 @@ export interface GolfAllTime {
 }
 
 export function golfAllTime(s: CalibrateState): GolfAllTime {
-  const byCategory = { putting: 0, chipping: 0, 'long-game': 0, drills: 0, simulator: 0, 'on-course': 0 }
+  // Categories are user-editable taxa now, so the tally is seeded from the
+  // current list rather than a hard-coded record.
+  const byCategory: Record<string, number> = {}
+  for (const c of s.golfCategories) byCategory[c.id] = 0
   let totalMinutes = 0
   let firstDate: string | null = null
   for (const g of s.golfSessions) {
-    byCategory[g.category] += g.minutes
+    byCategory[g.category] = (byCategory[g.category] ?? 0) + g.minutes
     totalMinutes += g.minutes
     if (!firstDate || g.date < firstDate) firstDate = g.date
   }
@@ -277,17 +293,4 @@ export function weeklyReview(s: CalibrateState): { current: WeekSnapshot; previo
   const prevRef = new Date(now)
   prevRef.setDate(now.getDate() - 7)
   return { current: weekSnapshot(s, weekDates(now)), previous: weekSnapshot(s, weekDates(prevRef)) }
-}
-
-export function golfWeeklySeries(s: CalibrateState, weeks = 8): { label: string; value: number }[] {
-  const out: { label: string; value: number }[] = []
-  const now = new Date()
-  for (let w = weeks - 1; w >= 0; w--) {
-    const ref = new Date(now)
-    ref.setDate(now.getDate() - w * 7)
-    const dates = new Set(weekDates(ref))
-    const mins = s.golfSessions.filter((g) => dates.has(g.date)).reduce((a, g) => a + g.minutes, 0)
-    out.push({ label: w === 0 ? 'now' : `-${w}w`, value: Math.round((mins / 60) * 10) / 10 })
-  }
-  return out
 }

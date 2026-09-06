@@ -1,6 +1,4 @@
-import '@fontsource-variable/space-grotesk/index.css'
-import '@fontsource-variable/inter/index.css'
-import '@fontsource-variable/jetbrains-mono/index.css'
+import '@fontsource-variable/geist/index.css'
 import './theme.css'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -18,7 +16,8 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 )
 
-// PWA: cache app shell for offline use (production only)
+// PWA: cache the shell for offline use, and give reminders a service worker
+// to post through — the only path iOS honours once the app is installed.
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js').catch(() => {})

@@ -1,146 +1,146 @@
-import { Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import { HudLabel, Panel, TAG_COLORS } from '../components/ui'
+import { Icon } from '../components/icons'
+import { Chip, DangerBtn, Empty, Eyebrow, InlineText, Page, Scroller, Section, Sheet, Tools } from '../components/ui'
 import { toMinutes, WEEKDAY_NAMES, weekdayOf } from '../lib/dates'
 import { DAY_CODENAMES } from '../store/seed'
 import { useStore } from '../store/store'
-import type { BlockTag, ScheduleBlock, Weekday } from '../store/types'
+import type { Weekday } from '../store/types'
 
-const TAGS: BlockTag[] = ['morning', 'school', 'gym', 'golf', 'run', 'business', 'meal', 'study', 'recovery', 'social', 'language']
-
-export function Schedule() {
+export function Schedule({ label }: { label: string }) {
   const s = useStore()
   const [day, setDay] = useState<Weekday>(weekdayOf())
-  const [editing, setEditing] = useState<string | null>(null)
-  const [draft, setDraft] = useState<Omit<ScheduleBlock, 'id'>>({
-    weekday: day,
-    start: '16:00',
-    end: '17:00',
-    title: '',
-    detail: '',
-    tag: 'business',
-  })
-  const [adding, setAdding] = useState(false)
-
+  const [tagsOpen, setTagsOpen] = useState(false)
   const blocks = s.schedule.filter((b) => b.weekday === day).sort((a, b) => toMinutes(a.start) - toMinutes(b.start))
 
-  const Editor = ({ value, onSave, onCancel }: { value: Omit<ScheduleBlock, 'id'>; onSave: (v: Omit<ScheduleBlock, 'id'>) => void; onCancel: () => void }) => {
-    const [v, setV] = useState(value)
-    return (
-      <div className="space-y-2 rounded-xl border border-signal/30 bg-black/30 p-3">
-        <div className="grid grid-cols-2 gap-2">
-          <input className="field num" type="time" value={v.start} onChange={(e) => setV({ ...v, start: e.target.value })} aria-label="Start" />
-          <input className="field num" type="time" value={v.end} onChange={(e) => setV({ ...v, end: e.target.value })} aria-label="End" />
-        </div>
-        <input className="field w-full" placeholder="Block title" value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} />
-        <input className="field w-full" placeholder="Detail (optional)" value={v.detail ?? ''} onChange={(e) => setV({ ...v, detail: e.target.value })} />
-        <div className="flex flex-wrap gap-1.5">
-          {TAGS.map((t) => (
-            <button
-              key={t}
-              onClick={() => setV({ ...v, tag: t })}
-              className={`rounded-full border px-2.5 py-1 font-display text-[11px] font-semibold tracking-wide transition-colors ${
-                v.tag === t ? 'border-transparent text-black' : 'border-edge text-haze hover:text-ice'
-              }`}
-              style={v.tag === t ? { background: TAG_COLORS[t] } : {}}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-        <div className="flex gap-2 pt-1">
-          <button className="btn btn-signal flex-1" disabled={!v.title.trim()} onClick={() => onSave(v)}>
-            Save
-          </button>
-          <button className="btn" onClick={onCancel}>
-            Cancel
-          </button>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="space-y-4">
-      <header className="px-1">
-        <h1 className="h-lumen text-3xl font-bold tracking-wide">WEEKLY BLUEPRINT</h1>
-        <p className="mt-1 text-sm text-haze">Your operating schedule. Edit blocks, or tell Jarvis to do it.</p>
-      </header>
+    <Page
+      title={label}
+      lede="The operating week. Edit a block by typing straight into it, or tell Jarvis to move things around."
+      actions={
+        <button className="btn" onClick={() => setTagsOpen(true)}>
+          Tags
+        </button>
+      }
+    >
+      <Section label="Week">
+        <Scroller>
+          {WEEKDAY_NAMES.map((name, i) => (
+            <Chip key={name} active={day === i} onClick={() => setDay(i as Weekday)}>
+              {name.slice(0, 3)}
+              <span className={`ml-2 ${day === i ? 'text-black/50' : 'text-ghost'}`}>{s.schedule.filter((b) => b.weekday === i).length}</span>
+            </Chip>
+          ))}
+        </Scroller>
+      </Section>
 
-      <div className="flex gap-1.5 overflow-x-auto overscroll-x-contain pb-1">
-        {WEEKDAY_NAMES.map((name, i) => (
+      <Section
+        label={`${WEEKDAY_NAMES[day]} — ${DAY_CODENAMES[day]}`}
+        aside={
           <button
-            key={name}
-            onClick={() => setDay(i as Weekday)}
-            className={`shrink-0 rounded-xl border px-3.5 py-2 font-display text-sm font-semibold tracking-wide transition-all ${
-              day === i ? 'border-signal/50 bg-signal/10 text-signal' : 'border-edge bg-black/20 text-haze hover:text-ice'
-            }`}
+            className="btn btn-sm"
+            onClick={() =>
+              s.addBlock({ weekday: day, start: '09:00', end: '10:00', title: 'New block', detail: '', tag: s.blockTags[0]?.id ?? 'study' })
+            }
           >
-            {name.slice(0, 3).toUpperCase()}
+            <Icon name="plus" size={12} /> Block
           </button>
-        ))}
-      </div>
-
-      <Panel>
-        <HudLabel>
-          {WEEKDAY_NAMES[day]} — {DAY_CODENAMES[day]}
-        </HudLabel>
-        <ol className="space-y-1.5">
-          {blocks.map((b) =>
-            editing === b.id ? (
-              <li key={b.id}>
-                <Editor
-                  value={b}
-                  onCancel={() => setEditing(null)}
-                  onSave={(v) => {
-                    s.updateBlock(b.id, v)
-                    setEditing(null)
-                  }}
-                />
-              </li>
-            ) : (
-              <li key={b.id} className="group flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-white/[0.03]">
-                <span className="h-9 w-1 shrink-0 rounded-full" style={{ background: TAG_COLORS[b.tag] }} />
-                <button className="flex min-w-0 flex-1 items-center gap-3 text-left" onClick={() => setEditing(b.id)}>
-                  <span className="num w-[86px] shrink-0 text-[11px] leading-tight text-fog">
-                    {b.start}
-                    {b.end && <><br />{b.end}</>}
+        }
+      >
+        {blocks.length ? (
+          <ol>
+            {blocks.map((b) => (
+              <li key={b.id} className="group border-b border-line py-3 last:border-b-0">
+                <div className="flex items-start gap-4">
+                  <span className="mt-1 block h-9 w-px shrink-0 bg-line-2" />
+                  <span className="flex w-16 shrink-0 flex-col gap-0.5">
+                    <input
+                      type="time"
+                      className="field-line num text-micro text-paper"
+                      value={b.start}
+                      aria-label="Start time"
+                      onChange={(e) => s.updateBlock(b.id, { start: e.target.value })}
+                    />
+                    <input
+                      type="time"
+                      className="field-line num text-micro text-faint"
+                      value={b.end}
+                      aria-label="End time"
+                      onChange={(e) => s.updateBlock(b.id, { end: e.target.value })}
+                    />
                   </span>
-                  <span className="min-w-0">
-                    <span className="block truncate font-display text-[0.95rem] font-semibold tracking-wide text-ice">{b.title}</span>
-                    {b.detail && <span className="block truncate text-xs text-fog">{b.detail}</span>}
+                  <span className="min-w-0 flex-1">
+                    <InlineText value={b.title} onChange={(v) => s.updateBlock(b.id, { title: v })} ariaLabel="Block title" className="t-head" />
+                    <InlineText
+                      value={b.detail ?? ''}
+                      onChange={(v) => s.updateBlock(b.id, { detail: v })}
+                      ariaLabel="Block detail"
+                      placeholder="Detail…"
+                      className="mt-1 text-micro text-faint"
+                    />
                   </span>
-                </button>
-                <button
-                  className="btn btn-ghost !px-2 transition-opacity focus-visible:opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
-                  aria-label={`Delete ${b.title}`}
-                  onClick={() => s.removeBlock(b.id)}
-                >
-                  <Trash2 size={15} className="text-alert/80" />
-                </button>
+                  <select
+                    className="field !py-1 hidden shrink-0 text-micro sm:block"
+                    value={b.tag}
+                    aria-label="Tag"
+                    onChange={(e) => s.updateBlock(b.id, { tag: e.target.value })}
+                  >
+                    {s.blockTags.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.label}
+                      </option>
+                    ))}
+                  </select>
+                  <Tools>
+                    <select
+                      className="field !py-1 text-micro"
+                      value=""
+                      aria-label="Copy to day"
+                      onChange={(e) => {
+                        if (e.target.value !== '') s.duplicateBlockToDay(b.id, Number(e.target.value) as Weekday)
+                        e.target.value = ''
+                      }}
+                    >
+                      <option value="">Copy to…</option>
+                      {WEEKDAY_NAMES.map((n, i) => (
+                        <option key={n} value={i}>
+                          {n}
+                        </option>
+                      ))}
+                    </select>
+                    <DangerBtn onConfirm={() => s.removeBlock(b.id)} label={`Delete ${b.title}`} />
+                  </Tools>
+                </div>
               </li>
-            ),
-          )}
-        </ol>
-
-        {adding ? (
-          <div className="mt-3">
-            <Editor
-              value={{ ...draft, weekday: day }}
-              onCancel={() => setAdding(false)}
-              onSave={(v) => {
-                s.addBlock({ ...v, weekday: day })
-                setDraft(v)
-                setAdding(false)
-              }}
-            />
-          </div>
+            ))}
+          </ol>
         ) : (
-          <button className="btn mt-3 w-full" onClick={() => setAdding(true)}>
-            <Plus size={15} /> Add block
-          </button>
+          <Empty>Nothing on {WEEKDAY_NAMES[day]}. Add a block, or copy one over from another day.</Empty>
         )}
-      </Panel>
-    </div>
+      </Section>
+
+      <Sheet open={tagsOpen} onClose={() => setTagsOpen(false)} title="Block tags">
+        <p className="mb-5 text-body text-faint">Rename freely — historic blocks keep their tag, only the label changes.</p>
+        <ul>
+          {s.blockTags.map((t) => (
+            <li key={t.id} className="group flex items-center gap-3 border-b border-line py-2.5">
+              <span className="min-w-0 flex-1">
+                <InlineText value={t.label} onChange={(v) => s.renameTaxon('blockTags', t.id, v)} ariaLabel="Tag name" className="text-body text-paper" />
+              </span>
+              <span className="num shrink-0 text-micro text-faint">{s.schedule.filter((b) => b.tag === t.id).length}</span>
+              <Tools>
+                <DangerBtn onConfirm={() => s.removeTaxon('blockTags', t.id)} label={`Delete ${t.label}`} />
+              </Tools>
+            </li>
+          ))}
+        </ul>
+        <button className="btn mt-4 w-full" onClick={() => s.addTaxon('blockTags', 'New tag')}>
+          Add tag
+        </button>
+        <Eyebrow className="mt-6">Note</Eyebrow>
+        <p className="mt-2 text-micro leading-relaxed text-faint">
+          Tags group blocks for Jarvis and for filtering. They carry no colour — the palette is monochrome by design.
+        </p>
+      </Sheet>
+    </Page>
   )
 }

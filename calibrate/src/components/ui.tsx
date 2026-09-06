@@ -1,147 +1,444 @@
-import { Check } from 'lucide-react'
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { Icon, type GlyphName } from './icons'
 
-/**
- * Click-to-edit text: renders as plain content until clicked, then becomes an
- * input. Enter or blur saves (only if changed), Escape cancels. The dotted
- * underline on hover is the affordance — the whole app's "everything is
- * editable, no forms" contract rides on this component.
- */
-export function InlineEdit({
-  value,
-  onSave,
-  num = false,
-  className = '',
-  inputClassName = '',
-  label,
-  placeholder = '—',
+/* ═══════════════════════════════════════════════════════════════════
+   PRIMITIVES
+   Every component here obeys the same three rules: structure comes
+   from whitespace and hairlines, colour is monochrome, and numbers
+   are set in the mono face so columns align.
+   ═══════════════════════════════════════════════════════════════════ */
+
+export function Page({
+  title,
+  lede,
+  actions,
+  children,
 }: {
-  value: string
-  onSave: (next: string) => void
-  /** numeric-ish content: use the mono font + inputMode for phone keyboards */
-  num?: boolean
-  className?: string
-  inputClassName?: string
-  /** accessible name, e.g. "Edit carbs for Lift day" */
-  label: string
-  placeholder?: string
+  title: ReactNode
+  lede?: ReactNode
+  actions?: ReactNode
+  children: ReactNode
 }) {
-  const [editing, setEditing] = useState(false)
-  const [draft, setDraft] = useState(value)
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    if (editing) {
-      inputRef.current?.focus()
-      inputRef.current?.select()
-    }
-  }, [editing])
-
-  const commit = () => {
-    setEditing(false)
-    const next = draft.trim()
-    if (next && next !== value) onSave(next)
-    else setDraft(value)
-  }
-
-  if (editing) {
-    return (
-      <input
-        ref={inputRef}
-        aria-label={label}
-        className={`w-full min-w-0 rounded border border-signal/50 bg-black/60 px-1 py-0.5 text-inherit outline-none ring-1 ring-signal/20 ${num ? 'num' : ''} ${inputClassName}`}
-        value={draft}
-        inputMode={num ? 'decimal' : undefined}
-        onChange={(e) => setDraft(e.target.value)}
-        onBlur={commit}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') commit()
-          if (e.key === 'Escape') {
-            setDraft(value)
-            setEditing(false)
-          }
-        }}
-      />
-    )
-  }
-
   return (
-    <button
-      type="button"
-      aria-label={label}
-      title="Click to edit"
-      onClick={() => {
-        setDraft(value)
-        setEditing(true)
-      }}
-      className={`min-w-0 cursor-text rounded px-1 py-0.5 text-left decoration-dotted underline-offset-4 transition-colors hover:bg-white/[0.05] hover:underline focus-visible:bg-white/[0.05] focus-visible:outline-1 focus-visible:outline-signal/60 ${num ? 'num' : ''} ${className}`}
-    >
-      {value || <span className="text-fog">{placeholder}</span>}
-    </button>
+    <div className="animate-fade">
+      <header className="mb-7 flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+        <div className="min-w-0">
+          <h1 className="t-page">{title}</h1>
+          {lede && <p className="mt-1.5 max-w-xl text-body text-dim">{lede}</p>}
+        </div>
+        {actions && <div className="flex shrink-0 flex-wrap items-center gap-1.5">{actions}</div>}
+      </header>
+      <div className="space-y-8 pb-6">{children}</div>
+    </div>
   )
 }
 
-export function Panel({
+export function Eyebrow({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return <div className={`eyebrow ${className}`}>{children}</div>
+}
+
+/** A content block. Hairline above, label, content. No box, no fill. */
+export function Section({
+  label,
+  aside,
   children,
   className = '',
-  glow = false,
+  id,
 }: {
+  label?: ReactNode
+  aside?: ReactNode
   children: ReactNode
   className?: string
-  glow?: boolean
+  id?: string
 }) {
   return (
-    <section
-      className={`glass rounded-2xl p-4 sm:p-5 animate-rise ${glow ? 'ring-1 ring-signal/20' : ''} ${className}`}
-    >
+    <section id={id} className={`pane ${className}`}>
+      {(label || aside) && (
+        <div className="mb-4 flex items-center justify-between gap-3">
+          {label ? <Eyebrow>{label}</Eyebrow> : <span />}
+          {aside && <div className="flex items-center gap-1.5">{aside}</div>}
+        </div>
+      )}
       {children}
     </section>
   )
 }
 
-export function HudLabel({ children, className = '' }: { children: ReactNode; className?: string }) {
+/** A list row: hairline underneath, hover reveals its controls. */
+export function Row({
+  children,
+  className = '',
+  onClick,
+  muted = false,
+}: {
+  children: ReactNode
+  className?: string
+  onClick?: () => void
+  muted?: boolean
+}) {
+  const Tag = onClick ? 'button' : 'div'
   return (
-    <div className={`hud-label mb-3 flex items-center gap-2 ${className}`}>
-      <span className="inline-block h-px w-4 bg-fog/60" />
+    <Tag
+      onClick={onClick}
+      className={`group flex w-full items-center gap-3 border-b border-line py-2.5 text-left transition-opacity last:border-b-0 ${
+        muted ? 'opacity-45' : ''
+      } ${onClick ? 'hover:opacity-100' : ''} ${className}`}
+    >
+      {children}
+    </Tag>
+  )
+}
+
+/** Controls that only appear on hover (desktop) but are always present on touch. */
+export function Tools({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex shrink-0 items-center gap-0.5 opacity-100 transition-opacity lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100">
       {children}
     </div>
   )
 }
 
-/** Radial progress ring */
+export function IconBtn({
+  glyph,
+  label,
+  onClick,
+  disabled,
+  active,
+  size = 14,
+  className = '',
+}: {
+  glyph: GlyphName
+  label: string
+  onClick?: () => void
+  disabled?: boolean
+  active?: boolean
+  size?: number
+  className?: string
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      onClick={onClick}
+      disabled={disabled}
+      className={`rounded-xs p-1.5 transition-colors ${
+        active ? 'text-paper' : 'text-faint hover:text-paper'
+      } disabled:opacity-25 disabled:hover:text-faint ${className}`}
+    >
+      <Icon name={glyph} size={size} />
+    </button>
+  )
+}
+
+/** Up/down reorder pair — the flexibility affordance used everywhere. */
+export function Reorder({
+  onUp,
+  onDown,
+  first,
+  last,
+}: {
+  onUp: () => void
+  onDown: () => void
+  first: boolean
+  last: boolean
+}) {
+  return (
+    <>
+      <IconBtn glyph="chevronUp" label="Move up" onClick={onUp} disabled={first} size={12} />
+      <IconBtn glyph="chevronDown" label="Move down" onClick={onDown} disabled={last} size={12} />
+    </>
+  )
+}
+
+/** Destructive action that asks once, inline, with no modal. */
+export function DangerBtn({
+  onConfirm,
+  label = 'Delete',
+  glyph = 'trash',
+}: {
+  onConfirm: () => void
+  label?: string
+  glyph?: GlyphName
+}) {
+  const [armed, setArmed] = useState(false)
+  useEffect(() => {
+    if (!armed) return
+    const t = setTimeout(() => setArmed(false), 3200)
+    return () => clearTimeout(t)
+  }, [armed])
+  if (armed) {
+    return (
+      <button type="button" className="btn btn-sm !text-paper" onClick={onConfirm}>
+        Confirm
+      </button>
+    )
+  }
+  return <IconBtn glyph={glyph} label={label} onClick={() => setArmed(true)} />
+}
+
+/* ─────────────────────────────────────────────
+   INLINE EDITING — every label in the app is a
+   text field wearing a disguise.
+   ───────────────────────────────────────────── */
+
+export function InlineText({
+  value,
+  onChange,
+  placeholder = '—',
+  className = '',
+  ariaLabel,
+  mono = false,
+}: {
+  value: string
+  onChange: (v: string) => void
+  placeholder?: string
+  className?: string
+  ariaLabel: string
+  mono?: boolean
+}) {
+  const [draft, setDraft] = useState(value)
+  const focused = useRef(false)
+  useEffect(() => {
+    if (!focused.current) setDraft(value)
+  }, [value])
+  return (
+    <input
+      className={`field-line w-full ${mono ? 'num' : ''} ${className}`}
+      value={draft}
+      aria-label={ariaLabel}
+      placeholder={placeholder}
+      onFocus={() => (focused.current = true)}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={() => {
+        focused.current = false
+        if (draft !== value) onChange(draft)
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') e.currentTarget.blur()
+        if (e.key === 'Escape') {
+          setDraft(value)
+          e.currentTarget.blur()
+        }
+      }}
+    />
+  )
+}
+
+/** Auto-growing inline textarea. */
+export function InlineArea({
+  value,
+  onChange,
+  placeholder = '',
+  className = '',
+  ariaLabel,
+  minRows = 2,
+}: {
+  value: string
+  onChange: (v: string) => void
+  placeholder?: string
+  className?: string
+  ariaLabel: string
+  minRows?: number
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null)
+  const [draft, setDraft] = useState(value)
+  const focused = useRef(false)
+  useEffect(() => {
+    if (!focused.current) setDraft(value)
+  }, [value])
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
+  }, [draft])
+  return (
+    <textarea
+      ref={ref}
+      rows={minRows}
+      className={`w-full resize-none bg-transparent text-body leading-relaxed text-mute outline-none placeholder:text-faint focus:text-paper ${className}`}
+      value={draft}
+      aria-label={ariaLabel}
+      placeholder={placeholder}
+      onFocus={() => (focused.current = true)}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={() => {
+        focused.current = false
+        if (draft !== value) onChange(draft)
+      }}
+    />
+  )
+}
+
+/** Numeric inline cell — mono, right-aligned, commits on blur. */
+export function NumCell({
+  value,
+  onChange,
+  placeholder = '—',
+  width = 'w-14',
+  ariaLabel,
+  suffix,
+}: {
+  value: number | null
+  onChange: (v: number | null) => void
+  placeholder?: string
+  width?: string
+  ariaLabel: string
+  suffix?: string
+}) {
+  const [draft, setDraft] = useState(value == null ? '' : String(value))
+  const focused = useRef(false)
+  useEffect(() => {
+    if (!focused.current) setDraft(value == null ? '' : String(value))
+  }, [value])
+  return (
+    <span className="inline-flex items-baseline gap-0.5">
+      <input
+        className={`field-line num ${width} text-right text-paper`}
+        inputMode="decimal"
+        aria-label={ariaLabel}
+        placeholder={placeholder}
+        value={draft}
+        onFocus={() => (focused.current = true)}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={() => {
+          focused.current = false
+          const n = parseFloat(draft.replace(',', '.'))
+          onChange(draft.trim() === '' || isNaN(n) ? null : n)
+        }}
+        onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+      />
+      {suffix && <span className="text-micro text-faint">{suffix}</span>}
+    </span>
+  )
+}
+
+/* ─────────────────────────────────────────────
+   DATA DISPLAY
+   ───────────────────────────────────────────── */
+
+export function Stat({
+  label,
+  value,
+  sub,
+  strong = false,
+}: {
+  label: ReactNode
+  value: ReactNode
+  sub?: ReactNode
+  strong?: boolean
+}) {
+  return (
+    <div>
+      <div className={`readout text-[1.375rem] ${strong ? 'text-paper' : 'text-paper/85'}`}>{value}</div>
+      <div className="eyebrow mt-1.5">{label}</div>
+      {sub && <div className="mt-1 text-micro text-faint">{sub}</div>}
+    </div>
+  )
+}
+
+/** 1px progress line. The only "chart" most numbers need. */
+export function Bar({ pct, className = '' }: { pct: number; className?: string }) {
+  return (
+    <div className={`relative h-px w-full bg-line ${className}`}>
+      <div
+        className="absolute inset-y-0 left-0 bg-paper transition-[width] duration-500 ease-out"
+        style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
+      />
+    </div>
+  )
+}
+
+/**
+ * Metric against a target band. The band is a hairline notch on the
+ * track, not a coloured zone — hue would break the system.
+ */
+export function Track({
+  label,
+  value,
+  min,
+  max,
+  unit = '',
+  onEditTarget,
+}: {
+  label: ReactNode
+  value: number
+  min: number
+  max: number
+  unit?: string
+  onEditTarget?: () => void
+}) {
+  const ceiling = Math.max(max * 1.12, value * 1.02, 1)
+  const pct = (value / ceiling) * 100
+  const lo = (min / ceiling) * 100
+  const hi = (max / ceiling) * 100
+  const inBand = value >= min && value <= max
+  return (
+    <div className="py-2.5">
+      <div className="mb-2 flex items-baseline justify-between gap-3">
+        <span className="text-body text-mute">{label}</span>
+        <span className="num text-body text-paper">
+          {Math.round(value)}
+          <span className="text-faint">
+            {unit} · {min}–{max}
+            {unit}
+          </span>
+          {onEditTarget && (
+            <button className="ml-2 align-middle text-faint hover:text-paper" onClick={onEditTarget} aria-label="Edit target">
+              <Icon name="edit" size={11} />
+            </button>
+          )}
+        </span>
+      </div>
+      <div className="relative h-[3px] w-full">
+        <div className="absolute inset-x-0 top-1 h-px bg-line" />
+        <div className="absolute top-0 h-[3px] w-px bg-line-2" style={{ left: `${lo}%` }} />
+        <div className="absolute top-0 h-[3px] w-px bg-line-2" style={{ left: `${hi}%` }} />
+        <div
+          className={`absolute top-1 h-px transition-[width] duration-500 ease-out ${inBand ? 'bg-paper' : 'bg-paper/55'}`}
+          style={{ width: `${Math.min(100, pct)}%` }}
+        />
+      </div>
+    </div>
+  )
+}
+
+/** Radial ring. One stroke, no glow unless it's the page's focal element. */
 export function Ring({
   pct,
-  size = 120,
-  stroke = 8,
-  color = 'var(--color-signal)',
-  track = 'rgba(255,255,255,0.07)',
+  size = 96,
+  stroke = 1.5,
   children,
+  focal = false,
 }: {
   pct: number
   size?: number
   stroke?: number
-  color?: string
-  track?: string
   children?: ReactNode
+  focal?: boolean
 }) {
-  const r = (size - stroke) / 2
+  const r = (size - stroke * 2) / 2
   const c = 2 * Math.PI * r
   const off = c * (1 - Math.min(100, Math.max(0, pct)) / 100)
   return (
     <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={track} strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={stroke} />
         <circle
           cx={size / 2}
           cy={size / 2}
           r={r}
           fill="none"
-          stroke={color}
+          stroke="#ffffff"
           strokeWidth={stroke}
-          strokeLinecap="round"
+          strokeLinecap="butt"
           strokeDasharray={c}
           strokeDashoffset={off}
-          style={{ transition: 'stroke-dashoffset 0.6s cubic-bezier(0.22,1,0.36,1)', filter: `drop-shadow(0 0 6px ${color}40)` }}
+          style={{
+            transition: 'stroke-dashoffset 0.7s cubic-bezier(0.2,0,0,1)',
+            filter: focal ? 'drop-shadow(0 0 6px rgba(255,255,255,0.5))' : undefined,
+          }}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">{children}</div>
@@ -149,144 +446,95 @@ export function Ring({
   )
 }
 
-/** Horizontal meter with target band */
-export function Meter({
-  value,
-  min,
-  max,
-  label,
-  unit = '',
-  color = 'var(--color-signal)',
-}: {
-  value: number
-  min: number
-  max: number
-  label: string
-  unit?: string
-  color?: string
-}) {
-  const cap = max * 1.15
-  const pct = Math.min(100, (value / cap) * 100)
-  const lo = (min / cap) * 100
-  const hi = (max / cap) * 100
-  const inBand = value >= min && value <= max
-  return (
-    <div>
-      <div className="mb-1 flex items-baseline justify-between gap-2">
-        <span className="text-xs font-medium text-haze">{label}</span>
-        <span className="num text-xs text-ice">
-          {Math.round(value)}
-          <span className="text-fog">
-            {unit} / {min}–{max}
-            {unit}
-          </span>
-        </span>
-      </div>
-      <div className="relative h-2 overflow-hidden rounded-full bg-black/40">
-        <div
-          className="absolute inset-y-0 rounded-full opacity-20"
-          style={{ left: `${lo}%`, width: `${hi - lo}%`, background: color }}
-        />
-        <div
-          className="absolute inset-y-0 left-0 rounded-full"
-          style={{
-            width: `${pct}%`,
-            background: inBand ? 'var(--color-affirm)' : color,
-            transition: 'width 0.5s cubic-bezier(0.22,1,0.36,1)',
-            boxShadow: `0 0 8px ${inBand ? 'rgba(93,211,158,0.4)' : 'rgba(255,126,71,0.35)'}`,
-          }}
-        />
-      </div>
-    </div>
-  )
-}
-
-/** Minimal sparkline */
-export function Sparkline({
+export function Spark({
   points,
-  width = 140,
-  height = 36,
-  color = 'var(--color-steel)',
-  goal,
+  width = 132,
+  height = 30,
 }: {
   points: number[]
   width?: number
   height?: number
-  color?: string
-  /** Draw a dashed target line at this value (scaled with the data range). */
-  goal?: number
 }) {
   if (points.length < 2) {
     return (
-      <svg width={width} height={height}>
-        <line x1={0} y1={height / 2} x2={width} y2={height / 2} stroke="rgba(255,255,255,0.1)" strokeDasharray="3 4" />
+      <svg width={width} height={height} aria-hidden="true">
+        <line x1={0} y1={height / 2} x2={width} y2={height / 2} stroke="rgba(255,255,255,0.1)" strokeDasharray="2 4" />
       </svg>
     )
   }
-  // Include the goal in the scale so the target line is always on-canvas
-  const all = goal !== undefined ? [...points, goal] : points
-  const min = Math.min(...all)
-  const max = Math.max(...all)
+  const min = Math.min(...points)
+  const max = Math.max(...points)
   const span = max - min || 1
   const step = width / (points.length - 1)
-  const yFor = (v: number) => height - 4 - ((v - min) / span) * (height - 8)
-  const d = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${(i * step).toFixed(1)} ${yFor(p).toFixed(1)}`).join(' ')
-  const lastY = yFor(points[points.length - 1])
+  const y = (p: number) => height - 2 - ((p - min) / span) * (height - 4)
+  const d = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${(i * step).toFixed(1)} ${y(p).toFixed(1)}`).join(' ')
   return (
-    <svg width={width} height={height} className="overflow-visible">
-      {goal !== undefined && (
-        <line x1={0} y1={yFor(goal)} x2={width} y2={yFor(goal)} stroke="rgba(93,211,158,0.45)" strokeWidth={1} strokeDasharray="4 4" />
-      )}
-      <path d={d} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
-      <circle cx={width} cy={lastY} r={3} fill={color} style={{ filter: `drop-shadow(0 0 4px ${color})` }} />
+    <svg width={width} height={height} className="overflow-visible" aria-hidden="true">
+      <path d={d} fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth={1} strokeLinejoin="round" strokeLinecap="round" />
+      <circle cx={width} cy={y(points[points.length - 1])} r={1.75} fill="#fff" />
     </svg>
   )
 }
 
-/** Vertical bar chart */
-export function Bars({
+/** Column chart. Value is encoded by height and alpha — never by hue. */
+export function Cols({
   data,
-  height = 90,
-  color = 'var(--color-signal)',
+  height = 72,
   unit = '',
 }: {
   data: { label: string; value: number }[]
   height?: number
-  color?: string
   unit?: string
 }) {
   const max = Math.max(...data.map((d) => d.value), 1)
   return (
-    <div className="flex items-end gap-1.5" style={{ height }}>
+    <div className="flex items-end gap-[3px]" style={{ height }}>
       {data.map((d, i) => (
-        <div key={i} className="group flex min-w-0 flex-1 flex-col items-center gap-1" title={`${d.label}: ${d.value}${unit}`}>
-          <span className="num text-[10px] text-fog opacity-0 transition-opacity group-hover:opacity-100">
-            {d.value}
-          </span>
+        <div key={i} className="group/col flex min-w-0 flex-1 flex-col items-center justify-end gap-1.5" title={`${d.label}: ${d.value}${unit}`}>
+          <span className="num text-micro text-faint opacity-0 transition-opacity group-hover/col:opacity-100">{d.value || ''}</span>
           <div
-            className="w-full rounded-t-sm transition-all"
+            className="w-full transition-all duration-500"
             style={{
-              height: `${Math.max(3, (d.value / max) * (height - 34))}px`,
-              background: d.value === 0 ? 'rgba(255,255,255,0.06)' : color,
-              opacity: d.value === 0 ? 1 : 0.5 + 0.5 * (d.value / max),
+              height: `${Math.max(1, (d.value / max) * (height - 26))}px`,
+              background: d.value === 0 ? 'rgba(255,255,255,0.07)' : `rgba(255,255,255,${(0.3 + 0.7 * (d.value / max)).toFixed(2)})`,
             }}
           />
-          <span className="hud-label !text-[9px] truncate max-w-full">{d.label}</span>
+          <span className="eyebrow max-w-full truncate !text-[9px]">{d.label}</span>
         </div>
       ))}
     </div>
   )
 }
 
-/** Designed checkbox */
-export function CheckDot({
+/** Don't-break-the-chain strip: one square per day, filled when hit. */
+export function Chain({ days, size = 7 }: { days: boolean[]; size?: number }) {
+  return (
+    <div className="flex flex-wrap gap-[3px]" aria-hidden="true">
+      {days.map((hit, i) => (
+        <span
+          key={i}
+          className="block"
+          style={{
+            width: size,
+            height: size,
+            background: hit ? '#ffffff' : 'rgba(255,255,255,0.08)',
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
+export function Dot({
   checked,
   onToggle,
   label,
+  size = 18,
 }: {
   checked: boolean
   onToggle: () => void
   label?: string
+  size?: number
 }) {
   return (
     <button
@@ -295,59 +543,111 @@ export function CheckDot({
       aria-checked={checked}
       aria-label={label ?? 'toggle'}
       onClick={onToggle}
-      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-all duration-200 focus-visible:outline-2 focus-visible:outline-signal ${
-        checked
-          ? 'border-affirm bg-affirm/20 shadow-[0_0_10px_rgba(93,211,158,0.35)]'
-          : 'border-edge-strong bg-black/30 hover:border-signal/60'
+      style={{ width: size, height: size }}
+      className={`flex shrink-0 items-center justify-center rounded-full border transition-colors duration-150 ${
+        checked ? 'border-paper bg-paper text-black' : 'border-line-2 text-transparent hover:border-line-3'
       }`}
     >
-      <Check
-        size={14}
-        strokeWidth={3}
-        className={`text-affirm transition-all duration-200 ${checked ? 'scale-100 opacity-100' : 'scale-50 opacity-0'}`}
+      <Icon name="check" size={size * 0.6} strokeWidth={2} />
+    </button>
+  )
+}
+
+export function Toggle({ on, onChange, label }: { on: boolean; onChange: (v: boolean) => void; label: string }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={label}
+      onClick={() => onChange(!on)}
+      className={`relative h-[18px] w-8 shrink-0 rounded-full border transition-colors ${
+        on ? 'border-paper bg-paper' : 'border-line-2 bg-transparent'
+      }`}
+    >
+      <span
+        className={`absolute top-[2px] h-3 w-3 rounded-full transition-all ${
+          on ? 'left-[15px] bg-black' : 'left-[2px] bg-line-3'
+        }`}
       />
     </button>
   )
 }
 
-export function StatTile({
-  label,
-  value,
-  sub,
-  accent = 'text-ice',
+export function Chip({
+  active,
+  onClick,
+  children,
+  className = '',
 }: {
-  label: string
-  value: ReactNode
-  sub?: ReactNode
-  accent?: string
+  active?: boolean
+  onClick?: () => void
+  children: ReactNode
+  className?: string
 }) {
   return (
-    <div className="rounded-xl border border-edge bg-black/25 px-3.5 py-3">
-      <div className="hud-label !mb-1.5">{label}</div>
-      <div className={`num text-xl font-semibold leading-none sm:text-2xl ${accent}`}>{value}</div>
-      {sub && <div className="mt-1.5 text-[11px] text-fog">{sub}</div>}
-    </div>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-xs border px-2.5 py-1 text-micro font-medium transition-colors ${
+        active ? 'border-paper bg-paper text-black' : 'border-line text-dim hover:border-line-2 hover:text-paper'
+      } ${className}`}
+    >
+      {children}
+    </button>
   )
 }
 
 export function Empty({ children }: { children: ReactNode }) {
+  return <div className="py-8 text-body text-faint">{children}</div>
+}
+
+/** Bottom sheet on mobile, centred panel on desktop. Flat, hairlined. */
+export function Sheet({
+  open,
+  onClose,
+  title,
+  children,
+  wide = false,
+}: {
+  open: boolean
+  onClose: () => void
+  title: ReactNode
+  children: ReactNode
+  wide?: boolean
+}) {
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open, onClose])
+  if (!open) return null
   return (
-    <div className="rounded-xl border border-dashed border-edge px-4 py-8 text-center text-sm text-fog">
-      {children}
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 sm:items-center"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className={`animate-lift max-h-[86dvh] w-full overflow-y-auto border-t border-line-2 bg-ink px-5 pb-8 pt-5 sm:max-h-[80dvh] sm:rounded-xs sm:border ${
+          wide ? 'sm:max-w-2xl' : 'sm:max-w-md'
+        }`}
+        style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <Eyebrow>{title}</Eyebrow>
+          <IconBtn glyph="close" label="Close" onClick={onClose} size={15} />
+        </div>
+        {children}
+      </div>
     </div>
   )
 }
 
-export const TAG_COLORS: Record<string, string> = {
-  morning: '#7fb4d8',
-  school: '#8b93a3',
-  gym: '#ff7e47',
-  golf: '#5dd39e',
-  run: '#5dd39e',
-  business: '#e0a458',
-  meal: '#c9a3d4',
-  study: '#8b93a3',
-  recovery: '#7f8fd8',
-  social: '#d8c47f',
-  language: '#7fb4d8',
+/** Horizontal scroller for tab strips that must never wrap. */
+export function Scroller({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return <div className={`no-bar -mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 ${className}`}>{children}</div>
 }

@@ -407,3 +407,133 @@ export const ollieWorkouts: Workout[] = [
     ],
   },
 ]
+
+// ════════════════════════════════════════════════════════════════════
+// v8 — THE SECTION REGISTRY
+// Navigation is data. Every entry below can be renamed, reordered,
+// hidden, regrouped or deleted from inside the app, and new ones can
+// be created. Nothing here is structural.
+// ════════════════════════════════════════════════════════════════════
+
+import type { GroupDef, Habit, Reminder, SectionDef, Taxon } from './types'
+
+export const seedGroups: GroupDef[] = [
+  { id: 'now', label: 'Now', order: 0 },
+  { id: 'body', label: 'Body', order: 1 },
+  { id: 'craft', label: 'Craft', order: 2 },
+  { id: 'build', label: 'Build', order: 3 },
+  { id: 'system', label: 'System', order: 4 },
+]
+
+const S = (
+  id: string,
+  module: SectionDef['module'],
+  label: string,
+  group: string,
+  icon: string,
+  order: number,
+  bar = false,
+): SectionDef => ({ id, module, label, group, icon, order, hidden: false, bar })
+
+export const seedSections: SectionDef[] = [
+  S('today', 'dashboard', 'Today', 'now', 'today', 0, true),
+  S('jarvis', 'jarvis', 'Jarvis', 'now', 'jarvis', 1, true),
+  S('schedule', 'schedule', 'Blueprint', 'now', 'schedule', 2),
+
+  S('training', 'training', 'Training', 'body', 'training', 0, true),
+  S('nutrition', 'nutrition', 'Fuel', 'body', 'nutrition', 1),
+  S('recovery', 'recovery', 'Recovery', 'body', 'recovery', 2),
+
+  S('golf', 'golf', 'Golf', 'craft', 'golf', 0, true),
+  S('mindset', 'mindset', 'Mindset', 'craft', 'mindset', 1),
+  S('books', 'books', 'Reading', 'craft', 'books', 2),
+
+  S('business', 'business', 'Aurora', 'build', 'business', 0),
+  S('markets', 'markets', 'Markets', 'build', 'markets', 1),
+  S('news', 'news', 'Intel', 'build', 'news', 2),
+
+  S('goals', 'goals', 'Goals', 'system', 'goals', 0),
+  S('notes', 'notes', 'Notes', 'system', 'notes', 1),
+  S('grocery', 'grocery', 'Supply', 'system', 'grocery', 2),
+  S('settings', 'settings', 'Settings', 'system', 'settings', 3),
+]
+
+// ── Editable taxonomies. Ids are stable so historic logs never break;
+//    only the labels are user-facing, and every one of them is editable.
+
+export const seedGolfCategories: Taxon[] = [
+  { id: 'putting', label: 'Putting' },
+  { id: 'chipping', label: 'Chipping' },
+  { id: 'long-game', label: 'Long Game' },
+  { id: 'drills', label: 'Drills' },
+  { id: 'simulator', label: 'Simulator' },
+  { id: 'on-course', label: 'On Course' },
+]
+
+export const seedBlockTags: Taxon[] = [
+  { id: 'morning', label: 'Morning' },
+  { id: 'school', label: 'School' },
+  { id: 'gym', label: 'Gym' },
+  { id: 'golf', label: 'Golf' },
+  { id: 'run', label: 'Run' },
+  { id: 'business', label: 'Business' },
+  { id: 'meal', label: 'Meal' },
+  { id: 'study', label: 'Study' },
+  { id: 'recovery', label: 'Recovery' },
+  { id: 'social', label: 'Social' },
+  { id: 'language', label: 'Language' },
+]
+
+export const seedBizAreas: Taxon[] = [
+  { id: 'content', label: 'Content' },
+  { id: 'store', label: 'Store' },
+  { id: 'marketing', label: 'Marketing' },
+  { id: 'suppliers', label: 'Suppliers' },
+  { id: 'ops', label: 'Ops' },
+]
+
+export const seedMealWindows: Taxon[] = [
+  { id: 'breakfast', label: 'Breakfast' },
+  { id: 'lunch', label: 'Lunch' },
+  { id: 'dinner', label: 'Dinner' },
+  { id: 'snack', label: 'Performance Snack' },
+]
+
+// ── The consistency engine: what actually gets tracked daily ──
+
+const H = (
+  hid: string,
+  label: string,
+  kind: Habit['kind'],
+  target: number,
+  unit: string,
+  order: number,
+): Habit => ({ id: hid, label, kind, target, unit, order, archived: false, days: [] })
+
+export const seedHabits: Habit[] = [
+  H('h-protein', 'Protein target', 'count', 190, 'g', 0),
+  H('h-water', 'Water', 'count', 3000, 'ml', 1),
+  H('h-read', 'Read 15 min', 'count', 15, 'min', 2),
+  H('h-blackout', '22:30 blackout', 'boolean', 1, '', 3),
+  H('h-checkin', 'Evening audit', 'boolean', 1, '', 4),
+  H('h-train', 'Train or run', 'boolean', 1, '', 5),
+  H('h-golf', 'Golf touch', 'boolean', 1, '', 6),
+]
+
+const R = (rid: string, label: string, time: string, body: string, sectionId?: string): Reminder => ({
+  id: rid,
+  label,
+  body,
+  time,
+  days: [],
+  enabled: true,
+  sectionId,
+})
+
+export const seedReminders: Reminder[] = [
+  R('r-water', 'Hydration check', '10:30', 'Front-load the 3L. Where are you?', 'nutrition'),
+  R('r-fuel', 'Protein anchor', '14:00', 'Mid-day protein anchor — 40-50g.', 'nutrition'),
+  R('r-session', 'Session window', '15:45', "Session window opens in 15 minutes.", 'training'),
+  R('r-audit', 'Systems audit', '21:00', 'Log weight, sleep and the day before shutdown.', 'today'),
+  R('r-blackout', 'Blackout', '22:15', 'Blackout in 15. Screens down, magnesium, wind down.', 'recovery'),
+]

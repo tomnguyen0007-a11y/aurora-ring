@@ -1,17 +1,84 @@
 export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6 // 0 = Monday … 6 = Sunday
 
-export type BlockTag =
-  | 'morning'
-  | 'school'
-  | 'gym'
+// ─────────────────────────────────────────────────────────────
+// SECTION REGISTRY — every page in the app is data, not code.
+// Rename, reorder, hide, regroup, or invent new ones. Nothing in
+// the navigation is hard-coded any more.
+// ─────────────────────────────────────────────────────────────
+
+export type ModuleKind =
+  | 'dashboard'
+  | 'jarvis'
+  | 'goals'
+  | 'training'
   | 'golf'
-  | 'run'
-  | 'business'
-  | 'meal'
-  | 'study'
+  | 'nutrition'
   | 'recovery'
-  | 'social'
-  | 'language'
+  | 'grocery'
+  | 'notes'
+  | 'business'
+  | 'books'
+  | 'mindset'
+  | 'markets'
+  | 'news'
+  | 'schedule'
+  | 'review'
+  | 'settings'
+  | 'custom'
+
+export interface SectionDef {
+  id: string
+  module: ModuleKind
+  label: string
+  group: string
+  icon: string
+  order: number
+  hidden: boolean
+  bar: boolean // pinned into the mobile bottom bar
+}
+
+export interface GroupDef {
+  id: string
+  label: string
+  order: number
+}
+
+/** Renameable taxonomy entry (golf categories, business areas, schedule tags…). */
+export interface Taxon {
+  id: string
+  label: string
+}
+
+// ── Custom sections: user-invented pages built from blocks ──
+
+export type CustomBlockKind = 'checklist' | 'counter' | 'note' | 'table' | 'metric'
+
+export interface CustomListItem {
+  id: string
+  text: string
+  done: boolean
+}
+
+export interface CustomBlock {
+  id: string
+  kind: CustomBlockKind
+  title: string
+  items?: CustomListItem[]
+  step?: number
+  target?: number
+  unit?: string
+  body?: string
+  columns?: string[]
+  rows?: string[][]
+  /** date (yyyy-mm-dd) → value, for counter + metric blocks */
+  series?: Record<string, number>
+}
+
+// ─────────────────────────────────────────────────────────────
+// SCHEDULE
+// ─────────────────────────────────────────────────────────────
+
+export type BlockTag = string
 
 export interface ScheduleBlock {
   id: string
@@ -22,6 +89,10 @@ export interface ScheduleBlock {
   detail?: string
   tag: BlockTag
 }
+
+// ─────────────────────────────────────────────────────────────
+// TRAINING
+// ─────────────────────────────────────────────────────────────
 
 export interface Exercise {
   id: string
@@ -45,9 +116,9 @@ export interface SetEntry {
 
 export interface WorkoutLog {
   id: string
-  date: string // ISO yyyy-mm-dd
+  date: string
   workoutId: string
-  entries: Record<string, SetEntry[]> // exerciseId -> sets
+  entries: Record<string, SetEntry[]>
   completed: boolean
 }
 
@@ -60,7 +131,12 @@ export interface RunLog {
   notes: string
 }
 
-export type GolfCategory = 'putting' | 'chipping' | 'long-game' | 'drills' | 'simulator' | 'on-course'
+// ─────────────────────────────────────────────────────────────
+// GOLF
+// ─────────────────────────────────────────────────────────────
+
+/** Golf practice category id. Seeded ids stay stable; labels are editable. */
+export type GolfCategory = string
 
 export interface GolfSession {
   id: string
@@ -71,12 +147,11 @@ export interface GolfSession {
 }
 
 /**
- * Wall-clock state for the live Practice Timer — persisted so the elapsed
- * time survives the phone locking, the tab backgrounding, or iOS killing and
- * reloading the PWA process while it's running. Elapsed time is always
- * DERIVED from these timestamps (now - startedAt + accumulatedSec), never
- * ticked by a setInterval counter, so throttled/suspended background timers
- * can't make it fall behind reality.
+ * Wall-clock state for the live Practice Timer — persisted so elapsed time
+ * survives the phone locking, the tab backgrounding, or iOS killing and
+ * reloading the PWA while it runs. Elapsed is always DERIVED from these
+ * timestamps (now - startedAt + accumulatedSec), never ticked by an interval,
+ * so a throttled background timer cannot fall behind reality.
  */
 export interface GolfTimerState {
   category: GolfCategory
@@ -86,11 +161,52 @@ export interface GolfTimerState {
   accumulatedSec: number
 }
 
+/**
+ * A photo from training or golf, dated and captioned — a visual log of what
+ * actually happened that day. Uploaded from Golf/Training, or attached to a
+ * Jarvis message and kept via "log this".
+ */
+export interface TrainingPhoto {
+  id: string
+  date: string
+  category: 'golf' | 'training' | 'other'
+  /**
+   * Blobs live in IndexedDB (lib/photoDb) keyed by this id — the store holds
+   * metadata only, so localStorage never carries base64 payloads. Populated
+   * transiently while adding, and for legacy entries that migrate on boot.
+   */
+  dataUrl?: string
+  caption?: string
+  createdAt: number
+}
+
 export interface HandicapEntry {
   id: string
   date: string
   value: number
 }
+
+export interface GolfStats {
+  fairwaysPct: number
+  girPct: number
+  scramblePct: number
+  puttsPerRound: number
+  lostBallsPerRound: number
+  avgScore: number
+  updated: string
+  focus: string
+}
+
+export interface GolfRound {
+  id: string
+  date: string
+  course: string
+  score: number
+}
+
+// ─────────────────────────────────────────────────────────────
+// GOALS
+// ─────────────────────────────────────────────────────────────
 
 export type Pillar = 'physique' | 'golf' | 'business' | 'recovery' | 'custom'
 
@@ -106,10 +222,14 @@ export interface Goal {
   title: string
   target: string
   deadline: string | null
-  progress: number // 0-100
+  progress: number
   milestones: Milestone[]
   notes: string
 }
+
+// ─────────────────────────────────────────────────────────────
+// NUTRITION
+// ─────────────────────────────────────────────────────────────
 
 export interface MacroTargets {
   kcal: [number, number]
@@ -131,7 +251,7 @@ export interface FoodLog {
 
 export interface MealOption {
   id: string
-  window: string // Breakfast / Lunch / Dinner / Performance Snack
+  window: string
   name: string
   detail: string
 }
@@ -142,6 +262,17 @@ export interface GroceryItem {
   qty: string
   done: boolean
 }
+
+export interface SupplementItem {
+  id: string
+  name: string
+  dose: string
+  timing: string
+}
+
+// ─────────────────────────────────────────────────────────────
+// NOTES / BUSINESS / BOOKS
+// ─────────────────────────────────────────────────────────────
 
 export interface Note {
   id: string
@@ -159,44 +290,10 @@ export interface TableDoc {
   updated: number
 }
 
-/**
- * A free-form knowledge document the user feeds Jarvis — pasted or uploaded
- * from Obsidian, a spec, a coach's PDF-turned-markdown, anything. Injected into
- * Jarvis's context so it reasons from the user's real material, not just the
- * built-in seed knowledge. "source" tags where it came from (e.g. a filename).
- */
-export interface KnowledgeDoc {
-  id: string
-  title: string
-  body: string
-  source: string
-  updated: number
-}
-
-/**
- * A photo from training or golf, dated and captioned — a Strava-style visual
- * log of "what did I actually do that day." Uploaded directly from Golf/
- * Training, or attached to a Jarvis chat message and saved via "log this."
- */
-export interface TrainingPhoto {
-  id: string
-  date: string
-  category: 'golf' | 'training' | 'other'
-  /**
-   * Image blobs live in IndexedDB (lib/photoDb), keyed by this photo's id — the
-   * store holds metadata only, so localStorage never carries base64 payloads.
-   * This field is only populated transiently (adding a photo, or legacy entries
-   * from before the IndexedDB move, which migrate on boot).
-   */
-  dataUrl?: string
-  caption?: string
-  createdAt: number
-}
-
 export interface BizTask {
   id: string
   title: string
-  area: string // Content / Store / Marketing / Suppliers / Ops
+  area: string
   done: boolean
   created: number
 }
@@ -221,38 +318,80 @@ export interface Book {
   notes: string
 }
 
+// ─────────────────────────────────────────────────────────────
+// CHECK-INS, HABITS, REMINDERS — the consistency engine
+// ─────────────────────────────────────────────────────────────
+
 export interface CheckIn {
   date: string
   weightKg: number | null
   sleepH: number | null
-  sleepQuality: number | null // 1-5
-  energy: number | null // 1-5
+  sleepQuality: number | null
+  energy: number | null
   blackoutOnTime: boolean | null
   notes: string
 }
 
+export interface Habit {
+  id: string
+  label: string
+  /** boolean = done / not done · count = accumulate toward a target */
+  kind: 'boolean' | 'count'
+  target: number
+  unit: string
+  order: number
+  archived: boolean
+  /** which weekdays it counts on — empty means every day */
+  days: Weekday[]
+}
+
+/** date → habitId → value (1/0 for boolean habits) */
+export type HabitLog = Record<string, Record<string, number>>
+
+export interface Reminder {
+  id: string
+  label: string
+  body: string
+  time: string // "HH:MM"
+  days: Weekday[] // empty = every day
+  enabled: boolean
+  sectionId?: string
+}
+
+// ─────────────────────────────────────────────────────────────
+// MARKETS
+// ─────────────────────────────────────────────────────────────
+
 export interface WatchItem {
   id: string
   kind: 'crypto' | 'stock'
-  symbol: string // BTC / AAPL
-  cgId?: string // coingecko id for crypto
+  symbol: string
+  cgId?: string
   name: string
 }
 
 export interface Quote {
   price: number
-  change24h: number // percent
+  change24h: number
   ts: number
 }
+
+// ─────────────────────────────────────────────────────────────
+// JARVIS
+// ─────────────────────────────────────────────────────────────
 
 export interface ChatMsg {
   id: string
   role: 'user' | 'jarvis'
   text: string
   ts: number
-  acted?: string[] // human-readable list of actions Jarvis executed
-  image?: string // data URL of an attached reference photo (legacy single-photo messages)
-  images?: string[] // data URLs — a message can carry several photos at once
+  acted?: string[]
+  /** legacy single-photo messages */
+  image?: string
+  /** data URLs — a message can carry several photos at once */
+  images?: string[]
+  /** tool names Jarvis called while answering, for the transparency trail */
+  tools?: string[]
 }
 
 export type MemoryCategory = 'golf' | 'fitness' | 'nutrition' | 'life' | 'business' | 'recovery'
@@ -261,7 +400,7 @@ export interface MemoryFact {
   id: string
   text: string
   category: MemoryCategory
-  importance: number // 1-10, higher surfaces more readily in retrieval
+  importance: number
   createdAt: number
   lastAccessed: number
   accessCount: number
@@ -273,70 +412,27 @@ export interface Profile {
   heightCm: number | null
   location: string
   inspiration: string
-  identity: string // free-form "who I am / what I'm building"
-  philosophy: string // core operating philosophy
-  facts: MemoryFact[] // discrete memory facts Jarvis should always know, ranked by semantic relevance at query time
+  identity: string
+  philosophy: string
+  facts: MemoryFact[]
 }
 
 export interface Mantra {
   id: string
   text: string
-  author: string // "" if unattributed
-  tag: 'mindset' | 'wealth' | 'discipline' | 'stoic' | 'love' | 'custom'
+  author: string
+  tag: string
 }
 
-export interface SupplementItem {
+/** Second-brain document — pasted or imported reference Jarvis reads. */
+export interface KnowledgeDoc {
   id: string
-  name: string
-  dose: string
-  timing: string
-}
-
-export interface GolfStats {
-  fairwaysPct: number
-  girPct: number
-  scramblePct: number
-  puttsPerRound: number
-  lostBallsPerRound: number
-  avgScore: number
-  updated: string
-  focus: string // current mental/technical focus
-}
-
-export type LlmProvider = 'none' | 'anthropic' | 'gemini' | 'groq' | 'openrouter'
-
-export interface Settings {
-  userName: string
-  provider: LlmProvider
-  anthropicKey: string
-  geminiKey: string
-  anthropicModel: string
-  geminiModel: string
-  groqKey: string // groq.com — genuinely free tier, no card, no web search
-  groqModel: string
-  openrouterKey: string // openrouter.ai — free model router, resilient backup, vision on the right model
-  openrouterModel: string
-  finnhubKey: string
-  gnewsKey: string
-  newsCountry: string
-  speakReplies: boolean
-  voiceURI: string // chosen speech-synthesis voice
-  elevenKey: string // ElevenLabs — the real JARVIS voice (primary TTS)
-  elevenVoiceId: string
-  openaiKey?: string // OpenAI TTS — secondary voice fallback
-  notifyEnabled: boolean // nutrition/recovery reminders
-  hevyKey: string // Hevy official API — live workout sync
-  // Cross-device sync (Supabase project owned by the user)
-  supabaseUrl?: string // https://xxxx.supabase.co
-  supabaseKey?: string // anon public key
-  syncCode?: string // shared secret identifying this user's state row — same on every device
-  // GitHub knowledge sync — pulls markdown/text straight from a repo (e.g. an
-  // Obsidian vault or the ECC skills repo) into the Brain Feed, no copy-paste.
-  githubToken?: string // personal access token; only needed for private repos / higher rate limits
-  githubRepo?: string // "owner/repo"
-  githubBranch?: string
-  githubPath?: string // optional folder prefix to restrict the sync to
-  githubSyncedAt?: number
+  title: string
+  body: string
+  source: string
+  updated: number
+  /** always injected into Jarvis's context, not just on keyword match */
+  pinned: boolean
 }
 
 export interface HevySession {
@@ -347,28 +443,72 @@ export interface HevySession {
   volumeKg: number
 }
 
-export interface GolfRound {
-  id: string
-  date: string
-  course: string
-  score: number
+// ─────────────────────────────────────────────────────────────
+// SETTINGS
+// ─────────────────────────────────────────────────────────────
+
+export type LlmProvider = 'none' | 'anthropic' | 'gemini' | 'groq' | 'openrouter' | 'local'
+
+export interface Settings {
+  userName: string
+  provider: LlmProvider
+  anthropicKey: string
+  geminiKey: string
+  anthropicModel: string
+  geminiModel: string
+  groqKey: string
+  groqModel: string
+  openrouterKey: string
+  openrouterModel: string
+  /** OpenAI-compatible local server — Ollama, LM Studio, llama.cpp. */
+  localBaseUrl: string
+  localModel: string
+  finnhubKey: string
+  /** USDA FoodData Central key. Free at fdc.nal.usda.gov; DEMO_KEY works but throttles hard. */
+  usdaKey: string
+  gnewsKey: string
+  newsCountry: string
+  speakReplies: boolean
+  voiceURI: string
+  elevenKey: string
+  elevenVoiceId: string
+  openaiKey?: string
+  notifyEnabled: boolean
+  hevyKey: string
+  supabaseUrl?: string
+  supabaseKey?: string
+  syncCode?: string
+  // GitHub knowledge sync — pulls markdown/text straight from a repo (an
+  // Obsidian vault, the ECC skills repo) into the Brain Feed, no copy-paste.
+  githubToken?: string // PAT; only needed for private repos or higher rate limits
+  githubRepo?: string // "owner/repo"
+  githubBranch?: string
+  githubPath?: string // optional folder prefix to restrict the sync to
+  githubSyncedAt?: number
+
+  // ── v8 ──
+  /** how many tool-call rounds Jarvis may take before it must answer */
+  agentSteps: number
+  /** let Jarvis search the web even on providers without a native tool */
+  webSearch: boolean
+  /** scheduled reminders (needs the tab open or the PWA installed) */
+  remindersEnabled: boolean
+  /** end-of-day review prompt */
+  closeoutTime: string
+  /** UI density */
+  density: 'comfortable' | 'compact'
+  /** show numbers only after they exist, hide empty modules from Today */
+  hideEmpty: boolean
+
+  // ── Brand ──
+  /** your own mark as a data URL — replaces the default wing and the favicon */
+  brandMark?: string
+  /** flip the mark's luminance so a black-on-transparent file reads on black */
+  brandInvert?: boolean
+  /** wordmark and line beneath it */
+  brandName?: string
+  brandTagline?: string
 }
 
-export type ViewId =
-  | 'today'
-  | 'jarvis'
-  | 'goals'
-  | 'training'
-  | 'golf'
-  | 'nutrition'
-  | 'recovery'
-  | 'grocery'
-  | 'notes'
-  | 'business'
-  | 'books'
-  | 'mindset'
-  | 'markets'
-  | 'news'
-  | 'schedule'
-  | 'review'
-  | 'settings'
+/** Legacy alias: views are section ids now, so any string is valid. */
+export type ViewId = string

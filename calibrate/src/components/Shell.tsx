@@ -1,56 +1,12 @@
-import {
-  Activity,
-  BookOpen,
-  Bot,
-  Brain,
-  Briefcase,
-  CalendarCheck,
-  CalendarRange,
-  CandlestickChart,
-  Crosshair,
-  Dumbbell,
-  Globe,
-  HeartPulse,
-  LayoutGrid,
-  MoreHorizontal,
-  Settings2,
-  ShoppingCart,
-  StickyNote,
-  Target,
-  UtensilsCrossed,
-  X,
-} from 'lucide-react'
-import { useRef, useState, useSyncExternalStore, type ReactNode } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { getSyncStatus, subscribeSyncStatus } from '../lib/supabase'
 import { useStore } from '../store/store'
-import type { ViewId } from '../store/types'
+import type { SectionDef } from '../store/types'
+import { Icon, Mark, type GlyphName } from './icons'
+import { Palette } from './Palette'
+import { Eyebrow, Sheet } from './ui'
 
-const NAV: { id: ViewId; label: string; icon: typeof Activity }[] = [
-  { id: 'today', label: 'Today', icon: LayoutGrid },
-  { id: 'jarvis', label: 'Jarvis', icon: Bot },
-  { id: 'goals', label: 'Goals', icon: Target },
-  { id: 'training', label: 'Training', icon: Dumbbell },
-  { id: 'golf', label: 'Golf', icon: Crosshair },
-  { id: 'nutrition', label: 'Nutrition', icon: UtensilsCrossed },
-  { id: 'recovery', label: 'Recovery', icon: HeartPulse },
-  { id: 'grocery', label: 'Grocery', icon: ShoppingCart },
-  { id: 'business', label: 'AURORA', icon: Briefcase },
-  { id: 'notes', label: 'Notes', icon: StickyNote },
-  { id: 'books', label: 'Books', icon: BookOpen },
-  { id: 'mindset', label: 'Mindset', icon: Brain },
-  { id: 'markets', label: 'Markets', icon: CandlestickChart },
-  { id: 'news', label: 'News', icon: Globe },
-  { id: 'schedule', label: 'Schedule', icon: CalendarRange },
-  { id: 'review', label: 'Review', icon: CalendarCheck },
-  { id: 'settings', label: 'Settings', icon: Settings2 },
-]
-
-// 5 symmetric slots so Jarvis sits dead-center: 2 tabs, Jarvis, then Training + "More".
-// Nutrition drops off the primary row but stays reachable via the More sheet / desktop sidebar.
-const MOBILE_LEFT: ViewId[] = ['today', 'golf']
-const MOBILE_RIGHT: ViewId[] = ['training']
-
-/** Tap the wordmark to force-refresh the app: clears the offline cache and reloads. */
+/** Clear the offline cache and reload — the "why is this stale" escape hatch. */
 async function hardRefresh() {
   try {
     if ('serviceWorker' in navigator) {
@@ -66,230 +22,330 @@ async function hardRefresh() {
   }
 }
 
-function Brand() {
+/** The mark is yours: drop any SVG/PNG in Settings → Brand and it lands here,
+    in the mobile bar and in the browser tab. Falls back to the default wing. */
+export function BrandMark({ size = 13, className = '' }: { size?: number; className?: string }) {
+  const mark = useStore((s) => s.settings.brandMark)
+  const invert = useStore((s) => s.settings.brandInvert)
+  if (!mark) return <Mark size={size} className={className} />
   return (
-    <button
-      onClick={hardRefresh}
-      title="Tap to refresh the app to the latest version"
-      aria-label="Refresh Calibrate"
-      className="flex items-center gap-3 px-2 text-left transition-opacity active:opacity-60"
-    >
-      <div className="relative flex h-9 w-9 items-center justify-center">
-        <svg viewBox="0 0 100 100" className="h-8 w-8" fill="#f4f2ee">
-          <path transform="translate(38,18) scale(1.9)" d="M12,1 C13,8 16,11 23,12 C16,13 13,16 12,23 C11,16 8,13 1,12 C8,11 11,8 12,1 Z" />
-          <path transform="translate(18,38) scale(1.9)" d="M12,1 C13,8 16,11 23,12 C16,13 13,16 12,23 C11,16 8,13 1,12 C8,11 11,8 12,1 Z" />
-        </svg>
-      </div>
-      <div>
-        <div className="h-lumen text-lg font-bold leading-none tracking-[0.2em]">CALIBRATE</div>
-        <div className="hud-label !mb-0 mt-1 !text-[8px] !tracking-[0.3em] text-arc">PERSONAL OS</div>
-      </div>
-    </button>
+    <img
+      src={mark}
+      alt=""
+      aria-hidden="true"
+      className={`shrink-0 object-contain ${className}`}
+      style={{ height: size * 1.5, width: 'auto', maxWidth: size * 3, filter: invert ? 'invert(1)' : undefined }}
+    />
   )
 }
 
-/**
- * Live sync indicator — tap to open Settings. Green dot = synced, amber = pushing,
- * red = error, grey = not configured (local-only). Makes "why is my phone different
- * from my desktop" answerable at a glance.
- */
-function SyncBadge() {
+function Brand({ compact = false }: { compact?: boolean }) {
+  const name = useStore((s) => s.settings.brandName) || 'CALIBRATE'
+  const tagline = useStore((s) => s.settings.brandTagline) ?? 'PERSONAL OS'
+  return (
+    <div className="flex items-center gap-2.5">
+      <BrandMark size={13} className="text-paper" />
+      <div className="leading-none">
+        <div className="text-[0.8125rem] font-medium tracking-[0.16em] text-paper">{name}</div>
+        {!compact && tagline && <div className="mt-1 text-[0.5625rem] tracking-[0.18em] text-faint">{tagline}</div>}
+      </div>
+    </div>
+  )
+}
+
+/** Sync state as a single hairline square. Nothing blinks, nothing is coloured. */
+function SyncMark() {
   const status = useSyncExternalStore(subscribeSyncStatus, getSyncStatus)
   const setView = useStore((s) => s.setView)
-  const configured = status.enabled
-  const color = !configured
-    ? 'bg-fog/60'
+  const label = !status.enabled
+    ? 'Local only — tap to set up sync'
     : status.error
-      ? 'bg-alert shadow-[0_0_8px_rgba(239,106,84,0.7)]'
+      ? `Sync error: ${status.error}`
       : status.pendingPush
-        ? 'bg-signal shadow-[0_0_8px_rgba(233,237,242,0.6)]'
-        : 'bg-affirm shadow-[0_0_8px_rgba(74,222,143,0.7)]'
-  const label = !configured ? 'Sync off — local only. Tap to set up.' : status.error ? `Sync error: ${status.error}` : status.pendingPush ? 'Syncing…' : 'Synced'
-
+        ? 'Syncing…'
+        : 'Synced'
+  const text = !status.enabled ? 'LOCAL' : status.error ? 'ERROR' : status.pendingPush ? 'SYNC…' : 'SYNCED'
   return (
-    <button
-      onClick={() => setView('settings')}
-      title={label}
-      aria-label={label}
-      className="flex items-center gap-1.5 rounded-full px-2 py-1"
-    >
-      <span className={`inline-block h-2 w-2 rounded-full ${color}`} />
-      <span className="hud-label !mb-0 !text-[8px] !tracking-[0.2em]">{!configured ? 'LOCAL' : status.error ? 'SYNC ERR' : 'SYNC'}</span>
+    <button onClick={() => setView('settings')} title={label} aria-label={label} className="flex items-center gap-2">
+      <span
+        className={`block h-1.5 w-1.5 ${
+          !status.enabled ? 'bg-ghost' : status.error ? 'bg-paper/40' : status.pendingPush ? 'animate-breathe bg-paper' : 'bg-paper'
+        }`}
+      />
+      <span className="eyebrow">{text}</span>
     </button>
   )
 }
 
-/** Regular (non-Jarvis) bottom-nav tab — near-white glow when active, matching the ice/glass palette. */
-function NavTab({ item, active, onClick }: { item: (typeof NAV)[number]; active: boolean; onClick: () => void }) {
-  const Icon = item.icon
-  return (
-    <button
-      onClick={onClick}
-      aria-label={item.label}
-      aria-current={active ? 'page' : undefined}
-      className={`flex flex-col items-center justify-self-center gap-0.5 rounded-xl px-3 py-1.5 transition-all ${
-        active ? 'text-ice drop-shadow-[0_0_8px_rgba(234,244,255,0.65)]' : 'text-fog'
-      }`}
-    >
-      <Icon size={19} strokeWidth={active ? 2.4 : 2} />
-      <span className="font-display text-[9px] font-semibold tracking-wider">{item.label}</span>
-    </button>
-  )
-}
-
-export function Shell({ children }: { children: ReactNode }) {
+/** The grouped index — the full map of the app, on both viewports. */
+function IndexSheet({ open, onClose, go }: { open: boolean; onClose: () => void; go: (id: string) => void }) {
+  const sections = useStore((s) => s.sections)
+  const groups = useStore((s) => s.groups)
   const view = useStore((s) => s.view)
-  const setView = useStore((s) => s.setView)
-  const [moreOpen, setMoreOpen] = useState(false)
-  const mainRef = useRef<HTMLElement>(null)
+  const [q, setQ] = useState('')
 
-  const go = (v: ViewId) => {
-    setView(v)
-    setMoreOpen(false)
-    mainRef.current?.scrollTo({ top: 0 })
-  }
+  const grouped = useMemo(() => {
+    const visible = sections.filter((s) => !s.hidden && (!q || s.label.toLowerCase().includes(q.toLowerCase())))
+    return [...groups]
+      .sort((a, b) => a.order - b.order)
+      .map((g) => ({ group: g, items: visible.filter((s) => s.group === g.id).sort((a, b) => a.order - b.order) }))
+      .filter((x) => x.items.length)
+  }, [sections, groups, q])
 
   return (
-    <div className="relative z-10 mx-auto flex h-dvh max-w-[1500px] overflow-hidden">
-      {/* Desktop sidebar */}
-      <aside className="hidden h-dvh w-56 shrink-0 flex-col gap-1 overflow-y-auto border-r border-edge px-3 py-6 lg:flex">
-        <div className="mb-8">
-          <Brand />
-        </div>
-        <nav className="flex flex-1 flex-col gap-0.5" aria-label="Primary">
-          {NAV.map(({ id, label, icon: Icon }) => {
-            const active = view === id
-            return (
-              <button
-                key={id}
-                onClick={() => go(id)}
-                aria-current={active ? 'page' : undefined}
-                className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-left font-display text-[0.95rem] font-semibold tracking-wide transition-all ${
-                  active ? 'bg-white/[0.06] text-signal' : 'text-haze hover:bg-white/[0.04] hover:text-ice'
-                }`}
-              >
-                {active && (
-                  <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-signal shadow-[0_0_10px_rgba(233,237,242,0.55)]" />
-                )}
-                <Icon size={17} strokeWidth={active ? 2.4 : 2} className="shrink-0" />
-                {label}
-              </button>
-            )
-          })}
-        </nav>
-        <div className="flex items-center justify-between px-3 pt-3 text-[10px] leading-relaxed text-fog">
-          <span>
-            <span className="text-signal-dim">◆</span> THE BLUEPRINT V7
-            <br />
-            Executive Operating System
-          </span>
-          <SyncBadge />
-        </div>
-      </aside>
-
-      {/* Right column: fixed mobile header + single scroll region + in-flow bottom nav.
-          Nothing here is position:fixed against the layout viewport — that's what let
-          the bottom nav and header get stranded behind the keyboard / dynamic browser
-          chrome on iOS PWAs. Everything is a normal flex child inside an h-dvh shell,
-          so it can never be scrolled past or displaced. */}
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        {/* Mobile top bar — always visible, never scrolls away, so Settings is always one tap away */}
-        <div
-          className="flex shrink-0 items-center justify-between px-3 pb-3 lg:hidden"
-          style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
-        >
-          <Brand />
-          <div className="flex items-center gap-1">
-            <SyncBadge />
-            <button className="btn btn-ghost !px-2.5" aria-label="Settings" onClick={() => go('settings')}>
-              <Settings2 size={18} />
-            </button>
-          </div>
-        </div>
-
-        <main ref={mainRef} className="min-w-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-6 sm:px-6 lg:px-6 lg:pb-28 lg:pt-6">
-          {children}
-        </main>
-
-        {/* Mobile bottom nav — 5 equal columns, Jarvis dead-center, monochrome ice glow.
-            In-flow (not fixed), so it always sits right below the scroll region and can
-            never end up unreachable. */}
-        <nav
-          aria-label="Primary mobile"
-          className="glass-strong z-40 mx-3 grid shrink-0 grid-cols-5 items-center rounded-2xl px-1 py-2 lg:hidden"
-          style={{ marginBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
-        >
-          {MOBILE_LEFT.map((id) => (
-            <NavTab key={id} item={NAV.find((x) => x.id === id)!} active={view === id} onClick={() => go(id)} />
-          ))}
-
-          <button
-            onClick={() => go('jarvis')}
-            aria-label="Jarvis"
-            aria-current={view === 'jarvis' ? 'page' : undefined}
-            className="relative -mt-7 flex flex-col items-center justify-self-center"
-          >
-            <span
-              className={`flex h-14 w-14 items-center justify-center rounded-full border transition-all ${
-                view === 'jarvis'
-                  ? 'border-ice/40 bg-gradient-to-b from-[#2a2f38] to-[#05070a] text-ice shadow-[0_0_0_1px_rgba(255,255,255,0.06),0_0_28px_rgba(234,244,255,0.55),0_10px_26px_-10px_rgba(0,0,0,0.9)]'
-                  : 'border-white/15 bg-gradient-to-b from-[#20242c] to-[#08090d] text-haze shadow-[0_0_16px_rgba(234,244,255,0.18),0_10px_22px_-10px_rgba(0,0,0,0.85)]'
-              }`}
-            >
-              <Bot size={23} strokeWidth={2.2} />
-            </span>
-          </button>
-
-          {MOBILE_RIGHT.map((id) => (
-            <NavTab key={id} item={NAV.find((x) => x.id === id)!} active={view === id} onClick={() => go(id)} />
-          ))}
-
-          <button
-            onClick={() => setMoreOpen(true)}
-            aria-label="More sections"
-            className="flex flex-col items-center justify-self-center gap-0.5 rounded-xl px-3 py-1.5 text-fog"
-          >
-            <MoreHorizontal size={19} />
-            <span className="font-display text-[9px] font-semibold tracking-wider">More</span>
-          </button>
-        </nav>
-      </div>
-
-      {/* Mobile "more" sheet */}
-      {moreOpen && (
-        <div className="fixed inset-0 z-50 flex items-end bg-black/60 backdrop-blur-sm lg:hidden" onClick={() => setMoreOpen(false)}>
-          <div
-            className="glass-strong w-full rounded-t-3xl p-5 animate-rise"
-            style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-label="All sections"
-          >
-            <div className="mb-4 flex items-center justify-between">
-              <span className="hud-label !mb-0">All Sections</span>
-              <button className="btn btn-ghost !px-2" aria-label="Close" onClick={() => setMoreOpen(false)}>
-                <X size={18} />
-              </button>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {NAV.map(({ id, label, icon: Icon }) => (
+    <Sheet open={open} onClose={onClose} title="Index">
+      <input
+        className="field mb-5 w-full"
+        placeholder="Filter sections…"
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        aria-label="Filter sections"
+      />
+      <div className="space-y-6">
+        {grouped.map(({ group, items }) => (
+          <div key={group.id}>
+            <Eyebrow className="mb-2">{group.label}</Eyebrow>
+            <div className="border-t border-line">
+              {items.map((s) => (
                 <button
-                  key={id}
-                  onClick={() => go(id)}
-                  className={`flex flex-col items-center gap-2 rounded-xl border px-2 py-3.5 transition-colors ${
-                    view === id
-                      ? 'border-white/20 bg-white/[0.06] text-ice shadow-[0_0_14px_rgba(234,244,255,0.25)]'
-                      : 'border-edge bg-black/20 text-haze active:bg-white/5'
+                  key={s.id}
+                  onClick={() => {
+                    go(s.id)
+                    onClose()
+                  }}
+                  className={`flex w-full items-center gap-3 border-b border-line py-3 text-left text-body ${
+                    view === s.id ? 'text-paper' : 'text-mute'
                   }`}
                 >
-                  <Icon size={20} />
-                  <span className="font-display text-[11px] font-semibold tracking-wide">{label}</span>
+                  <Icon name={(s.icon as GlyphName) ?? 'custom'} size={15} className={view === s.id ? 'text-paper' : 'text-faint'} />
+                  <span className="flex-1 truncate">{s.label}</span>
+                  {view === s.id && <span className="h-1 w-1 bg-paper" />}
                 </button>
               ))}
             </div>
           </div>
+        ))}
+      </div>
+      <div className="mt-7 flex flex-wrap gap-2 border-t border-line pt-5">
+        <button
+          className="btn"
+          onClick={() => {
+            go('settings')
+            onClose()
+          }}
+        >
+          <Icon name="sliders" size={13} /> Customise navigation
+        </button>
+        <button className="btn" onClick={hardRefresh}>
+          <Icon name="refresh" size={13} /> Reload app
+        </button>
+      </div>
+    </Sheet>
+  )
+}
+
+export function Shell({ children, onAsk }: { children: ReactNode; onAsk: (text: string) => void }) {
+  const view = useStore((s) => s.view)
+  const setView = useStore((s) => s.setView)
+  const sections = useStore((s) => s.sections)
+  const groups = useStore((s) => s.groups)
+  const [indexOpen, setIndexOpen] = useState(false)
+  const [paletteOpen, setPaletteOpen] = useState(false)
+
+  const go = (id: string) => {
+    setView(id)
+    window.scrollTo({ top: 0 })
+  }
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        setPaletteOpen((v) => !v)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  const nav = useMemo(
+    () =>
+      [...groups]
+        .sort((a, b) => a.order - b.order)
+        .map((g) => ({
+          group: g,
+          items: sections.filter((s) => s.group === g.id && !s.hidden).sort((a, b) => a.order - b.order),
+        }))
+        .filter((x) => x.items.length),
+    [sections, groups],
+  )
+
+  const current = sections.find((s) => s.id === view)
+
+  // Mobile bar: whatever is pinned, capped at four, with Jarvis always centre.
+  const barItems: SectionDef[] = useMemo(() => {
+    const pinned = sections.filter((s) => s.bar && !s.hidden && s.module !== 'jarvis').sort((a, b) => a.order - b.order)
+    return pinned.slice(0, 4)
+  }, [sections])
+  const jarvis = sections.find((s) => s.module === 'jarvis' && !s.hidden)
+  const left = barItems.slice(0, 2)
+  const right = barItems.slice(2, 4)
+
+  // Sidebar overflows below ~900px tall. Fade the tail only while there is more to reach.
+  const navRef = useRef<HTMLElement | null>(null)
+  const [navFade, setNavFade] = useState(false)
+  const onNavScroll = useCallback(() => {
+    const el = navRef.current
+    if (!el) return
+    setNavFade(el.scrollHeight - el.clientHeight - el.scrollTop > 4)
+  }, [])
+  useLayoutEffect(onNavScroll, [onNavScroll, nav])
+  useEffect(() => {
+    const el = navRef.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const ro = new ResizeObserver(onNavScroll)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [onNavScroll])
+
+  return (
+    <div className="mx-auto flex min-h-dvh max-w-[1440px]">
+      {/* ── Desktop sidebar: typography only. No icons, no boxes. ── */}
+      <aside className="sticky top-0 hidden h-dvh w-[212px] shrink-0 flex-col border-r border-line px-6 py-7 lg:flex">
+        <button onClick={() => go('today')} className="mb-7 text-left" aria-label="Calibrate home">
+          <Brand />
+        </button>
+
+        <nav
+          ref={navRef}
+          onScroll={onNavScroll}
+          className="no-bar flex-1 overflow-y-auto"
+          aria-label="Sections"
+          style={
+            navFade
+              ? { maskImage: 'linear-gradient(to bottom,#000 calc(100% - 32px),transparent)', WebkitMaskImage: 'linear-gradient(to bottom,#000 calc(100% - 32px),transparent)' }
+              : undefined
+          }
+        >
+          {nav.map(({ group, items }, gi) => (
+            <div key={group.id} className={gi === 0 ? '' : 'mt-6'}>
+              <Eyebrow className="mb-2">{group.label}</Eyebrow>
+              <div className="-ml-6 space-y-px">
+                {items.map((s) => {
+                  const active = view === s.id
+                  return (
+                    <button
+                      key={s.id}
+                      onClick={() => go(s.id)}
+                      aria-current={active ? 'page' : undefined}
+                      className={`relative block w-full py-[5px] pl-6 pr-2 text-left text-body transition-colors ${
+                        active ? 'text-paper' : 'text-dim hover:text-mute'
+                      }`}
+                    >
+                      {active && <span className="absolute left-0 top-1/2 h-3.5 w-px -translate-y-1/2 bg-paper" />}
+                      <span className="truncate">{s.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
+        </nav>
+
+        <div className="mt-5 space-y-2.5 border-t border-line pt-4">
+          <button
+            onClick={() => setPaletteOpen(true)}
+            className="flex w-full items-center justify-between text-left text-micro text-faint transition-colors hover:text-mute"
+          >
+            <span className="flex items-center gap-2">
+              <Icon name="search" size={12} /> Search or ask
+            </span>
+            <span className="num text-[0.625rem] tracking-normal">⌘K</span>
+          </button>
+          <SyncMark />
         </div>
-      )}
+      </aside>
+
+      {/* ── Main column ── */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* Mobile top bar */}
+        <div
+          className="sticky top-0 z-30 flex items-center justify-between border-b border-line bg-ink px-5 py-3.5 lg:hidden"
+          style={{ paddingTop: 'max(0.875rem, env(safe-area-inset-top))' }}
+        >
+          <Brand compact />
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setPaletteOpen(true)}
+              aria-label="Search or ask"
+              className="p-2 text-faint transition-colors active:text-paper"
+            >
+              <Icon name="search" size={17} />
+            </button>
+            <button
+              onClick={() => go('settings')}
+              aria-label="Settings"
+              className="p-2 text-faint transition-colors active:text-paper"
+            >
+              <Icon name="settings" size={17} />
+            </button>
+          </div>
+        </div>
+
+        <main className="min-w-0 flex-1 px-5 pb-28 pt-6 sm:px-8 lg:px-10 lg:pb-24 lg:pt-9">{children}</main>
+      </div>
+
+      {/* ── Mobile bottom bar: flat, edge to edge, hairline top. ── */}
+      <nav
+        aria-label="Primary"
+        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-line bg-ink lg:hidden"
+        style={{ paddingBottom: 'max(0.25rem, env(safe-area-inset-bottom))' }}
+      >
+        {[...left, jarvis, ...right].filter(Boolean).slice(0, 4).map((s) => (
+          <BarTab key={s!.id} section={s!} active={view === s!.id} onClick={() => go(s!.id)} />
+        ))}
+        <button
+          onClick={() => setIndexOpen(true)}
+          aria-label="All sections"
+          className="relative flex flex-col items-center gap-1 pb-2 pt-2.5 text-faint transition-colors active:text-paper"
+        >
+          <Icon name="more" size={18} />
+          <span className="text-[0.5625rem] tracking-[0.06em]">Index</span>
+        </button>
+      </nav>
+
+      <IndexSheet open={indexOpen} onClose={() => setIndexOpen(false)} go={go} />
+      <Palette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        onAsk={(t) => {
+          onAsk(t)
+          const j = sections.find((s) => s.module === 'jarvis')
+          if (j) go(j.id)
+        }}
+      />
+
+      {/* Screen-reader anchor for the current page name */}
+      <span className="sr-only" aria-live="polite">
+        {current?.label}
+      </span>
     </div>
+  )
+}
+
+function BarTab({ section, active, onClick }: { section: SectionDef; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-current={active ? 'page' : undefined}
+      aria-label={section.label}
+      className={`relative flex flex-col items-center gap-1 pb-2 pt-2.5 transition-colors ${
+        active ? 'text-paper' : 'text-faint'
+      }`}
+    >
+      {active && <span className="absolute inset-x-4 top-0 h-px bg-paper" />}
+      <Icon name={(section.icon as GlyphName) ?? 'custom'} size={18} strokeWidth={active ? 1.5 : 1.25} />
+      <span className="max-w-full truncate px-1 text-[0.5625rem] tracking-[0.06em]">{section.label}</span>
+    </button>
   )
 }

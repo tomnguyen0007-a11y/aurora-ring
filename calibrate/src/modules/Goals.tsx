@@ -1,78 +1,92 @@
-import { Crosshair, Dumbbell, Briefcase, Moon, Plus, Sparkles, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import { CheckDot, HudLabel, Panel } from '../components/ui'
+import { Bar, DangerBtn, Dot, Empty, Eyebrow, InlineArea, InlineText, Page, Reorder, Section, Tools } from '../components/ui'
 import { useStore } from '../store/store'
-import type { Pillar } from '../store/types'
 
-const PILLAR_META: Record<Pillar, { label: string; color: string; icon: typeof Dumbbell }> = {
-  physique: { label: 'Physique', color: '#ff7e47', icon: Dumbbell },
-  golf: { label: 'Golf', color: '#5dd39e', icon: Crosshair },
-  business: { label: 'Business', color: '#e0a458', icon: Briefcase },
-  recovery: { label: 'Recovery', color: '#7f8fd8', icon: Moon },
-  custom: { label: 'Custom', color: '#7fb4d8', icon: Sparkles },
-}
-
-export function Goals() {
+export function Goals({ label }: { label: string }) {
   const s = useStore()
   const [newTitle, setNewTitle] = useState('')
-  const [newMilestone, setNewMilestone] = useState<Record<string, string>>({})
+  const [draft, setDraft] = useState<Record<string, string>>({})
 
   return (
-    <div className="space-y-4">
-      <header className="px-1">
-        <h1 className="h-lumen text-3xl font-bold tracking-wide">STRATEGIC PILLARS</h1>
-        <p className="mt-1 text-sm text-haze">The four pillars from the Blueprint, plus anything you add. Jarvis can update these.</p>
-      </header>
+    <Page
+      title={label}
+      lede="The pillars, and everything you add to them. Every line is editable; Jarvis can rewrite them too."
+      actions={
+        <form
+          className="flex gap-2"
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (!newTitle.trim()) return
+            s.addGoal({ title: newTitle.trim() })
+            setNewTitle('')
+          }}
+        >
+          <input className="field w-48" placeholder="New goal…" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} aria-label="New goal" />
+          <button className="btn btn-solid" type="submit">
+            Add
+          </button>
+        </form>
+      }
+    >
+      {!s.goals.length && (
+        <Section>
+          <Empty>No goals yet. What are you actually building this year?</Empty>
+        </Section>
+      )}
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        {s.goals.map((g) => {
-          const meta = PILLAR_META[g.pillar]
-          const Icon = meta.icon
+      <div className="grid gap-x-14 gap-y-2 xl:grid-cols-2">
+        {s.goals.map((g, gi) => {
           const msDone = g.milestones.filter((m) => m.done).length
           const derived = g.milestones.length ? Math.round((msDone / g.milestones.length) * 100) : g.progress
           return (
-            <Panel key={g.id}>
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <span
-                    className="flex h-9 w-9 items-center justify-center rounded-xl border"
-                    style={{ borderColor: `${meta.color}55`, background: `${meta.color}14`, color: meta.color }}
-                  >
-                    <Icon size={17} />
-                  </span>
-                  <div>
-                    <div className="font-display text-lg font-bold leading-tight tracking-wide text-ice">{g.title}</div>
-                    <div className="hud-label !mb-0 mt-0.5 !text-[8px]" style={{ color: meta.color }}>
-                      {meta.label}
-                    </div>
-                  </div>
-                </div>
-                <button className="btn btn-ghost !px-2" aria-label={`Delete goal ${g.title}`} onClick={() => s.removeGoal(g.id)}>
-                  <Trash2 size={15} className="text-alert/70" />
-                </button>
-              </div>
-
-              <p className="mt-3 text-sm text-haze">{g.target}</p>
-              {g.deadline && <p className="num mt-1 text-xs text-fog">Deadline {g.deadline}</p>}
-
-              <div className="mt-3">
-                <div className="mb-1 flex justify-between text-xs">
-                  <span className="text-fog">Progress</span>
-                  <span className="num text-ice">{derived}%</span>
-                </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-black/40">
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{ width: `${derived}%`, background: meta.color, boxShadow: `0 0 10px ${meta.color}66` }}
+            <Section key={g.id} className="group">
+              <div className="mb-4 flex items-start gap-3">
+                <div className="min-w-0 flex-1">
+                  <InlineText value={g.title} onChange={(v) => s.updateGoal(g.id, { title: v })} ariaLabel="Goal title" className="t-page" />
+                  <InlineText
+                    value={g.target}
+                    onChange={(v) => s.updateGoal(g.id, { target: v })}
+                    ariaLabel="Goal target"
+                    placeholder="What does done look like?"
+                    className="mt-2 text-body text-mute"
                   />
                 </div>
+                <Tools>
+                  <Reorder onUp={() => s.moveGoal(g.id, -1)} onDown={() => s.moveGoal(g.id, 1)} first={gi === 0} last={gi === s.goals.length - 1} />
+                  <DangerBtn onConfirm={() => s.removeGoal(g.id)} label={`Delete ${g.title}`} />
+                </Tools>
               </div>
 
-              <ul className="mt-4 space-y-2">
+              <div className="mb-5 flex items-baseline justify-between">
+                <span className="flex items-baseline gap-2">
+                  <Eyebrow>Deadline</Eyebrow>
+                  <input
+                    type="date"
+                    className="field-line num text-micro text-mute"
+                    value={g.deadline ?? ''}
+                    aria-label="Deadline"
+                    onChange={(e) => s.updateGoal(g.id, { deadline: e.target.value || null })}
+                  />
+                </span>
+                <span className="num text-body text-paper">{derived}%</span>
+              </div>
+              <Bar pct={derived} />
+
+              <ul className="mt-5">
                 {g.milestones.map((m) => (
-                  <li key={m.id} className="flex items-center gap-2.5">
-                    <CheckDot checked={m.done} onToggle={() => s.toggleMilestone(g.id, m.id)} label={m.title} />
-                    <span className={`text-sm ${m.done ? 'text-fog line-through' : 'text-ice'}`}>{m.title}</span>
+                  <li key={m.id} className="group/ms flex items-center gap-3 border-b border-line py-2.5 last:border-b-0">
+                    <Dot checked={m.done} onToggle={() => s.toggleMilestone(g.id, m.id)} label={m.title} size={16} />
+                    <span className="min-w-0 flex-1">
+                      <InlineText
+                        value={m.title}
+                        onChange={(v) => s.updateMilestone(g.id, m.id, v)}
+                        ariaLabel="Milestone"
+                        className={`text-body ${m.done ? 'text-faint line-through' : 'text-paper'}`}
+                      />
+                    </span>
+                    <span className="shrink-0 opacity-100 transition-opacity lg:opacity-0 lg:group-hover/ms:opacity-100">
+                      <DangerBtn onConfirm={() => s.removeMilestone(g.id, m.id)} label="Delete milestone" />
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -81,46 +95,37 @@ export function Goals() {
                 className="mt-3 flex gap-2"
                 onSubmit={(e) => {
                   e.preventDefault()
-                  const t = (newMilestone[g.id] ?? '').trim()
+                  const t = (draft[g.id] ?? '').trim()
                   if (!t) return
                   s.addMilestone(g.id, t)
-                  setNewMilestone({ ...newMilestone, [g.id]: '' })
+                  setDraft({ ...draft, [g.id]: '' })
                 }}
               >
                 <input
-                  className="field flex-1 !py-1.5 text-sm"
-                  placeholder="Add milestone…"
-                  value={newMilestone[g.id] ?? ''}
-                  onChange={(e) => setNewMilestone({ ...newMilestone, [g.id]: e.target.value })}
+                  className="field min-w-0 flex-1"
+                  placeholder="Add a milestone…"
+                  value={draft[g.id] ?? ''}
+                  onChange={(e) => setDraft({ ...draft, [g.id]: e.target.value })}
+                  aria-label="New milestone"
                 />
-                <button className="btn !px-3" type="submit" aria-label="Add milestone">
-                  <Plus size={15} />
+                <button className="btn" type="submit">
+                  Add
                 </button>
               </form>
 
-              {g.notes && <p className="mt-3 border-t border-edge pt-3 text-xs leading-relaxed text-fog">{g.notes}</p>}
-            </Panel>
+              <div className="mt-5 border-t border-line pt-4">
+                <InlineArea
+                  value={g.notes}
+                  onChange={(v) => s.updateGoal(g.id, { notes: v })}
+                  ariaLabel="Goal notes"
+                  placeholder="Notes, constraints, the plan…"
+                  className="!text-micro"
+                />
+              </div>
+            </Section>
           )
         })}
       </div>
-
-      <Panel>
-        <HudLabel>New Goal</HudLabel>
-        <form
-          className="flex flex-col gap-2 sm:flex-row"
-          onSubmit={(e) => {
-            e.preventDefault()
-            if (!newTitle.trim()) return
-            s.addGoal({ title: newTitle.trim() })
-            setNewTitle('')
-          }}
-        >
-          <input className="field flex-1" placeholder="e.g. Read 12 books this year" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />
-          <button className="btn btn-signal" type="submit">
-            <Plus size={15} /> Add goal
-          </button>
-        </form>
-      </Panel>
-    </div>
+    </Page>
   )
 }

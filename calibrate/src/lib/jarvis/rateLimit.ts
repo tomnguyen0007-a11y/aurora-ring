@@ -9,6 +9,7 @@ const PROVIDER_LIMIT: Record<LlmProvider, number> = {
   anthropic: 50,
   gemini: 15,
   groq: 30,
+  local: 10_000, // on-device: no quota to protect
   openrouter: 20,
 }
 
