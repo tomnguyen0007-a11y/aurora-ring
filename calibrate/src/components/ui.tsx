@@ -173,12 +173,12 @@ export function DangerBtn({
     const t = setTimeout(() => setArmed(false), 3200)
     return () => clearTimeout(t)
   }, [armed])
+  // Same footprint both states — swapping to a text "Confirm" button widened
+  // the row and pushed it past crowded, shrink-0-packed controls (the counter
+  // habit editor: label, target, unit, reorder, delete) with nowhere for the
+  // overflow to go, so the confirm tap landed off-screen and looked broken.
   if (armed) {
-    return (
-      <button type="button" className="btn btn-sm !text-paper" onClick={onConfirm}>
-        Confirm
-      </button>
-    )
+    return <IconBtn glyph="check" label={`Confirm: ${label}`} onClick={onConfirm} className="!text-paper" />
   }
   return <IconBtn glyph={glyph} label={label} onClick={() => setArmed(true)} />
 }

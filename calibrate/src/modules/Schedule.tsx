@@ -52,17 +52,21 @@ export function Schedule({ label }: { label: string }) {
               <li key={b.id} className="group border-b border-line py-3 last:border-b-0">
                 <div className="flex items-start gap-4">
                   <span className="mt-1 block h-9 w-px shrink-0 bg-line-2" />
-                  <span className="flex w-16 shrink-0 flex-col gap-0.5">
+                  {/* A native <input type="time"> has a browser-drawn minimum
+                      width (the HH:MM segments plus a clock affordance) that
+                      CSS width cannot shrink below — at w-16 (64px) the UA was
+                      clipping the last character instead of shrinking. */}
+                  <span className="flex w-24 shrink-0 flex-col gap-0.5">
                     <input
                       type="time"
-                      className="field-line num text-micro text-paper"
+                      className="field-line num w-full text-micro text-paper"
                       value={b.start}
                       aria-label="Start time"
                       onChange={(e) => s.updateBlock(b.id, { start: e.target.value })}
                     />
                     <input
                       type="time"
-                      className="field-line num text-micro text-faint"
+                      className="field-line num w-full text-micro text-faint"
                       value={b.end}
                       aria-label="End time"
                       onChange={(e) => s.updateBlock(b.id, { end: e.target.value })}

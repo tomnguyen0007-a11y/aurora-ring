@@ -29,6 +29,11 @@ export function Books({ label }: { label: string }) {
             {habit && <div className="eyebrow mt-2">{habitStreak(s, habit)} day streak</div>}
           </div>
           <div className="flex gap-2">
+            {todayMin > 0 && (
+              <button className="btn" onClick={() => s.logReading(todayISO(), -15)} aria-label="Subtract 15 minutes">
+                −15
+              </button>
+            )}
             {[15, 30, 45].map((m) => (
               <button key={m} className="btn" onClick={() => s.logReading(todayISO(), m)}>
                 +{m}
