@@ -13,22 +13,28 @@ export function Page({
   lede,
   actions,
   children,
+  fill = false,
 }: {
   title: ReactNode
   lede?: ReactNode
   actions?: ReactNode
   children: ReactNode
+  /** Claim the full height of <main> instead of flowing — for a page that owns
+      its own scrolling, like a chat transcript with a composer pinned under it. */
+  fill?: boolean
 }) {
   return (
-    <div className="animate-fade">
-      <header className="mb-11 flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+    <div className={`animate-fade ${fill ? 'flex h-full flex-col' : ''}`}>
+      <header
+        className={`flex flex-wrap items-start justify-between gap-x-6 gap-y-3 ${fill ? 'mb-6 shrink-0' : 'mb-11'}`}
+      >
         <div className="min-w-0">
           <h1 className="t-page">{title}</h1>
           {lede && <p className="mt-1.5 max-w-xl text-body text-dim">{lede}</p>}
         </div>
         {actions && <div className="flex shrink-0 flex-wrap items-center gap-1.5">{actions}</div>}
       </header>
-      <div className="space-y-14 pb-6 sm:space-y-16">{children}</div>
+      <div className={fill ? 'flex min-h-0 flex-1 flex-col' : 'space-y-14 pb-6 sm:space-y-16'}>{children}</div>
     </div>
   )
 }

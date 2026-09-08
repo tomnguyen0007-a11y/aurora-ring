@@ -257,6 +257,7 @@ export function Jarvis({ label }: { label: string }) {
 
   return (
     <Page
+      fill
       title={label}
       lede={
         <span className="flex items-center gap-2">
@@ -286,7 +287,7 @@ export function Jarvis({ label }: { label: string }) {
         </Tools>
       }
     >
-      <div className="flex h-[calc(100dvh-16rem)] flex-col lg:h-[calc(100dvh-15rem)]">
+      <div className="flex min-h-0 flex-1 flex-col">
         <div className="no-bar flex-1 overflow-y-auto overscroll-contain">
           {!s.chat.length && (
             <div className="flex h-full flex-col items-center justify-center gap-6 text-center">

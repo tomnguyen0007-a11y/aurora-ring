@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Icon, type GlyphName } from '../components/icons'
 import { Bar, DangerBtn, Dot, Empty, Eyebrow, InlineText, NumCell, Reorder, Ring, Section, Track } from '../components/ui'
 import { nowMinutes, todayISO, toMinutes, weekdayOf } from '../lib/dates'
-import { dayScore, habitHit, habitStreak, habitValue, isDerived, nextBestHabit } from '../lib/habits'
+import { dayScore, habitHit, habitStreak, habitValue, isDerived } from '../lib/habits'
 import { computeNudges, updateBadge } from '../lib/notify'
 import { quoteOfDay } from '../lib/quote'
 import { macrosForDate } from '../lib/stats'
@@ -23,17 +23,33 @@ function QuickLog() {
   const date = todayISO()
   const workout = s.workouts.find((w) => w.weekday === weekdayOf())
   const workoutDone = s.workoutLogs.some((l) => l.date === date && l.workoutId === workout?.id && l.completed)
+  // A fired tile turns into its own undo for five seconds. One mechanism covers
+  // every mis-tap — water, reading, golf, the session — with no extra controls
+  // sitting on screen the rest of the time.
   const [flash, setFlash] = useState<string | null>(null)
 
-  const fire = (key: string, fn: () => void) => () => {
+  const fire = (key: string, fn: () => void, undoable: boolean) => () => {
     fn()
+    if (!undoable) return
     setFlash(key)
-    setTimeout(() => setFlash((f) => (f === key ? null : f)), 900)
+    setTimeout(() => setFlash((f) => (f === key ? null : f)), 5000)
   }
 
-  const actions: { key: string; label: string; glyph: GlyphName; run: () => void; done?: boolean }[] = [
-    { key: 'w', label: '+500ml', glyph: 'water', run: () => s.addWater(date, 500) },
-    { key: 'r', label: '+15 read', glyph: 'books', run: () => s.logReading(date, 15) },
+  const undo = (key: string, fn: () => void) => () => {
+    fn()
+    setFlash((f) => (f === key ? null : f))
+  }
+
+  const actions: {
+    key: string
+    label: string
+    glyph: GlyphName
+    run: () => void
+    revert?: () => void
+    done?: boolean
+  }[] = [
+    { key: 'w', label: '+500ml', glyph: 'water', run: () => s.addWater(date, 500), revert: () => s.addWater(date, -500) },
+    { key: 'r', label: '+15 read', glyph: 'books', run: () => s.logReading(date, 15), revert: () => s.logReading(date, -15) },
     {
       key: 's',
       label: workoutDone ? 'Session done' : 'Mark session',
@@ -46,6 +62,10 @@ function QuickLog() {
       label: '30m golf',
       glyph: 'golf',
       run: () => s.addGolfSession({ date, category: s.golfCategories[0]?.id ?? 'putting', minutes: 30, notes: '' }),
+      revert: () => {
+        const last = s.golfSessions.find((g) => g.date === date && g.minutes === 30)
+        if (last) s.removeGolfSession(last.id)
+      },
     },
     {
       key: 'b',
@@ -66,13 +86,14 @@ function QuickLog() {
       {actions.map((a) => (
         <button
           key={a.key}
-          onClick={fire(a.key, a.run)}
+          onClick={flash === a.key && a.revert ? undo(a.key, a.revert) : fire(a.key, a.run, !!a.revert)}
+          aria-label={flash === a.key && a.revert ? `Undo ${a.label}` : a.label}
           className={`flex flex-col items-center gap-2 border-b border-r border-line py-4 transition-colors last:border-r-0 sm:border-b-0 ${
             flash === a.key || a.done ? 'text-paper' : 'text-dim hover:text-paper'
           }`}
         >
-          <Icon name={a.glyph} size={17} />
-          <span className="text-micro">{flash === a.key ? 'Logged' : a.label}</span>
+          <Icon name={flash === a.key && a.revert ? 'refresh' : a.glyph} size={17} />
+          <span className="text-micro">{flash === a.key && a.revert ? 'Undo' : a.label}</span>
         </button>
       ))}
     </div>
@@ -188,7 +209,6 @@ export function Dashboard() {
   const score = dayScore(s)
   const macros = macrosForDate(s, date)
   const quote = quoteOfDay(s.mantras)
-  const focus = nextBestHabit(s, date)
   const [editing, setEditing] = useState(false)
   const nudges = useMemo(
     () => computeNudges(),
@@ -244,17 +264,11 @@ export function Dashboard() {
                 'Day clear. Blackout at 22:30.'
               )}
             </p>
-            {focus && (
-              <p className="mt-1.5 text-body text-faint">
-                Closest win: <span className="text-mute">{focus.label}</span>
-                {focus.kind === 'count' && (
-                  <span className="num">
-                    {' '}
-                    — {Math.max(0, focus.target - habitValue(s, date, focus))}
-                    {focus.unit} short
-                  </span>
-                )}
-              </p>
+            {quote && (
+              <button onClick={() => s.setView('mindset')} className="mt-5 block max-w-lg text-left">
+                <p className="text-lede leading-relaxed text-mute">{quote.text}</p>
+                {quote.author && <p className="mt-1.5 text-micro text-faint">{quote.author}</p>}
+              </button>
             )}
           </div>
           <div className="hidden shrink-0 sm:block">
@@ -303,12 +317,15 @@ export function Dashboard() {
             <Track label="Protein" value={macros.protein} min={s.macros.protein[0]} max={s.macros.protein[1]} unit="g" />
             <div className="mt-6 flex items-center justify-between border-t border-line pt-5">
               <span className="text-body text-mute">Water</span>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 <span className="num text-body text-paper">
                   {(macros.water / 1000).toFixed(1)}
                   <span className="text-faint">/{(s.macros.waterMl / 1000).toFixed(1)}L</span>
                 </span>
-                <button className="btn btn-sm" onClick={() => s.addWater(date, 500)}>
+                <button className="btn btn-sm" onClick={() => s.addWater(date, -500)} aria-label="Remove 500ml">
+                  −500
+                </button>
+                <button className="btn btn-sm" onClick={() => s.addWater(date, 500)} aria-label="Add 500ml">
                   +500
                 </button>
               </div>
@@ -379,13 +396,6 @@ export function Dashboard() {
               <Empty>Nothing scheduled today. Build the day in Blueprint.</Empty>
             )}
           </Section>
-
-          {quote && (
-            <button onClick={() => s.setView('mindset')} className="block w-full py-2 text-left">
-              <p className="max-w-xl text-head font-normal leading-snug text-paper">{quote.text}</p>
-              {quote.author && <p className="mt-3.5 text-body text-faint">{quote.author}</p>}
-            </button>
-          )}
 
           <Section label="Close out">
             <CheckInCard />
