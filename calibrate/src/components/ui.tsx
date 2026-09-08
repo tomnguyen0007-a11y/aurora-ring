@@ -256,8 +256,20 @@ export function InlineArea({
   useLayoutEffect(() => {
     const el = ref.current
     if (!el) return
-    el.style.height = 'auto'
-    el.style.height = `${el.scrollHeight}px`
+    const resize = () => {
+      el.style.height = 'auto'
+      el.style.height = `${el.scrollHeight}px`
+    }
+    resize()
+    // The box was sized once, on mount, against whatever width and font
+    // metrics existed at that instant. A phone loads the custom webfont
+    // *after* first paint, and that swap reflows text into more lines at
+    // the same width — this was the actual clipping bug (looked font-fine
+    // on a warm desktop cache, cut on a cold mobile load). Re-measure once
+    // the real font is in, and again on rotate/resize.
+    document.fonts?.ready?.then(resize).catch(() => {})
+    window.addEventListener('resize', resize)
+    return () => window.removeEventListener('resize', resize)
   }, [draft])
   return (
     <textarea
