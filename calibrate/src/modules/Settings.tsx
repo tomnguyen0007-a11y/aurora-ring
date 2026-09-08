@@ -592,7 +592,13 @@ function MemoryPanel() {
             <li key={f.id} className="group flex items-center gap-3 border-b border-line py-2.5 last:border-b-0">
               <span className="eyebrow w-16 shrink-0">{f.category}</span>
               <span className="min-w-0 flex-1">
-                <InlineText value={f.text} onChange={(v) => s.updateFact(f.id, { text: v })} ariaLabel="Memory fact" className="text-body text-paper" />
+                <InlineArea
+                  value={f.text}
+                  onChange={(v) => s.updateFact(f.id, { text: v })}
+                  ariaLabel="Memory fact"
+                  minRows={1}
+                  className="text-body !text-paper"
+                />
               </span>
               <NumCell value={f.importance} onChange={(v) => s.updateFact(f.id, { importance: Math.max(1, Math.min(10, v ?? 5)) })} ariaLabel="Importance" width="w-8" />
               <Tools>

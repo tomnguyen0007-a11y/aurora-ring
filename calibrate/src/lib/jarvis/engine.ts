@@ -1,6 +1,7 @@
 import { fmtHours, todayISO, weekDates, weekdayOf } from '../dates'
 import { dayProgress, golfMinutes, golfTotalWeek, macrosForDate, revenueToday, streaks, weightSeries, workoutsThisWeek } from '../stats'
 import { useStore } from '../../store/store'
+import { normalise } from './normalise'
 import type { DayTypeMacro } from '../../store/seed'
 import type { Exercise, FoodLog, GolfCategory, Weekday, Workout } from '../../store/types'
 import { applyActions, type JarvisAction } from './actions'
@@ -121,7 +122,12 @@ const WEEKDAY_MAP: Record<string, Weekday> = {
  * All responses use grounded context (profile, memory, knowledge, live state).
  */
 export function runLocalEngine(input: string, contextUserName?: string): EngineResult | null {
-  const t = input.trim()
+  // Every pattern below was written against tidy text. Real input is thumbed
+  // into a phone — "30m gf", "protien 40g", "1,5l". Normalise first so a typo
+  // costs an LLM round-trip instead of silently missing every rule.
+  // The raw text is kept for anything echoed back to the user.
+  const raw = input.trim()
+  const t = normalise(raw)
   const s = useStore.getState()
   const name = contextUserName || s.settings.userName || 'sir'
   let m: RegExpMatchArray | null

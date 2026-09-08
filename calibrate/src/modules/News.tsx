@@ -3,6 +3,26 @@ import { Chip, Empty, Eyebrow, Page, Scroller, Section } from '../components/ui'
 import { fetchWorldNews, NEWS_REGIONS, NEWS_TOPICS, type Article, type NewsTopic } from '../lib/market'
 import { useStore } from '../store/store'
 
+/**
+ * Article art. Photographs are content, not chrome, so they are the one place
+ * colour is allowed through the monochrome lock — framed by a hairline, never
+ * rounded, and removed entirely if the URL 404s so a dead image cannot leave a
+ * gap in the column.
+ */
+function Art({ src, alt, className = '' }: { src: string | null; alt: string; className?: string }) {
+  const [dead, setDead] = useState(false)
+  if (!src || dead) return null
+  return (
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      onError={() => setDead(true)}
+      className={`border border-line object-cover ${className}`}
+    />
+  )
+}
+
 function timeAgo(iso: string): string {
   const ts = Date.parse(iso)
   if (isNaN(ts)) return ''
@@ -124,6 +144,7 @@ export function News({ label }: { label: string }) {
       {lead && (
         <Section label={submitted ? `Results for “${submitted}”` : 'Lead'}>
           <a href={lead.url} target="_blank" rel="noopener noreferrer" className="group block max-w-3xl">
+            <Art src={lead.image} alt="" className="mb-6 aspect-[16/9] w-full" />
             <h2 className="text-[1.75rem] leading-[1.15] tracking-[-0.022em] text-paper">{lead.title}</h2>
             {lead.description && <p className="mt-3 text-body leading-relaxed text-mute">{lead.description}</p>}
             <span className="mt-4 flex items-baseline gap-3">
@@ -139,12 +160,15 @@ export function News({ label }: { label: string }) {
           <ul className="grid gap-x-14 lg:grid-cols-2">
             {rest.map((a, i) => (
               <li key={i} className="border-b border-line py-3.5">
-                <a href={a.url} target="_blank" rel="noopener noreferrer" className="group block">
-                  <span className="block text-body leading-snug text-mute transition-colors group-hover:text-paper">{a.title}</span>
-                  <span className="mt-2 flex items-baseline gap-3">
-                    <Eyebrow>{a.source}</Eyebrow>
-                    <span className="num text-micro text-ghost">{timeAgo(a.publishedAt)}</span>
+                <a href={a.url} target="_blank" rel="noopener noreferrer" className="group flex items-start gap-4">
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-body leading-snug text-mute transition-colors group-hover:text-paper">{a.title}</span>
+                    <span className="mt-2 flex items-baseline gap-3">
+                      <Eyebrow>{a.source}</Eyebrow>
+                      <span className="num text-micro text-ghost">{timeAgo(a.publishedAt)}</span>
+                    </span>
                   </span>
+                  <Art src={a.image} alt="" className="h-16 w-16 shrink-0" />
                 </a>
               </li>
             ))}

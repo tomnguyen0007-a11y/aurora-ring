@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Chip, DangerBtn, Empty, InlineText, Page, Scroller, Section, Tools } from '../components/ui'
+import { Chip, DangerBtn, Empty, InlineArea, InlineText, Page, Scroller, Section, Tools } from '../components/ui'
 import { quoteOfDay } from '../lib/quote'
 import { useStore } from '../store/store'
 
@@ -61,7 +61,16 @@ export function Mindset({ label }: { label: string }) {
               <li key={m.id} className="group border-b border-line py-4">
                 <div className="flex items-start gap-3">
                   <span className="min-w-0 flex-1">
-                    <InlineText value={m.text} onChange={(v) => s.updateMantra(m.id, { text: v })} ariaLabel="Principle" className="text-body leading-relaxed text-paper" />
+                    {/* A principle is a sentence, not a label — InlineText is a
+                        single-line <input> and physically cannot wrap, which was
+                        clipping every long quote mid-word. */}
+                    <InlineArea
+                      value={m.text}
+                      onChange={(v) => s.updateMantra(m.id, { text: v })}
+                      ariaLabel="Principle"
+                      minRows={1}
+                      className="text-body leading-relaxed !text-paper"
+                    />
                     <InlineText
                       value={m.author}
                       onChange={(v) => s.updateMantra(m.id, { author: v })}

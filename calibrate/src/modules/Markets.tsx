@@ -94,8 +94,17 @@ export function Markets({ label }: { label: string }) {
                         {Math.abs(q.change24h).toFixed(2)}%
                       </span>
                     </>
+                  ) : w.kind === 'stock' && !s.settings.finnhubKey ? (
+                    <button
+                      type="button"
+                      onClick={() => s.setView('settings')}
+                      className="shrink-0 text-micro text-faint underline underline-offset-2 transition-colors hover:text-paper"
+                      title="Stock quotes need a free Finnhub key — opens Settings"
+                    >
+                      Add key
+                    </button>
                   ) : (
-                    <span className="text-micro text-faint">{w.kind === 'stock' && !s.settings.finnhubKey ? 'needs key' : '…'}</span>
+                    <span className="text-micro text-faint">…</span>
                   )}
                   <Tools>
                     <DangerBtn onConfirm={() => s.removeWatch(w.id)} label={`Remove ${w.symbol}`} />
@@ -145,14 +154,24 @@ export function Markets({ label }: { label: string }) {
           <ul>
             {news.map((n, i) => (
               <li key={i} className="border-b border-line py-3 last:border-b-0">
-                <a href={n.url} target="_blank" rel="noopener noreferrer" className="group block">
-                  <span className="block text-body leading-snug text-mute transition-colors group-hover:text-paper">{n.headline}</span>
+                <a href={n.url} target="_blank" rel="noopener noreferrer" className="group flex items-start gap-4">
+                  <span className="min-w-0 flex-1"><span className="block text-body leading-snug text-mute transition-colors group-hover:text-paper">{n.headline}</span>
                   <span className="mt-1.5 flex items-baseline gap-2">
                     <Eyebrow>{n.source}</Eyebrow>
                     <span className="num text-micro text-ghost">
                       {new Date(n.datetime * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                     </span>
                   </span>
+                  </span>
+                  {n.image && (
+                    <img
+                      src={n.image}
+                      alt=""
+                      loading="lazy"
+                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                      className="h-14 w-14 shrink-0 border border-line object-cover"
+                    />
+                  )}
                 </a>
               </li>
             ))}

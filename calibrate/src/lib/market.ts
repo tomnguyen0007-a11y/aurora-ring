@@ -44,6 +44,7 @@ export interface NewsItem {
   source: string
   url: string
   datetime: number
+  image: string | null
 }
 
 /** Market news. Finnhub when a key exists; the Google News business wire when it doesn't. */
@@ -52,8 +53,9 @@ export async function fetchMarketNews(key: string): Promise<NewsItem[]> {
     try {
       const res = await fetch(`https://finnhub.io/api/v1/news?category=general&token=${key}`)
       if (res.ok) {
-        const data: NewsItem[] = await res.json()
-        if (Array.isArray(data) && data.length) return data.slice(0, 12)
+        const data: (NewsItem & { image?: string })[] = await res.json()
+        if (Array.isArray(data) && data.length)
+          return data.slice(0, 12).map((n) => ({ ...n, image: n.image || null }))
       }
     } catch {
       /* fall through to the keyless wire */
@@ -63,6 +65,7 @@ export async function fetchMarketNews(key: string): Promise<NewsItem[]> {
   return articles.map((a) => ({
     headline: a.title,
     source: a.source,
+    image: a.image,
     url: a.url,
     datetime: Math.floor(Date.parse(a.publishedAt || '') / 1000) || Math.floor(Date.now() / 1000),
   }))
@@ -111,6 +114,83 @@ export const NEWS_REGIONS: { code: string; lang: string; label: string }[] = [
   { code: 'CA', lang: 'en', label: 'Canada' },
 ]
 
+/**
+ * Publisher feeds carry <media:thumbnail> and a real summary; Google News
+ * carries neither — its <description> is a list of related links and it never
+ * ships an image. So a topic wire is built from publishers where a good one
+ * exists, and falls back to Google News for national editions, non-English
+ * regions and free-text search, which publishers cannot serve.
+ *
+ * Every feed below was checked for image coverage before being listed
+ * (Al Jazeera, CNBC and The Verge all return 0/10 through the converter and
+ * are deliberately absent).
+ */
+const TOPIC_FEEDS: Partial<Record<NewsTopic, string[]>> = {
+  top: ['https://feeds.bbci.co.uk/news/rss.xml', 'https://feeds.skynews.com/feeds/rss/world.xml'],
+  world: [
+    'https://feeds.bbci.co.uk/news/world/rss.xml',
+    'https://www.theguardian.com/world/rss',
+    'https://feeds.skynews.com/feeds/rss/world.xml',
+  ],
+  business: ['https://feeds.bbci.co.uk/news/business/rss.xml', 'https://feeds.skynews.com/feeds/rss/business.xml'],
+  technology: ['https://feeds.bbci.co.uk/news/technology/rss.xml', 'https://feeds.arstechnica.com/arstechnica/index'],
+  science: ['https://feeds.bbci.co.uk/news/science_and_environment/rss.xml'],
+  health: ['https://feeds.bbci.co.uk/news/health/rss.xml'],
+  sports: ['https://feeds.bbci.co.uk/sport/rss.xml'],
+}
+
+/** BBC serves the size in the path; the feed hands out 240px, the page wants more. */
+function upscale(url: string): string {
+  return url.replace(/\/standard\/\d+\//, '/standard/976/')
+}
+
+function stripTags(html: string): string {
+  return html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/** Round-robin the publishers so one outlet cannot own the whole page. */
+function interleave(lists: Article[][], limit: number): Article[] {
+  const out: Article[] = []
+  const seen = new Set<string>()
+  for (let i = 0; out.length < limit; i++) {
+    let advanced = false
+    for (const list of lists) {
+      const a = list[i]
+      if (!a) continue
+      advanced = true
+      const key = a.title.toLowerCase().slice(0, 60)
+      if (seen.has(key)) continue
+      seen.add(key)
+      out.push(a)
+      if (out.length >= limit) break
+    }
+    if (!advanced) break
+  }
+  return out
+}
+
+async function fetchPublisher(feed: string, limit: number): Promise<Article[]> {
+  const data = await fetchFeed(feed)
+  return (data.items ?? []).slice(0, limit).map((it) => {
+    const raw = it.thumbnail || it.enclosure?.link || null
+    return {
+      title: (it.title ?? '').trim(),
+      description: stripTags(it.description ?? '').slice(0, 240),
+      url: it.link ?? '',
+      image: raw ? upscale(raw) : null,
+      source: data.feed?.title ?? it.author ?? '',
+      publishedAt: it.pubDate ?? '',
+    }
+  })
+}
+
 /** Google News titles come through as "Headline - Publisher". */
 function splitHeadline(raw: string): { title: string; source: string } {
   const idx = raw.lastIndexOf(' - ')
@@ -127,6 +207,22 @@ export async function fetchWorldNews(opts: {
   limit?: number
 }): Promise<Article[]> {
   const limit = opts.limit ?? 14
+
+  // Publisher wire first: it is the only path that returns pictures and a real
+  // summary. Free-text search and national/non-English editions fall through to
+  // Google News below, which no publisher feed can replace.
+  const feeds = opts.query?.trim() ? undefined : TOPIC_FEEDS[opts.topic ?? 'top']
+  if (feeds?.length) {
+    try {
+      const lists = await Promise.all(
+        feeds.map((f) => fetchPublisher(f, limit).catch(() => [] as Article[])),
+      )
+      const merged = interleave(lists, limit)
+      if (merged.length) return merged
+    } catch {
+      /* fall through to the keyless Google wire */
+    }
+  }
 
   // Optional upgrade path: a GNews key buys images and descriptions.
   if (opts.gnewsKey) {
