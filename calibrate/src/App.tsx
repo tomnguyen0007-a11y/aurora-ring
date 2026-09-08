@@ -115,15 +115,16 @@ export default function App() {
   }, [brandName, section])
 
   return (
-    <>
-      <Shell>
-        <Suspense fallback={<ModuleLoading />}>{section ? <Render section={section} /> : null}</Suspense>
-      </Shell>
-      {section?.module !== 'jarvis' && (
-        <Suspense fallback={null}>
-          <JarvisDock />
-        </Suspense>
-      )}
-    </>
+    <Shell
+      footer={
+        section?.module !== 'jarvis' ? (
+          <Suspense fallback={null}>
+            <JarvisDock />
+          </Suspense>
+        ) : null
+      }
+    >
+      <Suspense fallback={<ModuleLoading />}>{section ? <Render section={section} /> : null}</Suspense>
+    </Shell>
   )
 }

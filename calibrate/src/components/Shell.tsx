@@ -5,7 +5,7 @@ import { useStore } from '../store/store'
 import type { SectionDef } from '../store/types'
 import { Icon, Mark, type GlyphName } from './icons'
 import { Palette } from './Palette'
-import { Eyebrow, Sheet } from './ui'
+import { Eyebrow, IconBtn, InlineText, Sheet } from './ui'
 
 /** Clear the offline cache and reload — the "why is this stale" escape hatch. */
 async function hardRefresh() {
@@ -83,46 +83,89 @@ function IndexSheet({ open, onClose, go }: { open: boolean; onClose: () => void;
   const sections = useStore((s) => s.sections)
   const groups = useStore((s) => s.groups)
   const view = useStore((s) => s.view)
+  const updateSection = useStore((s) => s.updateSection)
   const [q, setQ] = useState('')
+  // Arrange mode turns the index into the section manager: rename, show/hide,
+  // pin to the bottom bar. It lives here because this is where you go looking.
+  const [arrange, setArrange] = useState(false)
 
   const grouped = useMemo(() => {
-    const visible = sections.filter((s) => !s.hidden && (!q || s.label.toLowerCase().includes(q.toLowerCase())))
+    const visible = sections.filter((s) => (arrange || !s.hidden) && (!q || s.label.toLowerCase().includes(q.toLowerCase())))
     return [...groups]
       .sort((a, b) => a.order - b.order)
       .map((g) => ({ group: g, items: visible.filter((s) => s.group === g.id).sort((a, b) => a.order - b.order) }))
       .filter((x) => x.items.length)
-  }, [sections, groups, q])
+  }, [sections, groups, q, arrange])
 
   return (
     <Sheet open={open} onClose={onClose} title="Index">
-      <input
-        className="field mb-5 w-full"
-        placeholder="Filter sections…"
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        aria-label="Filter sections"
-      />
+      <div className="mb-5 flex items-center gap-2">
+        <input
+          className="field min-w-0 flex-1"
+          placeholder="Filter sections…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          aria-label="Filter sections"
+        />
+        <button className="btn btn-sm shrink-0" onClick={() => setArrange(!arrange)}>
+          {arrange ? 'Done' : 'Arrange'}
+        </button>
+      </div>
+      {arrange && (
+        <p className="mb-5 text-micro leading-relaxed text-faint">
+          Rename anything. The eye hides a section from the app; the pin puts it on the bottom bar (first four win).
+        </p>
+      )}
       <div className="space-y-6">
         {grouped.map(({ group, items }) => (
           <div key={group.id}>
             <Eyebrow className="mb-2">{group.label}</Eyebrow>
             <div className="border-t border-line">
-              {items.map((s) => (
-                <button
-                  key={s.id}
-                  onClick={() => {
-                    go(s.id)
-                    onClose()
-                  }}
-                  className={`flex w-full items-center gap-3 border-b border-line py-3 text-left text-body ${
-                    view === s.id ? 'text-paper' : 'text-mute'
-                  }`}
-                >
-                  <Icon name={(s.icon as GlyphName) ?? 'custom'} size={15} className={view === s.id ? 'text-paper' : 'text-faint'} />
-                  <span className="flex-1 truncate">{s.label}</span>
-                  {view === s.id && <span className="h-1 w-1 bg-paper" />}
-                </button>
-              ))}
+              {items.map((sec) =>
+                arrange ? (
+                  <div
+                    key={sec.id}
+                    className={`flex w-full items-center gap-3 border-b border-line py-2.5 ${sec.hidden ? 'opacity-45' : ''}`}
+                  >
+                    <Icon name={(sec.icon as GlyphName) ?? 'custom'} size={15} className="shrink-0 text-faint" />
+                    <span className="min-w-0 flex-1">
+                      <InlineText
+                        value={sec.label}
+                        onChange={(v) => updateSection(sec.id, { label: v })}
+                        ariaLabel={`Rename ${sec.label}`}
+                        className="w-full text-body text-paper"
+                      />
+                    </span>
+                    <IconBtn
+                      glyph={sec.hidden ? 'eye' : 'check'}
+                      label={sec.hidden ? `Show ${sec.label}` : `Hide ${sec.label}`}
+                      active={!sec.hidden}
+                      onClick={() => updateSection(sec.id, { hidden: !sec.hidden })}
+                    />
+                    <IconBtn
+                      glyph="pin"
+                      label={sec.bar ? `Unpin ${sec.label}` : `Pin ${sec.label} to the bar`}
+                      active={!!sec.bar}
+                      onClick={() => updateSection(sec.id, { bar: !sec.bar })}
+                    />
+                  </div>
+                ) : (
+                  <button
+                    key={sec.id}
+                    onClick={() => {
+                      go(sec.id)
+                      onClose()
+                    }}
+                    className={`flex w-full items-center gap-3 border-b border-line py-3 text-left text-body ${
+                      view === sec.id ? 'text-paper' : 'text-mute'
+                    }`}
+                  >
+                    <Icon name={(sec.icon as GlyphName) ?? 'custom'} size={15} className={view === sec.id ? 'text-paper' : 'text-faint'} />
+                    <span className="flex-1 truncate">{sec.label}</span>
+                    {view === sec.id && <span className="h-1 w-1 bg-paper" />}
+                  </button>
+                ),
+              )}
             </div>
           </div>
         ))}
@@ -145,7 +188,7 @@ function IndexSheet({ open, onClose, go }: { open: boolean; onClose: () => void;
   )
 }
 
-export function Shell({ children }: { children: ReactNode }) {
+export function Shell({ children, footer }: { children: ReactNode; footer?: ReactNode }) {
   const view = useStore((s) => s.view)
   const setView = useStore((s) => s.setView)
   const sections = useStore((s) => s.sections)
@@ -210,9 +253,14 @@ export function Shell({ children }: { children: ReactNode }) {
   }, [onNavScroll])
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-[1440px]">
+    /* The whole app is one non-scrolling flex box; only <main> scrolls.
+       Nothing here is position:fixed, which is the point: iOS repaints fixed
+       elements against a stale viewport during momentum scroll, which is how
+       the bottom bar ended up floating mid-screen. A normal flex child cannot
+       detach. */
+    <div className="mx-auto flex h-dvh max-w-[1440px] overflow-hidden">
       {/* ── Desktop sidebar: typography only. No icons, no boxes. ── */}
-      <aside className="sticky top-0 hidden h-dvh w-[212px] shrink-0 flex-col border-r border-line px-6 py-7 lg:flex">
+      <aside className="hidden h-full w-[212px] shrink-0 flex-col border-r border-line px-6 py-7 lg:flex">
         <button onClick={() => go('today')} className="mb-7 text-left" aria-label="Calibrate home">
           <Brand />
         </button>
@@ -271,7 +319,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Mobile top bar */}
         <div
-          className="sticky top-0 z-30 flex items-center justify-between border-b border-line bg-ink px-5 py-3.5 lg:hidden"
+          className="flex shrink-0 items-center justify-between border-b border-line px-5 py-3.5 lg:hidden"
           style={{ paddingTop: 'max(0.875rem, env(safe-area-inset-top))' }}
         >
           <Brand compact />
@@ -293,27 +341,32 @@ export function Shell({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        <main className="min-w-0 flex-1 px-5 pb-28 pt-6 sm:px-8 lg:px-10 lg:pb-24 lg:pt-9">{children}</main>
+        <main className="no-bar min-w-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-12 pt-7 sm:px-8 lg:px-10 lg:pb-10 lg:pt-9">
+          {children}
+        </main>
+
+        {footer}
+
+        {/* Bottom bar — a flex child, never fixed. See the note on the root. */}
+        <nav
+          aria-label="Primary"
+          className="grid shrink-0 grid-cols-5 border-t border-line lg:hidden"
+          style={{ paddingBottom: 'max(0.25rem, env(safe-area-inset-bottom))' }}
+        >
+          {[...left, jarvis, ...right].filter(Boolean).slice(0, 4).map((s) => (
+            <BarTab key={s!.id} section={s!} active={view === s!.id} onClick={() => go(s!.id)} />
+          ))}
+          <button
+            onClick={() => setIndexOpen(true)}
+            aria-label="All sections"
+            className="relative flex flex-col items-center gap-1 pb-2 pt-2.5 text-faint transition-colors active:text-paper"
+          >
+            <Icon name="more" size={18} />
+            <span className="text-[0.5625rem] tracking-[0.06em]">Index</span>
+          </button>
+        </nav>
       </div>
 
-      {/* ── Mobile bottom bar: flat, edge to edge, hairline top. ── */}
-      <nav
-        aria-label="Primary"
-        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-line bg-ink lg:hidden"
-        style={{ paddingBottom: 'max(0.25rem, env(safe-area-inset-bottom))' }}
-      >
-        {[...left, jarvis, ...right].filter(Boolean).slice(0, 4).map((s) => (
-          <BarTab key={s!.id} section={s!} active={view === s!.id} onClick={() => go(s!.id)} />
-        ))}
-        <button
-          onClick={() => setIndexOpen(true)}
-          aria-label="All sections"
-          className="relative flex flex-col items-center gap-1 pb-2 pt-2.5 text-faint transition-colors active:text-paper"
-        >
-          <Icon name="more" size={18} />
-          <span className="text-[0.5625rem] tracking-[0.06em]">Index</span>
-        </button>
-      </nav>
 
       <IndexSheet open={indexOpen} onClose={() => setIndexOpen(false)} go={go} />
       <Palette

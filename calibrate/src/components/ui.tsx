@@ -21,14 +21,14 @@ export function Page({
 }) {
   return (
     <div className="animate-fade">
-      <header className="mb-7 flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+      <header className="mb-11 flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
         <div className="min-w-0">
           <h1 className="t-page">{title}</h1>
           {lede && <p className="mt-1.5 max-w-xl text-body text-dim">{lede}</p>}
         </div>
         {actions && <div className="flex shrink-0 flex-wrap items-center gap-1.5">{actions}</div>}
       </header>
-      <div className="space-y-8 pb-6">{children}</div>
+      <div className="space-y-14 pb-6 sm:space-y-16">{children}</div>
     </div>
   )
 }
@@ -54,7 +54,7 @@ export function Section({
   return (
     <section id={id} className={`pane ${className}`}>
       {(label || aside) && (
-        <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="mb-5 flex items-center justify-between gap-3">
           {label ? <Eyebrow>{label}</Eyebrow> : <span />}
           {aside && <div className="flex items-center gap-1.5">{aside}</div>}
         </div>

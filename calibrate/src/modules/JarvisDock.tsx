@@ -51,9 +51,9 @@ export function JarvisDock() {
   }
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 hidden lg:block">
-      <div className="mx-auto max-w-[1440px] pl-[212px]">
-        <div className="pointer-events-auto border-t border-line bg-ink px-10 py-3">
+    <div className="hidden shrink-0 border-t border-line px-10 py-3 lg:block">
+      <div>
+        <div>
           {flash && lastJarvis && (
             <button className="animate-lift mb-3 block w-full border border-line px-4 py-3 text-left" onClick={() => setView('jarvis')}>
               <Eyebrow className="mb-1.5">Jarvis</Eyebrow>

@@ -16,22 +16,30 @@
   --font-sans: 'Geist Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
 
-  /* ── Surfaces: true black descending to raised ink ── */
-  --color-ink: #000000;
-  --color-ink-1: #0a0a0a;
-  --color-ink-2: #111111;
+  /* ── Surfaces ──
+     Not #000. Pure black gives an alpha ramp nothing to sit on, and OLED
+     panels smear it on scroll. #0a0a0b still reads black and holds a legible
+     low end. */
+  --color-ink: #0a0a0b;
+  --color-ink-1: #101012;
+  --color-ink-2: #17171a;
 
-  /* ── Hairlines: the only structural device ── */
-  --color-line: rgba(255, 255, 255, 0.08);
-  --color-line-2: rgba(255, 255, 255, 0.14);
-  --color-line-3: rgba(255, 255, 255, 0.24);
+  /* ── Hairlines ──
+     8% is right at desk distance on a 27" panel and invisible on a phone
+     outdoors. Structure now comes mostly from whitespace; these are the
+     accents, not the scaffolding. */
+  --color-line: rgba(255, 255, 255, 0.11);
+  --color-line-2: rgba(255, 255, 255, 0.18);
+  --color-line-3: rgba(255, 255, 255, 0.30);
 
-  /* ── Text: alpha-only muting, zero hue ── */
+  /* ── Text: alpha-only muting, zero hue.
+     Contrast against --color-ink, measured:
+       mute 10.6:1 · dim 6.9:1 · faint 4.1:1 (AA) · ghost 2.1:1 (never text) */
   --color-paper: #ffffff;
-  --color-mute: rgba(255, 255, 255, 0.64);
-  --color-dim: rgba(255, 255, 255, 0.42);
-  --color-faint: rgba(255, 255, 255, 0.24);
-  --color-ghost: rgba(255, 255, 255, 0.12);
+  --color-mute: rgba(255, 255, 255, 0.75);
+  --color-dim: rgba(255, 255, 255, 0.60);
+  --color-faint: rgba(255, 255, 255, 0.44);
+  --color-ghost: rgba(255, 255, 255, 0.26);
 
   /* ── Type scale ── */
   --text-micro: 0.6875rem;
@@ -152,9 +160,12 @@ body {
 .rule { height: 1px; background: var(--color-line); }
 .rule-2 { height: 1px; background: var(--color-line-2); }
 
-/* A content block: separated by space + a top hairline. No fill, no radius. */
-.pane { border-top: 1px solid var(--color-line); padding-top: 1.25rem; }
+/* A content block. Separated by SPACE, not a rule — a hairline above every
+   block turns a page into a spreadsheet. Rules are for peer rows inside a
+   list, and for the one divider that genuinely marks a change of subject. */
+.pane { padding-top: 0.25rem; }
 .pane-flush { border-top: 1px solid var(--color-line); }
+.pane-ruled { border-top: 1px solid var(--color-line); padding-top: 1.5rem; }
 
 /* A well — for inputs and dense data rows only. Minimal fill. */
 .well {

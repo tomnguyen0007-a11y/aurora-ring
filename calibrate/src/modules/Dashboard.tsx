@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Icon, type GlyphName } from '../components/icons'
-import { Bar, Chain, Dot, Empty, Eyebrow, Ring, Section, Track } from '../components/ui'
-import { fmtHours, nowMinutes, todayISO, toMinutes, weekdayOf } from '../lib/dates'
-import { dayScore, habitChain, habitHit, habitStreak, habitValue, isDerived, nextBestHabit } from '../lib/habits'
+import { Bar, DangerBtn, Dot, Empty, Eyebrow, InlineText, NumCell, Reorder, Ring, Section, Track } from '../components/ui'
+import { nowMinutes, todayISO, toMinutes, weekdayOf } from '../lib/dates'
+import { dayScore, habitHit, habitStreak, habitValue, isDerived, nextBestHabit } from '../lib/habits'
 import { computeNudges, updateBadge } from '../lib/notify'
 import { quoteOfDay } from '../lib/quote'
-import { golfTotalWeek, macrosForDate, revenueToday, workoutsThisWeek } from '../lib/stats'
+import { macrosForDate } from '../lib/stats'
 import { DAY_CODENAMES } from '../store/seed'
 import { useStore } from '../store/store'
 import { CheckInCard } from './CheckInCard'
@@ -79,7 +79,12 @@ function QuickLog() {
   )
 }
 
-function HabitRow({ habitId }: { habitId: string }) {
+/**
+ * A standard, editable where you look at it. Renaming, retargeting, reordering
+ * and deleting all happen on this row — the previous build hid them in Settings,
+ * which is why the placeholder rows felt stuck.
+ */
+function HabitRow({ habitId, editing }: { habitId: string; editing: boolean }) {
   const s = useStore()
   const date = todayISO()
   const habit = s.habits.find((h) => h.id === habitId)
@@ -90,32 +95,78 @@ function HabitRow({ habitId }: { habitId: string }) {
   const streak = habitStreak(s, habit)
   const pct = habit.target ? Math.min(100, (value / habit.target) * 100) : 0
   const derived = isDerived(habit.id)
+  const idx = s.habits.filter((h) => !h.archived).sort((a, b) => a.order - b.order).findIndex((h) => h.id === habit.id)
+  const count = s.habits.filter((h) => !h.archived).length
 
   return (
-    <div className="border-b border-line py-3 last:border-b-0">
-      <div className="flex items-center gap-3">
+    <div className="border-b border-line py-3.5 last:border-b-0">
+      <div className="flex items-center gap-3.5">
         {habit.kind === 'boolean' && !derived ? (
-          <Dot checked={hit} onToggle={() => s.toggleHabit(date, habit.id)} label={habit.label} size={16} />
+          <Dot checked={hit} onToggle={() => s.toggleHabit(date, habit.id)} label={habit.label} size={17} />
         ) : (
           <span className={`block h-1.5 w-1.5 shrink-0 ${hit ? 'bg-paper' : 'bg-ghost'}`} />
         )}
-        <span className={`min-w-0 flex-1 truncate text-body ${hit ? 'text-paper' : 'text-mute'}`}>{habit.label}</span>
+
+        <span className="min-w-0 flex-1">
+          {editing ? (
+            <InlineText
+              value={habit.label}
+              onChange={(v) => s.updateHabit(habit.id, { label: v })}
+              ariaLabel={`Rename ${habit.label}`}
+              className={`w-full text-body ${hit ? 'text-paper' : 'text-mute'}`}
+            />
+          ) : (
+            <span className={`block truncate text-body ${hit ? 'text-paper' : 'text-mute'}`}>{habit.label}</span>
+          )}
+        </span>
+
         {habit.kind === 'count' ? (
-          <span className="num shrink-0 text-body text-paper">
-            {Math.round(value)}
-            <span className="text-faint">
-              /{habit.target}
-              {habit.unit}
+          editing ? (
+            <span className="num flex shrink-0 items-baseline gap-0.5 text-body text-paper">
+              <NumCell
+                value={habit.target}
+                onChange={(v) => s.updateHabit(habit.id, { target: Math.max(1, v ?? 1) })}
+                ariaLabel={`Target for ${habit.label}`}
+                width="w-12"
+              />
+              <InlineText
+                value={habit.unit}
+                onChange={(v) => s.updateHabit(habit.id, { unit: v })}
+                ariaLabel={`Unit for ${habit.label}`}
+                placeholder="unit"
+                className="w-10 text-micro text-faint"
+              />
             </span>
-          </span>
+          ) : (
+            <span className="num shrink-0 text-body text-paper">
+              {Math.round(value)}
+              <span className="text-faint">
+                /{habit.target}
+                {habit.unit}
+              </span>
+            </span>
+          )
         ) : (
           <span className="num shrink-0 text-micro text-faint">{hit ? 'done' : '—'}</span>
         )}
-        <span className="num w-9 shrink-0 text-right text-micro text-faint" title={`${streak} day streak`}>
+
+        <span className="num w-8 shrink-0 text-right text-micro text-faint" title={`${streak} day streak`}>
           {streak}d
         </span>
+
+        {editing && (
+          <span className="flex shrink-0 items-center gap-1">
+            <Reorder
+              onUp={() => s.moveHabit(habit.id, -1)}
+              onDown={() => s.moveHabit(habit.id, 1)}
+              first={idx === 0}
+              last={idx === count - 1}
+            />
+            <DangerBtn onConfirm={() => s.removeHabit(habit.id)} label={`Delete ${habit.label}`} />
+          </span>
+        )}
       </div>
-      {habit.kind === 'count' && <Bar pct={pct} className="mt-2.5" />}
+      {habit.kind === 'count' && <Bar pct={pct} className="mt-3" />}
     </div>
   )
 }
@@ -136,12 +187,9 @@ export function Dashboard() {
 
   const score = dayScore(s)
   const macros = macrosForDate(s, date)
-  const workout = s.workouts.find((w) => w.weekday === wd)
-  const workoutLog = s.workoutLogs.find((l) => l.date === date && l.workoutId === workout?.id)
-  const wk = workoutsThisWeek(s)
-  const rev = revenueToday(s)
   const quote = quoteOfDay(s.mantras)
   const focus = nextBestHabit(s, date)
+  const [editing, setEditing] = useState(false)
   const nudges = useMemo(
     () => computeNudges(),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -219,25 +267,43 @@ export function Dashboard() {
 
       <QuickLog />
 
-      <div className="mt-10 grid grid-cols-[minmax(0,1fr)] gap-x-14 gap-y-10 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
-        <div className="space-y-9 lg:sticky lg:top-8 lg:self-start">
-          <Section label="Standards">
+      <div className="mt-14 grid grid-cols-[minmax(0,1fr)] gap-x-16 gap-y-14 lg:grid-cols-[minmax(0,300px)_minmax(0,1fr)]">
+        {/* Left rail: the two numbers that decide the day. */}
+        <div className="space-y-14 lg:sticky lg:top-2 lg:self-start">
+          <Section
+            label="Standards"
+            aside={
+              <button className="btn btn-sm" onClick={() => setEditing(!editing)}>
+                {editing ? 'Done' : 'Edit'}
+              </button>
+            }
+          >
             <div>
               {s.habits
                 .filter((h) => !h.archived)
                 .sort((a, b) => a.order - b.order)
                 .map((h) => (
-                  <HabitRow key={h.id} habitId={h.id} />
+                  <HabitRow key={h.id} habitId={h.id} editing={editing} />
                 ))}
             </div>
+            {editing && (
+              <div className="mt-5 flex flex-wrap gap-2">
+                <button className="btn btn-sm" onClick={() => s.addHabit('Untitled', 'boolean')}>
+                  + Check-off
+                </button>
+                <button className="btn btn-sm" onClick={() => s.addHabit('Untitled', 'count', 1, 'x')}>
+                  + Counter
+                </button>
+              </div>
+            )}
           </Section>
 
           <Section label="Fuel">
             <Track label="Calories" value={macros.kcal} min={s.macros.kcal[0]} max={s.macros.kcal[1]} />
             <Track label="Protein" value={macros.protein} min={s.macros.protein[0]} max={s.macros.protein[1]} unit="g" />
-            <div className="flex items-center justify-between border-t border-line pt-3">
+            <div className="mt-6 flex items-center justify-between border-t border-line pt-5">
               <span className="text-body text-mute">Water</span>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <span className="num text-body text-paper">
                   {(macros.water / 1000).toFixed(1)}
                   <span className="text-faint">/{(s.macros.waterMl / 1000).toFixed(1)}L</span>
@@ -248,44 +314,28 @@ export function Dashboard() {
               </div>
             </div>
           </Section>
-
-          <Section label="This week">
-            <dl className="space-y-3">
-              {[
-                { k: 'Sessions', v: `${wk.done}/${wk.planned}` },
-                { k: 'Golf', v: fmtHours(golfTotalWeek(s)) },
-                { k: 'Aurora', v: `$${rev.toFixed(0)}` },
-              ].map((row) => (
-                <div key={row.k} className="flex items-baseline justify-between border-b border-line pb-3 last:border-b-0 last:pb-0">
-                  <dt className="text-body text-mute">{row.k}</dt>
-                  <dd className="num text-body text-paper">{row.v}</dd>
-                </div>
-              ))}
-            </dl>
-          </Section>
         </div>
 
-        <div className="space-y-9">
+        {/* Right: the day itself. */}
+        <div className="space-y-14">
           {nudges.length > 0 && (
-            <Section label="Needs attention">
-              <ul>
-                {nudges.map((n) => (
-                  <li key={n.id} className="flex items-center gap-3 border-b border-line py-3 last:border-b-0">
-                    <span className={`block h-1 w-1 shrink-0 ${n.urgent ? 'bg-paper' : 'bg-ghost'}`} />
-                    <span className={`min-w-0 flex-1 text-body ${n.urgent ? 'text-paper' : 'text-mute'}`}>{n.text}</span>
-                    {n.action && (
-                      <button className="btn btn-sm shrink-0" onClick={() => s.setView(n.action!.sectionId)}>
-                        {n.action.label}
-                      </button>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </Section>
+            <ul className="space-y-2.5">
+              {nudges.map((n) => (
+                <li key={n.id} className="flex items-center gap-3">
+                  <span className={`block h-1 w-1 shrink-0 ${n.urgent ? 'bg-paper' : 'bg-ghost'}`} />
+                  <span className={`min-w-0 flex-1 text-body ${n.urgent ? 'text-paper' : 'text-mute'}`}>{n.text}</span>
+                  {n.action && (
+                    <button className="btn btn-sm shrink-0" onClick={() => s.setView(n.action!.sectionId)}>
+                      {n.action.label}
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
           )}
 
           <Section
-            label="Timeline"
+            label="Today's plan"
             aside={
               <button className="btn btn-sm" onClick={() => s.setView('schedule')}>
                 Edit
@@ -301,7 +351,7 @@ export function Dashboard() {
                   return (
                     <li
                       key={b.id}
-                      className={`flex items-start gap-4 border-b border-line py-3 last:border-b-0 ${done ? 'opacity-40' : past ? 'opacity-60' : ''}`}
+                      className={`flex items-start gap-4 border-b border-line py-3.5 last:border-b-0 ${done ? 'opacity-45' : past ? 'opacity-65' : ''}`}
                     >
                       <span className={`mt-1.5 block h-8 w-px shrink-0 ${active ? 'bg-paper' : 'bg-line-2'}`} />
                       <span className="num w-11 shrink-0 pt-0.5 text-micro leading-relaxed text-faint">
@@ -320,7 +370,7 @@ export function Dashboard() {
                         </span>
                         {b.detail && <span className="mt-0.5 block truncate text-micro text-faint">{b.detail}</span>}
                       </span>
-                      <Dot checked={done} onToggle={() => s.toggleBlock(date, b.id)} label={b.title} size={16} />
+                      <Dot checked={done} onToggle={() => s.toggleBlock(date, b.id)} label={b.title} size={17} />
                     </li>
                   )
                 })}
@@ -330,73 +380,15 @@ export function Dashboard() {
             )}
           </Section>
 
-          <Section
-            label="Session"
-            aside={
-              <button className="btn btn-sm" onClick={() => s.setView('training')}>
-                Open
-              </button>
-            }
-          >
-            {workout ? (
-              <>
-                <div className="flex items-baseline justify-between gap-4">
-                  <h2 className="t-head">{workout.name}</h2>
-                  <span className="num text-micro text-faint">
-                    {workout.exercises.length} lifts · {workout.exercises.reduce((a, e) => a + e.sets, 0)} sets
-                  </span>
-                </div>
-                <ul className="mt-4">
-                  {workout.exercises.slice(0, 5).map((e) => (
-                    <li key={e.id} className="flex items-baseline justify-between gap-4 border-b border-line py-2 last:border-b-0">
-                      <span className="min-w-0 truncate text-body text-mute">{e.name}</span>
-                      <span className="num shrink-0 text-body text-faint">
-                        {e.sets}×{e.reps}
-                      </span>
-                    </li>
-                  ))}
-                  {workout.exercises.length > 5 && <li className="pt-2 text-micro text-faint">+{workout.exercises.length - 5} more</li>}
-                </ul>
-                <button
-                  className={`btn mt-5 w-full ${workoutLog?.completed ? '' : 'btn-solid'}`}
-                  onClick={() => s.setWorkoutDone(date, workout.id, !workoutLog?.completed)}
-                >
-                  {workoutLog?.completed ? 'Completed — undo' : 'Mark session complete'}
-                </button>
-              </>
-            ) : (
-              <Empty>No lift scheduled. Engine work or golf today.</Empty>
-            )}
-          </Section>
-
           {quote && (
-            <Section label="Signal">
-              <button onClick={() => s.setView('mindset')} className="block w-full text-left">
-                <p className="text-lede leading-relaxed text-paper">{quote.text}</p>
-                {quote.author && <p className="mt-2 text-body text-faint">{quote.author}</p>}
-              </button>
-            </Section>
+            <button onClick={() => s.setView('mindset')} className="block w-full py-2 text-left">
+              <p className="max-w-xl text-head font-normal leading-snug text-paper">{quote.text}</p>
+              {quote.author && <p className="mt-3.5 text-body text-faint">{quote.author}</p>}
+            </button>
           )}
 
           <Section label="Close out">
             <CheckInCard />
-          </Section>
-
-          <Section label="30 days">
-            <div className="space-y-4">
-              {s.habits
-                .filter((h) => !h.archived)
-                .sort((a, b) => a.order - b.order)
-                .map((h) => (
-                  <div key={h.id}>
-                    <div className="mb-1.5 flex items-baseline justify-between">
-                      <span className="text-micro text-mute">{h.label}</span>
-                      <span className="num text-micro text-faint">{habitStreak(s, h)}d</span>
-                    </div>
-                    <Chain days={habitChain(s, h, 30)} />
-                  </div>
-                ))}
-            </div>
           </Section>
         </div>
       </div>
