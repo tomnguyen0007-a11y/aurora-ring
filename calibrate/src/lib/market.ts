@@ -209,9 +209,15 @@ export async function fetchWorldNews(opts: {
   const limit = opts.limit ?? 14
 
   // Publisher wire first: it is the only path that returns pictures and a real
-  // summary. Free-text search and national/non-English editions fall through to
-  // Google News below, which no publisher feed can replace.
-  const feeds = opts.query?.trim() ? undefined : TOPIC_FEEDS[opts.topic ?? 'top']
+  // summary. But it is a fixed set of English/UK outlets, so it only stands in
+  // for the *default* edition — free-text search, and any region other than
+  // the default US/English one (Czechia, Germany, Austria...), fall through to
+  // Google News below, which is the only path that actually respects country
+  // and language. Regression note: this used to ignore `country` entirely and
+  // silently served the same global English wire to every region, which is
+  // why "National" for Czechia stopped showing Czech news.
+  const isDefaultRegion = !opts.country || opts.country.toUpperCase() === 'US'
+  const feeds = opts.query?.trim() || !isDefaultRegion ? undefined : TOPIC_FEEDS[opts.topic ?? 'top']
   if (feeds?.length) {
     try {
       const lists = await Promise.all(

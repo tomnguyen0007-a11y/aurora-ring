@@ -95,8 +95,13 @@ export function News({ label }: { label: string }) {
       }
     >
       <Section>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
-          <Scroller className="min-w-0 flex-1">
+        {/* Topics and search shared one row with a min-w-0 scroller, which
+            flexbox is free to squeeze to almost nothing rather than wrap —
+            on a phone that left three of eight topics reachable only by
+            scrolling a sliver a few px wide next to the search box. Stacked
+            below sm; back to one row once there's room for both. */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-3">
+          <Scroller className="w-full sm:min-w-0 sm:flex-1">
             {NEWS_TOPICS.map((c) => (
               <Chip
                 key={c.id}
@@ -112,7 +117,7 @@ export function News({ label }: { label: string }) {
             ))}
           </Scroller>
           <form
-            className="flex min-w-[200px] gap-2"
+            className="flex w-full gap-2 sm:min-w-[200px] sm:w-auto"
             onSubmit={(e) => {
               e.preventDefault()
               setSubmitted(query)

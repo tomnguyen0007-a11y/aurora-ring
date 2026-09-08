@@ -359,9 +359,9 @@ export function Shell({ children, footer }: { children: ReactNode; footer?: Reac
           <button
             onClick={() => setIndexOpen(true)}
             aria-label="All sections"
-            className="relative flex flex-col items-center gap-1 pb-2 pt-2.5 text-faint transition-colors active:text-paper"
+            className="relative flex flex-col items-center gap-0.5 pb-1.5 pt-2 text-faint transition-colors active:text-paper"
           >
-            <Icon name="more" size={18} />
+            <Icon name="more" size={17} />
             <span className="text-[0.5625rem] tracking-[0.06em]">Index</span>
           </button>
         </nav>
@@ -394,12 +394,12 @@ function BarTab({ section, active, onClick }: { section: SectionDef; active: boo
       onClick={onClick}
       aria-current={active ? 'page' : undefined}
       aria-label={section.label}
-      className={`relative flex flex-col items-center gap-1 pb-2 pt-2.5 transition-colors ${
+      className={`relative flex flex-col items-center gap-0.5 pb-1.5 pt-2 transition-colors ${
         active ? 'text-paper' : 'text-faint'
       }`}
     >
       {active && <span className="absolute inset-x-4 top-0 h-px bg-paper" />}
-      <Icon name={(section.icon as GlyphName) ?? 'custom'} size={18} strokeWidth={active ? 1.5 : 1.25} />
+      <Icon name={(section.icon as GlyphName) ?? 'custom'} size={17} strokeWidth={active ? 1.5 : 1.25} />
       <span className="max-w-full truncate px-1 text-[0.5625rem] tracking-[0.06em]">{section.label}</span>
     </button>
   )
