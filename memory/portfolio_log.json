@@ -66,6 +66,35 @@
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
       ]
+    },
+    {
+      "timestamp": "2026-09-10",
+      "status": "INCOMPLETE - IBKR live account/position data unavailable",
+      "account": null,
+      "positions": [],
+      "news_research": [
+        {
+          "ticker": "SLS",
+          "summary": "REGAL trial still has not hit its 80th event as of the Aug 11, 2026 Q2 update (last official count 78/80, May 11). Topline readout still guided for 2H/Q4 2026. Some retail commentary frames the delay as a positive OS signal (patients living longer than projected), but this is unconfirmed speculation, not company guidance. No 8-K announcing the 80th event has been filed."
+        },
+        {
+          "ticker": "CING",
+          "summary": "NOT present in the last logged portfolio (2026-07-11 run only held SLS and SPCX). Flagging for review rather than assuming current exposure. Since then: FDA issued a Complete Response Letter for CTx-1301 (ADHD) on June 1/2, 2026, citing CMC (manufacturing) issues only - no clinical safety/efficacy concerns. Company reported ~$28.4M cash as of June 30, 2026 and is working with its manufacturing partner toward NDA resubmission; no resubmission date confirmed yet."
+        },
+        {
+          "ticker": "SPCX",
+          "summary": "Q2 2026 earnings (Aug 4): revenue $7.8B (+92% YoY, beat), EPS loss $0.09 (beat), but capex exploded to $18.37B (AI $15.83B), and stock fell to a new all-time low (~$116.70 after-hours vs $125.33 close) on capex-intensity concerns. That is well below the $145.92 mark price / 07-11 log. First 20% lockup tranche unlocked late Jul/early Aug 2026 as scheduled; further ~7% tranches unlocking Aug-Oct; full 180-day lockup expires Dec 8, 2026 (Musk's stake locked until June 2027)."
+        },
+        {
+          "ticker": "MARKET",
+          "summary": "ES (S&P 500 Sep futures) +0.49% premarket on 2026-09-10; crude oil pulled back overnight (Strait of Hormuz supply-concern easing per US Energy Secretary), 10Y yield down to ~4.79%, supportive for equities."
+        }
+      ],
+      "flags": [
+        "BLOCKER: IBKR MCP connector tools were not available in this session (connector shows connected/enabled but no callable tools were found), so account NAV, live positions, marks, gaps, and levels could not be pulled. premarket-research.js was not run against fabricated input to avoid producing misleading numbers.",
+        "Portfolio composition is stale (last confirmed 2026-07-11, i.e. ~2 months old) and the routine's own ticker list now references CING, which was not in that log - current holdings should be reconciled manually before relying on any sizing math here.",
+        "SPCX is down sharply from the last logged mark ($145.92) to a new post-earnings all-time low near $116-117 - if still held at prior share count this is a material unrealized loss and NAV% swing that needs live confirmation."
+      ]
     }
   ]
 }
