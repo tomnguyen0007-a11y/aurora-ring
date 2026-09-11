@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-09-11",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,66 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-09-11",
+      "account": {
+        "nav_usd": 1316.392,
+        "nav_eur_base": 1137.2584,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -113.54,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 13.51,
+          "prior_close": 13.49,
+          "gap_pct": 0.15,
+          "since_last_run_pct": 5.88,
+          "market_value": 932.19001725,
+          "nav_pct": 70.81,
+          "unrealized_pnl": -56.50688275,
+          "daily_pnl": 1.38001725,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Unconfirmed report (Aug 28, 2026) claimed the 80th required event had occurred; company has NOT issued an 8-K/press release confirming it as of Sep 11, 2026. Stock fell 13.15% on Aug 28 on the confirmation gap. Topline readout still guided for Q4 2026. Separately, Phase 2 SLS009 1L AML topline data also expected Q4 2026 (Q2 earnings, Aug 11). AACR Pancreatic Cancer poster session Sep 25-28, 2026 (non-catalytic).",
+            "next_check": "Watch for 8-K / press release officially confirming the 80th REGAL event and quiet-period entry"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 70.8% of NAV vs 35% trim threshold; NEW: Pomerantz LLP investor-alert (Sep 8, 2026) investigating securities-fraud claims tied to the Aug 28 disclosure gap - litigation overhang on top of binary trial risk"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 149.11,
+          "prior_close": 148.18,
+          "gap_pct": 0.63,
+          "since_last_run_pct": 2.19,
+          "market_value": 387.66001586,
+          "nav_pct": 29.45,
+          "unrealized_pnl": -57.26298414,
+          "daily_pnl": 2.39201586,
+          "catalyst": {
+            "name": "Staggered post-IPO lockup unlocks + Q2 2026 earnings beat + Cursor merger",
+            "status": "Q2 2026 (reported Aug 4): revenue $7.81B vs $6.93B est (+92% YoY), net loss narrowed to $541M from $1B YoY; CFO guided ~$100B annualized revenue run-rate by year-end. Cursor merger closed Aug 14 (389.3M new shares, implied $60B value). Lockup tranches: Aug 6 (911.5M sh, ~$105B) - stock +6.14% same day; Sep 9 (319M sh, ~$49B) - stock fell >4%. ~1.55B shares (~16% of float) unlocked across 3 releases as of Sep 9. NEXT: late Sept 2026 - successive 7% employee tranches expected to expand float roughly sixfold.",
+            "next_check": "Late-September employee-tranche unlock date/size confirmation; stock reaction into and through it"
+          },
+          "risk_flag": "WATCH - within cap (29.5%) but second-largest single-name risk; largest-ever supply event (~6x float expansion) due late Sep 2026, ~2-3 weeks out"
+        }
+      ],
+      "flags": [
+        "SLS still at 70.8% of NAV (up from 69.8% at last run) - now compounded by a securities-fraud investor-alert (Pomerantz, Sep 8) stemming from the unconfirmed-80th-event stock drop on Aug 28. Concentration + litigation overhang + still-pending binary readout is the account's single biggest risk.",
+        "Zero USD cash buffer persists - account fully invested two months running, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
+        "SPCX's largest lockup event yet (~6x float expansion from 7% employee tranches) lands late Sept 2026, on the heels of a >4% drop from the Sep 9 unlock - fundamentals (Q2 beat, ARR guide) are strong but near-term technical supply pressure is building into a position already near the 35% cap.",
+        "NAV up ~4.4% since last run ($1,261 -> $1,316 USD) despite both positions remaining underwater on cost basis, driven by price appreciation (SLS +5.9%, SPCX +2.2% since 2026-07-11 marks)."
       ]
     }
   ]
