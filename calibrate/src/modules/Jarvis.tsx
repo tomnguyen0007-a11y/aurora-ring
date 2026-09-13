@@ -397,6 +397,20 @@ export function Jarvis({ label }: { label: string }) {
 
           <button
             type="button"
+            onClick={() => {
+              if (s.settings.speakReplies) stopSpeaking() // muting mid-reply cuts it off immediately, not just future ones
+              s.setSettings({ speakReplies: !s.settings.speakReplies })
+            }}
+            aria-label={s.settings.speakReplies ? 'Mute Jarvis' : 'Unmute Jarvis'}
+            aria-pressed={!s.settings.speakReplies}
+            title={s.settings.speakReplies ? 'Jarvis speaks replies — tap to mute' : 'Jarvis is muted — tap to unmute'}
+            className={`p-1.5 transition-colors ${s.settings.speakReplies ? 'text-faint hover:text-paper' : 'text-paper'}`}
+          >
+            <Icon name={s.settings.speakReplies ? 'speaker' : 'speakerOff'} size={17} />
+          </button>
+
+          <button
+            type="button"
             onClick={() => fileRef.current?.click()}
             aria-label="Attach a photo"
             className={`p-1.5 transition-colors ${images.length ? 'text-paper' : 'text-faint hover:text-paper'}`}
