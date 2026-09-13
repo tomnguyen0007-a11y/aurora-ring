@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-08-30",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,67 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-08-30",
+      "account": {
+        "nav_usd": 1295.236,
+        "nav_eur_base": 1120.8452,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -137.72,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 13.47,
+          "prior_close": 15.21,
+          "gap_pct": -11.44,
+          "since_last_run_pct": 5.56,
+          "market_value": 929.43001725,
+          "nav_pct": 71.76,
+          "unrealized_pnl": -59.26688275,
+          "daily_pnl": -120.05998275,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Company's official count remains 78 of 80 required events (per Aug 11, 2026 Q2 8-K). An unconfirmed report (German source) claimed the 80th event was hit, sparking a speculative pop; company has not confirmed. Today's -11.44% gap is a retail unwind of that unconfirmed rumor, not new negative trial data. Alliance Global raised PT to $35 from $25 on Aug 17, 2026, citing catalyst proximity.",
+            "next_check": "Official company confirmation of 80th event via 8-K/press release; once confirmed, sequence is database lock -> blinded review -> stats -> unblind -> topline (guided 2H 2026)"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 71.76% of NAV, up from 69.8% last run, now >2x the 35% trim threshold, directly ahead of the account's largest binary catalyst"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 140.94999695,
+          "prior_close": 140.87,
+          "gap_pct": 0.06,
+          "since_last_run_pct": -3.41,
+          "market_value": 366.46999207,
+          "nav_pct": 28.29,
+          "unrealized_pnl": -78.45300793,
+          "daily_pnl": 0.20799207,
+          "catalyst": {
+            "name": "Staggered IPO lockup unlocks + $25B investment-grade bond (unchanged, no new credit news)",
+            "status": "First tranche (~911.5M sh, 20% block) unlocked Aug 6, 2026 - stock fell hard into the event then rallied +6% after. Second tranche (~319M sh) unlocked Aug 20, 2026, lifting free float to ~14% from 4-5% at IPO. Next tranches: ~700M shares each in Sept and Oct 2026; full lockup expires Dec 8, 2026.",
+            "next_check": "September ~700M-share unlock tranche (more than 2x the Aug 6 tranche) - the next real supply-risk event"
+          },
+          "risk_flag": "WITHIN_CAP - 28.29% of NAV, no trim needed; cost basis $171.12 vs mark $140.95 (-17.6%) reflects post-IPO lockup supply overhang, not a credit or fundamental issue"
+        }
+      ],
+      "flags": [
+        "SLS concentration WORSENED since last run (69.8% -> 71.76% of NAV) despite today's red candle, because SPCX fell more over the same period - now >2x the 35% single-name threshold sitting directly in front of the account's biggest binary catalyst (REGAL topline).",
+        "Today's SLS -11.44% move is a rumor unwind (unconfirmed '80th event' report), not a negative data readout - the actual binary catalyst has not landed yet. Don't read today's drop as bad trial news.",
+        "Zero USD cash buffer persists - no dry powder to trim into or add on weakness (not on margin, no forced-liquidation risk).",
+        "SPCX's bigger lockup risk (Sept ~700M-share tranche, >2x the Aug 6 tranche) is ~2-3 weeks out - the Aug 6/20 tranches are already absorbed and price has stabilized.",
+        "This routine's standing search template references CING, which is not currently held in the portfolio - likely stale boilerplate worth reviewing."
       ]
     }
   ]
