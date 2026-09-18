@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-09-18",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -10,6 +10,88 @@
     "notes": "Read-only research log. No trades are ever placed by this routine."
   },
   "runs": [
+    {
+      "timestamp": "2026-09-18",
+      "account": {
+        "nav_usd": 1188.636,
+        "nav_eur_base": 1037.61,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -240.72,
+        "unrealized_pnl_eur_base": -209.57,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "since_last_run": {
+        "prior_timestamp": "2026-07-11",
+        "nav_usd_change_pct": -5.76,
+        "nav_eur_base_change_pct": -6.33
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 11.4200001,
+          "prior_close": 11.53,
+          "gap_pct": -0.95,
+          "since_last_run_pct": -10.5,
+          "market_value": 787.9800069,
+          "nav_pct": 66.29,
+          "unrealized_pnl": -200.7168931,
+          "daily_pnl": -7.5899931,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still short of 80th required event as of this run (78 events per May 11 2026 update, no 8-K confirming 80th event found in overnight search through Aug 11 2026 filings); delayed reach of 80th event framed by company/analysts as a positive OS signal; SLS009 Phase 2 AML topline and REGAL topline both guided for Q4 2026. Separately, AACR Pancreatic Cancer conference poster abstracts (SLS009/tambiciclib) scheduled Sep 25-28 2026 - IR visibility event, not the primary catalyst.",
+            "next_check": "watch for 8-K / press release announcing 80th event; monitor ATM offering pace"
+          },
+          "risk": {
+            "over_35pct_nav": true,
+            "trim_shares_to_reach_35pct": 32.57,
+            "two_pct_nav_target_value_usd": 23.77
+          },
+          "risk_flag": "OVER_CONCENTRATED - 66.3% of NAV vs 35% trim threshold (down from 69.8% last run only because price fell, not because it was trimmed)",
+          "news_note": "No overnight news breaking the REGAL thesis. Drift lower since last run (-10.5%) consistent with known ATM dilution overhang: shares outstanding rose from 153.10M (YE2025) to 201.95M (Aug 10 2026) via a $150M ATM offering, not a negative catalyst."
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 155.8600006,
+          "prior_close": 154.81,
+          "gap_pct": 0.68,
+          "since_last_run_pct": 6.81,
+          "market_value": 405.23600156,
+          "nav_pct": 34.09,
+          "unrealized_pnl": -39.68699844,
+          "daily_pnl": 2.73000156,
+          "catalyst": {
+            "name": "Staggered IPO lockup unlocks + Q2 2026 earnings (already reported)",
+            "status": "Q2 2026 earnings reported Aug 4 2026 (revenue +92% YoY to $7.81B, net loss narrowed to $541M). First lockup tranche unlocked ~Aug 6 2026. Further 7% employee tranches unlocking through September (~Sep 9 already passed, ~Sep 10 ~17% of 13.4B shares cumulatively unlocked, next ~7% tranche around Sep 24 2026 - ~6 days from this run). Largest single release (~28% of the 180-day block, ~1.3B shares) expected around Q3 earnings (next report guided Nov 5 2026). Full lockup expiry Dec 8 2026.",
+            "next_check": "Sep 24 2026 tranche unlock reaction; Nov 5 2026 Q3 earnings date confirmation"
+          },
+          "risk": {
+            "over_35pct_nav": false,
+            "trim_shares_to_reach_35pct": 0,
+            "two_pct_nav_target_value_usd": 23.77
+          },
+          "risk_flag": "WATCH - now at 34.09% of NAV, just under the 35% trim threshold (up from 30.08% last run); approaching the trim line purely on price strength, not new buying",
+          "news_note": "Stock has absorbed the Aug 6 and Sep 9 unlock tranches without breaking down - up 6.81% since last run and +0.68% premarket gap today, despite ongoing lockup supply. No negative credit/bond news found; bond remains investment-grade and was oversubscribed at pricing."
+        }
+      ],
+      "market_context": {
+        "premarket_snapshot": "S&P 500 futures up ~1.94% premarket, VIX down to ~15.41, 10Y yield down to ~4.79% (crude oil retreat pulling yields lower); broad risk-on tape with Nasdaq/mega-cap tech leadership intact.",
+        "note": "General market backdrop is supportive today; does not offset company-specific concentration risk in either position."
+      },
+      "flags": [
+        "SLS at 66.3% of NAV remains nearly double the 35% single-name trim threshold; no news breaks the REGAL thesis, but the 80th event still hasn't been confirmed and dilution (ATM offering) continues to be the dominant driver of the drift lower.",
+        "SPCX has climbed to 34.09% of NAV (from 30.08% last run) purely on price strength heading into the Sep 24 lockup tranche - worth monitoring as it is now within ~1pt of the 35% trim threshold.",
+        "Zero USD cash buffer persists - account fully invested in two richly binary-catalyst names, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
+        "Portfolio NAV is down 5.8% (USD) / 6.3% (EUR base) since the last run on 2026-07-11, driven almost entirely by SLS's decline; unrealized loss widened from -$172.41 to -$240.72."
+      ]
+    },
     {
       "timestamp": "2026-07-11",
       "account": {
