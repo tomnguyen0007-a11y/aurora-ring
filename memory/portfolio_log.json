@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-09-19",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -66,6 +66,90 @@
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
       ]
+    },
+    {
+      "timestamp": "2026-09-19",
+      "account": {
+        "nav_usd": 1192.434,
+        "nav_eur_base": 1040.9612,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -241.19,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 11.48999975,
+          "prior_close": 11.53,
+          "gap_pct": -0.35,
+          "since_last_run_pct": -9.95,
+          "market_value": 792.80998275,
+          "nav_pct": 66.49,
+          "unrealized_pnl": -195.88691725,
+          "daily_pnl": -2.76001725,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Last official SEC 8-K (Aug 11, 2026) still shows 78 of 80 required events; no Sept SEC filing confirming 80th event as of run date. An unconfirmed German media report in Aug 2026 claimed the 80th event had been reached, but SELLAS has not confirmed it. Topline still guided for Q4 2026. Alliance Global analyst raised PT to $25 from $10.",
+            "next_check": "Watch for 8-K / press release confirming 80th event, database lock, and topline readout"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 66.5% of NAV vs 35% trim threshold (improved from 69.8% in prior run but still ~2x cap)",
+          "risk_sizing": {
+            "over_35pct_nav": true,
+            "trim_shares_to_reach_35pct": 32.68,
+            "two_pct_nav_target_value_usd": 23.85
+          },
+          "news_sentiment": "Mixed: bullish analyst PT upgrade + delay-as-good-sign narrative vs. unconfirmed catalyst report and retail skepticism",
+          "todays_setup": "Hold - flat gap (-0.35%), no confirmed catalyst news, do not act on unverified 80th-event rumor"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 152.64300535,
+          "prior_close": 154.81,
+          "gap_pct": -1.4,
+          "since_last_run_pct": 4.61,
+          "market_value": 396.87181391,
+          "nav_pct": 33.28,
+          "unrealized_pnl": -48.05118609,
+          "daily_pnl": -5.63418609,
+          "catalyst": {
+            "name": "Staggered IPO lockup unlocks + Starship Flight 14 launch",
+            "status": "Sept 9-10, 2026 lockup tranche already unlocked (free float expanded to ~17%); stock absorbed it well and is +4.6% since last run despite dilution. Next tranches: Sept 24, Oct 9, Oct 24; full lockup ends Dec 8, 2026. Starship Flight 14 (first revenue-generating mission, 26 Starlink V3 sats) delayed from Sept 22 to Sept 28 - reported retail selling on the delay headline. Unconfirmed Musk comments hinting at a SpaceX/Tesla merger adding volatility.",
+            "next_check": "Sept 24 lockup tranche; Starship Flight 14 on/around Sept 28; any confirmation/denial of merger speculation"
+          },
+          "risk_flag": "WATCH - back within 35% cap (was 30.1% last run) but two compounding near-term catalysts (lockup + Starship delay) elevate volatility",
+          "risk_sizing": {
+            "over_35pct_nav": false,
+            "trim_shares_to_reach_35pct": 0,
+            "two_pct_nav_target_value_usd": 23.85
+          },
+          "news_sentiment": "Near-term negative (Starship delay drove selling, merger rumor noise) / medium-term neutral-positive (unlock absorbed, bond oversubscribed, no credit deterioration)",
+          "todays_setup": "Hold - fade risk into Sept 24 unlock and Sept 28 Starship window, no fresh negative credit news"
+        }
+      ],
+      "market_context": "S&P 500 futures (ESU26) +0.12% premarket, stabilizing after three straight down sessions as oil and bond yields retreat.",
+      "flags": [
+        "SLS still 66.5% of NAV vs 35% single-name trim threshold - concentration risk persists (slightly improved from 69.8% in July, driven by price decline not trimming).",
+        "Zero USD cash buffer - account fully invested, no dry powder (not on margin, so no forced-liquidation risk).",
+        "SLS REGAL 80th-event catalyst is unconfirmed by SELLAS/SEC as of this run - an Aug media report claiming it hit is not corroborated by an official filing; do not treat as confirmed.",
+        "SPCX has two catalysts converging in the next 1-2 weeks: Sept 24 lockup tranche and Starship Flight 14 (delayed to Sept 28) - compounding volatility risk on the second-largest position.",
+        "Unrealized P&L has widened to -$241.19 (USD) from -$172.41 at last run, driven almost entirely by SLS's -9.95% drift since July; NAV (EUR base) down 6.0% over the same period."
+      ],
+      "compounding_scorecard": {
+        "period": "2026-07-11 to 2026-09-19 (70 days)",
+        "nav_eur_change_pct": -6.03,
+        "nav_usd_change_pct": -5.46,
+        "sls_mark_change_pct": -9.95,
+        "spcx_mark_change_pct": 4.61,
+        "unrealized_pnl_usd_change": -68.78
+      }
     }
   ]
 }
