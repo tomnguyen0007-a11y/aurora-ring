@@ -23,7 +23,11 @@ npm run build      # production build → dist/
 
 ## Deploy (free)
 
-A GitHub Actions workflow (`.github/workflows/deploy-calibrate.yml`) deploys to **GitHub Pages** on every push to `main` that touches `calibrate/`. One-time setup: repo **Settings → Pages → Source: GitHub Actions**. Then install it on your phone from the browser menu ("Add to Home Screen") — it's a PWA and works offline.
+Deployed by **Vercel** on every push to `main`. The repo root `vercel.json` points the build at `calibrate/` (`npm ci` + `npm run build`, output `calibrate/dist`), so the app serves from the project root.
+
+GitHub Pages is not an option here: Pages will not serve a private repo, and this repo has to stay private — it carries a portfolio log, personal planning notes and the Shopify theme.
+
+Install it on your phone from the browser menu ("Add to Home Screen") — it's a PWA and works offline.
 
 ## Data
 
