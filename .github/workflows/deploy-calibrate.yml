@@ -31,11 +31,7 @@ jobs:
         run: |
           npm ci
           npm run build
-      # enablement: turn Pages on via the API if it is off, so a repo whose
-      # Pages setting gets cleared redeploys itself instead of 404ing
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: calibrate/dist
