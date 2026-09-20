@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "cd calibrate && npm ci",
+  "buildCommand": "cd calibrate && npm run build",
+  "outputDirectory": "calibrate/dist"
+}
