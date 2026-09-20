@@ -6,43 +6,43 @@ Hit $1,000/day revenue. Every output — design, copy, code, campaign — must b
 ---
 
 ## ECC Toolkit (Always Available)
-The `/ECC` directory contains 271 skills, 67 agents, and production-tested patterns. **Before starting any task, load the relevant skill(s) from ECC.** Do not invent patterns when ECC has them.
+The `/ecc-lite` directory holds the ECC skills/agents this project actually uses (full ECC toolkit lives outside the repo at ~/ECC-full). **Before starting any task, load the relevant skill(s) from ECC.** Do not invent patterns when ECC has them.
 
 ### Skill Lookup by Task
 
 | Task | ECC Skill Path |
 |------|----------------|
-| Web/UI design | `ECC/skills/frontend-design-direction/SKILL.md` |
-| Design system | `ECC/skills/design-system/SKILL.md` |
-| Animations/motion | `ECC/skills/motion-ui/SKILL.md`, `motion-foundations`, `motion-advanced`, `motion-patterns` |
-| Glass/blur effects | `ECC/skills/liquid-glass-design/SKILL.md` |
-| React components | `ECC/skills/react-patterns/SKILL.md` |
-| Next.js | `ECC/skills/nextjs-turbopack/SKILL.md` |
-| Tailwind/CSS | `ECC/rules/web/design-quality.md` |
-| Brand identity | `ECC/skills/brand-discovery/SKILL.md`, `brand-voice` |
-| Marketing campaign | `ECC/skills/marketing-campaign/SKILL.md` |
-| SEO | `ECC/skills/seo/SKILL.md` |
-| Content/copy | `ECC/skills/content-engine/SKILL.md` |
-| Social media | `ECC/skills/social-publisher/SKILL.md` |
-| Landing page | `ECC/skills/marketing-campaign/SKILL.md` + `frontend-design-direction` |
-| Dashboard | `ECC/skills/dashboard-builder/SKILL.md` |
-| Video/motion content | `ECC/skills/remotion-video-creation/SKILL.md` |
-| API design | `ECC/skills/api-design/SKILL.md` |
-| Backend | `ECC/skills/backend-patterns/SKILL.md` |
-| Security | `ECC/skills/security-review/SKILL.md` |
-| TDD | `ECC/skills/tdd-workflow/SKILL.md` |
-| Code review | `ECC/agents/code-reviewer.md` |
-| Performance | `ECC/agents/performance-optimizer.md` |
-| Accessibility | `ECC/agents/a11y-architect.md` |
-| SEO specialist | `ECC/agents/seo-specialist.md` |
-| Marketing agent | `ECC/agents/marketing-agent.md` |
-| Architecture | `ECC/agents/architect.md` |
+| Web/UI design | `ecc-lite/skills/frontend-design-direction/SKILL.md` |
+| Design system | `ecc-lite/skills/design-system/SKILL.md` |
+| Animations/motion | `ecc-lite/skills/motion-ui/SKILL.md`, `motion-foundations`, `motion-advanced`, `motion-patterns` |
+| Glass/blur effects | `ecc-lite/skills/liquid-glass-design/SKILL.md` |
+| React components | `ecc-lite/skills/react-patterns/SKILL.md` |
+| Next.js | `ecc-lite/skills/nextjs-turbopack/SKILL.md` |
+| Tailwind/CSS | `ecc-lite/rules/web/design-quality.md` |
+| Brand identity | `ecc-lite/skills/brand-discovery/SKILL.md`, `brand-voice` |
+| Marketing campaign | `ecc-lite/skills/marketing-campaign/SKILL.md` |
+| SEO | `ecc-lite/skills/seo/SKILL.md` |
+| Content/copy | `ecc-lite/skills/content-engine/SKILL.md` |
+| Social media | `ecc-lite/skills/social-publisher/SKILL.md` |
+| Landing page | `ecc-lite/skills/marketing-campaign/SKILL.md` + `frontend-design-direction` |
+| Dashboard | `ecc-lite/skills/dashboard-builder/SKILL.md` |
+| Video/motion content | `ecc-lite/skills/remotion-video-creation/SKILL.md` |
+| API design | `ecc-lite/skills/api-design/SKILL.md` |
+| Backend | `ecc-lite/skills/backend-patterns/SKILL.md` |
+| Security | `ecc-lite/skills/security-review/SKILL.md` |
+| TDD | `ecc-lite/skills/tdd-workflow/SKILL.md` |
+| Code review | `ecc-lite/agents/code-reviewer.md` |
+| Performance | `ecc-lite/agents/performance-optimizer.md` |
+| Accessibility | `ecc-lite/agents/a11y-architect.md` |
+| SEO specialist | `ecc-lite/agents/seo-specialist.md` |
+| Marketing agent | `ecc-lite/agents/marketing-agent.md` |
+| Architecture | `ecc-lite/agents/architect.md` |
 
 ---
 
 ## Design Standards (Non-Negotiable)
 
-Read `ECC/rules/web/design-quality.md` before ANY frontend work.
+Read `ecc-lite/rules/web/design-quality.md` before ANY frontend work.
 
 ### Hard Bans (never ship these)
 - Generic Tailwind/shadcn default card grids
@@ -70,13 +70,13 @@ Read `ECC/rules/web/design-quality.md` before ANY frontend work.
 2. Define palette intentionally
 3. Choose typography deliberately
 4. Reference at least 3 real product screenshots as inspiration
-5. Read `ECC/skills/frontend-design-direction/SKILL.md`
+5. Read `ecc-lite/skills/frontend-design-direction/SKILL.md`
 
 ---
 
 ## Motion & Animation
 
-Read `ECC/skills/motion-ui/SKILL.md` before adding any animation.
+Read `ecc-lite/skills/motion-ui/SKILL.md` before adding any animation.
 
 - Motion must: guide attention, communicate state, or preserve spatial continuity
 - If it does none of these → remove it
@@ -143,15 +143,15 @@ Use ECC agents for specialized sub-tasks instead of doing everything in one cont
 
 | When you need | Use |
 |---------------|-----|
-| Code review | `ECC/agents/code-reviewer.md` |
-| Performance audit | `ECC/agents/performance-optimizer.md` |
-| Security review | `ECC/agents/security-reviewer.md` |
-| Accessibility audit | `ECC/agents/a11y-architect.md` |
-| SEO audit | `ECC/agents/seo-specialist.md` |
-| Marketing strategy | `ECC/agents/marketing-agent.md` |
-| Architecture decisions | `ECC/agents/architect.md` |
-| React issues | `ECC/agents/react-reviewer.md` |
-| TypeScript issues | `ECC/agents/typescript-reviewer.md` |
+| Code review | `ecc-lite/agents/code-reviewer.md` |
+| Performance audit | `ecc-lite/agents/performance-optimizer.md` |
+| Security review | `ecc-lite/agents/security-reviewer.md` |
+| Accessibility audit | `ecc-lite/agents/a11y-architect.md` |
+| SEO audit | `ecc-lite/agents/seo-specialist.md` |
+| Marketing strategy | `ecc-lite/agents/marketing-agent.md` |
+| Architecture decisions | `ecc-lite/agents/architect.md` |
+| React issues | `ecc-lite/agents/react-reviewer.md` |
+| TypeScript issues | `ecc-lite/agents/typescript-reviewer.md` |
 
 ---
 
