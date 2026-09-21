@@ -45,7 +45,7 @@ function Brand({ compact = false }: { compact?: boolean }) {
   const tagline = useStore((s) => s.settings.brandTagline) ?? 'PERSONAL OS'
   return (
     <div className="flex items-center gap-2.5">
-      <BrandMark size={13} className="text-paper" />
+      <BrandMark size={16} className="text-paper" />
       <div className="leading-none">
         <div className="text-[0.8125rem] font-medium tracking-[0.16em] text-paper">{name}</div>
         {!compact && tagline && <div className="mt-1 text-[0.5625rem] tracking-[0.18em] text-faint">{tagline}</div>}
