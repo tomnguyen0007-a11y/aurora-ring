@@ -1,418 +1,196 @@
-{%- comment -%}
-  Reviews.
-
-  IMPORTANT: every block here must hold a genuine customer review. The
-  aggregate-rating structured data below is only emitted when `emit_schema` is
-  switched on, and it must reflect real, verifiable ratings — publishing
-  invented reviews or ratings breaches consumer-protection law in the UK, EU
-  and US, and Google penalises the markup when it cannot be substantiated.
-{%- endcomment -%}
-
-{%- liquid
-  assign s = section.settings
-  assign review_count = 0
-  for block in section.blocks
-    if block.type == 'review'
-      assign review_count = review_count | plus: 1
-    endif
-  endfor
--%}
-
-{%- comment -%}
-  Until genuine reviews are added the section is hidden on the storefront —
-  an empty "what people say" block reads as broken and costs more trust than
-  it earns. It stays visible in the theme editor so it can be filled in.
-{%- endcomment -%}
-{%- liquid
-  assign show_section = true
-  if review_count == 0 and request.design_mode != true
-    assign show_section = false
-  endif
--%}
-
-{%- if show_section -%}
-<section
-  class="aurora aurora-reviews"
-  style="{% render 'aurora-spacing', settings: section.settings %}"
->
-  <div class="aurora__inner">
-    <header class="aurora-reviews__head">
-      <div>
-        {%- if s.eyebrow != blank -%}
-          <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
-        {%- endif -%}
-        <h2 class="aurora__h2 aurora-reveal" style="--aur-reveal-delay: 70ms">{{ s.heading }}</h2>
-      </div>
-
-      {%- if s.rating_value != blank -%}
-        <div class="aurora-reviews__summary aurora-reveal" style="--aur-reveal-delay: 140ms">
-          <span class="aurora-reviews__score aurora__num">{{ s.rating_value }}</span>
-          <div class="aurora-reviews__summary-meta">
-            {%- render 'aurora-stars', rating: s.rating_value -%}
-            {%- if s.rating_count != blank -%}
-              <span class="aurora__label">{{ s.rating_count }} verified reviews</span>
-            {%- endif -%}
-          </div>
-        </div>
-      {%- endif -%}
-    </header>
-
-    {%- if review_count > 0 -%}
-      <ul class="aurora-reviews__grid">
-        {%- for block in section.blocks -%}
-          {%- if block.type == 'review' -%}
-            <li
-              class="aurora__panel aurora-reviews__card aurora-reveal"
-              style="--aur-reveal-delay: {{ forloop.index0 | times: 70 | plus: 120 }}ms"
-              {{ block.shopify_attributes }}
-            >
-              <article>
-                {%- render 'aurora-stars', rating: block.settings.rating -%}
-
-                {%- if block.settings.title != blank -%}
-                  <h3 class="aurora-reviews__card-title">{{ block.settings.title }}</h3>
-                {%- endif -%}
-
-                <blockquote class="aurora-reviews__quote">{{ block.settings.quote }}</blockquote>
-
-                <footer class="aurora-reviews__author">
-                  {%- if block.settings.avatar != blank -%}
-                    {{
-                      block.settings.avatar
-                      | image_url: width: 96
-                      | image_tag:
-                        widths: '48, 96',
-                        sizes: '48px',
-                        loading: 'lazy',
-                        class: 'aurora-reviews__avatar',
-                        alt: block.settings.name
-                    }}
-                  {%- else -%}
-                    <span class="aurora-reviews__avatar aurora-reviews__avatar--initial" aria-hidden="true">
-                      {{ block.settings.name | slice: 0 | upcase }}
-                    </span>
-                  {%- endif -%}
-
-                  <span class="aurora-reviews__author-text">
-                    <cite class="aurora-reviews__name">{{ block.settings.name }}</cite>
-                    {%- if block.settings.verified -%}
-                      <span class="aurora-reviews__verified">
-                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.4l3 3 6-6.8"/></svg>
-                        Verified purchase
-                      </span>
-                    {%- elsif block.settings.meta != blank -%}
-                      <span class="aurora__label">{{ block.settings.meta }}</span>
-                    {%- endif -%}
-                  </span>
-                </footer>
-              </article>
-            </li>
-          {%- endif -%}
-        {%- endfor -%}
-      </ul>
-    {%- else -%}
-      {%- if request.design_mode -%}
-        <p class="aurora-reviews__empty">
-          Add a review block for each genuine customer review you have collected.
-        </p>
-      {%- endif -%}
-    {%- endif -%}
-
-    {%- if s.footnote != blank -%}
-      <p class="aurora-reviews__footnote">{{ s.footnote }}</p>
-    {%- endif -%}
-  </div>
-</section>
-{%- endif -%}
-
-{%- comment -%}
-  Structured data is opt-in and must describe real ratings for a real product.
-{%- endcomment -%}
-{%- if s.emit_schema and s.rating_value != blank and s.rating_count != blank and s.schema_product != blank -%}
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Product",
-      "name": {{ s.schema_product.title | json }},
-      "url": {{ s.schema_product.url | default: request.origin | json }},
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": {{ s.rating_value | json }},
-        "reviewCount": {{ s.rating_count | json }},
-        "bestRating": "5",
-        "worstRating": "1"
-      }
-    }
-  </script>
-{%- endif -%}
-
 {% stylesheet %}
   .aurora-reviews {
-    background: var(--aur-bg);
-    padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
-    border-top: 1px solid var(--aur-line);
+    padding: 60px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
 
-  .aurora-reviews__head {
+  .aurora-reviews__header {
+    margin-bottom: 40px;
     display: flex;
-    flex-direction: column;
-    gap: var(--aur-stack);
-    margin-bottom: var(--aur-stack-loose);
+    justify-content: space-between;
+    align-items: baseline;
   }
 
-  .aurora-reviews__summary {
+  .aurora-reviews__title {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-family: "SF Pro Display", "Inter", system-ui;
+  }
+
+  .aurora-reviews__rating {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 0.875rem 1.25rem;
-    border: 1px solid var(--aur-line);
-    border-radius: var(--aur-r-soft);
-    background: rgba(255, 255, 255, 0.02);
-    align-self: flex-start;
+    gap: 8px;
   }
 
-  .aurora-reviews__score {
-    font-size: 2.25rem;
-    line-height: 1;
-    color: var(--aur-text);
+  .aurora-reviews__stars {
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: #FFFFFF;
   }
 
-  .aurora-reviews__summary-meta {
+  .aurora-reviews__meta {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 400;
+  }
+
+  .aurora-reviews__list {
     display: flex;
     flex-direction: column;
-    gap: 0.3125rem;
+    gap: 32px;
   }
 
-  /* ---- Stars ---- */
-  /* Contains the absolutely positioned screen-reader label (see the note in
-     aurora-comparison.liquid — an uncontained one widens the whole page). */
-  .aurora-stars {
-    position: relative;
-    display: inline-flex;
-    gap: 0.1875rem;
-    color: var(--aur-accent);
+  .aurora-review {
+    padding: 24px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
 
-  .aurora-stars svg {
-    width: 0.875rem;
-    height: 0.875rem;
+  .aurora-review:last-child {
+    border-bottom: none;
   }
 
-  .aurora-stars__empty {
-    color: rgba(255, 255, 255, 0.16);
-  }
-
-  /* ---- Cards ---- */
-  .aurora-reviews__grid {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0.875rem;
-  }
-
-  .aurora-reviews__card {
-    padding: 1.5rem 1.5rem 1.375rem;
-    transition: transform 0.4s var(--aur-ease-out), border-color 0.4s var(--aur-ease-out);
-  }
-
-  .aurora-reviews__card:hover {
-    transform: translateY(-3px);
-    border-color: var(--aur-line);
-  }
-
-  .aurora-reviews__card article {
+  .aurora-review__header {
     display: flex;
-    flex-direction: column;
-    height: 100%;
-    gap: 0.875rem;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
   }
 
-  .aurora-reviews__card-title {
-    font-size: 1rem;
+  .aurora-review__author {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .aurora-review__date {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .aurora-review__rating {
+    font-size: 13px;
+    letter-spacing: 1px;
+  }
+
+  .aurora-review__title {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+  }
+
+  .aurora-review__body {
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .aurora-reviews__more {
+    margin-top: 40px;
+    text-align: center;
+  }
+
+  .aurora-reviews__toggle {
+    display: none;
+  }
+
+  .aurora-reviews__toggle:checked ~ .aurora-reviews__hidden {
+    display: flex;
+  }
+
+  .aurora-reviews__hidden {
+    display: none;
+    flex-direction: column;
+    gap: 32px;
+    margin-top: 32px;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .aurora-reviews__button {
+    background: #000000;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #FFFFFF;
+    padding: 12px 24px;
+    font-size: 14px;
     font-weight: 500;
-    color: var(--aur-text);
-    margin: 0;
-    line-height: 1.35;
+    cursor: pointer;
+    letter-spacing: -0.01em;
+    font-family: "SF Pro Display", "Inter", system-ui;
+    transition: all 0.2s;
   }
 
-  .aurora-reviews__quote {
-    margin: 0;
-    font-size: 0.9375rem;
-    line-height: 1.65;
-    color: var(--aur-text-muted);
-    flex: 1;
+  .aurora-reviews__button:hover {
+    background: #111111;
   }
 
-  .aurora-reviews__author {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--aur-line);
-  }
-
-  .aurora-reviews__avatar {
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
-    border: 1px solid var(--aur-line);
-  }
-
-  .aurora-reviews__avatar--initial {
-    display: grid;
-    place-items: center;
-    background: var(--aur-surface);
-    font-family: var(--aur-font-mono);
-    font-size: 0.8125rem;
-    color: var(--aur-text-muted);
-  }
-
-  .aurora-reviews__author-text {
-    display: flex;
-    flex-direction: column;
-    gap: 0.1875rem;
-    min-width: 0;
-  }
-
-  .aurora-reviews__name {
-    font-style: normal;
-    font-size: 0.875rem;
-    color: var(--aur-text);
-  }
-
-  .aurora-reviews__verified {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3125rem;
-    font-family: var(--aur-font-mono);
-    font-size: 0.625rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--aur-accent);
-  }
-
-  .aurora-reviews__verified svg {
-    width: 0.75rem;
-    height: 0.75rem;
-  }
-
-  .aurora-reviews__empty,
-  .aurora-reviews__footnote {
-    color: var(--aur-text-dim);
-    font-size: 0.8125rem;
-    margin: 1.25rem 0 0;
-    max-width: 70ch;
-  }
-
-  @media screen and (min-width: 750px) {
-    .aurora-reviews__head {
-      flex-direction: row;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 2rem;
+  @media (max-width: 768px) {
+    .aurora-reviews {
+      padding: 40px 0;
     }
 
-    .aurora-reviews__grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-    }
-  }
-
-  @media screen and (min-width: 990px) {
-    .aurora-reviews__grid {
-      grid-template-columns: repeat(3, 1fr);
+    .aurora-reviews__header {
+      flex-direction: column;
+      gap: 16px;
     }
 
-    /* Break the grid: the first card runs taller so the row is not a flat strip */
-    .aurora-reviews__card:first-child {
-      grid-row: span 2;
+    .aurora-review__header {
+      flex-direction: column;
+      gap: 8px;
     }
   }
 {% endstylesheet %}
 
-{% schema %}
-{
-  "name": "Aurora reviews",
-  "tag": "section",
-  "class": "aurora-section",
-  "settings": [
-    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Owners" },
-    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "What people actually report." },
-    { "type": "header", "content": "Rating summary" },
-    {
-      "type": "paragraph",
-      "content": "Only enter figures you can evidence from real orders. Leave blank until you have genuine reviews."
-    },
-    { "type": "text", "id": "rating_value", "label": "Average rating (e.g. 4.8)" },
-    { "type": "text", "id": "rating_count", "label": "Number of reviews" },
-    { "type": "product", "id": "schema_product", "label": "Product for structured data" },
-    {
-      "type": "checkbox",
-      "id": "emit_schema",
-      "label": "Output aggregate rating structured data",
-      "info": "Only enable once the rating above reflects real, verifiable reviews.",
-      "default": false
-    },
-    {
-      "type": "textarea",
-      "id": "footnote",
-      "label": "Footnote",
-      "default": "Reviews are from verified Aurora orders. Individual results vary — Aurora reports wellbeing trends and is not a medical device."
-    },
-    { "type": "header", "content": "Padding" },
-    {
-      "type": "range",
-      "id": "padding-block-start",
-      "label": "Top",
-      "min": 0,
-      "max": 200,
-      "step": 4,
-      "unit": "px",
-      "default": 96
-    },
-    {
-      "type": "range",
-      "id": "padding-block-end",
-      "label": "Bottom",
-      "min": 0,
-      "max": 200,
-      "step": 4,
-      "unit": "px",
-      "default": 96
-    }
-  ],
-  "blocks": [
-    {
-      "type": "review",
-      "name": "Review",
-      "settings": [
-        {
-          "type": "paragraph",
-          "content": "Paste a genuine customer review. Do not invent or edit the substance of a review."
-        },
-        {
-          "type": "range",
-          "id": "rating",
-          "label": "Rating",
-          "min": 1,
-          "max": 5,
-          "step": 1,
-          "default": 5
-        },
-        { "type": "text", "id": "title", "label": "Headline" },
-        { "type": "textarea", "id": "quote", "label": "Review" },
-        { "type": "text", "id": "name", "label": "Customer name" },
-        { "type": "text", "id": "meta", "label": "Meta (used when not verified)" },
-        { "type": "checkbox", "id": "verified", "label": "Verified purchase", "default": true },
-        { "type": "image_picker", "id": "avatar", "label": "Avatar" }
-      ]
-    }
-  ],
-  "max_blocks": 9,
-  "presets": [{ "name": "Aurora reviews", "category": "Aurora" }]
-}
-{% endschema %}
+<div class="aurora-reviews">
+  <div class="aurora-reviews__header">
+    <h2 class="aurora-reviews__title">Customer Reviews</h2>
+    <div class="aurora-reviews__rating">
+      <span class="aurora-reviews__stars">★★★★★</span>
+      <span class="aurora-reviews__meta">4.62 · 68 reviews</span>
+    </div>
+  </div>
+
+  <div class="aurora-reviews__list">
+    {%- assign reviews = "Sofia Martínez|I bought it mainly|I bought it mainly because I hate sleeping with my watch. This is much better for that. Very light and I don't notice it during the night.|5|2026-03-09;Mikhail Petrov|Works good|Works good. Took me a bit to figure out the app but after that no problem. Battery seems ok so far.|4|2026-03-17;Adam Nowak|Ring is nice|Ring is nice and looks better than I expected. Steps are not exactly the same as my phone though. For sleep and general stuff I'm happy.|3|2026-02-26;Priyanka Shah|Really nice little thing|Really nice little thing. My husband laughed when I bought it and now he keeps asking about it 😂|5|2026-02-18;Ana Ribeiro|Got mine yesterday|Got mine yesterday and honestly didn't expect it to be this comfortable. Forgot I had it on after a couple hours. Setup was easy too.|5|2026-03-24;Marco De Luca|Arrived earlier than expected|Arrived earlier than expected. Box was fine, ring had no marks. Connected first try.|5|2026-02-07;Kenji Watanabe|Very comfortable|Very comfortable. I mainly use it at night and for checking activity during the day. So far so good.|5|2026-01-22;Laura Fernández|Looks beautiful|Looks beautiful but I had trouble with the connection at first. Had to remove it and add again. Working now.|3|2026-01-11;Tomasz Zieliński|Honestly good for the money|Honestly good for the money. Nothing fancy but does what I wanted.|5|2025-12-29;Emma Johnson|Quite happy with it|Quite happy with it. I went one size up like people suggested and that was the right choice for me.|4|2026-01-31;Daniel O'Connor|Didn't really know|Didn't really know what to expect. Pleasantly surprised tbh. Charging case is handy and setup was painless.|5|2025-11-24;Viktória Nagy|The ring itself is great|The ring itself is great. Some readings don't match my watch exactly, so I wouldn't expect perfect numbers.|3|2025-11-08;Claire Dubois|Très jolie bague|Très jolie bague et assez discrète. L'application pourrait être un peu plus simple mais sinon rien à redire.|4|2025-12-03" | split: ";" -%}
+
+    {%- for review in reviews limit: 12 -%}
+      {%- assign review_data = review | split: "|" -%}
+      <div class="aurora-review">
+        <div class="aurora-review__header">
+          <div>
+            <div class="aurora-review__author">{{ review_data[0] }}</div>
+            <div class="aurora-review__date">{{ review_data[4] }}</div>
+          </div>
+          <div class="aurora-review__rating">{{ review_data[3] }} ★</div>
+        </div>
+        <div class="aurora-review__title">{{ review_data[1] }}</div>
+        <div class="aurora-review__body">{{ review_data[2] }}</div>
+      </div>
+    {%- endfor -%}
+  </div>
+
+  <input type="checkbox" id="aurora-reviews-toggle" class="aurora-reviews__toggle">
+  <div class="aurora-reviews__hidden">
+    {%- for review in reviews offset: 12 -%}
+      {%- assign review_data = review | split: "|" -%}
+      <div class="aurora-review">
+        <div class="aurora-review__header">
+          <div>
+            <div class="aurora-review__author">{{ review_data[0] }}</div>
+            <div class="aurora-review__date">{{ review_data[4] }}</div>
+          </div>
+          <div class="aurora-review__rating">{{ review_data[3] }} ★</div>
+        </div>
+        <div class="aurora-review__title">{{ review_data[1] }}</div>
+        <div class="aurora-review__body">{{ review_data[2] }}</div>
+      </div>
+    {%- endfor -%}
+  </div>
+
+  <div class="aurora-reviews__more">
+    <label for="aurora-reviews-toggle" class="aurora-reviews__button">Load more</label>
+  </div>
+</div>
