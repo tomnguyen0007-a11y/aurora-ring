@@ -17,8 +17,12 @@ export class ProviderError extends Error {
   }
 }
 
-// Priority order when auto-failing over: strongest/most-capable first.
-const PROVIDER_ORDER: LlmProvider[] = ['anthropic', 'gemini', 'groq', 'openrouter']
+// Priority order when auto-failing over: strongest/most-capable first. `local`
+// sits last — it's this-device-only (a phone can't reach the Mac's localhost)
+// and openly "weaker at tools" per its own Settings copy, so it should never
+// pre-empt a real API as an automatic fallback, only serve when explicitly
+// chosen as primary or when nothing else is configured.
+const PROVIDER_ORDER: LlmProvider[] = ['anthropic', 'gemini', 'groq', 'openrouter', 'local']
 
 export function providerLabel(p: LlmProvider): string {
   switch (p) {
@@ -30,6 +34,8 @@ export function providerLabel(p: LlmProvider): string {
       return 'Groq'
     case 'openrouter':
       return 'OpenRouter'
+    case 'local':
+      return 'On-device'
     default:
       return p
   }
@@ -45,6 +51,8 @@ function providerHasKey(p: LlmProvider, settings: ReturnType<typeof useStore.get
       return !!settings.groqKey
     case 'openrouter':
       return !!settings.openrouterKey
+    case 'local':
+      return !!settings.localBaseUrl && !!settings.localModel
     default:
       return false
   }
@@ -61,7 +69,10 @@ export function getProviderChain(opts: { needsVision?: boolean } = {}): LlmProvi
   const configured = PROVIDER_ORDER.filter((p) => providerHasKey(p, settings))
   const primary = settings.provider
   const chain = configured.includes(primary) ? [primary, ...configured.filter((p) => p !== primary)] : configured
-  return opts.needsVision ? chain.filter((p) => p !== 'groq') : chain
+  // Groq has no vision endpoint; local has unknown capability (depends what
+  // model the user pointed it at) — safer to assume no vision than to send an
+  // image request a local model can't read and call that "the AI is dumb."
+  return opts.needsVision ? chain.filter((p) => p !== 'groq' && p !== 'local') : chain
 }
 
 // ————————————————————————————————————————————————————————
@@ -383,6 +394,38 @@ async function callGroq(userText: string, ctx: JarvisContext): Promise<string> {
   return data.choices?.[0]?.message?.content ?? ''
 }
 
+// On-device: any OpenAI-compatible server running on this machine — Ollama,
+// LM Studio, llama.cpp. No key, no quota, fully private — but only this
+// device can reach its own localhost, and text-only until we know a given
+// local model actually supports images (see the vision filter above).
+async function callLocal(userText: string, ctx: JarvisContext): Promise<string> {
+  const { settings, chat } = useStore.getState()
+  const messages = [
+    { role: 'system', content: buildSystemPrompt(ctx, { webSearch: false }) },
+    ...historyFor(chat, userText),
+  ]
+  const base = settings.localBaseUrl.replace(/\/+$/, '')
+
+  let res: Response
+  try {
+    res = await fetch(`${base}/chat/completions`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ model: settings.localModel, max_tokens: 2500, messages }),
+    })
+  } catch {
+    throw new ProviderError('local', 0, `Couldn't reach ${base} — is the server running, and CORS enabled for this origin?`)
+  }
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => '')
+    throw new ProviderError('local', res.status, `On-device ${res.status}: ${body.slice(0, 180)}`)
+  }
+
+  const data: { choices?: { message?: { content?: string } }[] } = await res.json()
+  return data.choices?.[0]?.message?.content ?? ''
+}
+
 // OpenRouter: one key routes to many models, several genuinely free (":free" suffix).
 // Free models get retired without notice (qwen2.5-vl-72b:free vanished and 404'd
 // everyone using the old default), so the model is SELF-HEALING: on a 404 we fetch
@@ -631,6 +674,8 @@ async function callProvider(p: LlmProvider, userText: string, ctx: JarvisContext
       return callGroq(userText, ctx)
     case 'openrouter':
       return callOpenRouter(userText, ctx, images)
+    case 'local':
+      return callLocal(userText, ctx)
     default:
       throw new Error('no provider configured')
   }
@@ -652,6 +697,8 @@ async function streamProvider(
       return streamGroq(userText, ctx, onText)
     case 'openrouter':
       return streamOpenRouter(userText, ctx, images, onText)
+    case 'local':
+      return streamLocal(userText, ctx, onText)
     default:
       throw new Error('no provider configured')
   }
@@ -1015,6 +1062,46 @@ async function streamOpenRouter(
   return full
 }
 
+async function streamLocal(userText: string, ctx: JarvisContext, onText: (delta: string) => void): Promise<string> {
+  const { settings, chat } = useStore.getState()
+  const messages = [
+    { role: 'system', content: buildSystemPrompt(ctx, { webSearch: false }) },
+    ...historyFor(chat, userText),
+  ]
+  const base = settings.localBaseUrl.replace(/\/+$/, '')
+
+  let res: Response
+  try {
+    res = await fetch(`${base}/chat/completions`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ model: settings.localModel, max_tokens: 2500, stream: true, messages }),
+    })
+  } catch {
+    throw new ProviderError('local', 0, `Couldn't reach ${base} — is the server running, and CORS enabled for this origin?`)
+  }
+
+  if (!res.ok || !res.body) {
+    const body = await res.text().catch(() => '')
+    throw new ProviderError('local', res.status, `On-device ${res.status}: ${body.slice(0, 180)}`)
+  }
+
+  let full = ''
+  await consumeSSE(res, (payload) => {
+    try {
+      const ev: { choices?: { delta?: { content?: string } }[] } = JSON.parse(payload)
+      const text = ev.choices?.[0]?.delta?.content ?? ''
+      if (text) {
+        full += text
+        onText(text)
+      }
+    } catch {
+      /* ignore malformed frames */
+    }
+  })
+  return full
+}
+
 export interface StreamHandlers {
   /**
    * Called as visible reply text grows (action JSON is never included).
@@ -1156,6 +1243,21 @@ export async function testProvider(p: LlmProvider): Promise<ProviderTestResult> 
         if (healed.model) return { ok: true, message: `"${model}" was retired — auto-switched to ${healed.model}` }
         if (healed.diagnosis) return { ok: false, message: healed.diagnosis }
         return { ok: false, message: `Model "${model}" and every free fallback are unreachable right now — check your connection, or pick a model manually at openrouter.ai/models` }
+      }
+      case 'local': {
+        if (!settings.localBaseUrl || !settings.localModel) return { ok: false, message: 'Set the server URL and model name first' }
+        const base = settings.localBaseUrl.replace(/\/+$/, '')
+        try {
+          const res = await fetch(`${base}/chat/completions`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ model: settings.localModel, max_tokens: 5, messages: [{ role: 'user', content: 'hi' }] }),
+          })
+          if (!res.ok) return { ok: false, message: `${res.status}: ${(await res.text().catch(() => '')).slice(0, 100)}` }
+          return { ok: true, message: 'Connected' }
+        } catch {
+          return { ok: false, message: `Couldn't reach ${base} — is the server running, and CORS enabled for this origin?` }
+        }
       }
       default:
         return { ok: false, message: 'Not applicable' }

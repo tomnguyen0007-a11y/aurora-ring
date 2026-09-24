@@ -169,17 +169,35 @@ async function pullState(): Promise<void> {
   notify()
 }
 
+// Every field syncs as one blob per device — a device pushes its ENTIRE
+// settings on ANY unrelated edit (toggling a habit, a Jarvis reply landing),
+// whatever value each key field happens to hold there. If a key was only
+// just added on device A, and device B (still holding an old, keyless copy)
+// pushes first because you happened to be using it at the same moment, B's
+// blank key wins the last-write-wins race and silently wipes A's key — "the
+// API keys just go out randomly." These fields only ever move forward: an
+// empty incoming value never replaces a real one, so a stale pusher can't
+// erase a key another device just set (mirrors the sync-credential guard
+// below). Trade-off: deliberately clearing a key on one device won't clear
+// it everywhere — an invalid/revoked key just fails loudly later, which
+// beats losing a working one silently.
+const CREDENTIAL_FIELDS = ['anthropicKey', 'geminiKey', 'groqKey', 'openrouterKey', 'localBaseUrl', 'localModel'] as const
+
 function applyRemote(data: Record<string, unknown>): void {
   applyingRemote = true
   try {
     const cur = useStore.getState()
     const remoteSettings = (data.settings ?? {}) as Record<string, unknown>
+    const curSettings = cur.settings as unknown as Record<string, unknown>
+    const mergedSettings: Record<string, unknown> = { ...cur.settings, ...remoteSettings }
+    for (const field of CREDENTIAL_FIELDS) {
+      if (!remoteSettings[field] && curSettings[field]) mergedSettings[field] = curSettings[field]
+    }
     useStore.setState({
       ...(data as Partial<CalibrateState>),
       view: cur.view, // navigation is per-device
       settings: {
-        ...cur.settings,
-        ...remoteSettings,
+        ...mergedSettings,
         // never let a stale remote wipe the credentials that make sync work
         supabaseUrl: cur.settings.supabaseUrl,
         supabaseKey: cur.settings.supabaseKey,
