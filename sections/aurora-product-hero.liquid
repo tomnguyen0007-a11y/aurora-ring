@@ -1,0 +1,109 @@
+{% stylesheet %}
+  .aurora-hero-trust {
+    padding: 32px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 40px;
+  }
+
+  .aurora-hero-trust__rating {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .aurora-hero-trust__stars {
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: #FFFFFF;
+    font-weight: 500;
+  }
+
+  .aurora-hero-trust__count {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.65);
+    font-weight: 400;
+  }
+
+  .aurora-hero-trust__count a {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    transition: border-color 0.2s;
+  }
+
+  .aurora-hero-trust__count a:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+
+  .aurora-hero-trust__badges {
+    display: flex;
+    gap: 24px;
+    justify-content: flex-end;
+  }
+
+  .aurora-hero-trust__badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+  }
+
+  .aurora-hero-trust__badge-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .aurora-hero-trust__badge-text {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.2;
+  }
+
+  @media (max-width: 768px) {
+    .aurora-hero-trust {
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+      padding: 24px 0;
+    }
+
+    .aurora-hero-trust__rating {
+      order: 1;
+    }
+
+    .aurora-hero-trust__badges {
+      order: 2;
+      justify-content: center;
+      gap: 32px;
+    }
+  }
+{% endstylesheet %}
+
+<div class="aurora-hero-trust">
+  <div class="aurora-hero-trust__rating">
+    <span class="aurora-hero-trust__stars">★★★★★</span>
+    <span class="aurora-hero-trust__count"><a href="#aurora-reviews">4.62 · 82 verified reviews</a></span>
+  </div>
+
+  <div class="aurora-hero-trust__badges">
+    <div class="aurora-hero-trust__badge">
+      <div class="aurora-hero-trust__badge-icon">↩</div>
+      <div class="aurora-hero-trust__badge-text">14-Day<br>Returns</div>
+    </div>
+    <div class="aurora-hero-trust__badge">
+      <div class="aurora-hero-trust__badge-icon">✓</div>
+      <div class="aurora-hero-trust__badge-text">Lab<br>Tested</div>
+    </div>
+    <div class="aurora-hero-trust__badge">
+      <div class="aurora-hero-trust__badge-icon">→</div>
+      <div class="aurora-hero-trust__badge-text">Ships<br>24h</div>
+    </div>
+  </div>
+</div>
