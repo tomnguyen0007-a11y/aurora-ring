@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-09-24",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -10,6 +10,68 @@
     "notes": "Read-only research log. No trades are ever placed by this routine."
   },
   "runs": [
+    {
+      "timestamp": "2026-09-24",
+      "account": {
+        "nav_usd": 1183.036,
+        "nav_eur_base": 1041.24,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -259.90,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 11.4399996,
+          "prior_close": 11.52,
+          "gap_pct": -0.69,
+          "since_last_run_pct": -10.34,
+          "market_value": 789.3599724,
+          "nav_pct": 66.72,
+          "unrealized_pnl": -199.3369276,
+          "daily_pnl": -5.5200276,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still 78 of 80 required events per Aug 11, 2026 10-Q/8-K (last confirmed count); unverified retail/Stocktwits chatter claims 80th event reported, not confirmed by any company SEC filing found; topline still guided 2H/Q4 2026",
+            "next_check": "watch for 8-K / press release announcing 80th event and unblinding"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 66.7% of NAV vs 35% trim threshold; per 2% NAV sizing rule, trim ~32.8 shares to reach 35% cap"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 147.83000185,
+          "prior_close": 148.39,
+          "gap_pct": -0.38,
+          "since_last_run_pct": 1.31,
+          "market_value": 384.35800481,
+          "nav_pct": 32.49,
+          "unrealized_pnl": -60.56499519,
+          "daily_pnl": -1.37799519,
+          "catalyst": {
+            "name": "Staggered IPO lockup unlock schedule; $25B investment-grade bond deal already priced/oversubscribed",
+            "status": "CONFIRMED: up to 328.4M shares unlock TODAY (Sept 24, 2026) - same-size unlocks repeat Oct 9 and Oct 24; ~1.3B shares unlock after Q3 earnings; final 180-day lockup expires Dec 8, 2026. Prior Aug 6 unlock (~900M+ sh) saw stock initially rise.",
+            "next_check": "intraday price action into and after today's unlock; Q3 2026 earnings date for the much larger post-earnings unlock tranche"
+          },
+          "risk_flag": "WATCH - within 35% cap but second-largest single-name risk; live share-unlock catalyst today"
+        }
+      ],
+      "flags": [
+        "SLS at 66.7% of NAV remains nearly double the 35% single-name trim threshold; no confirmed 80th-event/unblind filing found, only unverified retail chatter - do not treat as resolved.",
+        "SPCX has a confirmed, scheduled 328.4M-share lockup unlock today (Sept 24, 2026); historically the Aug 6 unlock did not sink the stock, but this is a real supply event to watch intraday.",
+        "DATA DISCREPANCY: one web search snippet claimed SLS premarket at $10.03 (-13.1%) vs prior close $11.54, while the direct IBKR price snapshot shows $11.44 (-0.69%) vs prior close $11.52. Broker snapshot used as source of truth for this log; user should visually confirm live quote before relying on either figure.",
+        "CING was named in this routine's per-ticker instruction template but is NOT a currently held position (confirmed via live IBKR get_account_positions - only SLS and SPCX held); no CING research performed.",
+        "Zero USD cash buffer persists - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
+        "NAV declined from $1,261.21 (Jul 11 run) to $1,183.04 (this run), driven by SLS mark-to-market (avg cost $14.33 vs current $11.44)."
+      ]
+    },
     {
       "timestamp": "2026-07-11",
       "account": {
