@@ -10,6 +10,7 @@
     display: flex;
     justify-content: space-between;
     align-items: baseline;
+    gap: 24px;
   }
 
   .aurora-reviews__title {
@@ -23,6 +24,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    white-space: nowrap;
   }
 
   .aurora-reviews__stars {
@@ -57,6 +59,11 @@
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 12px;
+    gap: 16px;
+  }
+
+  .aurora-review__meta {
+    flex-shrink: 0;
   }
 
   .aurora-review__author {
@@ -68,11 +75,13 @@
   .aurora-review__date {
     font-size: 12px;
     color: rgba(255, 255, 255, 0.4);
+    margin-top: 4px;
   }
 
   .aurora-review__rating {
     font-size: 13px;
     letter-spacing: 1px;
+    color: #FFFFFF;
   }
 
   .aurora-review__title {
@@ -135,62 +144,73 @@
     .aurora-reviews__header {
       flex-direction: column;
       gap: 16px;
+      align-items: flex-start;
     }
 
     .aurora-review__header {
       flex-direction: column;
       gap: 8px;
     }
+
+    .aurora-reviews__rating {
+      flex-direction: column;
+      align-items: flex-start;
+    }
   }
 {% endstylesheet %}
+
+{%- capture reviews_json -%}{% include 'reviews' %}{%- endcapture -%}
+{%- assign reviews = reviews_json | parse_json -%}
 
 <div class="aurora-reviews">
   <div class="aurora-reviews__header">
     <h2 class="aurora-reviews__title">Customer Reviews</h2>
     <div class="aurora-reviews__rating">
       <span class="aurora-reviews__stars">★★★★★</span>
-      <span class="aurora-reviews__meta">4.62 · 68 reviews</span>
+      <span class="aurora-reviews__meta">4.62 · {{ reviews | size }} reviews</span>
     </div>
   </div>
 
   <div class="aurora-reviews__list">
-    {%- assign reviews = "Sofia Martínez|I bought it mainly|I bought it mainly because I hate sleeping with my watch. This is much better for that. Very light and I don't notice it during the night.|5|2026-03-09;Mikhail Petrov|Works good|Works good. Took me a bit to figure out the app but after that no problem. Battery seems ok so far.|4|2026-03-17;Adam Nowak|Ring is nice|Ring is nice and looks better than I expected. Steps are not exactly the same as my phone though. For sleep and general stuff I'm happy.|3|2026-02-26;Priyanka Shah|Really nice little thing|Really nice little thing. My husband laughed when I bought it and now he keeps asking about it 😂|5|2026-02-18;Ana Ribeiro|Got mine yesterday|Got mine yesterday and honestly didn't expect it to be this comfortable. Forgot I had it on after a couple hours. Setup was easy too.|5|2026-03-24;Marco De Luca|Arrived earlier than expected|Arrived earlier than expected. Box was fine, ring had no marks. Connected first try.|5|2026-02-07;Kenji Watanabe|Very comfortable|Very comfortable. I mainly use it at night and for checking activity during the day. So far so good.|5|2026-01-22;Laura Fernández|Looks beautiful|Looks beautiful but I had trouble with the connection at first. Had to remove it and add again. Working now.|3|2026-01-11;Tomasz Zieliński|Honestly good for the money|Honestly good for the money. Nothing fancy but does what I wanted.|5|2025-12-29;Emma Johnson|Quite happy with it|Quite happy with it. I went one size up like people suggested and that was the right choice for me.|4|2026-01-31;Daniel O'Connor|Didn't really know|Didn't really know what to expect. Pleasantly surprised tbh. Charging case is handy and setup was painless.|5|2025-11-24;Viktória Nagy|The ring itself is great|The ring itself is great. Some readings don't match my watch exactly, so I wouldn't expect perfect numbers.|3|2025-11-08;Claire Dubois|Très jolie bague|Très jolie bague et assez discrète. L'application pourrait être un peu plus simple mais sinon rien à redire.|4|2025-12-03" | split: ";" -%}
-
     {%- for review in reviews limit: 12 -%}
-      {%- assign review_data = review | split: "|" -%}
       <div class="aurora-review">
         <div class="aurora-review__header">
           <div>
-            <div class="aurora-review__author">{{ review_data[0] }}</div>
-            <div class="aurora-review__date">{{ review_data[4] }}</div>
+            <div class="aurora-review__author">{{ review.author }}</div>
+            <div class="aurora-review__date">{{ review.date }}</div>
           </div>
-          <div class="aurora-review__rating">{{ review_data[3] }} ★</div>
+          <div class="aurora-review__meta">
+            <div class="aurora-review__rating">{{ review.rating }} ★</div>
+          </div>
         </div>
-        <div class="aurora-review__title">{{ review_data[1] }}</div>
-        <div class="aurora-review__body">{{ review_data[2] }}</div>
+        <div class="aurora-review__title">{{ review.title }}</div>
+        <div class="aurora-review__body">{{ review.body }}</div>
       </div>
     {%- endfor -%}
   </div>
 
-  <input type="checkbox" id="aurora-reviews-toggle" class="aurora-reviews__toggle">
-  <div class="aurora-reviews__hidden">
-    {%- for review in reviews offset: 12 -%}
-      {%- assign review_data = review | split: "|" -%}
-      <div class="aurora-review">
-        <div class="aurora-review__header">
-          <div>
-            <div class="aurora-review__author">{{ review_data[0] }}</div>
-            <div class="aurora-review__date">{{ review_data[4] }}</div>
+  {%- if reviews.size > 12 -%}
+    <input type="checkbox" id="aurora-reviews-toggle" class="aurora-reviews__toggle">
+    <div class="aurora-reviews__hidden">
+      {%- for review in reviews offset: 12 -%}
+        <div class="aurora-review">
+          <div class="aurora-review__header">
+            <div>
+              <div class="aurora-review__author">{{ review.author }}</div>
+              <div class="aurora-review__date">{{ review.date }}</div>
+            </div>
+            <div class="aurora-review__meta">
+              <div class="aurora-review__rating">{{ review.rating }} ★</div>
+            </div>
           </div>
-          <div class="aurora-review__rating">{{ review_data[3] }} ★</div>
+          <div class="aurora-review__title">{{ review.title }}</div>
+          <div class="aurora-review__body">{{ review.body }}</div>
         </div>
-        <div class="aurora-review__title">{{ review_data[1] }}</div>
-        <div class="aurora-review__body">{{ review_data[2] }}</div>
-      </div>
-    {%- endfor -%}
-  </div>
+      {%- endfor -%}
+    </div>
 
-  <div class="aurora-reviews__more">
-    <label for="aurora-reviews-toggle" class="aurora-reviews__button">Load more</label>
-  </div>
+    <div class="aurora-reviews__more">
+      <label for="aurora-reviews-toggle" class="aurora-reviews__button">Load more reviews</label>
+    </div>
+  {%- endif -%}
 </div>
