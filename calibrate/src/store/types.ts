@@ -263,6 +263,12 @@ export interface GroceryItem {
   done: boolean
 }
 
+export interface QuickTask {
+  id: string
+  text: string
+  done: boolean
+}
+
 export interface SupplementItem {
   id: string
   name: string

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Icon, type GlyphName } from '../components/icons'
-import { Bar, DangerBtn, Dot, Empty, Eyebrow, InlineText, NumCell, Reorder, Ring, Section, Track } from '../components/ui'
+import { Bar, DangerBtn, Dot, Empty, Eyebrow, InlineText, NumCell, Reorder, Ring, Section, Tools, Track } from '../components/ui'
 import { nowMinutes, todayISO, toMinutes, weekdayOf } from '../lib/dates'
 import { dayScore, habitHit, habitStreak, habitValue, isDerived } from '../lib/habits'
 import { computeNudges, updateBadge } from '../lib/notify'
@@ -192,6 +192,70 @@ function HabitRow({ habitId, editing }: { habitId: string; editing: boolean }) {
   )
 }
 
+/**
+ * Loose ends that don't deserve a habit, a schedule block, or a note — "bring
+ * this to school" territory. Persistent (nothing resets it), strikethrough on
+ * check, and a Clear button that only shows up once something's actually done.
+ */
+function SideTasks() {
+  const s = useStore()
+  const [text, setText] = useState('')
+  const hasDone = s.quickTasks.some((t) => t.done)
+
+  return (
+    <Section
+      label="Side tasks"
+      aside={
+        hasDone ? (
+          <button className="btn btn-sm" onClick={s.clearDoneQuickTasks}>
+            Clear
+          </button>
+        ) : undefined
+      }
+    >
+      {s.quickTasks.length > 0 && (
+        <ul className="mb-3.5">
+          {s.quickTasks.map((t) => (
+            <li key={t.id} className="group flex items-center gap-3 border-b border-line py-2.5 last:border-b-0">
+              <Dot checked={t.done} onToggle={() => s.toggleQuickTask(t.id)} label={t.text || 'Task'} size={16} />
+              <span className="min-w-0 flex-1">
+                <InlineText
+                  value={t.text}
+                  onChange={(v) => s.updateQuickTask(t.id, { text: v })}
+                  ariaLabel="Side task"
+                  className={`text-body ${t.done ? 'text-faint line-through' : 'text-paper'}`}
+                />
+              </span>
+              <Tools>
+                <DangerBtn onConfirm={() => s.removeQuickTask(t.id)} label={`Delete ${t.text || 'task'}`} />
+              </Tools>
+            </li>
+          ))}
+        </ul>
+      )}
+      <form
+        className="flex gap-2"
+        onSubmit={(e) => {
+          e.preventDefault()
+          if (!text.trim()) return
+          s.addQuickTask(text.trim())
+          setText('')
+        }}
+      >
+        <input
+          className="field min-w-0 flex-1"
+          placeholder="Bring this to school…"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
+        <button className="btn btn-solid" type="submit">
+          Add
+        </button>
+      </form>
+    </Section>
+  )
+}
+
 export function Dashboard() {
   const s = useStore()
   const date = todayISO()
@@ -350,6 +414,8 @@ export function Dashboard() {
               ))}
             </ul>
           )}
+
+          <SideTasks />
 
           <Section
             label="Today's plan"

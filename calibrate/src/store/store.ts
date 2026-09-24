@@ -44,6 +44,7 @@ import type {
   GolfRound,
   GolfTimerState,
   GroceryItem,
+  QuickTask,
   GroupDef,
   Habit,
   HabitLog,
@@ -199,6 +200,14 @@ export interface CalibrateState {
   toggleGrocery: (id: string) => void
   removeGrocery: (id: string) => void
   clearDoneGrocery: () => void
+
+  // ── side tasks (dashboard quick-capture) ──
+  quickTasks: QuickTask[]
+  addQuickTask: (text: string) => void
+  updateQuickTask: (id: string, patch: Partial<QuickTask>) => void
+  toggleQuickTask: (id: string) => void
+  removeQuickTask: (id: string) => void
+  clearDoneQuickTasks: () => void
 
   // ── notes & tables ──
   notes: Note[]
@@ -366,6 +375,7 @@ const seedState = () => ({
   foodLogs: [],
   water: {},
   grocery: [],
+  quickTasks: [],
   notes: [],
   tables: [],
   bizTasks: [],
@@ -729,6 +739,12 @@ export const useStore = create<CalibrateState>()(
       toggleGrocery: (id) => set((s) => ({ grocery: s.grocery.map((g) => (g.id === id ? { ...g, done: !g.done } : g)) })),
       removeGrocery: (id) => set((s) => ({ grocery: s.grocery.filter((g) => g.id !== id) })),
       clearDoneGrocery: () => set((s) => ({ grocery: s.grocery.filter((g) => !g.done) })),
+
+      addQuickTask: (text) => set((s) => ({ quickTasks: [...s.quickTasks, { id: uid('qt'), text, done: false }] })),
+      updateQuickTask: (id, patch) => set((s) => ({ quickTasks: s.quickTasks.map((t) => (t.id === id ? { ...t, ...patch } : t)) })),
+      toggleQuickTask: (id) => set((s) => ({ quickTasks: s.quickTasks.map((t) => (t.id === id ? { ...t, done: !t.done } : t)) })),
+      removeQuickTask: (id) => set((s) => ({ quickTasks: s.quickTasks.filter((t) => t.id !== id) })),
+      clearDoneQuickTasks: () => set((s) => ({ quickTasks: s.quickTasks.filter((t) => !t.done) })),
 
       // ══════════════ NOTES ══════════════
       addNote: (title, body = '') => {
