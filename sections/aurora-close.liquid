@@ -1,0 +1,193 @@
+{%- comment -%}
+  The close.
+
+  Last CTA, the risk reversal that removes the final objection, and the wellness
+  positioning stated plainly. The disclaimer is not fine print here — being
+  straight about what Aurora is not is part of why it can be trusted about what
+  it is.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+  assign product = s.product
+-%}
+
+<section class="aurora aurora-close" style="{% render 'aurora-spacing', settings: section.settings %}">
+  <div class="aurora__inner">
+    <div class="aurora-close__lead">
+      {%- if s.eyebrow != blank -%}
+        <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
+      {%- endif -%}
+
+      <h2 class="aurora__display aurora-close__heading aurora-reveal" style="--aur-reveal-delay: 80ms">
+        {{ s.heading }}
+      </h2>
+
+      {%- if s.subheading != blank -%}
+        <p class="aurora__lede aurora-reveal" style="--aur-reveal-delay: 150ms">{{ s.subheading }}</p>
+      {%- endif -%}
+
+      {%- if s.cta_label != blank -%}
+        <div class="aurora-close__action aurora-reveal" style="--aur-reveal-delay: 210ms">
+          <a class="aurora__btn aurora__btn--primary" href="{{ s.cta_link | default: routes.all_products_collection_url }}">
+            {{ s.cta_label }}
+            {%- if product != blank and s.show_price -%}
+              <span class="aurora__price">{{ product.price | money }}</span>
+            {%- endif -%}
+          </a>
+        </div>
+      {%- endif -%}
+    </div>
+
+    <ul class="aurora-close__grid">
+      {%- for block in section.blocks -%}
+        <li class="aurora-close__item aurora-reveal" style="--aur-reveal-delay: {{ forloop.index0 | times: 70 | plus: 180 }}ms" {{ block.shopify_attributes }}>
+          <h3 class="aurora-close__title">{{ block.settings.title }}</h3>
+          {%- if block.settings.text != blank -%}
+            <p class="aurora-close__text">{{ block.settings.text }}</p>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+
+    {%- if s.disclaimer != blank -%}
+      <div class="aurora-close__disclaimer">{{ s.disclaimer }}</div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .aurora-close {
+    padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
+  }
+
+  .aurora-close__lead {
+    max-width: 40rem;
+    margin-bottom: var(--aur-stack-loose);
+  }
+
+  .aurora-close__heading {
+    max-width: 14ch;
+  }
+
+  .aurora-close__action {
+    margin-top: clamp(2rem, 4vw, 2.75rem);
+  }
+
+  .aurora-close__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    border-top: 1px solid var(--aur-line);
+  }
+
+  .aurora-close__item {
+    padding-block: 1.5rem;
+    border-bottom: 1px solid var(--aur-line);
+  }
+
+  .aurora-close__title {
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0 0 0.375rem;
+    color: var(--aur-text);
+  }
+
+  .aurora-close__text {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--aur-text-muted);
+    max-width: 40ch;
+  }
+
+  .aurora-close__disclaimer {
+    margin-top: var(--aur-stack-loose);
+    font-size: 0.8125rem;
+    line-height: 1.7;
+    color: var(--aur-text-dim);
+    max-width: 68ch;
+  }
+
+  .aurora-close__disclaimer p {
+    margin: 0;
+  }
+
+  .aurora-close__disclaimer p + p {
+    margin-top: 0.75rem;
+  }
+
+  @media screen and (min-width: 750px) {
+    .aurora-close__grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0 2.5rem;
+      border-bottom: 1px solid var(--aur-line);
+    }
+
+    .aurora-close__item {
+      border-bottom: 0;
+      padding-block: 1.75rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Aurora close",
+  "tag": "section",
+  "class": "aurora-section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "No risk" },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "One price. Then it is yours."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "No monthly fee, no metric held back, no second bill in two years' time. You buy the ring and every reading it takes belongs to you."
+    },
+    { "type": "text", "id": "cta_label", "label": "Button label", "default": "Buy Aurora" },
+    { "type": "url", "id": "cta_link", "label": "Button link" },
+    { "type": "product", "id": "product", "label": "Product (for live price)" },
+    { "type": "checkbox", "id": "show_price", "label": "Show price in button", "default": true },
+    {
+      "type": "richtext",
+      "id": "disclaimer",
+      "label": "Wellness disclaimer",
+      "default": "<p>Aurora is a general wellness product. It measures and reports trends in sleep, activity and recovery to support your own understanding of your habits. It is not a medical device and is not intended to diagnose, treat, cure or prevent any disease or condition.</p><p>Nothing shown in the app or on this site is medical advice. If you have a health concern, speak to a qualified healthcare professional.</p>"
+    },
+    { "type": "header", "content": "Padding" },
+    { "type": "range", "id": "padding-block-start", "label": "Top", "min": 0, "max": 280, "step": 4, "unit": "px", "default": 128 },
+    { "type": "range", "id": "padding-block-end", "label": "Bottom", "min": 0, "max": 280, "step": 4, "unit": "px", "default": 128 }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Guarantee",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "No subscription, ever" },
+        { "type": "textarea", "id": "text", "label": "Text", "default": "Every metric is unlocked at purchase and stays unlocked." }
+      ]
+    }
+  ],
+  "max_blocks": 3,
+  "presets": [
+    {
+      "name": "Aurora close",
+      "category": "Aurora",
+      "blocks": {
+        "item": { "type": "item", "settings": { "title": "No subscription, ever", "text": "Every metric is unlocked at purchase and stays unlocked." } },
+        "item_2": { "type": "item", "settings": { "title": "Free size exchange", "text": "If the fit is wrong, we send the right size at our cost." } },
+        "item_3": { "type": "item", "settings": { "title": "Your data, exportable", "text": "In full, whenever you ask, in a format you can open elsewhere." } }
+      },
+      "block_order": ["item", "item_2", "item_3"]
+    }
+  ]
+}
+{% endschema %}

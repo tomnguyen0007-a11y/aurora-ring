@@ -1,0 +1,132 @@
+{%- comment -%}
+  What actually arrives.
+
+  A considered purchase stalls on small unknowns — does it come with a charger,
+  do I have to buy a sizing kit. Answering that plainly, right before the price
+  argument, removes the last practical objection.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+-%}
+
+<section class="aurora aurora--card aurora-box" style="{% render 'aurora-spacing', settings: section.settings %}">
+  <div class="aurora__inner">
+    <header class="aurora-box__head">
+      {%- if s.eyebrow != blank -%}
+        <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
+      {%- endif -%}
+      <h2 class="aurora__h2 aurora-reveal" style="--aur-reveal-delay: 80ms">{{ s.heading }}</h2>
+    </header>
+
+    <ol class="aurora-box__list">
+      {%- for block in section.blocks -%}
+        <li class="aurora-box__item aurora-reveal" style="--aur-reveal-delay: {{ forloop.index0 | times: 70 | plus: 140 }}ms" {{ block.shopify_attributes }}>
+          <span class="aurora-box__index aurora__num">{{ forloop.index }}</span>
+          <h3 class="aurora-box__title">{{ block.settings.title }}</h3>
+          {%- if block.settings.text != blank -%}
+            <p class="aurora-box__text">{{ block.settings.text }}</p>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ol>
+  </div>
+</section>
+
+{% stylesheet %}
+  .aurora-box {
+    padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
+  }
+
+  .aurora-box__head {
+    margin-bottom: var(--aur-stack-loose);
+  }
+
+  .aurora-box__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    border-top: 1px solid var(--aur-line);
+  }
+
+  .aurora-box__item {
+    padding-block: 1.375rem;
+    border-bottom: 1px solid var(--aur-line);
+  }
+
+  .aurora-box__index {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--aur-text-dim);
+    margin-bottom: 0.5rem;
+  }
+
+  .aurora-box__title {
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0 0 0.25rem;
+    color: var(--aur-text);
+  }
+
+  .aurora-box__text {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--aur-text-muted);
+    max-width: 34ch;
+  }
+
+  @media screen and (min-width: 750px) {
+    .aurora-box__list {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0 2rem;
+      border-bottom: 1px solid var(--aur-line);
+    }
+
+    .aurora-box__item {
+      border-bottom: 0;
+      padding-block: 1.75rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Aurora in the box",
+  "tag": "section",
+  "class": "aurora-section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "What arrives" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "In the box." },
+    { "type": "header", "content": "Padding" },
+    { "type": "range", "id": "padding-block-start", "label": "Top", "min": 0, "max": 280, "step": 4, "unit": "px", "default": 128 },
+    { "type": "range", "id": "padding-block-end", "label": "Bottom", "min": 0, "max": 280, "step": 4, "unit": "px", "default": 128 }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Item",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "The Aurora ring" },
+        { "type": "textarea", "id": "text", "label": "Text", "default": "In your size and finish." }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [
+    {
+      "name": "Aurora in the box",
+      "category": "Aurora",
+      "blocks": {
+        "item": { "type": "item", "settings": { "title": "The Aurora ring", "text": "In the size and finish you confirmed." } },
+        "item_2": { "type": "item", "settings": { "title": "Sizing kit", "text": "Posted first, so the fit is right before we ship." } },
+        "item_3": { "type": "item", "settings": { "title": "Charging dock", "text": "Full charge in about 90 minutes." } },
+        "item_4": { "type": "item", "settings": { "title": "USB-C cable", "text": "No proprietary connector to lose." } }
+      },
+      "block_order": ["item", "item_2", "item_3", "item_4"]
+    }
+  ]
+}
+{% endschema %}

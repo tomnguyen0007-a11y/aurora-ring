@@ -1,0 +1,30 @@
+{%- doc -%}
+  Renders a 5-star rating.
+
+  Stars are decorative; the rating is announced once as text so a screen reader
+  hears "Rated 4.8 out of 5" rather than five separate star images.
+
+  @param {string} rating - Rating from 0 to 5. Rounded to the nearest whole star.
+{%- enddoc -%}
+
+{%- liquid
+  assign value = rating | plus: 0.0
+  if value > 5
+    assign value = 5
+  endif
+  if value < 0
+    assign value = 0
+  endif
+  assign filled = value | round
+-%}
+
+<span class="aurora-stars">
+  <span class="aurora__visually-hidden">Rated {{ rating }} out of 5</span>
+  {%- for i in (1..5) -%}
+    {%- if i <= filled -%}
+      <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.6l2.47 5.28 5.53.72-4.06 3.9 1.03 5.63L10 14.4l-4.97 2.73 1.03-5.63L2 7.6l5.53-.72z"/></svg>
+    {%- else -%}
+      <svg class="aurora-stars__empty" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.6l2.47 5.28 5.53.72-4.06 3.9 1.03 5.63L10 14.4l-4.97 2.73 1.03-5.63L2 7.6l5.53-.72z"/></svg>
+    {%- endif -%}
+  {%- endfor -%}
+</span>

@@ -1,0 +1,193 @@
+{%- liquid
+  assign s = section.settings
+  assign product = s.product | default: product
+
+  assign on_product_page = false
+  if template.name == 'product' and product != blank
+    assign on_product_page = true
+  endif
+-%}
+
+{%- if product != blank -%}
+  <div
+    class="aurora aurora-sticky"
+    data-aurora-sticky="{{ s.watch_selector | default: '#aurora-hero-cta' }}"
+  >
+    <div class="aurora-sticky__inner">
+      <div class="aurora-sticky__product">
+        {%- if product.featured_image -%}
+          {{
+            product.featured_image
+            | image_url: width: 120
+            | image_tag:
+              widths: '60, 120',
+              sizes: '48px',
+              loading: 'lazy',
+              class: 'aurora-sticky__thumb',
+              alt: product.featured_image.alt | default: product.title
+          }}
+        {%- endif -%}
+
+        <div class="aurora-sticky__text">
+          <span class="aurora-sticky__title">{{ s.short_title | default: product.title }}</span>
+          <span class="aurora-sticky__meta">
+            <span class="aurora__num aurora-sticky__price">{{ product.price | money }}</span>
+            {%- if product.compare_at_price > product.price -%}
+              <s class="aurora-sticky__was aurora__num">{{ product.compare_at_price | money }}</s>
+            {%- endif -%}
+            {%- if s.note != blank -%}
+              <span class="aurora-sticky__note">{{ s.note }}</span>
+            {%- endif -%}
+          </span>
+        </div>
+      </div>
+
+      {%- comment -%}
+        On the product page the bar drives the real product form so the selected
+        variant is always respected. Everywhere else it is a link.
+      {%- endcomment -%}
+      {%- if on_product_page -%}
+        <button
+          type="button"
+          class="aurora__btn aurora__btn--primary aurora-sticky__cta"
+          data-aurora-atc-proxy="{{ s.form_selector | default: 'form[action*=/cart/add] [type=submit]' | escape }}"
+          data-aurora-atc-fallback="{{ product.url }}"
+        >
+          {{ s.button_label | default: 'Add to cart' }}
+        </button>
+      {%- else -%}
+        <a class="aurora__btn aurora__btn--primary aurora-sticky__cta" href="{{ product.url }}">
+          {{ s.button_label | default: 'Add to cart' }}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .aurora-sticky {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    padding: 0.625rem var(--aur-gutter) calc(0.625rem + env(safe-area-inset-bottom));
+    background: color-mix(in srgb, var(--aur-page) 88%, transparent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--aur-line);
+    transform: translateY(110%);
+    visibility: hidden;
+    transition: transform 0.45s var(--aur-ease-out), visibility 0.45s;
+  }
+
+  .aurora-sticky.is-visible {
+    transform: none;
+    visibility: visible;
+  }
+
+  .aurora-sticky__inner {
+    max-width: var(--aur-max);
+    margin-inline: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .aurora-sticky__product {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .aurora-sticky__thumb {
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--aur-r-soft);
+    object-fit: cover;
+    border: 1px solid var(--aur-line);
+    flex-shrink: 0;
+  }
+
+  .aurora-sticky__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+  }
+
+  .aurora-sticky__title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--aur-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .aurora-sticky__meta {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+  }
+
+  .aurora-sticky__price {
+    color: var(--aur-text);
+  }
+
+  .aurora-sticky__was {
+    color: var(--aur-text-dim);
+    font-size: 0.75rem;
+  }
+
+  .aurora-sticky__note {
+    font-size: 0.75rem;
+    color: var(--aur-text-muted);
+  }
+
+  .aurora-sticky__cta {
+    flex-shrink: 0;
+    padding-block: 0.8125rem;
+  }
+
+  /* The thumbnail is the first thing to go when space is tight */
+  @media screen and (max-width: 480px) {
+    .aurora-sticky__thumb,
+    .aurora-sticky__note {
+      display: none;
+    }
+
+    .aurora-sticky__cta {
+      padding-inline: 1.25rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Aurora sticky buy bar",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Slides up once the main call to action has scrolled out of view. On a product page it triggers the real add-to-cart form, so the selected variant is always used."
+    },
+    { "type": "product", "id": "product", "label": "Product", "info": "Leave blank on product templates to use the current product." },
+    { "type": "text", "id": "short_title", "label": "Short title" },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Add to cart" },
+    { "type": "text", "id": "note", "label": "Note", "default": "Free shipping" },
+    {
+      "type": "text",
+      "id": "watch_selector",
+      "label": "Reveal after this element",
+      "default": "#aurora-hero-cta",
+      "info": "CSS selector. The bar appears once this element scrolls above the viewport."
+    },
+    { "type": "text", "id": "form_selector", "label": "Add-to-cart selector (advanced)" }
+  ],
+  "presets": [{ "name": "Aurora sticky buy bar", "category": "Aurora" }]
+}
+{% endschema %}

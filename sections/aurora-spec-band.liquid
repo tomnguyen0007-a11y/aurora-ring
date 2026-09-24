@@ -1,0 +1,458 @@
+{%- comment -%}
+  Product enhancement band. Sits under the buy box and does the job the buy box
+  cannot: show the ring being worn, say what it measures, and put the hard
+  numbers somewhere scannable.
+
+  Model-aware. The catalogue carries two variants of the same ring — one with an
+  LED display, one without — and they photograph completely differently. Rather
+  than maintain two templates, the section swaps image and copy when the product
+  is tagged or handled `screenless`, falling back to the default set otherwise.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = section.settings
+
+  comment
+    Which model this is. Tag detection alone was too fragile: a store with one
+    untagged test product silently fell through to the display-model set, which
+    is how the screen photograph ended up on the screenless page. The setting
+    wins, and auto-detection is only the fallback.
+  endcomment
+  assign is_screenless = false
+  case s.model
+    when 'screenless'
+      assign is_screenless = true
+    when 'screen'
+      assign is_screenless = false
+    else
+      if product != blank
+        if product.handle contains 'screenless'
+          assign is_screenless = true
+        elsif product.tags contains 'screenless'
+          assign is_screenless = true
+        elsif product.title contains 'Screenless' or product.title contains 'screenless'
+          assign is_screenless = true
+        endif
+      endif
+  endcase
+
+  assign band_image = s.image
+  assign band_heading = s.heading
+  assign band_body = s.body
+  assign band_alt = s.image_alt
+
+  if is_screenless
+    if s.image_screenless != blank
+      assign band_image = s.image_screenless
+    endif
+    if s.heading_screenless != blank
+      assign band_heading = s.heading_screenless
+    endif
+    if s.body_screenless != blank
+      assign band_body = s.body_screenless
+    endif
+    if s.image_alt_screenless != blank
+      assign band_alt = s.image_alt_screenless
+    endif
+  endif
+-%}
+
+<section class="aurora aurora-band" style="{% render 'aurora-spacing', settings: section.settings %}">
+  <div class="aurora__inner">
+    {%- comment -%} Editorial half: the ring on a hand, and why it is there. {%- endcomment -%}
+    <div class="aurora-band__lede-grid">
+      <div class="aurora-band__media aurora-reveal">
+        {%- if band_image != blank -%}
+          {{
+            band_image
+            | image_url: width: 1200
+            | image_tag:
+              widths: '480, 760, 1200',
+              sizes: '(max-width: 989px) 92vw, 46vw',
+              loading: 'lazy',
+              class: 'aurora-band__img',
+              alt: band_image.alt | default: band_alt
+          }}
+        {%- else -%}
+          {%- if is_screenless -%}
+            {%- assign fallback_src = 'aurora-wear-screenless.jpg' -%}
+            {%- assign fallback_w = 1400 -%}
+            {%- assign fallback_h = 1738 -%}
+          {%- else -%}
+            {%- assign fallback_src = 'aurora-wear-screen.jpg' -%}
+            {%- assign fallback_w = 1100 -%}
+            {%- assign fallback_h = 1467 -%}
+          {%- endif -%}
+          <img
+            class="aurora-band__img"
+            src="{{ fallback_src | asset_url }}"
+            width="{{ fallback_w }}"
+            height="{{ fallback_h }}"
+            loading="lazy"
+            decoding="async"
+            alt="{{ band_alt | escape }}"
+          >
+        {%- endif -%}
+      </div>
+
+      <div class="aurora-band__copy">
+        {%- if s.eyebrow != blank -%}
+          <p class="aurora__eyebrow aurora-reveal">{{ s.eyebrow }}</p>
+        {%- endif -%}
+        <h2 class="aurora__h2 aurora-band__title aurora-reveal" style="--aur-reveal-delay: 80ms">{{ band_heading }}</h2>
+        {%- if band_body != blank -%}
+          <div class="aurora-band__body aurora-reveal" style="--aur-reveal-delay: 150ms">{{ band_body }}</div>
+        {%- endif -%}
+      </div>
+    </div>
+
+    {%- comment -%} What it measures. {%- endcomment -%}
+    {%- assign benefits = section.blocks | where: 'type', 'benefit' -%}
+    {%- if benefits.size > 0 -%}
+      <div class="aurora-band__benefits">
+        {%- if s.benefits_title != blank -%}
+          <h3 class="aurora-band__sub aurora-reveal">{{ s.benefits_title }}</h3>
+        {%- endif -%}
+        <ul class="aurora-band__grid">
+          {%- for block in benefits -%}
+            <li
+              class="aurora-band__benefit aurora-reveal"
+              style="--aur-reveal-delay: {{ forloop.index0 | times: 60 }}ms"
+              {{ block.shopify_attributes }}
+            >
+              <span class="aurora-band__icon" aria-hidden="true">
+                {%- case block.settings.icon -%}
+                  {%- when 'moon' -%}
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
+                  {%- when 'heart' -%}
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20.4 5.6a5 5 0 0 0-7.1 0L12 6.9l-1.3-1.3a5 5 0 1 0-7.1 7.1L12 21l8.4-8.3a5 5 0 0 0 0-7.1z"/></svg>
+                  {%- when 'pulse' -%}
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l2.5-7 5 14 2.5-7h6"/></svg>
+                  {%- when 'drop' -%}
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7 6.6 9.9a7 7 0 1 0 10.8 0z"/></svg>
+                  {%- when 'battery' -%}
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="17" height="10" rx="2.5"/><path d="M22 10.5v3"/></svg>
+                  {%- when 'steps' -%}
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4.5c2 0 3 1.6 3 3.6S9 13 7 13s-3-1.4-3-3.4 1-5.1 3-5.1z"/><path d="M17 11c2 0 3 1.6 3 3.6s-1 4.9-3 4.9-3-1.4-3-3.4 1-5.1 3-5.1z"/></svg>
+                  {%- when 'thermometer' -%}
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 14V4.5a2 2 0 1 0-4 0V14a4 4 0 1 0 4 0z"/></svg>
+                  {%- when 'shield' -%}
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5 4.5 5.4V11c0 4.7 3.2 8.2 7.5 10.4 4.3-2.2 7.5-5.7 7.5-10.4V5.4z"/></svg>
+                  {%- else -%}
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.4"/></svg>
+                {%- endcase -%}
+              </span>
+              <h4 class="aurora-band__benefit-title">{{ block.settings.title }}</h4>
+              {%- if block.settings.text != blank -%}
+                <p class="aurora-band__benefit-text">{{ block.settings.text }}</p>
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} Hard numbers, in mono, where the eye can sweep them. {%- endcomment -%}
+    {%- assign specs = section.blocks | where: 'type', 'spec' -%}
+    {%- if specs.size > 0 -%}
+      <dl class="aurora-band__specs aurora-reveal">
+        {%- for block in specs -%}
+          <div class="aurora-band__spec" {{ block.shopify_attributes }}>
+            <dt class="aurora-band__spec-label">{{ block.settings.label }}</dt>
+            <dd class="aurora-band__spec-value aurora__num">{{ block.settings.value }}</dd>
+          </div>
+        {%- endfor -%}
+      </dl>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .aurora-band {
+    padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
+  }
+
+  .aurora-band__lede-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(2rem, 5vw, 4rem);
+    align-items: center;
+  }
+
+  .aurora-band__img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .aurora-band__title {
+    max-width: 16ch;
+  }
+
+  .aurora-band__body {
+    margin-top: var(--aur-stack);
+    color: var(--aur-text-muted);
+    max-width: 46ch;
+  }
+
+  .aurora-band__body > p {
+    margin: 0 0 0.875rem;
+  }
+
+  .aurora-band__body > p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* ---- Benefits ---- */
+  .aurora-band__benefits {
+    margin-top: clamp(3.5rem, 8vw, 6.5rem);
+  }
+
+  .aurora-band__sub {
+    font-family: var(--aur-font-display);
+    font-size: clamp(1.5rem, 2.6vw, 2rem);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    margin: 0 0 clamp(1.5rem, 3vw, 2.25rem);
+    color: var(--aur-text);
+  }
+
+  .aurora-band__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: clamp(1.25rem, 5vw, 2rem);
+    border-top: 1px solid var(--aur-line);
+  }
+
+  .aurora-band__benefit {
+    padding-block: 1.375rem;
+    border-bottom: 1px solid var(--aur-line);
+  }
+
+  .aurora-band__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 10px;
+    background: rgba(184, 67, 26, 0.07);
+    color: var(--aur-accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .aurora--night .aurora-band__icon {
+    background: rgba(255, 126, 71, 0.12);
+  }
+
+  .aurora-band__benefit-title {
+    font-family: var(--aur-font-body);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    margin: 0;
+    color: var(--aur-text);
+  }
+
+  .aurora-band__benefit-text {
+    margin: 0.375rem 0 0;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--aur-text-muted);
+    max-width: 34ch;
+  }
+
+  /* ---- Spec strip ---- */
+  .aurora-band__specs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    margin: clamp(3rem, 6vw, 4.5rem) 0 0;
+    border-top: 1px solid var(--aur-line);
+    border-left: 1px solid var(--aur-line);
+  }
+
+  .aurora-band__spec {
+    padding: 1rem 0.75rem;
+    border-right: 1px solid var(--aur-line);
+    border-bottom: 1px solid var(--aur-line);
+  }
+
+  .aurora-band__spec-label {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--aur-text-muted);
+  }
+
+  .aurora-band__spec-value {
+    margin: 0.3125rem 0 0;
+    font-size: clamp(0.875rem, 3vw, 1rem);
+    color: var(--aur-text);
+  }
+
+  .aurora-band__spec-label {
+    font-size: clamp(0.5625rem, 2vw, 0.6875rem);
+  }
+
+  @media screen and (min-width: 750px) {
+    .aurora-band__grid {
+      column-gap: clamp(1.5rem, 4vw, 3.5rem);
+    }
+
+    .aurora-band__spec {
+      padding: 1.125rem 1rem;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .aurora-band__lede-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(3rem, 7vw, 6rem);
+    }
+
+    .aurora-band__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .aurora-band__specs {
+      grid-template-columns: repeat(6, 1fr);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Aurora product band",
+  "tag": "section",
+  "class": "aurora-section",
+  "disabled_on": { "groups": ["header", "footer"] },
+  "settings": [
+    {
+      "type": "select",
+      "id": "model",
+      "label": "Model",
+      "info": "Auto reads the product handle, tags and title. Set it explicitly if the product is not tagged.",
+      "options": [
+        { "value": "screenless", "label": "Screenless" },
+        { "value": "screen", "label": "With display" },
+        { "value": "auto", "label": "Auto-detect from product" }
+      ],
+      "default": "screenless"
+    },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Worn, not watched" },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "It disappears by the second day."
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Body",
+      "default": "<p>Four grams of titanium, thinner than most wedding bands, with nothing on the outside to catch the light or announce itself. You stop noticing it long before it stops noticing you.</p><p>No screen to wake, no strap to tighten, no charging every night. It reads your body while you get on with the day.</p>"
+    },
+    { "type": "image_picker", "id": "image", "label": "Lifestyle image" },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text",
+      "default": "The Aurora ring worn on a hand in evening light"
+    },
+    { "type": "header", "content": "Screenless model" },
+    {
+      "type": "paragraph",
+      "content": "Used automatically when the product handle or tags contain “screenless”. Leave blank to reuse the fields above."
+    },
+    { "type": "image_picker", "id": "image_screenless", "label": "Lifestyle image (screenless)" },
+    { "type": "inline_richtext", "id": "heading_screenless", "label": "Heading (screenless)" },
+    { "type": "richtext", "id": "body_screenless", "label": "Body (screenless)" },
+    { "type": "text", "id": "image_alt_screenless", "label": "Image alt text (screenless)" },
+    { "type": "header", "content": "Benefits" },
+    { "type": "text", "id": "benefits_title", "label": "Benefits heading", "default": "What it reads." },
+    { "type": "header", "content": "Padding" },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 128
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 128
+    }
+  ],
+  "blocks": [
+    {
+      "type": "benefit",
+      "name": "Benefit",
+      "limit": 8,
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "moon", "label": "Moon" },
+            { "value": "heart", "label": "Heart" },
+            { "value": "pulse", "label": "Pulse" },
+            { "value": "drop", "label": "Drop" },
+            { "value": "battery", "label": "Battery" },
+            { "value": "steps", "label": "Steps" },
+            { "value": "thermometer", "label": "Temperature" },
+            { "value": "shield", "label": "Shield" },
+            { "value": "ring", "label": "Ring" }
+          ],
+          "default": "moon"
+        },
+        { "type": "text", "id": "title", "label": "Title", "default": "Sleep stages" },
+        { "type": "textarea", "id": "text", "label": "Text", "default": "Deep, REM and light, plus the wakings you will not remember." }
+      ]
+    },
+    {
+      "type": "spec",
+      "name": "Spec",
+      "limit": 8,
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Material" },
+        { "type": "text", "id": "value", "label": "Value", "default": "Titanium" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Aurora product band",
+      "category": "Aurora",
+      "blocks": {
+        "b1": { "type": "benefit", "settings": { "icon": "moon", "title": "Sleep stages", "text": "Deep, REM and light, plus the wakings you will not remember." } },
+        "b2": { "type": "benefit", "settings": { "icon": "heart", "title": "Heart rate", "text": "Through the night and across the day, not only when you ask." } },
+        "b3": { "type": "benefit", "settings": { "icon": "pulse", "title": "Heart rate variability", "text": "The number that moves first when you are run down." } },
+        "b4": { "type": "benefit", "settings": { "icon": "drop", "title": "Blood oxygen", "text": "Overnight readings, tracked as a trend rather than a one-off." } },
+        "b5": { "type": "benefit", "settings": { "icon": "steps", "title": "Activity", "text": "Real sessions counted separately from walking about." } },
+        "b6": { "type": "benefit", "settings": { "icon": "thermometer", "title": "Skin temperature", "text": "Nightly baseline, so a shift actually means something." } },
+        "s1": { "type": "spec", "settings": { "label": "Material", "value": "Titanium" } },
+        "s2": { "type": "spec", "settings": { "label": "Weight", "value": "3.3 g" } },
+        "s3": { "type": "spec", "settings": { "label": "Battery", "value": "7 days" } },
+        "s4": { "type": "spec", "settings": { "label": "Water", "value": "100 m" } },
+        "s5": { "type": "spec", "settings": { "label": "Sensors", "value": "6" } },
+        "s6": { "type": "spec", "settings": { "label": "Bluetooth", "value": "5.0" } }
+      },
+      "block_order": ["b1", "b2", "b3", "b4", "b5", "b6", "s1", "s2", "s3", "s4", "s5", "s6"]
+    }
+  ]
+}
+{% endschema %}

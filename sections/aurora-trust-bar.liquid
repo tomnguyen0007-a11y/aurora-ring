@@ -1,0 +1,107 @@
+{%- comment -%}
+  A quiet line of assurances directly under the hero. Text only — icons here
+  add visual noise without adding credibility.
+{%- endcomment -%}
+
+<section class="aurora aurora-trust" style="{% render 'aurora-spacing', settings: section.settings %}">
+  <div class="aurora__inner">
+    <ul class="aurora-trust__list">
+      {%- for block in section.blocks -%}
+        <li class="aurora-trust__item aurora-reveal" style="--aur-reveal-delay: {{ forloop.index0 | times: 70 }}ms" {{ block.shopify_attributes }}>
+          <strong class="aurora-trust__title">{{ block.settings.title }}</strong>
+          {%- if block.settings.detail != blank -%}
+            <span class="aurora-trust__detail">{{ block.settings.detail }}</span>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</section>
+
+{% stylesheet %}
+  .aurora-trust {
+    padding-block: var(--padding-block-start, 0) var(--padding-block-end, 0);
+  }
+
+  .aurora-trust__list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--aur-line);
+  }
+
+  .aurora-trust__item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding-block: 1.25rem;
+    border-bottom: 1px solid var(--aur-line);
+  }
+
+  .aurora-trust__title {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--aur-text);
+  }
+
+  .aurora-trust__detail {
+    font-size: 0.8125rem;
+    color: var(--aur-text-muted);
+  }
+
+  @media screen and (min-width: 750px) {
+    .aurora-trust__list {
+      grid-template-columns: repeat(3, 1fr);
+      border-bottom: 1px solid var(--aur-line);
+    }
+
+    .aurora-trust__item {
+      border-bottom: 0;
+      padding-block: 1.5rem;
+    }
+
+    .aurora-trust__item + .aurora-trust__item {
+      padding-left: 2rem;
+      border-left: 1px solid var(--aur-line);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Aurora trust bar",
+  "tag": "section",
+  "class": "aurora-section",
+  "settings": [
+    { "type": "header", "content": "Padding" },
+    { "type": "range", "id": "padding-block-start", "label": "Top", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 8 },
+    { "type": "range", "id": "padding-block-end", "label": "Bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 8 }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Assurance",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "Free EU delivery" },
+        { "type": "text", "id": "detail", "label": "Detail", "default": "Tracked, and included in the price" }
+      ]
+    }
+  ],
+  "max_blocks": 3,
+  "presets": [
+    {
+      "name": "Aurora trust bar",
+      "category": "Aurora",
+      "blocks": {
+        "item": { "type": "item", "settings": { "title": "Free EU delivery", "detail": "Tracked, and included in the price" } },
+        "item_2": { "type": "item", "settings": { "title": "No subscription, ever", "detail": "Every metric unlocked at purchase" } },
+        "item_3": { "type": "item", "settings": { "title": "Free size exchange", "detail": "Wrong fit, right size, at our cost" } }
+      },
+      "block_order": ["item", "item_2", "item_3"]
+    }
+  ]
+}
+{% endschema %}

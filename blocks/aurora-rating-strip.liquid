@@ -1,0 +1,66 @@
+{%- liquid
+  assign rating_mf = product.metafields.reviews.rating
+  assign avg = rating_mf.value.rating
+  assign count = product.metafields.reviews.rating_count.value | default: 0
+  assign full_stars = avg | floor
+-%}
+{%- if avg != blank -%}
+  <a href="#aurora-reviews" class="aurora-rating-strip" data-testid="aurora-rating-strip">
+    <span class="aurora-rating-strip__stars" aria-hidden="true">
+      {%- for i in (1..5) -%}
+        <svg viewBox="0 0 20 20" class="aurora-rating-strip__star{% if i > full_stars %} is-empty{% endif %}">
+          <path d="M10 1.5l2.6 5.6 6 .7-4.5 4.2 1.2 6-5.3-3-5.3 3 1.2-6L1.4 7.8l6-.7L10 1.5z"/>
+        </svg>
+      {%- endfor -%}
+    </span>
+    <span class="aurora-rating-strip__text">{{ avg | round: 1 }} · {{ count }} review{% if count != 1 %}s{% endif %}</span>
+  </a>
+{%- endif -%}
+
+{% stylesheet %}
+  .aurora-rating-strip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: #111111;
+    font-size: 0.8125rem;
+    scroll-behavior: smooth;
+  }
+
+  .aurora-rating-strip__stars {
+    display: inline-flex;
+    gap: 1px;
+  }
+
+  .aurora-rating-strip__star {
+    width: 13px;
+    height: 13px;
+    fill: #FFB800;
+  }
+
+  .aurora-rating-strip__star.is-empty {
+    fill: rgba(17, 17, 17, 0.16);
+  }
+
+  .aurora-rating-strip__text {
+    border-bottom: 1px solid rgba(17, 17, 17, 0.2);
+  }
+
+  .aurora-rating-strip:hover .aurora-rating-strip__text {
+    border-color: #111111;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Aurora rating strip",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Reads product.metafields.reviews.rating and reviews.rating_count. Renders nothing if the rating metafield is blank — place directly under the product title block."
+    }
+  ]
+}
+{% endschema %}
