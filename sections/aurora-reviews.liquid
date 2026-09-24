@@ -1,0 +1,246 @@
+{% stylesheet %}
+  .aurora-reviews {
+    padding: 60px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .aurora-reviews__header {
+    margin-bottom: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 24px;
+  }
+
+  .aurora-reviews__title {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-family: "SF Pro Display", "Inter", system-ui;
+  }
+
+  .aurora-reviews__rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+
+  .aurora-reviews__stars {
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: #FFFFFF;
+  }
+
+  .aurora-reviews__meta {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 400;
+  }
+
+  .aurora-reviews__list {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .aurora-review {
+    display: flex;
+    gap: 20px;
+    padding: 24px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .aurora-review:last-child {
+    border-bottom: none;
+  }
+
+  .aurora-review__avatar {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    background: #111111;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: #FFFFFF;
+  }
+
+  .aurora-review__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .aurora-review__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .aurora-review__author {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .aurora-review__date {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .aurora-review__rating {
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: #FFFFFF;
+    flex-shrink: 0;
+  }
+
+  .aurora-review__title {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .aurora-review__body {
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .aurora-reviews__more {
+    margin-top: 40px;
+    text-align: center;
+  }
+
+  .aurora-reviews__toggle {
+    display: none;
+  }
+
+  .aurora-reviews__toggle:checked ~ .aurora-reviews__hidden {
+    display: flex;
+  }
+
+  .aurora-reviews__hidden {
+    display: none;
+    flex-direction: column;
+    gap: 32px;
+    margin-top: 32px;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .aurora-reviews__button {
+    background: #000000;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #FFFFFF;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: -0.01em;
+    font-family: "SF Pro Display", "Inter", system-ui;
+    transition: all 0.2s;
+  }
+
+  .aurora-reviews__button:hover {
+    background: #111111;
+  }
+
+  @media (max-width: 768px) {
+    .aurora-reviews {
+      padding: 40px 0;
+    }
+
+    .aurora-reviews__header {
+      flex-direction: column;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .aurora-review {
+      gap: 16px;
+    }
+
+    .aurora-review__header {
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .aurora-reviews__rating {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .aurora-review__avatar {
+      width: 40px;
+      height: 40px;
+      font-size: 12px;
+    }
+  }
+{% endstylesheet %}
+
+{%- capture reviews_json -%}{% include 'reviews' %}{%- endcapture -%}
+{%- assign reviews = reviews_json | parse_json -%}
+
+<div class="aurora-reviews">
+  <div class="aurora-reviews__header">
+    <h2 class="aurora-reviews__title">Customer Reviews</h2>
+    <div class="aurora-reviews__rating">
+      <span class="aurora-reviews__stars">★★★★★</span>
+      <span class="aurora-reviews__meta">4.62 · {{ reviews | size }} reviews</span>
+    </div>
+  </div>
+
+  <div class="aurora-reviews__list">
+    {%- for review in reviews limit: 12 -%}
+      <div class="aurora-review">
+        <div class="aurora-review__avatar">{{ review.photo }}</div>
+        <div class="aurora-review__content">
+          <div class="aurora-review__header">
+            <div>
+              <div class="aurora-review__author">{{ review.author }}</div>
+              <div class="aurora-review__date">{{ review.date }}</div>
+            </div>
+            <div class="aurora-review__rating">{{ review.rating }}★</div>
+          </div>
+          <div class="aurora-review__title">{{ review.title }}</div>
+          <div class="aurora-review__body">{{ review.body }}</div>
+        </div>
+      </div>
+    {%- endfor -%}
+  </div>
+
+  {%- if reviews.size > 12 -%}
+    <input type="checkbox" id="aurora-reviews-toggle" class="aurora-reviews__toggle">
+    <div class="aurora-reviews__hidden">
+      {%- for review in reviews offset: 12 -%}
+        <div class="aurora-review">
+          <div class="aurora-review__avatar">{{ review.photo }}</div>
+          <div class="aurora-review__content">
+            <div class="aurora-review__header">
+              <div>
+                <div class="aurora-review__author">{{ review.author }}</div>
+                <div class="aurora-review__date">{{ review.date }}</div>
+              </div>
+              <div class="aurora-review__rating">{{ review.rating }}★</div>
+            </div>
+            <div class="aurora-review__title">{{ review.title }}</div>
+            <div class="aurora-review__body">{{ review.body }}</div>
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+
+    <div class="aurora-reviews__more">
+      <label for="aurora-reviews-toggle" class="aurora-reviews__button">Load more reviews</label>
+    </div>
+  {%- endif -%}
+</div>
