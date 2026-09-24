@@ -1,0 +1,175 @@
+{% stylesheet %}
+  .aurora-atc {
+    padding: 40px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .aurora-atc__form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .aurora-atc__size-select {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .aurora-atc__size-label {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: #FFFFFF;
+  }
+
+  .aurora-atc__size-options {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .aurora-atc__size-option {
+    padding: 10px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: transparent;
+    color: #FFFFFF;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .aurora-atc__size-option:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+
+  .aurora-atc__size-option--active {
+    border-color: #FFFFFF;
+    background: #FFFFFF;
+    color: #000000;
+  }
+
+  .aurora-atc__button-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .aurora-atc__button {
+    padding: 16px 24px;
+    background: #FFFFFF;
+    color: #000000;
+    border: none;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    font-family: "SF Pro Display", "Inter", system-ui;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 48px;
+  }
+
+  .aurora-atc__button:hover {
+    background: #F5F5F5;
+  }
+
+  .aurora-atc__trust {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .aurora-atc__security {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .aurora-atc__security-icon {
+    font-size: 13px;
+  }
+
+  .aurora-atc__payments {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .aurora-atc__payment-icon {
+    width: 28px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 4px;
+  }
+
+  @media (max-width: 768px) {
+    .aurora-atc {
+      padding: 32px 0;
+      gap: 16px;
+    }
+
+    .aurora-atc__button {
+      min-height: 44px;
+      padding: 14px 20px;
+      font-size: 15px;
+    }
+
+    .aurora-atc__trust {
+      flex-direction: column;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .aurora-atc__payments {
+      gap: 8px;
+    }
+  }
+{% endstylesheet %}
+
+<div class="aurora-atc">
+  <form method="post" action="/cart/add" id="product-form" accept-charset="UTF-8" class="aurora-atc__form">
+    
+    <div class="aurora-atc__size-select">
+      <label class="aurora-atc__size-label" for="product-size">Select Size</label>
+      <div class="aurora-atc__size-options">
+        <button type="button" class="aurora-atc__size-option aurora-atc__size-option--active" data-size="6">Size 6</button>
+        <button type="button" class="aurora-atc__size-option" data-size="7">Size 7</button>
+        <button type="button" class="aurora-atc__size-option" data-size="8">Size 8</button>
+        <button type="button" class="aurora-atc__size-option" data-size="9">Size 9</button>
+        <button type="button" class="aurora-atc__size-option" data-size="10">Size 10</button>
+        <button type="button" class="aurora-atc__size-option" data-size="11">Size 11</button>
+        <button type="button" class="aurora-atc__size-option" data-size="12">Size 12</button>
+      </div>
+      <input type="hidden" name="id" id="product-size" value="">
+    </div>
+
+    <div class="aurora-atc__button-wrap">
+      <button type="submit" name="add" class="aurora-atc__button">Add to Cart • €149</button>
+    </div>
+
+  </form>
+
+  <div class="aurora-atc__trust">
+    <div class="aurora-atc__security">
+      <span class="aurora-atc__security-icon">◆</span>
+      <span>Secure Checkout</span>
+    </div>
+    <div class="aurora-atc__payments">
+      <div class="aurora-atc__payment-icon">Visa</div>
+      <div class="aurora-atc__payment-icon">MC</div>
+      <div class="aurora-atc__payment-icon">Apple</div>
+      <div class="aurora-atc__payment-icon">PayPal</div>
+    </div>
+  </div>
+</div>
