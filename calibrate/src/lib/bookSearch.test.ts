@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { authorScore, bestCoverMatch, coverCandidates, fromGoogle, mergeResults, plainText, sharpCover, titleScore, type BookMatch } from './bookSearch'
+import { authorScore, bestCoverMatch, coverCandidates, fromGoogle, fromGutenberg, fromOpenLibrary, gutenbergAuthor, mergeResults, plainText, sharpCover, titleScore, type BookMatch } from './bookSearch'
 import { cleanSummary, firstSentences } from './bookSummary'
 
 const m = (title: string, author: string, coverUrl: string | null = 'x.jpg'): BookMatch => ({
@@ -93,5 +93,36 @@ describe('summary text', () => {
   })
   it('strips markdown a model adds anyway', () => {
     expect(cleanSummary('## Title\n**Bold** idea\n- point')).toBe('Title\nBold idea\n• point')
+  })
+})
+
+describe('Project Gutenberg', () => {
+  it('normalises Gutenberg author names', () => {
+    expect(gutenbergAuthor('Austen, Jane')).toBe('Jane Austen')
+    expect(gutenbergAuthor('Marcus Aurelius, Emperor of Rome, 121-180')).toBe('Marcus Aurelius')
+    expect(gutenbergAuthor('Seneca, Lucius Annaeus, 4 BCE-65')).toBe('Lucius Annaeus Seneca')
+  })
+  it('maps a Gutendex book with a read link', () => {
+    const m = fromGutenberg({ id: 2680, title: 'Meditations', authors: [{ name: 'Marcus Aurelius, Emperor of Rome, 121-180' }], formats: {} })
+    expect(m).toMatchObject({ title: 'Meditations', author: 'Marcus Aurelius', readUrl: 'https://www.gutenberg.org/ebooks/2680', source: 'gutenberg' })
+  })
+  it('attaches the free text to the Penguin edition instead of adding a duplicate row', () => {
+    const penguin = { ...m('Meditations', 'Marcus Aurelius', 'g1'), publisher: 'Penguin Classics', source: 'google' as const }
+    const pg = fromGutenberg({ id: 2680, title: 'Meditations', authors: [{ name: 'Marcus Aurelius, Emperor of Rome, 121-180' }] })!
+    const out = mergeResults([penguin], [], [pg])
+    expect(out).toHaveLength(1)
+    expect(out[0]).toMatchObject({ publisher: 'Penguin Classics', readUrl: 'https://www.gutenberg.org/ebooks/2680' })
+  })
+})
+
+describe('Open Library editions', () => {
+  it('takes publisher and public scan from the best-matching edition', () => {
+    const m = fromOpenLibrary({
+      title: 'Meditations',
+      author_name: ['Marcus Aurelius'],
+      key: '/works/OL1W',
+      editions: { docs: [{ publisher: ['Penguin Books'], ebook_access: 'public', ia: ['meditations00marc'] }] },
+    })
+    expect(m).toMatchObject({ publisher: 'Penguin Books', readUrl: 'https://archive.org/details/meditations00marc' })
   })
 })

@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
    BOOK SEARCH
-   Two free, keyless catalogues, both CORS-open so this runs straight
+   Three free, keyless catalogues, all CORS-open so this runs straight
    from the browser:
 
    · Google Books — the biggest catalogue there is (tens of millions of
@@ -10,11 +10,17 @@
      Docs: https://developers.google.com/books/docs/v1/using
    · Open Library — the fallback: open data, strong on older and
      non-English titles, and independent of Google's per-IP quota.
+     Queried at edition level, so "meditations penguin" can land on the
+     Penguin printing, and public-domain scans come with a read link.
      Docs: https://openlibrary.org/dev/docs/api/search
+   · Project Gutenberg, via Gutendex — 75,000+ public-domain books with
+     free full text. Its covers are plain, so it mostly contributes a
+     "Read free" link to a match the other two already found.
+     Docs: https://gutendex.com
 
-   Search queries both in parallel and merges (Google first — its
-   relevance ranking is far better). Either one failing is fine; only
-   both failing is an error.
+   Search queries all three in parallel and merges (Google first — its
+   relevance ranking is far better). Any of them failing is fine; only
+   all of them failing is an error.
 
    Two failure modes the matcher guards against:
    · Wrong cover — a work's default cover is often a translation, so
@@ -34,7 +40,9 @@ export interface BookMatch {
   publisher?: string
   /** Catalogue description, plain text. Seeds the auto-summary. */
   description?: string
-  source: 'google' | 'openlibrary'
+  /** Free, legal full text — Project Gutenberg or an Open Library public scan. */
+  readUrl?: string
+  source: 'google' | 'openlibrary' | 'gutenberg'
 }
 
 // ── Covers ─────────────────────────────────────────────────────────
@@ -137,8 +145,15 @@ const googleFielded = (title: string, author: string) =>
 // ── Open Library ───────────────────────────────────────────────────
 
 interface OpenLibraryEdition {
+  key?: string
+  title?: string
   cover_i?: number
   language?: string[]
+  publisher?: string[]
+  publish_date?: string[]
+  number_of_pages_median?: number
+  ebook_access?: string
+  ia?: string[]
 }
 
 interface OpenLibraryDoc {
@@ -147,7 +162,8 @@ interface OpenLibraryDoc {
   cover_i?: number
   number_of_pages_median?: number
   first_publish_year?: number
-  publisher?: string[]
+  key?: string
+  ebook_access?: string
   editions?: { docs?: OpenLibraryEdition[] }
 }
 
@@ -157,9 +173,15 @@ const OL_FIELDS = [
   'cover_i',
   'number_of_pages_median',
   'first_publish_year',
+  'key',
+  'ebook_access',
   'editions',
+  'editions.key',
   'editions.cover_i',
   'editions.language',
+  'editions.publisher',
+  'editions.ebook_access',
+  'editions.ia',
 ].join(',')
 
 function pickCover(d: OpenLibraryDoc): number | null {
@@ -168,14 +190,24 @@ function pickCover(d: OpenLibraryDoc): number | null {
   return d.cover_i ?? ed?.cover_i ?? null
 }
 
-function fromOpenLibrary(d: OpenLibraryDoc & { title: string }): BookMatch {
+export function fromOpenLibrary(d: OpenLibraryDoc & { title: string }): BookMatch {
   const cover = pickCover(d)
+  // `editions.docs[0]` is the edition that best matches the query — its
+  // publisher is what the user typed "penguin" to find.
+  const ed = d.editions?.docs?.[0]
+  const publicScan = ed?.ebook_access === 'public' && ed.ia?.[0]
   return {
     title: d.title,
     author: d.author_name?.[0] ?? '',
     coverUrl: cover ? coverFor(cover) : null,
     totalPages: d.number_of_pages_median ?? 0,
     year: d.first_publish_year ?? null,
+    publisher: ed?.publisher?.[0],
+    readUrl: publicScan
+      ? `https://archive.org/details/${encodeURIComponent(publicScan)}`
+      : d.ebook_access === 'public' && d.key
+        ? `https://openlibrary.org${d.key}`
+        : undefined,
     source: 'openlibrary',
   }
 }
@@ -188,28 +220,92 @@ async function openLibrary(params: Record<string, string>, signal?: AbortSignal)
   return (data.docs ?? []).filter((d): d is OpenLibraryDoc & { title: string } => !!d.title).map(fromOpenLibrary)
 }
 
+// ── Project Gutenberg (Gutendex) ──────────────────────────────────
+
+export interface GutendexBook {
+  id: number
+  title?: string
+  authors?: { name: string }[]
+  formats?: Record<string, string>
+}
+
+/** "Austen, Jane" → "Jane Austen"; "Marcus Aurelius, Emperor of Rome, 121-180" → "Marcus Aurelius". */
+export function gutenbergAuthor(name: string): string {
+  const parts = name.split(', ').filter((p) => !/\d/.test(p))
+  if (parts.length >= 2 && /^[A-Z][\w.'-]*(\s[A-Z][\w.'-]*){0,2}$/.test(parts[1]) && !/\s/.test(parts[0].trim())) {
+    return `${parts[1]} ${parts[0]}`
+  }
+  return parts[0] ?? name
+}
+
+export function fromGutenberg(b: GutendexBook): BookMatch | null {
+  if (!b.title) return null
+  return {
+    // Gutenberg titles carry the subtitle after a semicolon or newline.
+    title: b.title.split(/[;\n\r]/)[0].trim(),
+    author: b.authors?.[0] ? gutenbergAuthor(b.authors[0].name) : '',
+    coverUrl: b.formats?.['image/jpeg'] ?? null,
+    totalPages: 0,
+    year: null,
+    publisher: 'Project Gutenberg',
+    readUrl: `https://www.gutenberg.org/ebooks/${b.id}`,
+    source: 'gutenberg',
+  }
+}
+
+async function gutenberg(q: string, signal?: AbortSignal): Promise<BookMatch[]> {
+  // Gutendex can be slow; never let it hold the other two hostage.
+  const timeout = new AbortController()
+  const timer = setTimeout(() => timeout.abort(), 8000)
+  const relay = () => timeout.abort()
+  signal?.addEventListener('abort', relay)
+  try {
+    const res = await fetch(`https://gutendex.com/books/?search=${encodeURIComponent(q)}`, { signal: timeout.signal })
+    if (!res.ok) throw new Error(`Gutendex ${res.status}`)
+    const data = (await res.json()) as { results?: GutendexBook[] }
+    return (data.results ?? []).slice(0, 8).map(fromGutenberg).filter((m): m is BookMatch => !!m)
+  } finally {
+    clearTimeout(timer)
+    signal?.removeEventListener('abort', relay)
+  }
+}
+
 // ── Merge ──────────────────────────────────────────────────────────
 
-/** Run both catalogues; keep whatever answered. Throws only if both failed. */
-async function both(g: Promise<BookMatch[]>, o: Promise<BookMatch[]>): Promise<BookMatch[]> {
-  const [gr, or] = await Promise.allSettled([g, o])
-  if (gr.status === 'rejected' && or.status === 'rejected') throw gr.reason
-  return mergeResults(gr.status === 'fulfilled' ? gr.value : [], or.status === 'fulfilled' ? or.value : [])
+/** Run every catalogue; keep whatever answered. Throws only if all failed. */
+async function all(g: Promise<BookMatch[]>, o: Promise<BookMatch[]>, pg: Promise<BookMatch[]> = Promise.resolve([])): Promise<BookMatch[]> {
+  const settled = await Promise.allSettled([g, o, pg])
+  if (settled.every((r) => r.status === 'rejected')) throw (settled[0] as PromiseRejectedResult).reason
+  const [gv, ov, pv] = settled.map((r) => (r.status === 'fulfilled' ? r.value : []))
+  return mergeResults(gv, ov, pv)
 }
+
+const workKey = (m: BookMatch) => `${norm(m.title.split(/[:(]/)[0])}|${norm(m.author).split(' ').pop() ?? ''}`
 
 /**
  * Google first (better relevance, real editions). Open Library adds only
  * works Google didn't return. Google's own editions all stay — picking the
- * Penguin Classics printing over another is the point.
+ * Penguin Classics printing over another is the point. A free full text
+ * (Gutenberg, or an Open Library public scan) is attached to every row of
+ * the same work, so the nice edition still says "Read free"; Gutenberg
+ * only gets a row of its own for works nobody else found.
  */
-export function mergeResults(googleHits: BookMatch[], olHits: BookMatch[]): BookMatch[] {
-  const key = (m: BookMatch) => `${norm(m.title.split(/[:(]/)[0])}|${norm(m.author).split(' ').pop() ?? ''}`
+export function mergeResults(googleHits: BookMatch[], olHits: BookMatch[], pgHits: BookMatch[] = []): BookMatch[] {
   const seenCover = new Set<string>()
-  const seenWork = new Set(googleHits.map(key))
+  const seenWork = new Set(googleHits.map(workKey))
   const out: BookMatch[] = []
-  for (const m of [...googleHits, ...olHits.filter((m) => !seenWork.has(key(m)))]) {
+  for (const m of [...googleHits, ...olHits.filter((m) => !seenWork.has(workKey(m)))]) {
     if (m.coverUrl && seenCover.has(m.coverUrl)) continue
     if (m.coverUrl) seenCover.add(m.coverUrl)
+    out.push({ ...m })
+  }
+  const free = new Map<string, string>()
+  for (const m of [...olHits, ...pgHits]) if (m.readUrl && !free.has(workKey(m))) free.set(workKey(m), m.readUrl)
+  for (const m of out) m.readUrl ??= free.get(workKey(m))
+  const found = new Set(out.map(workKey))
+  for (const m of pgHits) {
+    if (found.has(workKey(m))) continue
+    found.add(workKey(m))
     out.push(m)
   }
   return out
@@ -218,7 +314,7 @@ export function mergeResults(googleHits: BookMatch[], olHits: BookMatch[]): Book
 export async function searchBooks(q: string, signal?: AbortSignal): Promise<BookMatch[]> {
   const text = q.trim()
   if (!text) return []
-  return both(google(text, signal), openLibrary({ q: text }, signal))
+  return all(google(text, signal), openLibrary({ q: text }, signal), gutenberg(text, signal))
 }
 
 // ── Matching ───────────────────────────────────────────────────────
@@ -274,7 +370,7 @@ export function bestCoverMatch(title: string, author: string, hits: BookMatch[])
 }
 
 function fieldedBoth(title: string, author: string, signal?: AbortSignal) {
-  return both(
+  return all(
     google(googleFielded(title, author), signal),
     openLibrary(author.trim() ? { title, author } : { title }, signal),
   )
@@ -302,4 +398,20 @@ export async function describeBook(title: string, author: string, signal?: Abort
     .filter((d) => d.length > 80)
     .sort((a, b) => b.length - a.length)
   return texts[0] ?? null
+}
+
+/**
+ * A free, legal full text of this exact book, or null. Throws when every
+ * source failed (offline) so callers don't record "none" by mistake.
+ */
+export async function findFreeCopy(title: string, author: string, signal?: AbortSignal): Promise<string | null> {
+  const settled = await Promise.allSettled([
+    gutenberg(`${title} ${author.split(',')[0]}`.trim(), signal),
+    openLibrary(author.trim() ? { title, author } : { title }, signal),
+  ])
+  if (settled.every((r) => r.status === 'rejected')) throw new Error('No catalogue reachable')
+  const hits = settled.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
+  // Gutenberg first: a clean, complete text beats a page scan.
+  const sorted = [...hits.filter((m) => m.source === 'gutenberg'), ...hits.filter((m) => m.source !== 'gutenberg')]
+  return confidentMatches(title, author, sorted).find((m) => m.readUrl)?.readUrl ?? null
 }

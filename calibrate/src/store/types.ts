@@ -336,6 +336,8 @@ export interface Book {
   summary?: string
   /** Edition publisher from search — "Penguin Classics". */
   publisher?: string
+  /** Free full text (Project Gutenberg / Open Library scan). '' = looked, none exists; undefined = not looked yet. */
+  readUrl?: string
   /** ISO dates stamped on status changes — drive "since Sep", the per-month chart and the by-year shelf. */
   startedAt?: string | null
   finishedAt?: string | null
