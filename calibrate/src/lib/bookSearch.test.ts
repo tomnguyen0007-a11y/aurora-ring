@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { authorScore, bestCoverMatch, coverCandidates, fromGoogle, fromGutenberg, fromOpenLibrary, gutenbergAuthor, mergeResults, plainText, sharpCover, titleScore, type BookMatch } from './bookSearch'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { authorScore, bestCoverMatch, concatGoogle, coverCandidates, guessLang, searchBooks, fromGoogle, fromGutenberg, fromOpenLibrary, gutenbergAuthor, mergeResults, plainText, sharpCover, titleScore, type BookMatch } from './bookSearch'
 import { cleanSummary, firstSentences } from './bookSummary'
 
 const m = (title: string, author: string, coverUrl: string | null = 'x.jpg'): BookMatch => ({
@@ -124,5 +124,40 @@ describe('Open Library editions', () => {
       editions: { docs: [{ publisher: ['Penguin Books'], ebook_access: 'public', ia: ['meditations00marc'] }] },
     })
     expect(m).toMatchObject({ publisher: 'Penguin Books', readUrl: 'https://archive.org/details/meditations00marc' })
+  })
+})
+
+describe('guessLang', () => {
+  it('reads the language off its letters', () => {
+    expect(guessLang('Psychologie peněz')).toBe('cs')
+    expect(guessLang('Bruselský diktát')).toBe('cs')
+    expect(guessLang('Die Verwandlung – Kafka, Schöne Ausgabe')).toBe('de')
+    expect(guessLang('Atomic Habits')).toBeNull()
+  })
+})
+
+describe('concatGoogle', () => {
+  it('keeps the first pass order and drops the same volume twice', () => {
+    const a = { ...m('Kniha', 'Autor', 'c1'), source: 'google' as const }
+    const b = { ...m('Jiná', 'Autor', 'c2'), source: 'google' as const }
+    expect(concatGoogle([a], [b, a]).map((x) => x.coverUrl)).toEqual(['c1', 'c2'])
+  })
+})
+
+describe('searchBooks streaming', () => {
+  afterEach(() => vi.unstubAllGlobals())
+  it('shows fast catalogues before the slow one answers, then merges it in', async () => {
+    const json = (body: unknown, ms = 0) =>
+      new Promise<Response>((ok) => setTimeout(() => ok(new Response(JSON.stringify(body), { status: 200 })), ms))
+    vi.stubGlobal('fetch', (url: string) => {
+      if (url.includes('googleapis')) return json({ items: [{ id: 'p', volumeInfo: { title: 'Psychologie peněz', authors: ['Morgan Housel'], imageLinks: { thumbnail: 'x' } } }] })
+      if (url.includes('openlibrary')) return json({ docs: [] })
+      return json({ results: [{ id: 1, title: 'Meditations', authors: [{ name: 'Marcus Aurelius' }] }] }, 30)
+    })
+    const updates: { n: number; done: boolean }[] = []
+    const final = await searchBooks('psychologie peněz stream-test', undefined, (r, done) => updates.push({ n: r.length, done }))
+    expect(updates[0]).toEqual({ n: 1, done: false })
+    expect(updates.at(-1)?.done).toBe(true)
+    expect(final.map((x) => x.source)).toEqual(['google', 'gutenberg'])
   })
 })
