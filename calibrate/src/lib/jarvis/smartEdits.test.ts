@@ -11,7 +11,7 @@ describe('total edit control — Jarvis can edit anything, not just add/delete',
       golfSessions: [{ id: 'gs1', date: today, category: 'putting', minutes: 250, notes: 'via Jarvis' }],
       runLogs: [{ id: 'r1', date: today, minutes: 45, distanceKm: 7, avgHr: null, notes: '' }],
       revenue: [{ id: 'v1', date: today, amount: 90, source: 'store' }],
-      books: [{ id: 'b1', title: 'Deep Work', author: 'Cal Newport', status: 'reading', currentPage: 40, totalPages: 300, rating: null, notes: '' }],
+      books: [{ id: 'b1', title: 'Deep Work', author: 'Cal Newport', status: 'reading', currentPage: 40, totalPages: 300, rating: null, notes: '', coverUrl: null }],
       goals: [{ id: 'g1', pillar: 'golf', title: 'Plus handicap', target: 'by summer', deadline: null, progress: 10, milestones: [], notes: '' }],
       trainingPhotos: [{ id: 'p1', date: today, category: 'golf', caption: 'putting drill', createdAt: 1 }],
       handicap: [

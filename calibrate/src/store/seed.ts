@@ -324,11 +324,11 @@ export const seedSupplements: SupplementItem[] = [
 ]
 
 export const seedBooks: Book[] = [
-  { id: id('bk'), title: 'The Almanack of Naval Ravikant', author: 'Eric Jorgenson', status: 'reading', currentPage: 0, totalPages: 244, rating: null, notes: 'Wealth without luck: leverage + specific knowledge. Happiness as a skill.' },
-  { id: id('bk'), title: 'Atomic Habits', author: 'James Clear', status: 'queued', currentPage: 0, totalPages: 320, rating: null, notes: 'Systems > goals. 1% better daily. Identity-based habits.' },
-  { id: id('bk'), title: 'The Changing World Order', author: 'Ray Dalio', status: 'queued', currentPage: 0, totalPages: 560, rating: null, notes: 'Empire & reserve-currency cycles. Macro lens for AURORA.' },
-  { id: id('bk'), title: 'The 48 Laws of Power', author: 'Robert Greene', status: 'queued', currentPage: 0, totalPages: 452, rating: null, notes: 'Descriptive strategy of social power. Read critically.' },
-  { id: id('bk'), title: 'The 4-Hour Workweek', author: 'Tim Ferriss', status: 'queued', currentPage: 0, totalPages: 416, rating: null, notes: 'DEAL: Definition, Elimination, Automation, Liberation.' },
+  { id: id('bk'), title: 'The Almanack of Naval Ravikant', author: 'Eric Jorgenson', status: 'reading', currentPage: 0, totalPages: 244, rating: null, notes: 'Wealth without luck: leverage + specific knowledge. Happiness as a skill.', coverUrl: null },
+  { id: id('bk'), title: 'Atomic Habits', author: 'James Clear', status: 'queued', currentPage: 0, totalPages: 320, rating: null, notes: 'Systems > goals. 1% better daily. Identity-based habits.', coverUrl: null },
+  { id: id('bk'), title: 'The Changing World Order', author: 'Ray Dalio', status: 'queued', currentPage: 0, totalPages: 560, rating: null, notes: 'Empire & reserve-currency cycles. Macro lens for AURORA.', coverUrl: null },
+  { id: id('bk'), title: 'The 48 Laws of Power', author: 'Robert Greene', status: 'queued', currentPage: 0, totalPages: 452, rating: null, notes: 'Descriptive strategy of social power. Read critically.', coverUrl: null },
+  { id: id('bk'), title: 'The 4-Hour Workweek', author: 'Tim Ferriss', status: 'queued', currentPage: 0, totalPages: 416, rating: null, notes: 'DEAL: Definition, Elimination, Automation, Liberation.', coverUrl: null },
 ]
 
 // Fuelling Framework — carbohydrate periodisation by day type (g/kg/day centre-of-band)

@@ -322,6 +322,8 @@ export interface Book {
   totalPages: number
   rating: number | null
   notes: string
+  /** Open Library cover art, when the search flow found one — null for a manually-typed book. */
+  coverUrl: string | null
 }
 
 // ─────────────────────────────────────────────────────────────

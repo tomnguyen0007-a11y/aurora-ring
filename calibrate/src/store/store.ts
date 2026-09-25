@@ -793,6 +793,7 @@ export const useStore = create<CalibrateState>()(
               totalPages: b.totalPages ?? 0,
               rating: b.rating ?? null,
               notes: b.notes ?? '',
+              coverUrl: b.coverUrl ?? null,
             },
             ...s.books,
           ],
