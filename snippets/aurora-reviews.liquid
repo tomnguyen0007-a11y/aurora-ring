@@ -1,0 +1,299 @@
+{%- comment -%}
+  Aurora — premium reviews (light, editorial).
+  Self-contained: scoped .avr- classes + own IIFE JS.
+  Safe on any page (product page + landing). Uses Shopify
+  contact form for submissions. Review dataset and totals
+  vary per product (flagship vs. the secondary/legacy model).
+{%- endcomment -%}
+{%- liquid
+  assign _is_alt = false
+  if product.title contains 'screenless' or product.handle contains 'screenless' or product.handle contains 'gen-1'
+    assign _is_alt = true
+  endif
+
+  assign _r_total = 852
+  assign _r_d5    = 730
+  assign _r_d4    = 78
+  assign _r_d3    = 27
+  assign _r_d2    = 12
+  assign _r_d1    = 5
+  assign _r_avg   = '4.8'
+  if _is_alt
+    assign _r_total = 534
+    assign _r_d5    = 445
+    assign _r_d4    = 58
+    assign _r_d3    = 19
+    assign _r_d2    = 8
+    assign _r_d1    = 4
+    assign _r_avg   = '4.7'
+  endif
+-%}
+
+<section id="avr" class="avr">
+  <div class="avr-wrap">
+
+    <!-- Header / summary -->
+    <div class="avr-head">
+      <div class="avr-sum">
+        <div class="avr-avg" id="avr-avg">{{ _r_avg }}</div>
+        <div class="avr-sum-stars">★★★★★</div>
+        <div class="avr-sum-count">Based on <strong id="avr-count">{{ _r_total }}</strong> verified reviews</div>
+        <button class="avr-write-btn" type="button" onclick="avrOpen()">Write a review</button>
+      </div>
+      <div class="avr-bars" id="avr-bars"></div>
+    </div>
+
+    <!-- Filters -->
+    <div class="avr-filters">
+      <div class="avr-fpills" id="avr-fpills">
+        <button class="avr-pill on" data-f="all" onclick="avrFilter('all',this)">All</button>
+        <button class="avr-pill" data-f="5" onclick="avrFilter('5',this)">5 ★</button>
+        <button class="avr-pill" data-f="4" onclick="avrFilter('4',this)">4 ★</button>
+        <button class="avr-pill" data-f="3" onclick="avrFilter('3',this)">3 ★</button>
+      </div>
+      <div class="avr-sort">
+        <span>Sort</span>
+        <select id="avr-sortsel" onchange="avrSort(this.value)">
+          <option value="helpful">Most helpful</option>
+          <option value="recent">Most recent</option>
+          <option value="high">Highest rated</option>
+          <option value="low">Lowest rated</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="avr-grid" id="avr-grid"></div>
+    <div class="avr-empty" id="avr-empty" style="display:none;">No reviews match this filter.</div>
+    <div class="avr-more-wrap"><button class="avr-more" id="avr-more" onclick="avrMore()">Show more reviews</button></div>
+
+    <!-- Write-review form (Shopify contact) -->
+    <div class="avr-form" id="avr-form">
+      <h3 class="avr-form-title">Share your experience</h3>
+      <p class="avr-form-sub">Your review appears here after a quick check.</p>
+      {% form 'contact' %}
+        <input type="hidden" name="contact[tags]" value="aurora-review,pending">
+        <input type="hidden" name="contact[subject]" value="New AURORA Ring Review">
+        <label class="avr-flabel">Your rating</label>
+        <div class="avr-starpick" id="avr-starpick">
+          <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
+        </div>
+        <input type="hidden" name="contact[rating]" id="avr-ratval">
+        <div class="avr-frow">
+          <div><label class="avr-flabel">Name</label><input class="avr-finput" name="contact[name]" type="text" placeholder="e.g. Jordan M." required></div>
+          <div><label class="avr-flabel">Email (not published)</label><input class="avr-finput" name="contact[email]" type="email" placeholder="you@email.com" required></div>
+        </div>
+        <label class="avr-flabel">Title</label>
+        <input class="avr-finput" name="contact[review_title]" type="text" placeholder="Summarise it in a line" required>
+        <label class="avr-flabel">Review</label>
+        <textarea class="avr-finput avr-ftext" name="contact[body]" rows="4" placeholder="How did it change your sleep, recovery or routine?" required></textarea>
+        <button class="avr-submit" type="submit">Submit review</button>
+      {% endform %}
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .avr{background:var(--vg-paper,#fff);color:var(--vg-ink,#15171a);padding:80px 20px;font-family:var(--aurora-font,'Inter',sans-serif);-webkit-font-smoothing:antialiased;border-top:1px solid var(--vg-line,#e6e8e3);}
+  .avr-wrap{max-width:1040px;margin:0 auto;}
+  .avr-head{display:grid;grid-template-columns:280px 1fr;gap:48px;align-items:center;padding-bottom:36px;margin-bottom:32px;border-bottom:1px solid var(--vg-line,#e6e8e3);}
+  .avr-avg{font-size:68px;font-weight:700;line-height:1;letter-spacing:-.03em;color:var(--vg-ink,#15171a);}
+  .avr-sum-stars{color:var(--vg-star,#ffb400);font-size:20px;letter-spacing:3px;margin:8px 0 6px;}
+  .avr-sum-count{font-size:13px;color:var(--vg-ink-soft,#5b6066);}
+  .avr-sum-count strong{color:var(--vg-ink,#15171a);}
+  .avr-write-btn{margin-top:18px;padding:12px 24px;border-radius:999px;border:none;background:var(--vg-ink,#15171a);color:#fff;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:transform .15s,opacity .2s;}
+  .avr-write-btn:hover{transform:translateY(-1px);opacity:.9;}
+  .avr-bars{display:flex;flex-direction:column;gap:9px;}
+  .avr-bar{display:flex;align-items:center;gap:12px;}
+  .avr-bar-l{font-size:12px;color:var(--vg-ink-soft,#5b6066);width:30px;display:flex;align-items:center;gap:3px;}
+  .avr-bar-l b{color:var(--vg-star,#ffb400);}
+  .avr-bar-track{flex:1;height:8px;background:var(--vg-paper-3,#eef0ea);border-radius:99px;overflow:hidden;}
+  .avr-bar-fill{height:100%;background:var(--vg-star,#ffb400);border-radius:99px;transition:width .8s cubic-bezier(.2,.8,.2,1);}
+  .avr-bar-p{font-size:12px;color:var(--vg-ink-soft,#5b6066);width:38px;text-align:right;}
+  .avr-filters{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:28px;}
+  .avr-fpills{display:flex;gap:8px;flex-wrap:wrap;}
+  .avr-pill{padding:8px 16px;border-radius:999px;border:1px solid var(--vg-line,#e6e8e3);background:#fff;color:var(--vg-ink-soft,#5b6066);font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;transition:all .16s;}
+  .avr-pill:hover{border-color:var(--vg-ink,#15171a);color:var(--vg-ink,#15171a);}
+  .avr-pill.on{background:var(--vg-ink,#15171a);border-color:var(--vg-ink,#15171a);color:#fff;}
+  .avr-sort{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--vg-ink-soft,#5b6066);}
+  .avr-sort select{padding:8px 12px;border-radius:10px;border:1px solid var(--vg-line,#e6e8e3);background:#fff;font-family:inherit;font-size:13px;color:var(--vg-ink,#15171a);cursor:pointer;}
+  .avr-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+  .avr-card{background:var(--vg-paper-2,#f5f6f3);border:1px solid var(--vg-line,#e6e8e3);border-radius:18px;padding:24px;transition:box-shadow .2s,transform .2s;}
+  .avr-card:hover{box-shadow:0 14px 32px rgba(0,0,0,.06);transform:translateY(-2px);}
+  .avr-ctop{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+  .avr-ava{width:42px;height:42px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:15px;letter-spacing:.02em;}
+  .avr-ci{flex:1;min-width:0;}
+  .avr-cname{font-size:14px;font-weight:600;color:var(--vg-ink,#15171a);display:flex;align-items:center;gap:6px;}
+  .avr-cver{font-size:10px;color:#0d9488;font-weight:600;display:inline-flex;align-items:center;gap:3px;}
+  .avr-cdate{font-size:11px;color:#9aa0a6;margin-top:2px;}
+  .avr-cstars{color:var(--vg-star,#ffb400);font-size:13px;letter-spacing:1px;margin-bottom:7px;}
+  .avr-ctitle{font-size:15px;font-weight:600;color:var(--vg-ink,#15171a);margin:0 0 6px;}
+  .avr-cbody{font-size:14px;line-height:1.65;color:var(--vg-ink-soft,#5b6066);margin:0;}
+  .avr-chelp{display:flex;align-items:center;gap:8px;margin-top:14px;padding-top:13px;border-top:1px solid var(--vg-line,#e6e8e3);}
+  .avr-chelp span{font-size:12px;color:#9aa0a6;}
+  .avr-hbtn{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border-radius:999px;border:1px solid var(--vg-line,#e6e8e3);background:#fff;color:var(--vg-ink-soft,#5b6066);font-size:12px;font-family:inherit;cursor:pointer;transition:all .15s;}
+  .avr-hbtn:hover{border-color:var(--vg-ink,#15171a);color:var(--vg-ink,#15171a);}
+  .avr-hbtn.voted{border-color:#0d9488;color:#0d9488;cursor:default;}
+  .avr-empty{text-align:center;padding:48px 0;color:#9aa0a6;font-size:14px;}
+  .avr-more-wrap{text-align:center;margin-top:32px;}
+  .avr-more{padding:13px 30px;border-radius:999px;border:1px solid var(--vg-line,#e6e8e3);background:#fff;color:var(--vg-ink,#15171a);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .18s;}
+  .avr-more:hover{border-color:var(--vg-ink,#15171a);}
+  .avr-form{max-width:620px;margin:44px auto 0;padding:32px;background:var(--vg-paper-2,#f5f6f3);border:1px solid var(--vg-line,#e6e8e3);border-radius:20px;display:none;}
+  .avr-form.open{display:block;}
+  .avr-form-title{font-size:22px;font-weight:700;margin:0 0 4px;color:var(--vg-ink,#15171a);}
+  .avr-form-sub{font-size:13px;color:var(--vg-ink-soft,#5b6066);margin:0 0 22px;}
+  .avr-flabel{display:block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--vg-ink-soft,#5b6066);margin:14px 0 7px;}
+  .avr-finput{width:100%;background:#fff;border:1px solid var(--vg-line,#e6e8e3);border-radius:10px;padding:12px 14px;font-family:inherit;font-size:14px;color:var(--vg-ink,#15171a);outline:none;box-sizing:border-box;transition:border-color .2s;}
+  .avr-finput:focus{border-color:#0d9488;}
+  .avr-ftext{resize:vertical;}
+  .avr-frow{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .avr-starpick{display:flex;gap:5px;font-size:28px;color:#d8dcd4;cursor:pointer;}
+  .avr-starpick span{transition:color .12s;}
+  .avr-starpick span.on{color:var(--vg-star,#ffb400);}
+  .avr-submit{margin-top:20px;width:100%;padding:15px;border-radius:12px;border:none;background:var(--vg-ink,#15171a);color:#fff;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;transition:opacity .2s;}
+  .avr-submit:hover{opacity:.85;}
+  @media(max-width:760px){
+    .avr-head{grid-template-columns:1fr;gap:28px;text-align:center;}
+    .avr-sum-stars{justify-content:center;}
+    .avr-grid{grid-template-columns:1fr;}
+    .avr-frow{grid-template-columns:1fr;}
+    .avr-filters{flex-direction:column;align-items:stretch;}
+  }
+</style>
+
+<script>
+(function(){
+  var IS_ALT={{ _is_alt }};
+
+  var R_MAIN=[
+    {n:'Jennifer M.',r:5,v:1,d:'2026-05-18',dl:'18 May 2026',h:42,t:'Accurate, comfortable, no subscription',b:"Waterproof, durable and stylish. Tracks heart rate, sleep and my cycle. Surprised how accurate the sleep data is — and no monthly fee."},
+    {n:'David K.',r:5,v:1,d:'2026-05-11',dl:'11 May 2026',h:38,t:'Battery genuinely lasts a week',b:"Charge once and forget about it. Waterproof so I never take it off. The app is easy to read every morning. Incredible value."},
+    {n:'Rachel T.',r:5,v:1,d:'2026-05-04',dl:'4 May 2026',h:31,t:'Looks high-end, true to size',b:"Sleek and premium-looking. Ordered a size 7 and it fits perfectly. Lasts for days on a charge and feels great all day."},
+    {n:'Carlos R.',r:5,v:1,d:'2026-04-27',dl:'27 Apr 2026',h:29,t:'Data matches my other trackers',b:"Measures exactly. The app reports extensively and I compared it against two other trackers — all very close. Worth every cent."},
+    {n:'Linda W.',r:5,v:1,d:'2026-04-21',dl:'21 Apr 2026',h:24,t:'Exactly what I needed for sleep',b:"Battery lasts the whole week. Comfortable enough to wear through the night without noticing it. The sleep breakdown is genuinely useful."},
+    {n:'Marcus O.',r:5,v:1,d:'2026-04-14',dl:'14 Apr 2026',h:22,t:'Real insights every morning',b:"Reasonable price for the feature set. The Aurora app gives me real health insights daily, not just a step count."},
+    {n:'Sophie A.',r:4,v:1,d:'2026-04-06',dl:'6 Apr 2026',h:19,t:'Great daily use, want deeper trends',b:"I find smartwatches cumbersome at night but still wanted activity tracking — this fits well. Four stars only because I'd love more detailed weekly charts in the app."},
+    {n:'Aisha P.',r:5,v:1,d:'2026-03-30',dl:'30 Mar 2026',h:17,t:'No subscription is a massive win',b:"Heart rate and step accuracy are surprisingly good. Comfortable all day. All the data without a monthly bill. 10/10."},
+    {n:'Kevin L.',r:3,v:1,d:'2026-03-22',dl:'22 Mar 2026',h:15,t:'Good tracker, sizing runs large',b:"Heart rate, oxygen and sleep tracking are solid. My size ran about half a size big — support handled the exchange quickly, so worth knowing before you order."},
+    {n:'Natalie S.',r:4,v:1,d:'2026-03-15',dl:'15 Mar 2026',h:12,t:'Excellent — wish it synced to Apple Health',b:"The sleep and HRV data has been eye-opening. Four stars only because I wish it synced with Apple Health, but standalone it's excellent."},
+    {n:'Bruno F.',r:5,v:1,d:'2026-03-08',dl:'8 Mar 2026',h:11,t:'Unbeatable pricing',b:"Genuine health tracking for the cost of a nice lunch. The week-long battery is the real standout."},
+    {n:'Hannah V.',r:5,v:1,d:'2026-02-28',dl:'28 Feb 2026',h:9,t:'Cycle tracking is a game changer',b:"The temperature trend and cycle predictions have been spot on. Discreet, comfortable, and the app explains the numbers."}
+  ];
+
+  var R_ALT=[
+    {n:'Priya N.',r:5,v:1,d:'2026-05-16',dl:'16 May 2026',h:33,t:'Simple, reliable, no fuss',b:"Does exactly what it says. Comfortable to sleep in and the battery easily gets me through a full week."},
+    {n:'Tom B.',r:5,v:1,d:'2026-05-09',dl:'9 May 2026',h:27,t:'Great intro to ring trackers',b:"My first ring after years of watches. Lighter than I expected and the sleep data alone was worth it."},
+    {n:'Elena V.',r:5,v:1,d:'2026-05-02',dl:'2 May 2026',h:24,t:'Comfortable enough to forget you’re wearing it',b:"Fits well, feels sturdy, and I stopped noticing it within a couple of days. Solid heart rate accuracy too."},
+    {n:'Omar S.',r:5,v:1,d:'2026-04-24',dl:'24 Apr 2026',h:21,t:'Glad I upgraded from a watch',b:"No more charging every night. Recovery scores line up with how I actually feel most mornings."},
+    {n:'Grace L.',r:4,v:1,d:'2026-04-17',dl:'17 Apr 2026',h:18,t:'Good value, battery could be a touch longer',b:"Tracking is accurate for the price. Four stars because I'd like another day or two of battery, but it's a minor gripe."},
+    {n:'Daniel H.',r:5,v:1,d:'2026-04-10',dl:'10 Apr 2026',h:16,t:'Sleep tracking nailed it',b:"The stage-by-stage sleep breakdown is more detailed than I expected at this price point."},
+    {n:'Mia C.',r:5,v:1,d:'2026-04-02',dl:'2 Apr 2026',h:14,t:'Exactly as described, quick shipping',b:"Arrived fast, sizing kit made it easy to get the right fit, and the app was simple to set up."},
+    {n:'Felix R.',r:3,v:1,d:'2026-03-25',dl:'25 Mar 2026',h:13,t:'Does the job, app could use polish',b:"Tracking is accurate enough day to day. The companion app feels a version behind the newer ring's — a refresh would be great."},
+    {n:'Zoe K.',r:5,v:1,d:'2026-03-17',dl:'17 Mar 2026',h:11,t:'Great starter ring',b:"Didn't want to commit to the flagship price and this covers everything I actually use daily."},
+    {n:'Isaac W.',r:4,v:1,d:'2026-03-09',dl:'9 Mar 2026',h:10,t:'Happy with it, occasional sync hiccup',b:"Works well overall. Every so often the app takes a minute to sync overnight data, but it always catches up."},
+    {n:'Nadia F.',r:5,v:1,d:'2026-02-27',dl:'27 Feb 2026',h:8,t:'Impressed for the price',b:"Didn't expect this level of accuracy at this price. Heart rate and sleep data both track closely with my old device."},
+    {n:'Leo P.',r:5,v:1,d:'2026-02-19',dl:'19 Feb 2026',h:7,t:'No regrets switching from a wrist tracker',b:"Lighter, more comfortable at night, and I check the app just as often. Easy recommendation."}
+  ];
+
+  var TOTAL={{ _r_total }};
+  var R=IS_ALT?R_ALT:R_MAIN;
+  var DIST={5:{{ _r_d5 }},4:{{ _r_d4 }},3:{{ _r_d3 }},2:{{ _r_d2 }},1:{{ _r_d1 }}};
+  var GR=['linear-gradient(135deg,#0d9488,#0f766e)','linear-gradient(135deg,#15171a,#3a3f44)','linear-gradient(135deg,#c79a3a,#9a7320)','linear-gradient(135deg,#5b8def,#2f63c4)','linear-gradient(135deg,#e07a5f,#c4533a)','linear-gradient(135deg,#8a6fd1,#5f44a8)'];
+  var st={f:'all',sort:'helpful',shown:6,voted:{}};
+  var THUMB='<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path><path d="M7 11l5-8a2.5 2.5 0 0 1 5 1v6h4a2 2 0 0 1 2 2l-1.4 7A2 2 0 0 1 18.6 22H7"></path></svg>';
+
+  function stars(n){var s='';for(var i=1;i<=5;i++)s+=(i<=n?'★':'☆');return s;}
+  function initials(name){return name.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();}
+  function avaColor(name){var c=0;for(var i=0;i<name.length;i++)c+=name.charCodeAt(i);return GR[c%GR.length];}
+
+  function loadUser(){
+    var key='aurora_user_reviews'+(IS_ALT?'_alt':'_main');
+    var u=[];try{u=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}
+    u.forEach(function(rv){R.unshift(rv);if(DIST[rv.r]!=null)DIST[rv.r]++;});
+    return u.length;
+  }
+  function saveUser(rv){
+    var key='aurora_user_reviews'+(IS_ALT?'_alt':'_main');
+    try{var u=JSON.parse(localStorage.getItem(key)||'[]');u.unshift(rv);localStorage.setItem(key,JSON.stringify(u));}catch(e){}
+  }
+  function renderBars(){
+    var total=0,wt=0;[5,4,3,2,1].forEach(function(s){total+=DIST[s];wt+=s*DIST[s];});
+    var avg=total?wt/total:4.8;
+    var html='';[5,4,3,2,1].forEach(function(s){
+      var p=Math.round(DIST[s]/total*100);
+      html+='<div class="avr-bar"><span class="avr-bar-l">'+s+'<b>★</b></span>'
+        +'<span class="avr-bar-track"><span class="avr-bar-fill" style="width:'+p+'%"></span></span>'
+        +'<span class="avr-bar-p">'+p+'%</span></div>';
+    });
+    document.getElementById('avr-bars').innerHTML=html;
+    var ce=document.getElementById('avr-count');if(ce)ce.textContent=total.toLocaleString();
+    var ae=document.getElementById('avr-avg');if(ae)ae.textContent=avg.toFixed(1);
+  }
+  function list(){
+    var l=R.slice();
+    if(st.f!=='all')l=l.filter(function(x){return x.r==+st.f;});
+    if(st.sort==='helpful')l.sort(function(a,b){return b.h-a.h;});
+    else if(st.sort==='recent')l.sort(function(a,b){return a.d<b.d?1:-1;});
+    else if(st.sort==='high')l.sort(function(a,b){return b.r-a.r||b.h-a.h;});
+    else if(st.sort==='low')l.sort(function(a,b){return a.r-b.r||b.h-a.h;});
+    return l;
+  }
+  function render(){
+    var l=list();var g=document.getElementById('avr-grid');var more=document.getElementById('avr-more');
+    document.getElementById('avr-empty').style.display=l.length?'none':'block';
+    var vis=l.slice(0,st.shown);
+    g.innerHTML=vis.map(function(x,i){
+      var id=x.n+x.d;var vt=st.voted[id];
+      return '<div class="avr-card">'
+        +'<div class="avr-ctop"><div class="avr-ava" style="background:'+avaColor(x.n)+'">'+initials(x.n)+'</div>'
+        +'<div class="avr-ci"><div class="avr-cname">'+x.n+(x.v?' <span class="avr-cver">✓ Verified</span>':'')+'</div>'
+        +'<div class="avr-cdate">'+x.dl+'</div></div></div>'
+        +'<div class="avr-cstars">'+stars(x.r)+'</div>'
+        +'<p class="avr-ctitle">'+x.t+'</p>'
+        +'<p class="avr-cbody">'+x.b+'</p>'
+        +'<div class="avr-chelp"><span>Helpful?</span><button class="avr-hbtn'+(vt?' voted':'')+'"'+(vt?' disabled':'')+' onclick="avrHelp(\''+id+'\',this)">'+THUMB+' '+(x.h+(vt?1:0))+'</button></div>'
+        +'</div>';
+    }).join('');
+    more.style.display=l.length>st.shown?'inline-block':'none';
+  }
+  window.avrFilter=function(f,btn){st.f=f;st.shown=6;[].forEach.call(document.querySelectorAll('.avr-pill'),function(b){b.classList.remove('on');});btn.classList.add('on');render();};
+  window.avrSort=function(v){st.sort=v;render();};
+  window.avrMore=function(){st.shown+=6;render();};
+  window.avrHelp=function(id,btn){if(st.voted[id])return;st.voted[id]=1;render();};
+  window.avrOpen=function(){var f=document.getElementById('avr-form');f.classList.add('open');f.scrollIntoView({behavior:'smooth',block:'center'});};
+
+  document.addEventListener('DOMContentLoaded',function(){
+    loadUser();            /* merge this browser's submitted reviews + bump the count */
+    renderBars();render();
+
+    var picked=0,sp=document.querySelectorAll('#avr-starpick span');
+    [].forEach.call(sp,function(s){
+      s.addEventListener('click',function(){picked=+s.getAttribute('data-v');document.getElementById('avr-ratval').value=picked;paint(picked);});
+      s.addEventListener('mouseover',function(){paint(+s.getAttribute('data-v'));});
+      s.addEventListener('mouseout',function(){paint(picked);});
+    });
+    function paint(v){[].forEach.call(sp,function(x){x.classList.toggle('on',+x.getAttribute('data-v')<=v);});}
+
+    /* On submit: persist the review locally so it shows + the count ticks up,
+       then let the Shopify contact form POST (emails the store for moderation). */
+    var form=document.querySelector('#avr-form form');
+    if(form){
+      form.addEventListener('submit',function(){
+        var g=function(n){var el=form.querySelector('[name="'+n+'"]');return el?el.value.trim():'';};
+        var rat=+(document.getElementById('avr-ratval').value)||5;
+        saveUser({n:g('contact[name]')||'Verified buyer',r:rat,v:1,
+          d:new Date().toISOString().slice(0,10),dl:'Just now',h:0,
+          t:g('contact[review_title]')||'Verified purchase',
+          b:g('contact[body]')});
+      });
+    }
+
+    if(location.search.indexOf('contact_posted=true')>-1){
+      var f=document.getElementById('avr-form');f.classList.add('open');
+      f.innerHTML='<div style="text-align:center;padding:40px 0;"><div style="font-size:40px;">✓</div><h3 class="avr-form-title" style="margin-top:10px;">Thank you — your review is live!</h3><p class="avr-form-sub">It now appears above and your rating has been counted.</p></div>';
+      document.getElementById('avr').scrollIntoView({behavior:'smooth'});
+    }
+  });
+})();
+</script>

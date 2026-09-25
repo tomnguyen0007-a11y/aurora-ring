@@ -1,0 +1,89 @@
+{%- comment -%}
+  Aurora — Companion app section (dark band).
+  Self-contained .asec- classes. Reusable on product page.
+{%- endcomment -%}
+
+<section class="asec">
+  <div class="asec-inner">
+    <div class="asec-copy">
+      <p class="asec-eyebrow">The Aurora App</p>
+      <h2 class="asec-h2">Your health,<br>decoded daily.</h2>
+      <p class="asec-sub">The <strong>Q Ring Fitness</strong> app (also on stores as <em>COLMI</em>) turns raw biosensor data into clear, actionable insight — sleep scores, recovery grades and real-time heart metrics in one dashboard.</p>
+      <div class="asec-feats">
+        <div class="asec-feat">Sleep stage analysis</div>
+        <div class="asec-feat">24/7 heart rate</div>
+        <div class="asec-feat">Blood oxygen (SpO₂)</div>
+        <div class="asec-feat">HRV tracking</div>
+        <div class="asec-feat">Stress monitoring</div>
+        <div class="asec-feat">Body temperature</div>
+        <div class="asec-feat">Menstrual cycle</div>
+        <div class="asec-feat">Readiness score</div>
+      </div>
+      <div class="asec-badges">
+        <a href="#" class="asec-badge"><span class="asec-bic"></span><span><small>Download on the</small><b>App Store</b></span></a>
+        <a href="#" class="asec-badge"><span class="asec-bic">▶</span><span><small>Get it on</small><b>Google Play</b></span></a>
+      </div>
+    </div>
+
+    <div class="asec-phone-wrap">
+      <div class="asec-phone">
+        <div class="asec-screen">
+          <div class="asec-shead"><span class="asec-stitle">Sleep Analysis</span><span class="asec-sdate">Last night</span></div>
+          <div class="asec-ring">
+            <svg width="92" height="92" viewBox="0 0 92 92"><circle cx="46" cy="46" r="39" fill="none" stroke="#1a1a22" stroke-width="6"/><circle cx="46" cy="46" r="39" fill="none" stroke="#00e5c8" stroke-width="6" stroke-dasharray="245" stroke-dashoffset="37" stroke-linecap="round" transform="rotate(-90 46 46)"/></svg>
+            <div class="asec-rnum">85</div>
+          </div>
+          <div class="asec-rlabel">Sleep score</div>
+          <div class="asec-metrics">
+            <div class="asec-m"><div class="asec-ml">Total</div><div class="asec-mv">7h 42m</div><div class="asec-ms">On target</div></div>
+            <div class="asec-m"><div class="asec-ml">Deep</div><div class="asec-mv">1h 55m</div><div class="asec-ms">↑ 18%</div></div>
+            <div class="asec-m"><div class="asec-ml">SpO₂</div><div class="asec-mv">98%</div><div class="asec-ms">Normal</div></div>
+            <div class="asec-m"><div class="asec-ml">HRV</div><div class="asec-mv">68ms</div><div class="asec-ms">↑ Elevated</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .asec{background:#06060a;color:#fff;padding:84px 20px;font-family:var(--aurora-font,'Inter',sans-serif);-webkit-font-smoothing:antialiased;overflow:hidden;}
+  .asec-inner{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1.1fr .9fr;gap:64px;align-items:center;}
+  .asec-eyebrow{font-family:var(--aurora-mono,monospace);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--aurora-mint,#00e5c8);margin:0 0 16px;}
+  .asec-h2{font-family:var(--aurora-serif,'Instrument Serif',serif);font-size:clamp(34px,4.4vw,52px);font-weight:400;line-height:1.08;letter-spacing:-.02em;margin:0 0 18px;color:#fff;}
+  .asec-sub{font-size:16px;line-height:1.65;color:#8a8a96;max-width:440px;margin:0 0 30px;}
+  .asec-sub strong{color:#e6e6ec;}
+  .asec-feats{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;margin-bottom:34px;}
+  .asec-feat{position:relative;padding-left:18px;font-size:13.5px;color:#c2c2cc;}
+  .asec-feat::before{content:'';position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:50%;background:var(--aurora-mint,#00e5c8);}
+  .asec-badges{display:flex;gap:12px;flex-wrap:wrap;}
+  .asec-badge{display:inline-flex;align-items:center;gap:10px;padding:11px 20px;border-radius:12px;background:#0e0e14;border:1px solid #1e1e28;text-decoration:none;transition:border-color .2s;}
+  .asec-badge:hover{border-color:var(--aurora-mint,#00e5c8);}
+  .asec-bic{font-size:18px;color:#fff;}
+  .asec-badge span span,.asec-badge>span{display:flex;flex-direction:column;}
+  .asec-badge small{font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#5a5a64;}
+  .asec-badge b{font-size:14px;color:#e6e6ec;font-weight:600;}
+  .asec-phone-wrap{display:flex;justify-content:center;}
+  .asec-phone{width:280px;background:#0a0a0e;border:1.5px solid #222;border-radius:40px;padding:18px 14px;box-shadow:0 40px 90px rgba(0,0,0,.6);}
+  .asec-phone::before{content:'';display:block;width:90px;height:6px;background:#1a1a22;border-radius:3px;margin:0 auto 16px;}
+  .asec-screen{background:#0c0c12;border-radius:26px;padding:22px 18px;}
+  .asec-shead{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+  .asec-stitle{font-size:13px;font-weight:600;color:#fff;}
+  .asec-sdate{font-size:10px;color:#444;font-family:var(--aurora-mono,monospace);}
+  .asec-ring{width:92px;height:92px;margin:0 auto 8px;position:relative;}
+  .asec-rnum{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#fff;}
+  .asec-rlabel{text-align:center;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#555;margin-bottom:16px;}
+  .asec-metrics{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+  .asec-m{background:#14141e;border-radius:12px;padding:12px;}
+  .asec-ml{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#555;margin-bottom:5px;}
+  .asec-mv{font-size:17px;font-weight:700;color:#fff;letter-spacing:-.02em;}
+  .asec-ms{font-size:9px;color:var(--aurora-mint,#00e5c8);margin-top:2px;}
+  @media(max-width:820px){
+    .asec-inner{grid-template-columns:1fr;gap:48px;}
+    .asec-phone-wrap{order:-1;}
+  }
+  @media(max-width:520px){
+    .asec{padding:60px 18px;}
+    .asec-feats{grid-template-columns:1fr;}
+  }
+</style>
