@@ -216,8 +216,12 @@ export interface Milestone {
   done: boolean
 }
 
+/** Long = the year-plus pillars; short = this month / this quarter. Missing = long (pre-horizon data). */
+export type GoalHorizon = 'long' | 'short'
+
 export interface Goal {
   id: string
+  horizon?: GoalHorizon
   pillar: Pillar
   title: string
   target: string
@@ -324,6 +328,9 @@ export interface Book {
   notes: string
   /** Open Library cover art, when the search flow found one — null for a manually-typed book. */
   coverUrl: string | null
+  /** ISO dates stamped on status changes — drive "since Sep", the per-month chart and the by-year shelf. */
+  startedAt?: string | null
+  finishedAt?: string | null
 }
 
 // ─────────────────────────────────────────────────────────────

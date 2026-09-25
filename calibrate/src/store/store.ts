@@ -230,6 +230,9 @@ export interface CalibrateState {
   updateRevenue: (id: string, patch: Partial<Omit<RevenueEntry, 'id'>>) => void
   removeRevenue: (id: string) => void
   revenueTarget: number
+  /** Books-finished target for the calendar year — the Reading page's goal pill. */
+  bookGoal: number
+  setBookGoal: (n: number) => void
   setRevenueTarget: (n: number) => void
 
   // ── books ──
@@ -381,6 +384,7 @@ const seedState = () => ({
   bizTasks: [],
   revenue: [],
   revenueTarget: 1000,
+  bookGoal: 12,
   books: seedBooks,
   readingLog: {},
   checkIns: {},
@@ -672,6 +676,7 @@ export const useStore = create<CalibrateState>()(
             ...s.goals,
             {
               id,
+              horizon: g.horizon ?? 'long',
               pillar: g.pillar ?? 'custom',
               title: g.title,
               target: g.target ?? '',
@@ -688,8 +693,17 @@ export const useStore = create<CalibrateState>()(
       removeGoal: (id) => set((s) => ({ goals: s.goals.filter((g) => g.id !== id) })),
       moveGoal: (id, direction) =>
         set((s) => {
+          // Reorder within the goal's own horizon — the page shows long and short
+          // as separate lists, so "up" means past the neighbour you can see.
           const idx = s.goals.findIndex((g) => g.id === id)
-          return { goals: reorder(s.goals, idx, idx + direction) }
+          if (idx === -1) return {}
+          const h = s.goals[idx].horizon ?? 'long'
+          let j = idx + direction
+          while (j >= 0 && j < s.goals.length && (s.goals[j].horizon ?? 'long') !== h) j += direction
+          if (j < 0 || j >= s.goals.length) return {}
+          const goals = [...s.goals]
+          ;[goals[idx], goals[j]] = [goals[j], goals[idx]]
+          return { goals }
         }),
       toggleMilestone: (goalId, msId) =>
         set((s) => ({
@@ -779,6 +793,7 @@ export const useStore = create<CalibrateState>()(
         set((s) => ({ revenue: s.revenue.map((r) => (r.id === id ? { ...r, ...patch } : r)) })),
       removeRevenue: (id) => set((s) => ({ revenue: s.revenue.filter((r) => r.id !== id) })),
       setRevenueTarget: (n) => set({ revenueTarget: Math.max(1, Math.round(n)) }),
+      setBookGoal: (n) => set({ bookGoal: Math.max(1, Math.round(n)) }),
 
       // ══════════════ BOOKS ══════════════
       addBook: (b) =>
@@ -794,11 +809,26 @@ export const useStore = create<CalibrateState>()(
               rating: b.rating ?? null,
               notes: b.notes ?? '',
               coverUrl: b.coverUrl ?? null,
+              startedAt: b.startedAt ?? ((b.status ?? 'reading') === 'reading' ? todayISO() : null),
+              finishedAt: b.finishedAt ?? (b.status === 'finished' ? todayISO() : null),
             },
             ...s.books,
           ],
         })),
-      updateBook: (id, patch) => set((s) => ({ books: s.books.map((b) => (b.id === id ? { ...b, ...patch } : b)) })),
+      updateBook: (id, patch) =>
+        set((s) => ({
+          books: s.books.map((b) => {
+            if (b.id !== id) return b
+            const next = { ...b, ...patch }
+            // Stamp the transition, never overwrite a date the caller set explicitly
+            if (patch.status && patch.status !== b.status) {
+              if (patch.status === 'reading' && !next.startedAt) next.startedAt = todayISO()
+              if (patch.status === 'finished' && !('finishedAt' in patch)) next.finishedAt = todayISO()
+              if (patch.status !== 'finished' && !('finishedAt' in patch)) next.finishedAt = null
+            }
+            return next
+          }),
+        })),
       removeBook: (id) => set((s) => ({ books: s.books.filter((b) => b.id !== id) })),
       logReading: (date, minutes) =>
         set((s) => ({ readingLog: { ...s.readingLog, [date]: Math.max(0, (s.readingLog[date] ?? 0) + minutes) } })),

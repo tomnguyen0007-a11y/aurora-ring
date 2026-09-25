@@ -23,7 +23,7 @@ export type JarvisAction =
   | { type: 'log_photo'; category: 'golf' | 'training' | 'other'; caption?: string; date?: string; imageData?: string }
   | { type: 'add_grocery'; name: string; qty?: string }
   | { type: 'add_note'; title: string; body?: string }
-  | { type: 'add_goal'; title: string; target?: string; pillar?: Pillar }
+  | { type: 'add_goal'; title: string; target?: string; pillar?: Pillar; horizon?: 'long' | 'short' }
   | { type: 'add_milestone'; goal: string; title: string }
   | { type: 'add_biz_task'; title: string; area?: string }
   | { type: 'add_book'; title: string; author?: string }
@@ -237,7 +237,7 @@ export function applyActions(actions: JarvisAction[]): string[] {
           break
         }
         case 'add_goal': {
-          s.addGoal({ title: a.title, target: a.target, pillar: a.pillar ?? 'custom' })
+          s.addGoal({ title: a.title, target: a.target, pillar: a.pillar ?? 'custom', horizon: a.horizon === 'short' ? 'short' : 'long' })
           receipts.push(`Goal added: ${a.title}`)
           break
         }

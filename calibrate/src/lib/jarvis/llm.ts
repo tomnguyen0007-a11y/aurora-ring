@@ -131,7 +131,8 @@ Logging:
 Adding:
   - {"type":"add_grocery","name":"...","qty":"..."}
   - {"type":"add_note","title":"...","body":"..."}
-  - {"type":"add_goal","title":"...","target":"...","pillar":"physique|golf|business|recovery|custom"}
+  - {"type":"add_goal","title":"...","target":"...","pillar":"physique|golf|business|recovery|custom","horizon":"long|short"}
+    horizon: "short" = this month/quarter, "long" = year-plus. Default long.
   - {"type":"add_milestone","goal":"<goal title fragment>","title":"..."}
   - {"type":"add_biz_task","title":"...","area":"Content|Store|Marketing|Suppliers|Ops"}
   - {"type":"add_book","title":"...","author":"..."}
