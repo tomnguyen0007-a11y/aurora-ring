@@ -5,7 +5,7 @@ import { useStore } from '../store/store'
 import type { SectionDef } from '../store/types'
 import { Icon, Mark, type GlyphName } from './icons'
 import { Palette } from './Palette'
-import { Eyebrow, IconBtn, InlineText, Sheet } from './ui'
+import { IconBtn, InlineText, Sheet } from './ui'
 
 /** Clear the offline cache and reload — the "why is this stale" escape hatch. */
 async function hardRefresh() {
@@ -119,7 +119,7 @@ function IndexSheet({ open, onClose, go }: { open: boolean; onClose: () => void;
       <div className="space-y-6">
         {grouped.map(({ group, items }) => (
           <div key={group.id}>
-            <Eyebrow className="mb-2">{group.label}</Eyebrow>
+            <h2 className="nav-group mb-2.5">{group.label}</h2>
             <div className="border-t border-line">
               {items.map((sec) =>
                 arrange ? (
@@ -277,8 +277,8 @@ export function Shell({ children, footer }: { children: ReactNode; footer?: Reac
           }
         >
           {nav.map(({ group, items }, gi) => (
-            <div key={group.id} className={gi === 0 ? '' : 'mt-6'}>
-              <Eyebrow className="mb-2">{group.label}</Eyebrow>
+            <div key={group.id} className={gi === 0 ? '' : 'mt-4 border-t border-line pt-4'}>
+              <h2 className="nav-group mb-2">{group.label}</h2>
               <div className="-ml-6 space-y-px">
                 {items.map((s) => {
                   const active = view === s.id

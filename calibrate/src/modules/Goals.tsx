@@ -1,18 +1,20 @@
 import { useState } from 'react'
-import { Bar, Chip, DangerBtn, Dot, Empty, Eyebrow, InlineArea, InlineText, Page, Reorder, Section, Tools } from '../components/ui'
+import { Bar, DangerBtn, Dot, Empty, Eyebrow, InlineArea, InlineText, Page, Reorder, Tools } from '../components/ui'
 import { useStore } from '../store/store'
 import type { Goal, GoalHorizon } from '../store/types'
 
-const HORIZONS: { id: GoalHorizon; label: string; lede: string; empty: string }[] = [
+const HORIZONS: { id: GoalHorizon; label: string; lede: string; empty: string; add: string }[] = [
   {
     id: 'long',
     label: 'Long term',
+    add: 'Add a long-term goal…',
     lede: 'Year-plus. The pillars everything else answers to.',
     empty: 'No long-term goals. What are you actually building this year?',
   },
   {
     id: 'short',
     label: 'Short term',
+    add: 'Add a short-term goal…',
     lede: 'This month, this quarter — the next concrete moves toward the pillars.',
     empty: 'Nothing short-term. Pick the one move that pushes a pillar this month.',
   },
@@ -28,16 +30,23 @@ function GoalCard({ g, first, last }: { g: Goal; first: boolean; last: boolean }
   const other = horizonOf(g) === 'long' ? 'short' : 'long'
 
   return (
-    <Section className="group">
+    <article className="group py-8 first:pt-0 last:pb-0">
       <div className="mb-4 flex items-start gap-3">
         <div className="min-w-0 flex-1">
-          <InlineText value={g.title} onChange={(v) => s.updateGoal(g.id, { title: v })} ariaLabel="Goal title" className="t-page" />
-          <InlineText
+          <InlineArea
+            value={g.title}
+            onChange={(v) => s.updateGoal(g.id, { title: v })}
+            ariaLabel="Goal title"
+            minRows={1}
+            className="!text-[1.1875rem] font-semibold !leading-snug tracking-[-0.016em] !text-paper"
+          />
+          <InlineArea
             value={g.target}
             onChange={(v) => s.updateGoal(g.id, { target: v })}
             ariaLabel="Goal target"
             placeholder="What does done look like?"
-            className="mt-2 text-body text-mute"
+            minRows={1}
+            className="mt-1 !leading-normal"
           />
         </div>
         <Tools>
@@ -47,7 +56,7 @@ function GoalCard({ g, first, last }: { g: Goal; first: boolean; last: boolean }
             onClick={() => s.updateGoal(g.id, { horizon: other })}
             title={`Move to ${other} term`}
           >
-            → {other === 'long' ? 'Long' : 'Short'}
+            → {other === 'long' ? 'Long' : 'Short'} term
           </button>
           <Reorder onUp={() => s.moveGoal(g.id, -1)} onDown={() => s.moveGoal(g.id, 1)} first={first} last={last} />
           <DangerBtn onConfirm={() => s.removeGoal(g.id)} label={`Delete ${g.title}`} />
@@ -119,65 +128,67 @@ function GoalCard({ g, first, last }: { g: Goal; first: boolean; last: boolean }
           className="!text-micro"
         />
       </div>
-    </Section>
+    </article>
+  )
+}
+
+/** One horizon as a column: a heading that owns it, a quick add, then its goals stacked. */
+function HorizonColumn({ h }: { h: (typeof HORIZONS)[number] }) {
+  const s = useStore()
+  const [draft, setDraft] = useState('')
+  const goals = s.goals.filter((g) => horizonOf(g) === h.id)
+  return (
+    <section aria-labelledby={`h-${h.id}`} className="min-w-0">
+      <header className="border-b-2 border-paper pb-3">
+        <div className="flex items-baseline gap-3">
+          <h2 id={`h-${h.id}`} className="text-[1.75rem] font-semibold leading-none tracking-[-0.03em] text-paper">
+            {h.label}
+          </h2>
+          <span className="num rounded-full border border-line-2 px-2 py-0.5 text-micro text-mute">{goals.length}</span>
+        </div>
+        <p className="mt-2 text-label text-faint">{h.lede}</p>
+      </header>
+
+      <form
+        className="mt-4 flex gap-2"
+        onSubmit={(e) => {
+          e.preventDefault()
+          const t = draft.trim()
+          if (!t) return
+          s.addGoal({ title: t, horizon: h.id })
+          setDraft('')
+        }}
+      >
+        <input className="field min-w-0 flex-1" placeholder={h.add} value={draft} onChange={(e) => setDraft(e.target.value)} aria-label={h.add} />
+        <button className="btn btn-solid" type="submit">
+          Add
+        </button>
+      </form>
+
+      {goals.length ? (
+        <div className="mt-8 divide-y divide-line">
+          {goals.map((g, i) => (
+            <GoalCard key={g.id} g={g} first={i === 0} last={i === goals.length - 1} />
+          ))}
+        </div>
+      ) : (
+        <Empty>{h.empty}</Empty>
+      )}
+    </section>
   )
 }
 
 export function Goals({ label }: { label: string }) {
-  const s = useStore()
-  const [newTitle, setNewTitle] = useState('')
-  const [newHorizon, setNewHorizon] = useState<GoalHorizon>('short')
-
   return (
     <Page
       title={label}
       lede="Long term sets direction, short term is what you do about it this month. Every line is editable; Jarvis can rewrite them too."
-      actions={
-        <form
-          className="flex flex-wrap items-center gap-2"
-          onSubmit={(e) => {
-            e.preventDefault()
-            if (!newTitle.trim()) return
-            s.addGoal({ title: newTitle.trim(), horizon: newHorizon })
-            setNewTitle('')
-          }}
-        >
-          <span className="flex gap-1" role="radiogroup" aria-label="Horizon">
-            {HORIZONS.map((h) => (
-              <Chip key={h.id} active={newHorizon === h.id} onClick={() => setNewHorizon(h.id)}>
-                {h.id === 'long' ? 'Long' : 'Short'}
-              </Chip>
-            ))}
-          </span>
-          <input className="field w-48" placeholder="New goal…" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} aria-label="New goal" />
-          <button className="btn btn-solid" type="submit">
-            Add
-          </button>
-        </form>
-      }
     >
-      <div className="space-y-16">
-        {HORIZONS.map((h) => {
-          const goals = s.goals.filter((g) => horizonOf(g) === h.id)
-          return (
-            <div key={h.id}>
-              <div className="mb-2 flex items-baseline gap-3 border-b border-line pb-3">
-                <h2 className="t-head">{h.label}</h2>
-                <span className="num text-micro text-faint">{goals.length}</span>
-                <p className="ml-auto hidden max-w-sm text-right text-micro text-faint sm:block">{h.lede}</p>
-              </div>
-              {goals.length ? (
-                <div className="grid gap-x-14 gap-y-2 xl:grid-cols-2">
-                  {goals.map((g, i) => (
-                    <GoalCard key={g.id} g={g} first={i === 0} last={i === goals.length - 1} />
-                  ))}
-                </div>
-              ) : (
-                <Empty>{h.empty}</Empty>
-              )}
-            </div>
-          )
-        })}
+      {/* Side by side, so each pillar sits across from the moves that serve it. */}
+      <div className="grid gap-x-12 gap-y-16 lg:grid-cols-2">
+        {HORIZONS.map((h) => (
+          <HorizonColumn key={h.id} h={h} />
+        ))}
       </div>
     </Page>
   )
