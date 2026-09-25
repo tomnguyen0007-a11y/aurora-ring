@@ -20,7 +20,15 @@
 
    Search queries all three in parallel and merges (Google first — its
    relevance ranking is far better). Any of them failing is fine; only
-   all of them failing is an error.
+   all of them failing is an error. Results stream in: whatever answers
+   first is on screen while Gutendex (the slow one) is still thinking.
+
+   Language: every catalogue leans English by default, which buries
+   Czech and German editions. The query's language is guessed from its
+   diacritics (ř ů ě → Czech, ä ö ü ß → German…); Google then also runs a
+   language-restricted search and Open Library prefers that language's
+   editions. A query with no accents still gets a Czech-restricted Google
+   pass, because Czech titles are often typed without them.
 
    Two failure modes the matcher guards against:
    · Wrong cover — a work's default cover is often a translation, so
@@ -43,6 +51,37 @@ export interface BookMatch {
   /** Free, legal full text — Project Gutenberg or an Open Library public scan. */
   readUrl?: string
   source: 'google' | 'openlibrary' | 'gutenberg'
+}
+
+// ── Language ───────────────────────────────────────────────────────
+
+export type Lang = 'cs' | 'sk' | 'de' | 'pl' | 'en'
+
+/** Open Library tags editions with MARC (ISO 639-2/B) codes. */
+const MARC: Record<Lang, string> = { cs: 'cze', sk: 'slo', de: 'ger', pl: 'pol', en: 'eng' }
+
+/** A confident guess from letters that only one of these languages uses, else null. */
+export function guessLang(text: string): Lang | null {
+  if (/[ěřů]/i.test(text)) return 'cs'
+  if (/[ľĺŕô]/i.test(text)) return 'sk'
+  if (/[ąęłńśźż]/i.test(text)) return 'pl'
+  if (/[äöüß]/i.test(text)) return 'de'
+  if (/[ščžýťďň]/i.test(text)) return 'cs'
+  return null
+}
+
+/**
+ * The reader's own non-English language — the browser's, if it names one
+ * we handle, else Czech: Calibrate lives in Prague, and a Czech title typed
+ * without its accents gives guessLang nothing to go on.
+ */
+function homeLang(): Lang {
+  const langs = typeof navigator !== 'undefined' ? navigator.languages ?? [] : []
+  for (const l of langs) {
+    const code = l.slice(0, 2).toLowerCase() as Lang
+    if (code in MARC && code !== 'en') return code
+  }
+  return 'cs'
 }
 
 // ── Covers ─────────────────────────────────────────────────────────
@@ -128,8 +167,9 @@ export function fromGoogle(v: GoogleVolume): BookMatch | null {
 const GOOGLE_FIELDS =
   'items(id,volumeInfo(title,subtitle,authors,publisher,publishedDate,pageCount,description,language,imageLinks))'
 
-async function google(q: string, signal?: AbortSignal): Promise<BookMatch[]> {
+async function google(q: string, signal?: AbortSignal, lang?: Lang): Promise<BookMatch[]> {
   const qs = new URLSearchParams({ q, maxResults: '20', printType: 'books', orderBy: 'relevance', fields: GOOGLE_FIELDS })
+  if (lang) qs.set('langRestrict', lang)
   const res = await fetch(`https://www.googleapis.com/books/v1/volumes?${qs}`, { signal })
   // Throw, don't return []: a 429 or 503 is "don't know", and callers must not
   // read it as "this book has no cover" and wipe a good one.
@@ -184,14 +224,14 @@ const OL_FIELDS = [
   'editions.ia',
 ].join(',')
 
-function pickCover(d: OpenLibraryDoc): number | null {
+function pickCover(d: OpenLibraryDoc, lang: Lang): number | null {
   const ed = d.editions?.docs?.[0]
-  if (ed?.cover_i && (!ed.language || ed.language.includes('eng'))) return ed.cover_i
+  if (ed?.cover_i && (!ed.language || ed.language.includes(MARC[lang]) || ed.language.includes('eng'))) return ed.cover_i
   return d.cover_i ?? ed?.cover_i ?? null
 }
 
-export function fromOpenLibrary(d: OpenLibraryDoc & { title: string }): BookMatch {
-  const cover = pickCover(d)
+export function fromOpenLibrary(d: OpenLibraryDoc & { title: string }, lang: Lang = 'en'): BookMatch {
+  const cover = pickCover(d, lang)
   // `editions.docs[0]` is the edition that best matches the query — its
   // publisher is what the user typed "penguin" to find.
   const ed = d.editions?.docs?.[0]
@@ -212,12 +252,13 @@ export function fromOpenLibrary(d: OpenLibraryDoc & { title: string }): BookMatc
   }
 }
 
-async function openLibrary(params: Record<string, string>, signal?: AbortSignal): Promise<BookMatch[]> {
-  const qs = new URLSearchParams({ ...params, lang: 'en', limit: '10', fields: OL_FIELDS })
+async function openLibrary(params: Record<string, string>, signal?: AbortSignal, lang: Lang = 'en'): Promise<BookMatch[]> {
+  // `lang` makes Open Library pick that language's edition as editions.docs[0].
+  const qs = new URLSearchParams({ ...params, lang, limit: '10', fields: OL_FIELDS })
   const res = await fetch(`https://openlibrary.org/search.json?${qs}`, { signal })
   if (!res.ok) throw new Error(`Open Library ${res.status}`)
   const data = (await res.json()) as { docs?: OpenLibraryDoc[] }
-  return (data.docs ?? []).filter((d): d is OpenLibraryDoc & { title: string } => !!d.title).map(fromOpenLibrary)
+  return (data.docs ?? []).filter((d): d is OpenLibraryDoc & { title: string } => !!d.title).map((d) => fromOpenLibrary(d, lang))
 }
 
 // ── Project Gutenberg (Gutendex) ──────────────────────────────────
@@ -272,12 +313,53 @@ async function gutenberg(q: string, signal?: AbortSignal): Promise<BookMatch[]> 
 
 // ── Merge ──────────────────────────────────────────────────────────
 
-/** Run every catalogue; keep whatever answered. Throws only if all failed. */
-async function all(g: Promise<BookMatch[]>, o: Promise<BookMatch[]>, pg: Promise<BookMatch[]> = Promise.resolve([])): Promise<BookMatch[]> {
-  const settled = await Promise.allSettled([g, o, pg])
-  if (settled.every((r) => r.status === 'rejected')) throw (settled[0] as PromiseRejectedResult).reason
-  const [gv, ov, pv] = settled.map((r) => (r.status === 'fulfilled' ? r.value : []))
-  return mergeResults(gv, ov, pv)
+/** Google editions from several passes, first pass wins; the same volume twice is dropped. */
+export function concatGoogle(...passes: BookMatch[][]): BookMatch[] {
+  const seen = new Set<string>()
+  return passes.flat().filter((m) => {
+    const k = m.coverUrl ?? `${norm(m.title)}|${norm(m.author)}|${m.publisher ?? ''}|${m.year ?? ''}`
+    if (seen.has(k)) return false
+    seen.add(k)
+    return true
+  })
+}
+
+interface Sources {
+  /** Google passes in priority order. */
+  google: Promise<BookMatch[]>[]
+  openLibrary: Promise<BookMatch[]>
+  gutenberg?: Promise<BookMatch[]>
+}
+
+/**
+ * Merge sources as each one lands, calling onUpdate with the best list so
+ * far. Resolves with the final list; throws only if every source failed.
+ */
+async function stream(src: Sources, onUpdate?: (results: BookMatch[], done: boolean) => void): Promise<BookMatch[]> {
+  const g: (BookMatch[] | null)[] = src.google.map(() => null)
+  let o: BookMatch[] = []
+  let pg: BookMatch[] = []
+  let failures = 0
+  const total = src.google.length + 1 + (src.gutenberg ? 1 : 0)
+  let settled = 0
+  const merged = () => mergeResults(concatGoogle(...g.map((x) => x ?? [])), o, pg)
+  const land = (fn: () => void) => () => {
+    fn()
+    settled++
+    onUpdate?.(merged(), settled === total)
+  }
+  const miss = () => {
+    failures++
+    settled++
+    if (settled === total) onUpdate?.(merged(), true)
+  }
+  await Promise.all([
+    ...src.google.map((p, i) => p.then((v) => land(() => (g[i] = v))(), miss)),
+    src.openLibrary.then((v) => land(() => (o = v))(), miss),
+    ...(src.gutenberg ? [src.gutenberg.then((v) => land(() => (pg = v))(), miss)] : []),
+  ])
+  if (failures === total) throw new Error('No book catalogue reachable')
+  return merged()
 }
 
 const workKey = (m: BookMatch) => `${norm(m.title.split(/[:(]/)[0])}|${norm(m.author).split(' ').pop() ?? ''}`
@@ -311,10 +393,48 @@ export function mergeResults(googleHits: BookMatch[], olHits: BookMatch[], pgHit
   return out
 }
 
-export async function searchBooks(q: string, signal?: AbortSignal): Promise<BookMatch[]> {
+function querySources(text: string, signal?: AbortSignal, withGutenberg = true): Sources {
+  const lang = guessLang(text)
+  // Background cover lookups skip the speculative home-language pass: an
+  // unaccented English title doesn't need a Czech-only Google query.
+  const local = lang ?? (withGutenberg ? homeLang() : 'en')
+  const open = google(text, signal)
+  const restricted = local === 'en' ? null : google(text, signal, local)
+  return {
+    // A query that is visibly Czech/German ranks that language's editions first.
+    google: restricted ? (lang ? [restricted, open] : [open, restricted]) : [open],
+    openLibrary: openLibrary({ q: text }, signal, lang ?? 'en'),
+    gutenberg: withGutenberg ? gutenberg(text, signal) : undefined,
+  }
+}
+
+// Same query twice in a session (typing, backspacing, reopening the sheet) is instant.
+const cache = new Map<string, BookMatch[]>()
+
+/**
+ * Search everything, streaming: onUpdate fires as each catalogue answers,
+ * so the first results show in about a second instead of waiting on the
+ * slowest source. Resolves with the final merged list.
+ */
+export async function searchBooks(
+  q: string,
+  signal?: AbortSignal,
+  onUpdate?: (results: BookMatch[], done: boolean) => void,
+): Promise<BookMatch[]> {
   const text = q.trim()
   if (!text) return []
-  return all(google(text, signal), openLibrary({ q: text }, signal), gutenberg(text, signal))
+  const key = norm(text)
+  const hit = cache.get(key)
+  if (hit) {
+    onUpdate?.(hit, true)
+    return hit
+  }
+  const results = await stream(querySources(text, signal), onUpdate)
+  if (!signal?.aborted) {
+    cache.set(key, results)
+    if (cache.size > 40) cache.delete(cache.keys().next().value!)
+  }
+  return results
 }
 
 // ── Matching ───────────────────────────────────────────────────────
@@ -370,29 +490,36 @@ export function bestCoverMatch(title: string, author: string, hits: BookMatch[])
 }
 
 function fieldedBoth(title: string, author: string, signal?: AbortSignal) {
-  return all(
-    google(googleFielded(title, author), signal),
-    openLibrary(author.trim() ? { title, author } : { title }, signal),
-  )
+  const lang = guessLang(`${title} ${author}`)
+  const q = googleFielded(title, author)
+  return stream({
+    google: lang ? [google(q, signal, lang), google(q, signal)] : [google(q, signal)],
+    openLibrary: openLibrary(author.trim() ? { title, author } : { title }, signal, lang ?? 'en'),
+  })
 }
 
 /** Auto-match a saved book to cover art. Fielded query first, loose one second. */
 export async function matchCover(title: string, author: string, signal?: AbortSignal): Promise<BookMatch | null> {
   const hit = bestCoverMatch(title, author, await fieldedBoth(title, author, signal))
   if (hit) return hit
-  return bestCoverMatch(title, author, await searchBooks(`${title} ${author}`, signal))
+  // Covers only — skip Gutenberg (plain covers, slowest source).
+  return bestCoverMatch(title, author, await stream(querySources(`${title} ${author}`, signal, false)))
 }
 
 /** Every distinct cover for a book — for the manual "change cover" picker. */
 export async function coverChoices(title: string, author: string, signal?: AbortSignal): Promise<BookMatch[]> {
   const hits = await fieldedBoth(title, author, signal)
-  const loose = hits.filter((m) => m.coverUrl).length < 4 ? await searchBooks(`${title} ${author}`, signal).catch(() => []) : []
+  const loose = hits.filter((m) => m.coverUrl).length < 4 ? await stream(querySources(`${title} ${author}`, signal, false)).catch(() => []) : []
   return mergeResults(hits, loose).filter((m) => m.coverUrl)
 }
 
 /** The longest catalogue description for this exact book, or null. */
 export async function describeBook(title: string, author: string, signal?: AbortSignal): Promise<string | null> {
-  const hits = await google(googleFielded(title, author), signal)
+  const lang = guessLang(`${title} ${author}`)
+  const q = googleFielded(title, author)
+  const passes = await Promise.allSettled(lang ? [google(q, signal, lang), google(q, signal)] : [google(q, signal)])
+  if (passes.every((r) => r.status === 'rejected')) throw new Error('Google Books unreachable')
+  const hits = concatGoogle(...passes.map((r) => (r.status === 'fulfilled' ? r.value : [])))
   const texts = confidentMatches(title, author, hits)
     .map((m) => m.description ?? '')
     .filter((d) => d.length > 80)
@@ -407,7 +534,7 @@ export async function describeBook(title: string, author: string, signal?: Abort
 export async function findFreeCopy(title: string, author: string, signal?: AbortSignal): Promise<string | null> {
   const settled = await Promise.allSettled([
     gutenberg(`${title} ${author.split(',')[0]}`.trim(), signal),
-    openLibrary(author.trim() ? { title, author } : { title }, signal),
+    openLibrary(author.trim() ? { title, author } : { title }, signal, guessLang(`${title} ${author}`) ?? 'en'),
   ])
   if (settled.every((r) => r.status === 'rejected')) throw new Error('No catalogue reachable')
   const hits = settled.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))

@@ -538,23 +538,36 @@ function AddBooks({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [author, setAuthor] = useState('')
   const abortRef = useRef<AbortController | null>(null)
 
-  const run = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!query.trim()) return
+  // Results stream in per catalogue; `searching` stays on until the slowest has answered.
+  const search = async (q: string) => {
+    if (!q.trim()) return
     abortRef.current?.abort()
     const controller = new AbortController()
     abortRef.current = controller
     setSearching(true)
     setOffline(false)
     try {
-      setResults(await searchBooks(query, controller.signal))
+      await searchBooks(q, controller.signal, (r) => !controller.signal.aborted && setResults(r))
     } catch {
       if (controller.signal.aborted) return
       setResults(null)
       setOffline(true)
     } finally {
-      setSearching(false)
+      if (!controller.signal.aborted) setSearching(false)
     }
+  }
+
+  // Search as you type, once the query has settled for a moment.
+  useEffect(() => {
+    if (query.trim().length < 3) return
+    const t = setTimeout(() => void search(query), 450)
+    return () => clearTimeout(t)
+  }, [query])
+  useEffect(() => () => abortRef.current?.abort(), [])
+
+  const run = (e: React.FormEvent) => {
+    e.preventDefault()
+    void search(query)
   }
 
   const add = (m: BookMatch, status: BookStatus) => {
@@ -584,17 +597,17 @@ function AddBooks({ open, onClose }: { open: boolean; onClose: () => void }) {
           onChange={(e) => setQuery(e.target.value)}
           autoFocus
         />
-        <button className="btn btn-solid shrink-0" type="submit" disabled={searching}>
+        <button className="btn btn-solid shrink-0" type="submit">
           {searching ? 'Searching…' : 'Search'}
         </button>
       </form>
 
       {results && results.length > 0 && (
         <ul className="mt-4">
-          {results.map((m, i) => {
+          {results.map((m) => {
             const done = added.includes(editionKey(m))
             return (
-              <li key={i} className="flex items-center gap-3 border-b border-line py-2.5 last:border-b-0">
+              <li key={`${m.source}:${editionKey(m)}`} className="flex items-center gap-3 border-b border-line py-2.5 last:border-b-0">
                 <Cover
                   book={{
                     title: m.title,
@@ -633,8 +646,11 @@ function AddBooks({ open, onClose }: { open: boolean; onClose: () => void }) {
           })}
         </ul>
       )}
+      {searching && results && results.length > 0 && (
+        <p className="mt-3 animate-breathe text-micro text-faint">Checking more catalogues…</p>
+      )}
       {offline && <Empty>Couldn't reach any book catalogue. Check the connection and search again.</Empty>}
-      {results && results.length === 0 && <Empty>No match in Google Books, Open Library or Project Gutenberg. Try the author's surname, or add it by hand below.</Empty>}
+      {!searching && results && results.length === 0 && <Empty>No match in Google Books, Open Library or Project Gutenberg. Try the author's surname, or add it by hand below.</Empty>}
 
       <button type="button" className="mt-5 block text-micro text-faint hover:text-paper" onClick={() => setManual((v) => !v)}>
         {manual ? 'Hide manual entry' : "Can't find it? Add manually"}
