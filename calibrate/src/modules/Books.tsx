@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Icon } from '../components/icons'
 import { Chain, DangerBtn, Empty, Eyebrow, InlineArea, InlineText, NumCell, Page, Sheet, Tools } from '../components/ui'
-import { coverCandidates, coverChoices, matchCover, searchBooks, sharpCover, type BookMatch } from '../lib/bookSearch'
+import { coverCandidates, coverChoices, findFreeCopy, matchCover, searchBooks, sharpCover, type BookMatch } from '../lib/bookSearch'
 import { todayISO } from '../lib/dates'
 import { habitChain, habitStreak } from '../lib/habits'
 import { useStore } from '../store/store'
@@ -162,6 +162,41 @@ function useSummaryBackfill(books: Book[]) {
     })()
     return () => controller.abort()
   }, [missing])
+}
+
+function FreeBadge() {
+  return (
+    <span className="shrink-0 rounded-full border border-line-2 px-1.5 py-px text-[0.5625rem] font-semibold uppercase tracking-[0.08em] text-mute">
+      Free
+    </span>
+  )
+}
+
+const readLabel = (url: string) =>
+  url.includes('gutenberg.org') ? 'Project Gutenberg' : url.includes('archive.org') ? 'Internet Archive' : 'Open Library'
+
+/** "Read free" when a legal full text exists — looked up once per book, remembered. */
+function FreeCopy({ book }: { book: Book }) {
+  const s = useStore()
+  useEffect(() => {
+    if (book.readUrl !== undefined) return
+    const controller = new AbortController()
+    findFreeCopy(book.title, book.author, controller.signal)
+      .then((url) => !controller.signal.aborted && s.updateBook(book.id, { readUrl: url ?? '' }))
+      .catch(() => {}) // offline — look again next time the sheet opens
+    return () => controller.abort()
+  }, [book.id, book.title, book.author, book.readUrl, s])
+  if (!book.readUrl) return null
+  return (
+    <a
+      href={book.readUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`${PILL} mt-4 w-fit`}
+    >
+      Read free · {readLabel(book.readUrl)} <Icon name="chevronRight" size={11} />
+    </a>
+  )
 }
 
 /** Summary block in the book sheet — auto-filled, editable, re-writable on demand. */
@@ -447,6 +482,7 @@ function BookSheet({ id, onClose }: { id: string | null; onClose: () => void }) 
               <Stars book={book} size={15} />
             </div>
           )}
+          <FreeCopy book={book} />
         </div>
       </div>
 
@@ -489,7 +525,7 @@ function BookSheet({ id, onClose }: { id: string | null; onClose: () => void }) 
 
 const editionKey = (m: BookMatch) => `${m.title}|${m.author}|${m.publisher ?? ''}|${m.year ?? ''}|${m.coverUrl ?? ''}`
 
-/** Search Google Books + Open Library; add straight to Reading or Want to read. Manual entry behind a toggle. */
+/** Search Google Books + Open Library + Project Gutenberg; add straight to Reading or Want to read. Manual entry behind a toggle. */
 function AddBooks({ open, onClose }: { open: boolean; onClose: () => void }) {
   const s = useStore()
   const [query, setQuery] = useState('')
@@ -531,6 +567,8 @@ function AddBooks({ open, onClose }: { open: boolean; onClose: () => void }) {
       coverPinned: !!m.coverUrl,
       coverRev: COVER_REV,
       publisher: m.publisher,
+      // Undefined, not '': a miss here is one search, not a verdict — the sheet looks again.
+      ...(m.readUrl ? { readUrl: m.readUrl } : {}),
       status,
     })
     setAdded((a) => [...a, editionKey(m)])
@@ -566,7 +604,10 @@ function AddBooks({ open, onClose }: { open: boolean; onClose: () => void }) {
                   size="row"
                 />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-body text-paper">{m.title}</span>
+                  <span className="flex items-center gap-2">
+                    <span className="truncate text-body text-paper">{m.title}</span>
+                    {m.readUrl && <FreeBadge />}
+                  </span>
                   <span className="block truncate text-micro text-mute">{m.author || 'Unknown author'}</span>
                   <span className="block truncate text-micro text-faint">
                     {[m.publisher, m.year, m.totalPages ? `${m.totalPages} pp` : null].filter(Boolean).join(' · ') || '\u00a0'}
@@ -592,8 +633,8 @@ function AddBooks({ open, onClose }: { open: boolean; onClose: () => void }) {
           })}
         </ul>
       )}
-      {offline && <Empty>Couldn't reach Google Books or Open Library. Check the connection and search again.</Empty>}
-      {results && results.length === 0 && <Empty>No match in Google Books or Open Library. Try the author's surname, or add it by hand below.</Empty>}
+      {offline && <Empty>Couldn't reach any book catalogue. Check the connection and search again.</Empty>}
+      {results && results.length === 0 && <Empty>No match in Google Books, Open Library or Project Gutenberg. Try the author's surname, or add it by hand below.</Empty>}
 
       <button type="button" className="mt-5 block text-micro text-faint hover:text-paper" onClick={() => setManual((v) => !v)}>
         {manual ? 'Hide manual entry' : "Can't find it? Add manually"}
@@ -915,7 +956,10 @@ export function Books({ label }: { label: string }) {
                         <button onClick={() => setDetail(b.id)} className="flex min-w-0 flex-1 items-center gap-4 text-left">
                           <Cover book={b} size="sm" />
                           <span className="min-w-0 flex-1">
-                            <span className="block truncate text-body font-medium text-paper">{b.title}</span>
+                            <span className="flex items-center gap-2">
+                              <span className="truncate text-body font-medium text-paper">{b.title}</span>
+                              {b.readUrl && <FreeBadge />}
+                            </span>
                             <span className="block truncate text-micro text-faint">
                               {b.author || 'Unknown author'}
                               {b.totalPages ? ` · ${b.totalPages} pp` : ''}
