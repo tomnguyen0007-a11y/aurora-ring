@@ -809,6 +809,8 @@ export const useStore = create<CalibrateState>()(
               rating: b.rating ?? null,
               notes: b.notes ?? '',
               coverUrl: b.coverUrl ?? null,
+              ...(b.coverPinned ? { coverPinned: true } : {}),
+              ...(b.coverRev ? { coverRev: b.coverRev } : {}),
               startedAt: b.startedAt ?? ((b.status ?? 'reading') === 'reading' ? todayISO() : null),
               finishedAt: b.finishedAt ?? (b.status === 'finished' ? todayISO() : null),
             },

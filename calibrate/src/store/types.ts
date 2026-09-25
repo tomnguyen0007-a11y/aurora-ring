@@ -328,6 +328,10 @@ export interface Book {
   notes: string
   /** Open Library cover art, when the search flow found one — null for a manually-typed book. */
   coverUrl: string | null
+  /** You picked this cover by hand (search result or the cover picker) — auto-matching never touches it. */
+  coverPinned?: boolean
+  /** Which revision of the auto-matcher last checked this cover; older ones get re-checked once. */
+  coverRev?: number
   /** ISO dates stamped on status changes — drive "since Sep", the per-month chart and the by-year shelf. */
   startedAt?: string | null
   finishedAt?: string | null

@@ -1,21 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Icon } from '../components/icons'
-import {
-  Bar,
-  Chain,
-  DangerBtn,
-  Empty,
-  Eyebrow,
-  IconBtn,
-  InlineArea,
-  InlineText,
-  NumCell,
-  Page,
-  Section,
-  Sheet,
-  Tools,
-} from '../components/ui'
-import { searchBooks, type BookMatch } from '../lib/bookSearch'
+import { Chain, DangerBtn, Empty, Eyebrow, InlineArea, InlineText, NumCell, Page, Sheet, Tools } from '../components/ui'
+import { coverChoices, matchCover, searchBooks, sharpCover, type BookMatch } from '../lib/bookSearch'
 import { todayISO } from '../lib/dates'
 import { habitChain, habitStreak } from '../lib/habits'
 import { useStore } from '../store/store'
@@ -23,86 +9,112 @@ import type { Book, BookStatus } from '../store/types'
 
 /* ════════════════════════════════════════════════════════════════════
    READING
-   Same anatomy as a proper reading tracker — the year's count and goal,
-   a month-by-month strip, lifetime stats, what's on the nightstand, and
-   a cover wall of everything read — drawn in Calibrate's own system:
-   hairlines and whitespace, no floating cards.
+   A proper reading tracker — the year's count and goal, a month strip,
+   lifetime stats, what's on the nightstand, and a cover wall of
+   everything read. The library lives on raised graphite panels
+   (--color-card*) with soft corners: a cover wall on pure ink reads as
+   a void. Everywhere else in Calibrate stays hairline-flat.
    ════════════════════════════════════════════════════════════════════ */
 
 const MONTHS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D']
 
+/** Bumping this re-checks every auto-matched cover once with the current matcher. */
+const COVER_REV = 2
+
+const PANEL = 'rounded-2xl border border-white/[0.05] bg-card p-4 sm:p-6'
+const PILL =
+  'inline-flex items-center gap-1.5 rounded-full border border-line-2 px-3 py-1 text-label font-medium text-paper transition-colors hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-paper'
+
 // ── Covers ─────────────────────────────────────────────────────────
 
-type CoverSize = 'sm' | 'lg' | 'fill'
+type CoverSize = 'sm' | 'md' | 'lg' | 'fill'
+
+const BOX: Record<CoverSize, string> = {
+  sm: 'h-12 w-8 rounded-[3px]',
+  md: 'h-[6.75rem] w-[4.5rem] rounded-[4px]',
+  lg: 'h-40 w-[6.75rem] rounded-[4px]',
+  fill: 'aspect-[2/3] w-full rounded-[4px]',
+}
 
 /** Cover art, or a typeset title tile when there is none (or it fails to load). */
 function Cover({ book, size }: { book: Pick<Book, 'title' | 'author' | 'coverUrl'>; size: CoverSize }) {
-  const [broken, setBroken] = useState(false)
-  const box = size === 'sm' ? 'h-12 w-8' : size === 'lg' ? 'h-40 w-[6.75rem]' : 'aspect-[2/3] w-full'
-  if (book.coverUrl && !broken) {
+  const url = size === 'sm' ? book.coverUrl : sharpCover(book.coverUrl)
+  const [broken, setBroken] = useState<string | null>(null)
+  const box = BOX[size]
+  if (url && broken !== url) {
     return (
       <img
-        src={book.coverUrl}
+        src={url}
         alt=""
         loading="lazy"
-        onError={() => setBroken(true)}
-        className={`${box} shrink-0 border border-line object-cover`}
+        decoding="async"
+        onError={() => setBroken(url)}
+        className={`${box} shrink-0 bg-card-3 object-cover shadow-[0_1px_0_rgba(255,255,255,0.06)_inset,0_6px_16px_-8px_rgba(0,0,0,0.8)]`}
       />
     )
   }
   if (size === 'sm') {
     return (
-      <span className={`${box} flex shrink-0 items-center justify-center border border-line bg-ink-2 text-faint`}>
+      <span className={`${box} flex shrink-0 items-center justify-center bg-card-3 text-faint`}>
         <Icon name="books" size={13} />
       </span>
     )
   }
+  // The typeset tile: a grey board with a darker spine, title set bold like a jacket.
   return (
-    <span className={`${box} flex shrink-0 flex-col justify-between overflow-hidden border border-line bg-ink-2 p-3 text-left`}>
-      <span className={`line-clamp-5 font-medium leading-tight text-paper ${size === 'lg' ? 'text-micro' : 'text-body'}`}>
+    <span
+      className={`${box} relative flex shrink-0 flex-col overflow-hidden bg-card-3 text-left ${size === 'fill' ? 'p-3 sm:p-4' : 'p-2.5'}`}
+    >
+      <span className="absolute inset-y-0 left-0 w-[3px] bg-black/25" aria-hidden="true" />
+      <span
+        className={`line-clamp-6 hyphens-auto break-words font-semibold leading-[1.15] tracking-[-0.01em] text-paper ${
+          size === 'fill' ? 'text-[0.8125rem] sm:text-[0.9375rem]' : 'text-micro'
+        }`}
+      >
         {book.title}
       </span>
-      {book.author && <span className="truncate text-[9px] uppercase tracking-[0.08em] text-faint">{book.author}</span>}
+      {book.author && (
+        <span className={`mt-1.5 line-clamp-2 leading-tight text-mute ${size === 'fill' ? 'text-micro' : 'text-[0.625rem]'}`}>
+          {book.author}
+        </span>
+      )}
     </span>
   )
 }
 
-// Backfill covers for books added before search existed (or typed by hand).
-// One attempt per book per session; Open Library is free but not a firehose.
+// Match covers for books that have none, or whose auto-picked cover predates
+// the current matcher (the old one grabbed translations and look-alike titles).
+// Hand-picked covers are never touched. One attempt per book per session.
 const coverTried = new Set<string>()
-
-async function findCover(b: Book, signal: AbortSignal): Promise<BookMatch | null> {
-  const queries = [`${b.title} ${b.author}`.trim(), b.title]
-  for (const q of queries) {
-    const hits = await searchBooks(q, signal).catch(() => [] as BookMatch[])
-    const hit = hits.find((h) => h.coverUrl)
-    if (hit) return hit
-  }
-  return null
-}
+const needsCover = (b: Book) => !b.coverPinned && (b.coverRev ?? 0) < COVER_REV && !coverTried.has(b.id)
 
 function useCoverBackfill(books: Book[]) {
   const missing = books
-    .filter((b) => !b.coverUrl && !coverTried.has(b.id))
+    .filter(needsCover)
     .map((b) => b.id)
     .join(',')
   useEffect(() => {
     if (!missing) return
     const controller = new AbortController()
     void (async () => {
-      for (const b of useStore.getState().books.filter((x) => !x.coverUrl && !coverTried.has(x.id))) {
+      for (const b of useStore.getState().books.filter(needsCover)) {
         coverTried.add(b.id)
-        const hit = await findCover(b, controller.signal)
-        if (controller.signal.aborted) {
-          coverTried.delete(b.id) // interrupted, not a genuine miss — retry next mount
+        let hit: BookMatch | null
+        try {
+          hit = await matchCover(b.title, b.author, controller.signal)
+        } catch {
+          // Offline or rate-limited — not a verdict on the cover. Keep it, retry next session.
+          if (controller.signal.aborted) coverTried.delete(b.id)
           return
         }
-        if (hit?.coverUrl) {
-          useStore.getState().updateBook(b.id, {
-            coverUrl: hit.coverUrl,
-            ...(b.totalPages ? {} : { totalPages: hit.totalPages }),
-          })
-        }
+        // Re-read: the user may have picked a cover while we were waiting.
+        const cur = useStore.getState().books.find((x) => x.id === b.id)
+        if (!cur || cur.coverPinned) continue
+        useStore.getState().updateBook(b.id, {
+          coverUrl: hit?.coverUrl ?? null,
+          coverRev: COVER_REV,
+          ...(cur.totalPages || !hit ? {} : { totalPages: hit.totalPages }),
+        })
       }
     })()
     return () => controller.abort()
@@ -119,8 +131,11 @@ function Stars({ book, size = 13 }: { book: Book; size?: number }) {
         <button
           key={v}
           type="button"
+          role="radio"
+          aria-checked={v === book.rating}
           onClick={() => s.updateBook(book.id, { rating: v === book.rating ? null : v })}
           aria-label={`Rate ${v}`}
+          className="transition-transform hover:scale-110 active:scale-95"
         >
           <Icon name="star" size={size} className={v <= (book.rating ?? 0) ? 'text-paper' : 'text-ghost'} />
         </button>
@@ -135,13 +150,27 @@ function monthYear(iso: string | null | undefined): string | null {
   return isNaN(d.getTime()) ? null : d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
 }
 
-function ReadingNow({ book }: { book: Book }) {
+/** 4px rounded progress track — the library's one chart primitive. */
+function Progress({ pct, className = '' }: { pct: number; className?: string }) {
+  return (
+    <div className={`h-1 w-full overflow-hidden rounded-full bg-white/[0.08] ${className}`}>
+      <div
+        className="h-full rounded-full bg-paper transition-[width] duration-500 ease-out"
+        style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
+      />
+    </div>
+  )
+}
+
+function ReadingNow({ book, onOpen }: { book: Book; onOpen: () => void }) {
   const s = useStore()
   const pct = book.totalPages ? Math.min(100, Math.round((book.currentPage / book.totalPages) * 100)) : 0
   const since = monthYear(book.startedAt)
   return (
-    <li className="group flex gap-6 border-b border-line py-6 first:pt-0 last:border-b-0">
-      <Cover book={book} size="lg" />
+    <li className="group flex gap-4 rounded-xl bg-card-2 p-3 sm:gap-5 sm:p-4">
+      <button type="button" onClick={onOpen} aria-label={`Open ${book.title}`} className="shrink-0 self-start transition-opacity hover:opacity-85">
+        <Cover book={book} size="md" />
+      </button>
       <div className="min-w-0 flex-1">
         <div className="flex items-start gap-3">
           <div className="min-w-0 flex-1">
@@ -150,15 +179,15 @@ function ReadingNow({ book }: { book: Book }) {
               onChange={(v) => s.updateBook(book.id, { title: v })}
               ariaLabel="Book title"
               minRows={1}
-              className="t-page"
+              className="!text-[1.0625rem] font-semibold !leading-snug tracking-[-0.012em] !text-paper"
             />
-            <div className="mt-1.5 flex flex-wrap items-baseline gap-x-1.5 text-body text-mute">
+            <div className="mt-0.5 flex flex-wrap items-baseline gap-x-1.5 text-label text-dim">
               <InlineText
                 value={book.author}
                 onChange={(v) => s.updateBook(book.id, { author: v })}
                 ariaLabel="Author"
                 placeholder="Author"
-                className="text-body text-mute"
+                className="!w-auto max-w-full text-label text-dim [field-sizing:content]"
               />
               {since && <span className="shrink-0 text-faint">· since {since}</span>}
             </div>
@@ -168,28 +197,28 @@ function ReadingNow({ book }: { book: Book }) {
           </Tools>
         </div>
 
-        <Bar pct={pct} className="mt-6" />
-        <div className="mt-3 flex items-baseline gap-1 text-body text-faint">
+        <Progress pct={pct} className="mt-4" />
+        <div className="mt-2 flex items-baseline gap-1 text-label text-dim">
           <span>p.</span>
           <NumCell
             value={book.currentPage || null}
             onChange={(v) => s.updateBook(book.id, { currentPage: v ?? 0 })}
             ariaLabel="Current page"
-            width="w-12"
+            width="w-[3.2ch] !text-left"
           />
           <span>of</span>
           <NumCell
             value={book.totalPages || null}
             onChange={(v) => s.updateBook(book.id, { totalPages: v ?? 0 })}
             ariaLabel="Total pages"
-            width="w-12"
+            width="w-[3.2ch] !text-left"
           />
           <span className="num">· {pct}%</span>
         </div>
 
-        <div className="mt-5 flex flex-wrap gap-2">
+        <div className="mt-3 flex flex-wrap gap-2">
           <button
-            className="btn btn-solid"
+            className={`${PILL} bg-black/40`}
             onClick={() =>
               s.updateBook(book.id, {
                 status: 'finished',
@@ -197,9 +226,12 @@ function ReadingNow({ book }: { book: Book }) {
               })
             }
           >
-            Finished <Icon name="check" size={13} />
+            Finished <Icon name="check" size={12} />
           </button>
-          <button className="btn" onClick={() => s.updateBook(book.id, { status: 'queued' })}>
+          <button
+            className="rounded-full px-3 py-1 text-label text-dim transition-colors hover:bg-white/[0.05] hover:text-paper"
+            onClick={() => s.updateBook(book.id, { status: 'queued' })}
+          >
             Back to queue
           </button>
         </div>
@@ -208,10 +240,70 @@ function ReadingNow({ book }: { book: Book }) {
   )
 }
 
+/** Pick a different cover from Open Library, or drop to the typeset tile. */
+function CoverPicker({ book, onDone }: { book: Book; onDone: () => void }) {
+  const s = useStore()
+  const [choices, setChoices] = useState<BookMatch[] | null>(null)
+  const [failed, setFailed] = useState(false)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    coverChoices(book.title, book.author, controller.signal)
+      .then(setChoices)
+      .catch(() => !controller.signal.aborted && setFailed(true))
+    return () => controller.abort()
+  }, [book.title, book.author])
+
+  const pick = (coverUrl: string | null) => {
+    s.updateBook(book.id, { coverUrl, coverPinned: true, coverRev: COVER_REV })
+    onDone()
+  }
+
+  return (
+    <div className="mt-5 rounded-xl bg-card-2 p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <Eyebrow>Choose a cover</Eyebrow>
+        <button className="text-micro text-faint hover:text-paper" onClick={onDone}>
+          Cancel
+        </button>
+      </div>
+      <div className="grid grid-cols-4 gap-2.5 sm:grid-cols-6">
+        <button
+          type="button"
+          onClick={() => pick(null)}
+          aria-label="Use title tile"
+          className={`rounded-[4px] outline-offset-2 transition-opacity hover:opacity-85 ${!book.coverUrl ? 'outline outline-1 outline-paper' : ''}`}
+        >
+          <Cover book={{ ...book, coverUrl: null }} size="fill" />
+        </button>
+        {choices?.map((c) => (
+          <button
+            key={c.coverUrl}
+            type="button"
+            onClick={() => pick(c.coverUrl)}
+            aria-label={`Use cover: ${c.title}${c.year ? `, ${c.year}` : ''}`}
+            title={`${c.title}${c.author ? ` — ${c.author}` : ''}${c.year ? ` · ${c.year}` : ''}`}
+            className={`rounded-[4px] outline-offset-2 transition-opacity hover:opacity-85 ${
+              sharpCover(book.coverUrl) === c.coverUrl ? 'outline outline-1 outline-paper' : ''
+            }`}
+          >
+            <Cover book={c} size="fill" />
+          </button>
+        ))}
+      </div>
+      {!choices && !failed && <p className="mt-3 text-micro text-faint">Searching Open Library…</p>}
+      {failed && <p className="mt-3 text-micro text-faint">Couldn't reach Open Library. The title tile still works.</p>}
+      {choices && !choices.length && <p className="mt-3 text-micro text-faint">No covers on file for this title — the tile is the honest option.</p>}
+    </div>
+  )
+}
+
 /** Everything about one book, editable in one place — opened from the cover wall. */
 function BookSheet({ id, onClose }: { id: string | null; onClose: () => void }) {
   const s = useStore()
+  const [picking, setPicking] = useState(false)
   const book = s.books.find((b) => b.id === id)
+  useEffect(() => setPicking(false), [id])
   if (!book) return null
   const moves: { id: BookStatus; label: string }[] = [
     { id: 'reading', label: 'Reading' },
@@ -221,7 +313,14 @@ function BookSheet({ id, onClose }: { id: string | null; onClose: () => void }) 
   return (
     <Sheet open onClose={onClose} title={book.status === 'finished' ? 'Read' : book.status === 'queued' ? 'Want to read' : 'Reading'} wide>
       <div className="flex gap-5">
-        <Cover book={book} size="lg" />
+        <div className="shrink-0">
+          <button type="button" onClick={() => setPicking(true)} aria-label="Change cover" className="block transition-opacity hover:opacity-85">
+            <Cover book={book} size="lg" />
+          </button>
+          <button type="button" onClick={() => setPicking((v) => !v)} className="mt-2 block w-full text-center text-micro text-faint hover:text-paper">
+            Change cover
+          </button>
+        </div>
         <div className="min-w-0 flex-1">
           <InlineText value={book.title} onChange={(v) => s.updateBook(book.id, { title: v })} ariaLabel="Book title" className="t-head" />
           <InlineText
@@ -231,12 +330,12 @@ function BookSheet({ id, onClose }: { id: string | null; onClose: () => void }) 
             placeholder="Author"
             className="mt-1 text-body text-mute"
           />
-          <div className="mt-4 flex items-baseline gap-1 text-micro text-faint">
+          <div className="mt-4 flex flex-wrap items-baseline gap-1 text-micro text-faint">
             <NumCell
               value={book.totalPages || null}
               onChange={(v) => s.updateBook(book.id, { totalPages: v ?? 0 })}
               ariaLabel="Total pages"
-              width="w-12"
+              width="w-10"
             />
             <span>pages</span>
             {book.status === 'finished' && (
@@ -264,6 +363,8 @@ function BookSheet({ id, onClose }: { id: string | null; onClose: () => void }) 
           )}
         </div>
       </div>
+
+      {picking && <CoverPicker book={book} onDone={() => setPicking(false)} />}
 
       <div className="mt-6 border-t border-line pt-4">
         <InlineArea
@@ -331,6 +432,9 @@ function AddBooks({ open, onClose }: { open: boolean; onClose: () => void }) {
       author: m.author,
       totalPages: m.totalPages,
       coverUrl: m.coverUrl,
+      // Chosen from a list showing this exact cover — that's a pick, not a guess.
+      coverPinned: !!m.coverUrl,
+      coverRev: COVER_REV,
       status,
     })
     setAdded((a) => [...a, `${m.title}|${m.author}`])
@@ -484,40 +588,50 @@ export function Books({ label }: { label: string }) {
     <Page
       title={label}
       actions={
-        <button className="btn btn-solid" onClick={() => setAdding(true)}>
+        <button
+          className="inline-flex items-center gap-1.5 rounded-full bg-paper px-4 py-2 text-label font-semibold text-black transition-opacity hover:opacity-90 active:opacity-80"
+          onClick={() => setAdding(true)}
+        >
           <Icon name="plus" size={13} /> Add books
         </button>
       }
     >
-      {/* Year readout left, the month strip right — the page's one focal number.
-          Header + stats are one block: Page spaces its children generously. */}
+      {/* Year count left, month strip right; stats underneath. One block. */}
       <div>
-        <header className="flex flex-col gap-10 border-b border-line pb-10 lg:flex-row lg:items-end lg:justify-between">
+        <header className="flex flex-col gap-8 border-b border-line pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="readout glow text-[5rem] leading-[0.9] sm:text-[6rem]">{thisYear.length}</div>
-            <p className="mt-4 text-body text-mute">books finished in {year}</p>
-            <div className="mt-4 inline-flex items-baseline gap-1.5 border border-line px-3 py-1.5 text-micro text-mute">
+            <div className="num text-[3.25rem] font-semibold leading-[0.95] tracking-[-0.045em] text-paper sm:text-[4rem]">
+              {thisYear.length}
+            </div>
+            <p className="mt-2 text-body text-mute">books finished in {year}</p>
+            <div className="mt-3 inline-flex items-baseline gap-1 rounded-full border border-line-2 px-3 py-1 text-micro text-mute">
               <span>Read goal</span>
-              <span className="num text-paper">{thisYear.length}/</span>
-              <NumCell value={s.bookGoal} onChange={(v) => s.setBookGoal(v ?? s.bookGoal)} ariaLabel="Yearly reading goal" width="w-6" />
+              <span className="num font-semibold text-paper">{thisYear.length}/</span>
+              <NumCell value={s.bookGoal} onChange={(v) => s.setBookGoal(v ?? s.bookGoal)} ariaLabel="Yearly reading goal" width="w-[2.2ch] !text-left" />
               <span className="text-faint">· {monthsLeft ? `${monthsLeft} mo left` : 'final month'}</span>
             </div>
           </div>
 
-          <div className="grid w-full max-w-md grid-cols-12 gap-1.5 lg:w-[26rem]" aria-label={`Books finished per month, ${year}`}>
+          <div className="grid w-full grid-cols-12 gap-1.5 sm:w-[20rem]" aria-label={`Books finished per month, ${year}`} role="img">
             {MONTHS.map((m, i) => (
-              <div key={i} className="flex flex-col items-center gap-2">
-                <span className={`num h-4 text-micro ${perMonth[i] ? 'text-mute' : 'text-transparent'}`}>{perMonth[i] || 0}</span>
+              <div key={i} className="flex flex-col items-center gap-1.5">
+                <span className={`num h-3.5 text-[0.625rem] font-medium ${perMonth[i] ? 'text-mute' : 'text-transparent'}`}>
+                  {perMonth[i] || 0}
+                </span>
                 <div
-                  className="relative h-20 w-full bg-white/[0.06]"
+                  className="relative h-14 w-full overflow-hidden rounded-[5px] bg-card-2"
                   title={`${perMonth[i]} in ${new Date(year, i).toLocaleDateString('en-GB', { month: 'long' })}`}
                 >
                   <div
-                    className={`absolute inset-x-0 bottom-0 transition-[height] duration-500 ${i === month ? 'bg-paper' : 'bg-paper/70'}`}
+                    className={`absolute inset-x-0 bottom-0 rounded-[5px] transition-[height] duration-500 ${
+                      i === month ? 'bg-paper' : 'bg-[#8e8e93]'
+                    }`}
                     style={{ height: `${(perMonth[i] / peak) * 100}%` }}
                   />
                 </div>
-                <span className={`text-micro ${i === month ? 'font-medium text-paper' : i > month ? 'text-ghost' : 'text-faint'}`}>
+                <span
+                  className={`text-[0.625rem] ${i === month ? 'font-semibold text-paper' : i > month ? 'text-ghost' : 'text-faint'}`}
+                >
                   {m}
                 </span>
               </div>
@@ -525,167 +639,208 @@ export function Books({ label }: { label: string }) {
           </div>
         </header>
 
-        <div className="flex divide-x divide-line py-6">
+        <div className="flex divide-x divide-line pt-5">
           {[
             { label: 'All time', value: finished.length },
             { label: 'Pages', value: pages.toLocaleString('en-US') },
             { label: 'Avg rating', value: avg === '—' ? avg : `${avg}★` },
           ].map((st) => (
-            <div key={st.label} className="pr-8 [&:not(:first-child)]:pl-8">
+            <div key={st.label} className="pr-6 [&:not(:first-child)]:pl-6">
               <Eyebrow>{st.label}</Eyebrow>
-              <div className="readout mt-2 text-[1.5rem]">{st.value}</div>
+              <div className="num mt-1.5 text-[1.0625rem] font-semibold text-paper">{st.value}</div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-x-16 gap-y-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,260px)]">
-        <Section label={`Reading now · ${reading.length}`}>
-          {reading.length ? (
-            <ul>
-              {reading.map((b) => (
-                <ReadingNow key={b.id} book={b} />
-              ))}
-            </ul>
-          ) : (
-            <Empty>Nothing on the nightstand. Pull one from Want to read.</Empty>
-          )}
-        </Section>
-
-        {/* The fifteen-minute habit rides alongside, not on top. */}
-        <Section label="Today">
-          <div className="flex items-baseline gap-1">
-            <span className="readout text-[2.25rem]">{todayMin}</span>
-            <span className="text-body text-faint">/15 min</span>
-          </div>
-          {habit && <div className="eyebrow mt-2">{habitStreak(s, habit)} day streak</div>}
-          <Bar pct={Math.min(100, (todayMin / 15) * 100)} className="mt-4" />
-          <div className="mt-4 flex flex-wrap gap-1.5">
-            {todayMin > 0 && (
-              <button className="btn btn-sm" onClick={() => s.logReading(todayISO(), -15)} aria-label="Subtract 15 minutes">
-                −15
-              </button>
-            )}
-            {[15, 30, 45].map((m) => (
-              <button key={m} className="btn btn-sm" onClick={() => s.logReading(todayISO(), m)}>
-                +{m}
-              </button>
-            ))}
-          </div>
-          {habit && (
-            <div className="mt-5">
-              <div className="eyebrow mb-2">Last 30 days</div>
-              <Chain days={habitChain(s, habit, 30)} size={6} />
-            </div>
-          )}
-        </Section>
-      </div>
-
-      <section>
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-line pb-3">
-          <div className="flex gap-5" role="tablist">
-            {(
-              [
-                { id: 'read', label: 'Read', n: finished.length },
-                { id: 'want', label: 'Want to read', n: queued.length },
-              ] as const
-            ).map((t) => (
-              <button
-                key={t.id}
-                role="tab"
-                aria-selected={tab === t.id}
-                onClick={() => setTab(t.id)}
-                className={`relative pb-3 -mb-3 text-body transition-colors ${tab === t.id ? 'text-paper' : 'text-faint hover:text-mute'}`}
-              >
-                {t.label} <span className="num ml-1 text-micro text-faint">{t.n}</span>
-                {tab === t.id && <span className="absolute inset-x-0 -bottom-px h-px bg-paper" />}
-              </button>
-            ))}
-          </div>
-          <div className="ml-auto flex items-center gap-2">
-            <select className="field !py-1 text-micro" value={sort} onChange={(e) => setSort(e.target.value as Sort)} aria-label="Sort">
-              <option value="recent">Recent</option>
-              <option value="title">Title</option>
-              <option value="rating">Rating</option>
-            </select>
-            <IconBtn glyph="grid" label="Cover wall" active={view === 'grid'} onClick={() => setView('grid')} size={15} />
-            <IconBtn glyph="list" label="List" active={view === 'list'} onClick={() => setView('list')} size={15} />
-          </div>
-        </div>
-
-        <input
-          className="field-line mt-4 w-full py-2 text-body"
-          placeholder="Filter by title, author or note"
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          aria-label="Filter books"
-        />
-
-        {shelf.every((g) => !g.books.length) ? (
-          <Empty>
-            {filter
-              ? 'Nothing matches.'
-              : tab === 'read'
-                ? 'Nothing finished yet — the wall fills itself.'
-                : 'Queue is empty. Add books to line up what’s next.'}
-          </Empty>
-        ) : (
-          shelf.map((g) => (
-            <div key={g.key} className="mt-8">
-              {g.label && (
-                <div className="mb-4 flex items-baseline justify-between border-b border-line pb-2">
-                  <span className="num text-body text-paper">{g.label}</span>
-                  <span className="eyebrow">
-                    {g.books.length} {g.books.length === 1 ? 'book' : 'books'}
-                  </span>
-                </div>
-              )}
-              {view === 'grid' ? (
-                <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 xl:grid-cols-7">
-                  {g.books.map((b) => (
-                    <button key={b.id} onClick={() => setDetail(b.id)} className="group text-left" aria-label={`Open ${b.title}`}>
-                      <div className="transition-opacity group-hover:opacity-80">
-                        <Cover book={b} size="fill" />
-                      </div>
-                      {b.rating ? (
-                        <div className="mt-2 flex gap-0.5 text-paper" aria-label={`${b.rating} stars`}>
-                          {Array.from({ length: b.rating }, (_, i) => (
-                            <Icon key={i} name="star" size={10} />
-                          ))}
-                        </div>
-                      ) : null}
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <ul>
-                  {g.books.map((b) => (
-                    <li key={b.id} className="flex items-center gap-4 border-b border-line py-3 last:border-b-0">
-                      <button onClick={() => setDetail(b.id)} className="flex min-w-0 flex-1 items-center gap-4 text-left">
-                        <Cover book={b} size="sm" />
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-body text-paper">{b.title}</span>
-                          <span className="block truncate text-micro text-faint">
-                            {b.author || 'Unknown author'}
-                            {b.totalPages ? ` · ${b.totalPages} pp` : ''}
-                          </span>
-                        </span>
-                      </button>
-                      {tab === 'read' ? (
-                        <Stars book={b} />
-                      ) : (
-                        <button className="btn btn-sm shrink-0" onClick={() => s.updateBook(b.id, { status: 'reading' })}>
-                          Start
-                        </button>
-                      )}
-                    </li>
+      <div className="space-y-5">
+        {/* Nightstand + the fifteen-minute habit, one panel. */}
+        <section className={PANEL} aria-labelledby="reading-now">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_15rem]">
+            <div>
+              <h2 id="reading-now" className="mb-4 flex items-baseline gap-2 text-[0.9375rem] font-semibold text-paper">
+                Reading now <span className="num text-micro font-normal text-faint">{reading.length}</span>
+              </h2>
+              {reading.length ? (
+                <ul className="space-y-3">
+                  {reading.map((b) => (
+                    <ReadingNow key={b.id} book={b} onOpen={() => setDetail(b.id)} />
                   ))}
                 </ul>
+              ) : (
+                <p className="rounded-xl bg-card-2 px-4 py-6 text-body text-dim">Nothing on the nightstand. Pull one from Want to read.</p>
               )}
             </div>
-          ))
-        )}
-      </section>
+
+            <div className="border-t border-line pt-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
+              <Eyebrow className="mb-4">Today</Eyebrow>
+              <div className="flex items-baseline gap-1">
+                <span className="num text-[2rem] font-semibold leading-none tracking-[-0.03em]">{todayMin}</span>
+                <span className="text-label text-faint">/15 min</span>
+              </div>
+              {habit && <div className="mt-2 text-micro text-dim">{habitStreak(s, habit)} day streak</div>}
+              <Progress pct={(todayMin / 15) * 100} className="mt-4" />
+              <div className="mt-4 flex flex-wrap gap-1.5">
+                {todayMin > 0 && (
+                  <button className={PILL} onClick={() => s.logReading(todayISO(), -15)} aria-label="Subtract 15 minutes">
+                    −15
+                  </button>
+                )}
+                {[15, 30, 45].map((m) => (
+                  <button key={m} className={PILL} onClick={() => s.logReading(todayISO(), m)} aria-label={`Log ${m} minutes`}>
+                    +{m}
+                  </button>
+                ))}
+              </div>
+              {habit && (
+                <div className="mt-5">
+                  <div className="eyebrow mb-2">Last 30 days</div>
+                  <Chain days={habitChain(s, habit, 30)} size={6} />
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className={PANEL} aria-label="Library">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="inline-flex rounded-full bg-card-2 p-1" role="tablist" aria-label="Shelf">
+              {(
+                [
+                  { id: 'read', label: 'Read', n: finished.length },
+                  { id: 'want', label: 'Want to read', n: queued.length },
+                ] as const
+              ).map((t) => (
+                <button
+                  key={t.id}
+                  role="tab"
+                  aria-selected={tab === t.id}
+                  onClick={() => setTab(t.id)}
+                  className={`rounded-full px-3.5 py-1.5 text-label font-medium transition-colors ${
+                    tab === t.id ? 'bg-paper text-black' : 'text-dim hover:text-paper'
+                  }`}
+                >
+                  {t.label} <span className={`num ml-1 ${tab === t.id ? 'text-black/55' : 'text-faint'}`}>{t.n}</span>
+                </button>
+              ))}
+            </div>
+            <div className="ml-auto flex items-center gap-2">
+              <span className="relative">
+                <select
+                  className="cursor-pointer appearance-none rounded-full border border-line-2 bg-transparent py-1.5 pl-3 pr-7 text-label font-medium text-paper outline-none transition-colors hover:bg-white/[0.05] focus-visible:border-line-3"
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value as Sort)}
+                  aria-label="Sort"
+                >
+                  <option value="recent">Recent</option>
+                  <option value="title">Title</option>
+                  <option value="rating">Rating</option>
+                </select>
+                <Icon name="chevronDown" size={11} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-mute" />
+              </span>
+              <span className="inline-flex rounded-full border border-line-2 p-0.5" role="radiogroup" aria-label="View">
+                {(
+                  [
+                    { id: 'grid', glyph: 'grid', label: 'Cover wall' },
+                    { id: 'list', glyph: 'list', label: 'List' },
+                  ] as const
+                ).map((v) => (
+                  <button
+                    key={v.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={view === v.id}
+                    aria-label={v.label}
+                    title={v.label}
+                    onClick={() => setView(v.id)}
+                    className={`rounded-full px-2 py-1 transition-colors ${view === v.id ? 'bg-white/[0.12] text-paper' : 'text-faint hover:text-paper'}`}
+                  >
+                    <Icon name={v.glyph} size={13} />
+                  </button>
+                ))}
+              </span>
+            </div>
+          </div>
+
+          <input
+            className="mt-5 w-full border-b border-line bg-transparent pb-2.5 text-body text-paper outline-none transition-colors placeholder:text-faint focus:border-line-3"
+            placeholder="Filter by title, author or note"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            aria-label="Filter books"
+          />
+
+          {shelf.every((g) => !g.books.length) ? (
+            <Empty>
+              {filter
+                ? 'Nothing matches.'
+                : tab === 'read'
+                  ? 'Nothing finished yet — the wall fills itself.'
+                  : 'Queue is empty. Add books to line up what’s next.'}
+            </Empty>
+          ) : (
+            shelf.map((g) => (
+              <div key={g.key} className="mt-6">
+                {g.label && (
+                  <div className="mb-3 flex items-baseline justify-between">
+                    <span className="num text-body font-semibold text-paper">{g.label}</span>
+                    <span className="eyebrow">
+                      {g.books.length} {g.books.length === 1 ? 'book' : 'books'}
+                    </span>
+                  </div>
+                )}
+                {view === 'grid' ? (
+                  <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 sm:gap-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7">
+                    {g.books.map((b) => (
+                      <button
+                        key={b.id}
+                        onClick={() => setDetail(b.id)}
+                        className="group self-start rounded-[4px] text-left focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-paper"
+                        aria-label={`Open ${b.title}`}
+                      >
+                        <div className="transition-transform duration-200 ease-out group-hover:-translate-y-0.5 group-active:translate-y-0">
+                          <Cover book={b} size="fill" />
+                        </div>
+                        {b.rating ? (
+                          <div className="mt-1.5 flex gap-0.5 text-paper" aria-label={`${b.rating} stars`}>
+                            {Array.from({ length: b.rating }, (_, i) => (
+                              <Icon key={i} name="star" size={10} />
+                            ))}
+                          </div>
+                        ) : null}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <ul className="overflow-hidden rounded-xl bg-card-2">
+                    {g.books.map((b) => (
+                      <li key={b.id} className="flex items-center gap-4 border-b border-line px-3 py-2.5 last:border-b-0">
+                        <button onClick={() => setDetail(b.id)} className="flex min-w-0 flex-1 items-center gap-4 text-left">
+                          <Cover book={b} size="sm" />
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-body font-medium text-paper">{b.title}</span>
+                            <span className="block truncate text-micro text-faint">
+                              {b.author || 'Unknown author'}
+                              {b.totalPages ? ` · ${b.totalPages} pp` : ''}
+                            </span>
+                          </span>
+                        </button>
+                        {tab === 'read' ? (
+                          <Stars book={b} />
+                        ) : (
+                          <button className={`${PILL} shrink-0`} onClick={() => s.updateBook(b.id, { status: 'reading' })}>
+                            Start
+                          </button>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))
+          )}
+        </section>
+      </div>
 
       <AddBooks open={adding} onClose={() => setAdding(false)} />
       <BookSheet id={detail} onClose={() => setDetail(null)} />

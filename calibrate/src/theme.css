@@ -24,6 +24,14 @@
   --color-ink-1: #101012;
   --color-ink-2: #17171a;
 
+  /* ── Library surfaces ──
+     The one sanctioned exception to law 2: the Reading library sits on
+     raised graphite panels, because a cover wall on pure ink reads as a
+     void. Neutral grey only — still zero hue. */
+  --color-card: #161618;
+  --color-card-2: #1f1f22;
+  --color-card-3: #2c2c30;
+
   /* ── Hairlines ──
      8% is right at desk distance on a 27" panel and invisible on a phone
      outdoors. Structure now comes mostly from whitespace; these are the
@@ -129,6 +137,17 @@ body {
   text-transform: uppercase;
   color: var(--color-dim);
   font-feature-settings: 'ss01';
+}
+
+/* Sidebar group heading — heavier and brighter than a section eyebrow,
+   because it divides the whole index, not one block. */
+.nav-group {
+  font-size: 0.6875rem;
+  line-height: 1;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-mute);
 }
 
 /* Data numerals — sans, tabular, tightened.
