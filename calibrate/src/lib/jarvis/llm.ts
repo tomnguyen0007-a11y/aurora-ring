@@ -1267,3 +1267,116 @@ export async function testProvider(p: LlmProvider): Promise<ProviderTestResult> 
     return { ok: false, message: e instanceof Error ? e.message : 'Network error' }
   }
 }
+
+// ————————————————————————————————————————————————————————
+// ONE-SHOT COMPLETION — for small background jobs (book summaries)
+// No chat history, no app context, no actions: a system line, a prompt, text back.
+// Same failover chain and rate limiter as Jarvis, so it can't starve him.
+// ————————————————————————————————————————————————————————
+
+async function completeWith(p: LlmProvider, system: string, prompt: string, maxTokens: number): Promise<string> {
+  const { settings } = useStore.getState()
+  const openAiStyle = async (url: string, headers: Record<string, string>, model: string) => {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', ...headers },
+      body: JSON.stringify({
+        model,
+        max_tokens: maxTokens,
+        messages: [
+          { role: 'system', content: system },
+          { role: 'user', content: prompt },
+        ],
+      }),
+    })
+    if (!res.ok) throw new ProviderError(p, res.status, `${providerLabel(p)} ${res.status}`)
+    const data: { choices?: { message?: { content?: string } }[] } = await res.json()
+    return data.choices?.[0]?.message?.content ?? ''
+  }
+
+  switch (p) {
+    case 'anthropic': {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-api-key': settings.anthropicKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({
+          model: settings.anthropicModel || 'claude-sonnet-5',
+          max_tokens: maxTokens,
+          system,
+          messages: [{ role: 'user', content: prompt }],
+        }),
+      })
+      if (!res.ok) throw new ProviderError(p, res.status, `Anthropic ${res.status}`)
+      const data: { content: { type: string; text?: string }[] } = await res.json()
+      return data.content
+        .filter((c) => c.type === 'text')
+        .map((c) => c.text ?? '')
+        .join('')
+    }
+    case 'gemini': {
+      const model = settings.geminiModel || 'gemini-2.5-flash'
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${settings.geminiKey}`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: system }] },
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: { maxOutputTokens: maxTokens },
+          }),
+        },
+      )
+      if (!res.ok) throw new ProviderError(p, res.status, `Gemini ${res.status}`)
+      const data: { candidates?: { content?: { parts?: { text?: string }[] } }[] } = await res.json()
+      return data.candidates?.[0]?.content?.parts?.map((x) => x.text ?? '').join('') ?? ''
+    }
+    case 'groq':
+      return openAiStyle(
+        'https://api.groq.com/openai/v1/chat/completions',
+        { authorization: `Bearer ${settings.groqKey}` },
+        settings.groqModel || 'llama-3.3-70b-versatile',
+      )
+    case 'openrouter':
+      return openAiStyle(
+        'https://openrouter.ai/api/v1/chat/completions',
+        {
+          authorization: `Bearer ${settings.openrouterKey}`,
+          'HTTP-Referer': typeof location !== 'undefined' ? location.origin : 'https://calibrate.app',
+          'X-Title': 'Calibrate',
+        },
+        settings.openrouterModel || 'qwen/qwen2.5-vl-72b-instruct:free',
+      )
+    case 'local':
+      return openAiStyle(`${settings.localBaseUrl.replace(/\/+$/, '')}/chat/completions`, {}, settings.localModel)
+    default:
+      throw new Error('no provider configured')
+  }
+}
+
+/** Plain text completion over the configured providers. Throws when none is configured or all fail. */
+export async function completeText(system: string, prompt: string, maxTokens = 400): Promise<string> {
+  const chain = getProviderChain()
+  if (!chain.length) throw new Error('LLM not configured')
+  const failures: string[] = []
+  for (const p of chain) {
+    if (!canCall(p)) {
+      failures.push(`${providerLabel(p)}: rate-limited`)
+      continue
+    }
+    recordCall(p)
+    try {
+      const text = (await completeWith(p, system, prompt, maxTokens)).trim()
+      if (text) return text
+      failures.push(`${providerLabel(p)}: empty reply`)
+    } catch (e) {
+      failures.push(`${providerLabel(p)}: ${e instanceof Error ? e.message : 'unknown error'}`)
+    }
+  }
+  throw new Error(failures.join(' | '))
+}

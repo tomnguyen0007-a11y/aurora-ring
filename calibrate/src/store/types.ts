@@ -332,6 +332,10 @@ export interface Book {
   coverPinned?: boolean
   /** Which revision of the auto-matcher last checked this cover; older ones get re-checked once. */
   coverRev?: number
+  /** Auto-written summary (AI or catalogue). '' = looked, found nothing; undefined = not looked yet. */
+  summary?: string
+  /** Edition publisher from search — "Penguin Classics". */
+  publisher?: string
   /** ISO dates stamped on status changes — drive "since Sep", the per-month chart and the by-year shelf. */
   startedAt?: string | null
   finishedAt?: string | null

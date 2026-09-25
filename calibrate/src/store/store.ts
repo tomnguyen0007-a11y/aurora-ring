@@ -811,6 +811,8 @@ export const useStore = create<CalibrateState>()(
               coverUrl: b.coverUrl ?? null,
               ...(b.coverPinned ? { coverPinned: true } : {}),
               ...(b.coverRev ? { coverRev: b.coverRev } : {}),
+              ...(b.summary !== undefined ? { summary: b.summary } : {}),
+              ...(b.publisher ? { publisher: b.publisher } : {}),
               startedAt: b.startedAt ?? ((b.status ?? 'reading') === 'reading' ? todayISO() : null),
               finishedAt: b.finishedAt ?? (b.status === 'finished' ? todayISO() : null),
             },

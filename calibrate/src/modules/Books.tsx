@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Icon } from '../components/icons'
 import { Chain, DangerBtn, Empty, Eyebrow, InlineArea, InlineText, NumCell, Page, Sheet, Tools } from '../components/ui'
-import { coverChoices, matchCover, searchBooks, sharpCover, type BookMatch } from '../lib/bookSearch'
+import { coverCandidates, coverChoices, matchCover, searchBooks, sharpCover, type BookMatch } from '../lib/bookSearch'
 import { todayISO } from '../lib/dates'
 import { habitChain, habitStreak } from '../lib/habits'
 import { useStore } from '../store/store'
@@ -27,10 +27,11 @@ const PILL =
 
 // ── Covers ─────────────────────────────────────────────────────────
 
-type CoverSize = 'sm' | 'md' | 'lg' | 'fill'
+type CoverSize = 'sm' | 'row' | 'md' | 'lg' | 'fill'
 
 const BOX: Record<CoverSize, string> = {
   sm: 'h-12 w-8 rounded-[3px]',
+  row: 'h-[4.5rem] w-12 rounded-[3px]',
   md: 'h-[6.75rem] w-[4.5rem] rounded-[4px]',
   lg: 'h-40 w-[6.75rem] rounded-[4px]',
   fill: 'aspect-[2/3] w-full rounded-[4px]',
@@ -38,22 +39,29 @@ const BOX: Record<CoverSize, string> = {
 
 /** Cover art, or a typeset title tile when there is none (or it fails to load). */
 function Cover({ book, size }: { book: Pick<Book, 'title' | 'author' | 'coverUrl'>; size: CoverSize }) {
-  const url = size === 'sm' ? book.coverUrl : sharpCover(book.coverUrl)
-  const [broken, setBroken] = useState<string | null>(null)
+  // Sharp render first, thumbnail next, typeset tile last.
+  const candidates = coverCandidates(book.coverUrl, size === 'sm' || size === 'row')
+  const [failed, setFailed] = useState<{ of: string | null; n: number }>({ of: null, n: 0 })
+  const tries = failed.of === book.coverUrl ? failed.n : 0
+  const url = candidates[tries]
   const box = BOX[size]
-  if (url && broken !== url) {
+  const next = () => setFailed({ of: book.coverUrl, n: tries + 1 })
+  if (url) {
     return (
       <img
+        key={url}
         src={url}
         alt=""
         loading="lazy"
         decoding="async"
-        onError={() => setBroken(url)}
+        onError={next}
+        // A 1×1 "no image" placeholder is a success to the browser, a failure to us.
+        onLoad={(e) => e.currentTarget.naturalWidth < 20 && next()}
         className={`${box} shrink-0 bg-card-3 object-cover shadow-[0_1px_0_rgba(255,255,255,0.06)_inset,0_6px_16px_-8px_rgba(0,0,0,0.8)]`}
       />
     )
   }
-  if (size === 'sm') {
+  if (size === 'sm' || size === 'row') {
     return (
       <span className={`${box} flex shrink-0 items-center justify-center bg-card-3 text-faint`}>
         <Icon name="books" size={13} />
@@ -119,6 +127,83 @@ function useCoverBackfill(books: Book[]) {
     })()
     return () => controller.abort()
   }, [missing])
+}
+
+// Summaries for every book, written in the background one at a time. The
+// module (and the AI client behind it) loads only when there is work to do.
+const summaryTried = new Set<string>()
+const needsSummary = (b: Book) => b.summary === undefined && !summaryTried.has(b.id)
+
+function useSummaryBackfill(books: Book[]) {
+  const missing = books
+    .filter(needsSummary)
+    .map((b) => b.id)
+    .join(',')
+  useEffect(() => {
+    if (!missing) return
+    const controller = new AbortController()
+    void (async () => {
+      const { summarizeBook } = await import('../lib/bookSummary')
+      for (const b of useStore.getState().books.filter(needsSummary)) {
+        if (controller.signal.aborted) return
+        summaryTried.add(b.id)
+        const r = await summarizeBook(b.title, b.author, controller.signal)
+        if (controller.signal.aborted) {
+          summaryTried.delete(b.id)
+          return
+        }
+        const cur = useStore.getState().books.find((x) => x.id === b.id)
+        if (!cur || cur.summary !== undefined) continue
+        if (r.text) useStore.getState().updateBook(b.id, { summary: r.text })
+        else if (r.definitive) useStore.getState().updateBook(b.id, { summary: '' })
+        // Pace it: a shelf of 30 books shouldn't burn a minute's AI quota in a second.
+        await new Promise((ok) => setTimeout(ok, 2500))
+      }
+    })()
+    return () => controller.abort()
+  }, [missing])
+}
+
+/** Summary block in the book sheet — auto-filled, editable, re-writable on demand. */
+function SummaryBlock({ book }: { book: Book }) {
+  const s = useStore()
+  const [busy, setBusy] = useState(false)
+  const [miss, setMiss] = useState(false)
+  const write = async () => {
+    setBusy(true)
+    setMiss(false)
+    try {
+      const { summarizeBook } = await import('../lib/bookSummary')
+      const r = await summarizeBook(book.title, book.author)
+      if (r.text) s.updateBook(book.id, { summary: r.text })
+      else setMiss(true)
+    } finally {
+      setBusy(false)
+    }
+  }
+  const pending = book.summary === undefined
+  return (
+    <div className="mt-6 border-t border-line pt-4">
+      <div className="mb-2 flex items-center justify-between">
+        <Eyebrow>Summary</Eyebrow>
+        <button type="button" onClick={write} disabled={busy} className="text-micro text-faint transition-colors hover:text-paper disabled:opacity-50">
+          {busy ? 'Writing…' : book.summary ? 'Rewrite' : 'Write summary'}
+        </button>
+      </div>
+      {pending && !busy ? (
+        <p className="text-micro text-faint">Writing a summary in the background…</p>
+      ) : (
+        <InlineArea
+          value={book.summary ?? ''}
+          onChange={(v) => s.updateBook(book.id, { summary: v })}
+          ariaLabel="Summary"
+          placeholder="No summary found for this title. Write your own, or try again."
+          className="!text-label !leading-relaxed"
+        />
+      )}
+      {miss && <p className="mt-1 text-micro text-faint">Nothing found — check the title and author, or add an AI key in Settings for better summaries.</p>}
+    </div>
+  )
 }
 
 // ── Pieces ─────────────────────────────────────────────────────────
@@ -338,6 +423,7 @@ function BookSheet({ id, onClose }: { id: string | null; onClose: () => void }) 
               width="w-10"
             />
             <span>pages</span>
+            {book.publisher && <span className="ml-1.5">· {book.publisher}</span>}
             {book.status === 'finished' && (
               <>
                 <span className="mx-1.5">·</span>
@@ -366,12 +452,15 @@ function BookSheet({ id, onClose }: { id: string | null; onClose: () => void }) 
 
       {picking && <CoverPicker book={book} onDone={() => setPicking(false)} />}
 
+      <SummaryBlock book={book} />
+
       <div className="mt-6 border-t border-line pt-4">
+        <Eyebrow className="mb-2">What stuck</Eyebrow>
         <InlineArea
           value={book.notes}
           onChange={(v) => s.updateBook(book.id, { notes: v })}
           ariaLabel="Notes"
-          placeholder="What stuck. Quotes, ideas, what to do about it…"
+          placeholder="Quotes, ideas, what to do about it…"
           className="!text-micro"
         />
       </div>
@@ -398,12 +487,15 @@ function BookSheet({ id, onClose }: { id: string | null; onClose: () => void }) 
   )
 }
 
-/** Search Open Library; add straight to Reading or Want to read. Manual entry behind a toggle. */
+const editionKey = (m: BookMatch) => `${m.title}|${m.author}|${m.publisher ?? ''}|${m.year ?? ''}|${m.coverUrl ?? ''}`
+
+/** Search Google Books + Open Library; add straight to Reading or Want to read. Manual entry behind a toggle. */
 function AddBooks({ open, onClose }: { open: boolean; onClose: () => void }) {
   const s = useStore()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<BookMatch[] | null>(null)
   const [searching, setSearching] = useState(false)
+  const [offline, setOffline] = useState(false)
   const [added, setAdded] = useState<string[]>([])
   const [manual, setManual] = useState(false)
   const [title, setTitle] = useState('')
@@ -417,10 +509,13 @@ function AddBooks({ open, onClose }: { open: boolean; onClose: () => void }) {
     const controller = new AbortController()
     abortRef.current = controller
     setSearching(true)
+    setOffline(false)
     try {
       setResults(await searchBooks(query, controller.signal))
     } catch {
-      setResults([])
+      if (controller.signal.aborted) return
+      setResults(null)
+      setOffline(true)
     } finally {
       setSearching(false)
     }
@@ -435,9 +530,10 @@ function AddBooks({ open, onClose }: { open: boolean; onClose: () => void }) {
       // Chosen from a list showing this exact cover — that's a pick, not a guess.
       coverPinned: !!m.coverUrl,
       coverRev: COVER_REV,
+      publisher: m.publisher,
       status,
     })
-    setAdded((a) => [...a, `${m.title}|${m.author}`])
+    setAdded((a) => [...a, editionKey(m)])
   }
 
   return (
@@ -445,7 +541,7 @@ function AddBooks({ open, onClose }: { open: boolean; onClose: () => void }) {
       <form className="flex gap-2" onSubmit={run}>
         <input
           className="field min-w-0 flex-1"
-          placeholder="Title, author or ISBN…"
+          placeholder="Title, author, ISBN — or add a publisher: “meditations penguin”"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           autoFocus
@@ -458,7 +554,7 @@ function AddBooks({ open, onClose }: { open: boolean; onClose: () => void }) {
       {results && results.length > 0 && (
         <ul className="mt-4">
           {results.map((m, i) => {
-            const done = added.includes(`${m.title}|${m.author}`)
+            const done = added.includes(editionKey(m))
             return (
               <li key={i} className="flex items-center gap-3 border-b border-line py-2.5 last:border-b-0">
                 <Cover
@@ -467,14 +563,13 @@ function AddBooks({ open, onClose }: { open: boolean; onClose: () => void }) {
                     author: m.author,
                     coverUrl: m.coverUrl,
                   }}
-                  size="sm"
+                  size="row"
                 />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-body text-paper">{m.title}</span>
+                  <span className="block truncate text-micro text-mute">{m.author || 'Unknown author'}</span>
                   <span className="block truncate text-micro text-faint">
-                    {m.author || 'Unknown author'}
-                    {m.year ? ` · ${m.year}` : ''}
-                    {m.totalPages ? ` · ${m.totalPages} pp` : ''}
+                    {[m.publisher, m.year, m.totalPages ? `${m.totalPages} pp` : null].filter(Boolean).join(' · ') || '\u00a0'}
                   </span>
                 </span>
                 {done ? (
@@ -497,7 +592,8 @@ function AddBooks({ open, onClose }: { open: boolean; onClose: () => void }) {
           })}
         </ul>
       )}
-      {results && results.length === 0 && <Empty>No match on Open Library. Add it by hand below.</Empty>}
+      {offline && <Empty>Couldn't reach Google Books or Open Library. Check the connection and search again.</Empty>}
+      {results && results.length === 0 && <Empty>No match in Google Books or Open Library. Try the author's surname, or add it by hand below.</Empty>}
 
       <button type="button" className="mt-5 block text-micro text-faint hover:text-paper" onClick={() => setManual((v) => !v)}>
         {manual ? 'Hide manual entry' : "Can't find it? Add manually"}
@@ -536,6 +632,7 @@ type Sort = 'recent' | 'title' | 'rating'
 export function Books({ label }: { label: string }) {
   const s = useStore()
   useCoverBackfill(s.books)
+  useSummaryBackfill(s.books)
 
   const [adding, setAdding] = useState(false)
   const [detail, setDetail] = useState<string | null>(null)
