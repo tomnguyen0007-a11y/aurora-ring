@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-09-29",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -66,6 +66,21 @@
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
       ]
+    },
+    {
+      "timestamp": "2026-09-29",
+      "status": "PARTIAL - live IBKR account/position data unavailable (no IBKR MCP tools exposed; premarket-research.js needs stdin JSON and errored with empty input). No prices, NAV or sizing computed; prior 2026-07-11 positions are stale (~80 days).",
+      "news": {
+        "SLS": "Q2 report (Aug 11, 2026): REGAL still blinded, approaching 80th event; unconfirmed retail/StockTwits reports claim 80th event hit, company silent. No official 8-K found. Readout sequence after 80th event: DB lock, blinded review, stats, unblind, topline.",
+        "SPCX": "Q2 earnings Aug 4: rev $7.81B (+92%), stock -8% AH on $18.37B capex; first 20% lockup tranche eligible Aug 6; stock hit new all-time low; 7% tranches continue, ~1.92B shares eligible as of Sep 24 (Day-105 tranche). Full lockup expiry Dec 8.",
+        "market": "ESU26 ~7,734, +0.12% premarket after 3 down sessions; dovish Williams comments, oil/yields lower."
+      },
+      "flags": [
+        "Live data missing: cannot compute levels, gap, NAV%, trim/add sizing. Reconnect IBKR connector and rerun.",
+        "Last known SLS 69.8% of NAV vs 35% threshold - unverified now.",
+        "SLS 80th-event rumor is unconfirmed; treat as unverified until 8-K/PR."
+      ],
+      "trades_placed": false
     }
   ]
 }
