@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-10-01",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -66,6 +66,81 @@
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
       ]
+    },
+    {
+      "timestamp": "2026-10-01",
+      "account": {
+        "nav_usd": 1246,
+        "nav_eur_base": 1102.39,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_eur": -168.56,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 12.37,
+          "last": 12.5,
+          "bid": 12.3,
+          "ask": 12.45,
+          "prior_close": 12.31,
+          "gap_pct": 0.49,
+          "market_value": 853.53,
+          "nav_pct": 68.5,
+          "unrealized_pnl": -135.17,
+          "daily_pnl": 4.14,
+          "since_last_run_pct": -3.06,
+          "catalyst": {
+            "name": "REGAL Phase 3 80th event",
+            "status": "Last company-confirmed count 78 (May 11). Aug 11 Q2 update: approaching 80. Unconfirmed German report claims 80th event hit; no 8-K/PR from SELLAS as of Sep 25. Sep 2/25 SLS009 preclinical pancreatic data only.",
+            "next_check": "8-K/PR confirming 80th event; database lock/unblind"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 68.5% NAV vs 35%; script trim-to-35% = 33.75 sh (reference only, no order)",
+          "news_sentiment": "neutral-positive (unconfirmed rumor, retail skeptical)",
+          "setup": "hold / no chase; binary event"
+        },
+        {
+          "ticker": "SPCX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 151.06,
+          "last": 151.13,
+          "bid": 151.04,
+          "ask": 151.07,
+          "prior_close": 150.86,
+          "gap_pct": 0.13,
+          "market_value": 392.76,
+          "nav_pct": 31.52,
+          "unrealized_pnl": -52.17,
+          "daily_pnl": 0.52,
+          "since_last_run_pct": 3.52,
+          "catalyst": {
+            "name": "Staged lockup releases + Q3 earnings",
+            "status": "Oct 10 (Day120) and ~Oct 25/26 (Day135) each ~7% (~328M sh); Q3 earnings reported ~Nov 3-5 (unconfirmed) triggers 28% (~1.3B sh); full lockup expires Dec 8.",
+            "next_check": "Oct 10 unlock reaction; Q3 date confirmation"
+          },
+          "risk_flag": "WATCH - 31.5% NAV, under 35% cap; supply overhang",
+          "news_sentiment": "neutral",
+          "setup": "hold; fade-risk into Oct 10 unlock"
+        }
+      ],
+      "market": "Futures edged higher Oct 1 after S&P 500 worst month since June; elevated oil and Treasury yields.",
+      "data_gaps": [
+        "IBKR snapshot returned 0.0 for open/high/low (pre-market) so VWAP proxy unavailable",
+        "SLS volume/CING not held; no CING position",
+        "Initial script run failed on empty stdin; rerun with piped live data succeeded",
+        "SEC EDGAR overnight search not specifically confirmed"
+      ],
+      "flags": [
+        "SLS 68.5% NAV, ~2x trim threshold, binary event",
+        "Zero USD cash; 2% NAV add size = $24.92 but no dry powder",
+        "SPCX unlock Oct 10"
+      ],
+      "trades_placed": false
     }
   ]
 }
