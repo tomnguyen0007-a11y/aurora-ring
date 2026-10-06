@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-10-06",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -66,6 +66,62 @@
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
       ]
+    },
+    {
+      "timestamp": "2026-10-06",
+      "account": {
+        "nav_usd": 1253.7,
+        "nav_eur_base": 1116.34,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -183.13,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 11.62,
+          "prior_close": 11.63,
+          "gap_pct": -0.09,
+          "market_value": 801.78,
+          "nav_pct": 63.95,
+          "unrealized_pnl": -186.92,
+          "since_last_run_pct": -8.93,
+          "catalyst": {
+            "name": "REGAL Ph3 80th event",
+            "status": "Company last confirmed 78/80 (May 11). Unconfirmed German report claims 80th event hit; stock +15% on that, then faded. Company in quiet period, no official confirmation.",
+            "next_check": "8-K/PR confirming 80th event; database lock"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 64% NAV vs 35%; trim ~31 shares to reach 35%"
+        },
+        {
+          "ticker": "SPCX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 172.58,
+          "prior_close": 171.09,
+          "gap_pct": 0.87,
+          "market_value": 448.71,
+          "nav_pct": 35.79,
+          "unrealized_pnl": 3.79,
+          "since_last_run_pct": 18.27,
+          "catalyst": {
+            "name": "Lockup: 28% tranche after Q3 earnings (date TBD late Oct/early Nov); 7% tranches Oct 10, Oct 25; full expiry Dec 9",
+            "status": "Q2 earnings/first unlock (Aug 6) passed",
+            "next_check": "Q3 earnings date; Oct 10 tranche"
+          },
+          "risk_flag": "Just over 35% NAV (trim ~0.06 sh); back to breakeven vs cost"
+        }
+      ],
+      "flags": [
+        "Script needs stdin JSON; ran with live IBKR data. IBKR snapshot gave no open/high/low (pre-market) so VWAP proxy unavailable.",
+        "SLS 64% NAV, unconfirmed 80th-event rumor, binary risk.",
+        "SPCX Oct 10 unlock tranche in 4 days.",
+        "Futures data not found via search."
+      ],
+      "note": "Read-only. No trades placed."
     }
   ]
 }
