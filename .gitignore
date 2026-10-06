@@ -1,1 +1,11 @@
 node_modules/
+# OS / agent / local-only
+.DS_Store
+.claude/
+.agents/
+.playwright-mcp/
+Claude outputs/
+SecondBrain/
+.env
+.env.*
+theme_export*.zip
