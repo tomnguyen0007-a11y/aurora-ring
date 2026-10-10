@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-10-10",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,82 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-10-10",
+      "data_note": "Quotes FROZEN (2026-10-10 is a Saturday, markets closed); levels = last session. VWAP not available from IBKR snapshot; midpoint of H/L used as proxy.",
+      "account": {
+        "nav_usd": 1229.4,
+        "nav_eur_base": 1097.57,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -207.28,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 11.65,
+          "prior_close": 11.26,
+          "open": 11.38,
+          "high": 11.805,
+          "low": 11.26,
+          "gap_pct": 3.46,
+          "since_last_run_pct": -8.7,
+          "market_value": 803.85,
+          "nav_pct": 65.39,
+          "unrealized_pnl": -184.85,
+          "daily_pnl": 26.91,
+          "catalyst": {
+            "name": "Phase 3 REGAL (GPS, AML) 80th event",
+            "status": "Last public count 78/80 (Aug 18); Q2 report Aug 11 said 80th event not yet reached; no confirmation found since. SLS009 Ph2 topline guided Q4 2026. Cash $138.3M at Jun 30. Unconfirmed buyout speculation (exec severance terms).",
+            "next_check": "8-K/PR on 80th event; SLS009 Q4 data"
+          },
+          "risk": {
+            "trim_shares_to_reach_35pct": 32.07,
+            "flag": "OVER_CONCENTRATED 65.4% vs 35%"
+          },
+          "setup": "hold (no trade proposed; trim is user decision)"
+        },
+        {
+          "ticker": "SPCX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 162.76,
+          "prior_close": 160.57,
+          "open": 165.3,
+          "high": 166.38,
+          "low": 160.61,
+          "gap_pct": 1.36,
+          "since_last_run_pct": 11.54,
+          "market_value": 423.18,
+          "nav_pct": 34.42,
+          "unrealized_pnl": -21.75,
+          "daily_pnl": 5.69,
+          "catalyst": {
+            "name": "Staggered IPO lockup unlocks",
+            "status": "Secondary sources (unverified): 7% tranches incl. Oct 10 and Oct 25; 28% tranche 2 days after Q3 earnings (late Oct/early Nov, date TBD); full release ~Dec 8-9; Musk locked to Jun 2027.",
+            "next_check": "Q3 earnings date; Oct 25 tranche"
+          },
+          "risk": {
+            "trim_shares_to_reach_35pct": 0,
+            "flag": "AT LIMIT 34.4% vs 35%"
+          },
+          "setup": "hold / fade strength into unlock; no add (no cash)"
+        }
+      ],
+      "flags": [
+        "Routine script needs stdin JSON; ran with IBKR live data instead.",
+        "Last run was 2026-07-11 - ~3 months gap; since-last-run moves: SLS -8.7%, SPCX +11.5%.",
+        "SLS 65.4% NAV, ~32 shares over the 35% threshold.",
+        "SPCX 34.4% NAV, 0.6pt below threshold; multiple lockup tranches ahead.",
+        "Zero cash; no dry powder.",
+        "Premarket futures not found for today (weekend).",
+        "CING not held; no CING check required."
       ]
     }
   ]
