@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-08-25",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,67 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-08-25",
+      "account": {
+        "nav_usd": 1342.2,
+        "nav_eur_base": 1153.8179,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -91.42,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 14.4399996,
+          "prior_close": 14.31,
+          "gap_pct": 0.91,
+          "market_value": 996.3599724,
+          "nav_pct": 73.79,
+          "unrealized_pnl": 7.6630724,
+          "daily_pnl": 7.9349724,
+          "since_last_run_pct": 13.17,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Company's last CONFIRMED count remains 78 of 80 required events (reaffirmed by licensing partner 3D Medicines to HKEX on Aug 18, 2026). An unconfirmed media report circulating since ~Aug 22-24 claims the 80th event has been reached; SELLAS has NOT issued an 8-K or press release confirming it. Stock has rallied ~13% since the Jul 11 log (and per some sources touched $15.75 intraday Aug 24) partly on this rumor plus an analyst PT raise (Alliance Global: $25 -> $35, Aug 17).",
+            "next_check": "Official 8-K/press release confirming the 80th event, database lock, and unblinding, or a company denial of the rumor"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 73.8% of NAV vs 35% trim threshold, WORSE than 69.8% at last run"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 136.1399994,
+          "prior_close": 135.04,
+          "gap_pct": 0.81,
+          "market_value": 353.96399844,
+          "nav_pct": 26.21,
+          "unrealized_pnl": -90.95900156,
+          "daily_pnl": 2.96399844,
+          "since_last_run_pct": -6.7,
+          "catalyst": {
+            "name": "$60B all-stock Cursor (Anysphere) acquisition closed; staggered IPO lockup unlocks",
+            "status": "Cursor merger closed Aug 14, 2026 - issued ~389.29M new Class A shares (~5% dilution), plus ~29.1M RSUs / 44.4M options assumed (further overhang). First 20% insider lockup tranche unlocked ~Aug 6, 2026 (stock dipped to ~$135.53 then recovered to ~$140-146). Further 7% tranches roll out Aug-Oct 2026; full lockup expires Dec 8/9, 2026.",
+            "next_check": "Additional 7% lockup tranche dates (Aug-Oct), RSU/option-driven sell pressure, Q3 earnings date"
+          },
+          "risk_flag": "WATCH - within cap, second-largest position; ongoing staggered dilution/lockup supply overhang through Q4"
+        }
+      ],
+      "flags": [
+        "SLS concentration WORSENED since last run: 73.8% of NAV vs 35% trim threshold (was 69.8% on Jul 11) - now over double the risk-sizing cap.",
+        "SLS's current rally is driven by an UNCONFIRMED media report of the 80th REGAL event; the company's own last confirmed count (via licensing partner HKEX filing, Aug 18) is still 78/80. High whipsaw risk if the rumor is wrong or premature.",
+        "Zero USD cash buffer persists - account fully invested, no dry powder (not on margin, so no forced-liquidation risk).",
+        "SPCX absorbed a $60B all-stock Cursor acquisition (closed Aug 14) and its first lockup tranche (~Aug 6) without breaking down, but remains under continuous dilution/supply pressure from RSU/option overhang and further 7% lockup tranches through October.",
+        "45-day gap since the last logged run (Jul 11 -> Aug 25): both the SPCX merger close and the SLS rumor-driven rally occurred without an interim checkpoint."
       ]
     }
   ]
