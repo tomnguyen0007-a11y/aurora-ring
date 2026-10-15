@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-09-17",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,69 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-09-17",
+      "account": {
+        "nav_usd": 1212.27198381,
+        "nav_eur_base": 1050.9435,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -221.34791619,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 11.78999995,
+          "prior_close": 11.66,
+          "gap_pct": 1.11,
+          "since_last_run_pct": -7.6,
+          "market_value": 813.50999655,
+          "nav_pct": 67.11,
+          "unrealized_pnl": -175.18690345,
+          "daily_pnl": 8.96999655,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Company's last officially disclosed count remains 78 of 80 events (May 11, 2026 update, repeated without new measurement date in partner 3D Medicines' Aug 18, 2026 disclosure). No 8-K since Aug 11, 2026. An unconfirmed German outlet report (AktienCheck, circulating over the weekend of Sep 13-14) claims the 80th event has been hit and OS data is expected 4Q26 - SELLAS has NOT confirmed this. Retail is split on credibility.",
+            "next_check": "Watch for an official 8-K/press release confirming or denying the 80th-event report; do not treat the AktienCheck report as fact."
+          },
+          "risk_flag": "OVER_CONCENTRATED - 67.1% of NAV vs 35% trim threshold (down from 69.8% last run, still ~32pp over)",
+          "trim_shares_to_reach_35pct": 33.01,
+          "two_pct_nav_target_value_usd": 24.25
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 153.3699951,
+          "prior_close": 150.88,
+          "gap_pct": 1.65,
+          "since_last_run_pct": 5.11,
+          "market_value": 398.76198726,
+          "nav_pct": 32.89,
+          "unrealized_pnl": -46.16101274,
+          "daily_pnl": 6.47398726,
+          "catalyst": {
+            "name": "Staggered IPO lockup unlock schedule",
+            "status": "7% employee tranches unlocked ~Aug 21 and ~Sep 10, 2026 (float now ~17% of shares outstanding). Next 7% tranche expected to unlock ~Sep 24, 2026, with the float described as expanding materially (reports say 'sixfold') as successive tranches hit expiration through late Sep. Full 180-day lockup expires Dec 9, 2026; Musk-held shares locked until Jun 13, 2027. Stock has rallied ~19% over the trailing 4 weeks to a post-July high despite the supply overhang.",
+            "next_check": "Sep 24, 2026 tranche unlock and any pre-unlock selling pressure; no new bond/credit news found this run."
+          },
+          "risk_flag": "WITHIN_CAP - 32.9% of NAV, back under the 35% threshold on the recent rally, but next lockup tranche is only ~1 week out"
+        }
+      ],
+      "flags": [
+        "SLS remains structurally over-concentrated at 67.1% of NAV (trim ~33 shares to reach the 35% cap) even after a -7.6% mark move since last run; this is a position-sizing issue independent of the catalyst outcome.",
+        "Unconfirmed rumor that REGAL hit its 80th event is circulating (AktienCheck) but SELLAS has not filed an 8-K confirming it - treat as noise until officially confirmed; a real unblind/topline readout is a binary catalyst on a 67%-of-NAV position.",
+        "Zero USD cash buffer persists - no dry powder to add or average on weakness in either name (not on margin, so no forced-liquidation risk).",
+        "SPCX has a lockup tranche unlocking ~Sep 24, 2026 (~1 week out) into a stock that just rallied ~19% in 4 weeks - watch for supply-driven fade risk into that date.",
+        "CING (mentioned in the routine's search list) is not currently a held position - no action needed; FDA CRL from Jun 1, 2026 remains unresolved with no resubmission date announced as of this run."
       ]
     }
   ]
