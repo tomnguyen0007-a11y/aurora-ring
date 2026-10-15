@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-08-10",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,67 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-08-10",
+      "account": {
+        "nav_usd": 1186.68,
+        "nav_eur_base": 1024.76,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -247.46,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 12.09000015,
+          "prior_close": 12.01,
+          "gap_pct": 0.67,
+          "since_last_run_pct": -5.25,
+          "market_value": 834.21001035,
+          "nav_pct": 70.3,
+          "unrealized_pnl": -154.48688965,
+          "daily_pnl": 5.52001035,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still at/near 78-79 of 80 required events as of Aug 2026; company in self-declared quiet period on trial-specific updates; delay past 78 events being read by some investors as a positive OS signal (patients living longer than modeled) rather than a negative sign; no 80th-event trigger confirmed yet",
+            "next_check": "watch for 8-K / press release announcing 80th event and database lock"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 70.3% of NAV vs 35% trim threshold, unchanged/worse since last run"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 135.3665924,
+          "prior_close": 133.11,
+          "gap_pct": 1.7,
+          "since_last_run_pct": -7.23,
+          "market_value": 351.95314024,
+          "nav_pct": 29.66,
+          "unrealized_pnl": -92.96985976,
+          "daily_pnl": 5.86714024,
+          "catalyst": {
+            "name": "Staggered post-IPO lockup unwind",
+            "status": "First major tranche (20% of restricted shares, ~911.5M shares, ~$123B) unlocked Aug 6 2026, two trading days after Q2 earnings; stock rallied +6% that day rather than selling off on the supply. Next: five ~7% tranches at day 70/90/105/120/135 post-June 12 IPO (roughly late Aug through late Oct); second major ~28% wave releases after Q3 earnings; full 180-day lockup expires Dec 8 2026",
+            "next_check": "next ~7% time-based tranche (~day 70, roughly Aug 21 2026) and Q3 earnings date for the following major wave"
+          },
+          "risk_flag": "WATCH - within cap, first lockup event passed without negative price impact; more tranches ahead"
+        }
+      ],
+      "flags": [
+        "SLS concentration ticked UP to 70.3% of NAV (from 69.8%) even as shares are basically flat/slightly up premarket - this is a NAV-denominator effect from SPCX weakness, not new SLS buying.",
+        "Zero cash buffer persists across both runs - no dry powder to add on weakness, and no ability to trim SLS into cash without a sell.",
+        "SPCX's first lockup unlock (Aug 6) is now resolved and was a non-event / mild positive (+6%) - the flagged risk from the prior run did not materialize. Four more time-based tranches and a bigger post-Q3-earnings wave remain ahead.",
+        "SLS still pre-catalyst: quiet period continues, no confirmed 80th-event trigger despite market chatter that data delay = better survival signal. This remains speculative until an official filing.",
+        "Total unrealized P&L worsened slightly to -$247 (from -$172) since last run, driven mostly by SPCX drawdown since the July run (-7.2%) rather than SLS."
       ]
     }
   ]
