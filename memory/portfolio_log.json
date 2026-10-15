@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-08-05",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,67 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-08-05",
+      "account": {
+        "nav_usd": 1121.53,
+        "nav_eur_base": 974.6903,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -312.09,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 12.04,
+          "prior_close": 11.81,
+          "gap_pct": 1.95,
+          "since_last_run_pct": -5.64,
+          "market_value": 830.76,
+          "nav_pct": 74.07,
+          "unrealized_pnl": -157.94,
+          "daily_pnl": 15.87,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "No public update since the May 11, 2026 disclosure of 78/80 required events; CEO signaled entering a quiet period ahead of the 80th-event trigger, so no confirmed unblind/topline date found overnight. Separately, on Jul 24, 2026 SELLAS lost binding arbitration against 3D Medicines over $13.0M in disputed Greater China milestone payments and was allocated ~$1.0M of 3D Medicines' legal costs; license itself continues, thesis not broken but adds a modest cash/sentiment drag. Cash position ~$138.3M as of Jun 30, 2026 per 8-K.",
+            "next_check": "watch for 8-K / press release announcing 80th event and end of quiet period"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 74.1% of NAV, up from 69.8% at last run, still well over the 35% trim threshold"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 115.24,
+          "prior_close": 125.33,
+          "gap_pct": -8.05,
+          "since_last_run_pct": -21.03,
+          "market_value": 299.65,
+          "nav_pct": 26.72,
+          "unrealized_pnl": -145.27,
+          "daily_pnl": -26.21,
+          "catalyst": {
+            "name": "Q2 2026 earnings (reported Aug 4, 2026) + first staggered IPO lockup tranche",
+            "status": "Q2 revenue beat ($7.81B vs $6.93B est, +92% YoY; AI revenue +247% YoY to $2.561B) but capex spiked 6x YoY to $18.37B (AI capex $15.83B, above the ~$13.09B expected). Stock fell ~6.5-8% on the capex/spend concern despite the beat. First lockup tranche (20% of the 180-day restricted block, ~$123B of stock at recent prices) unlocks Aug 6, 2026 - the 2nd trading day after earnings, i.e. imminent (~1 trading day out from this run). A bonus 10% unlock trigger (stock 30%+ above the $135 IPO price for 5 of 10 sessions pre-earnings) did NOT hit - shares were well below IPO price into earnings.",
+            "next_check": "Aug 6 2026 lockup unlock and resulting supply/price action; further 7% tranches Aug-Oct; second major ~28% wave after Q3 earnings; full lockup expires Dec 8, 2026"
+          },
+          "risk_flag": "WATCH - imminent large supply event (lockup unlock ~Aug 6) on top of a post-earnings capex selloff; position down 21% since last run"
+        }
+      ],
+      "flags": [
+        "SLS concentration WORSENED to 74.1% of NAV (vs 69.8% last run) - more than double the 35% trim threshold, still pre-binary-catalyst with no confirmed unblind date.",
+        "SLS lost its arbitration against 3D Medicines (Jul 24, 2026) - loses right to the disputed $13.0M milestone claim and owes ~$1.0M of the counterparty's costs; not thesis-breaking (China license continues) but a real negative.",
+        "SPCX faces its first lockup unlock (~$123B of stock, 20% of restricted shares) around Aug 6, 2026 - essentially tomorrow/next session from this run - directly on top of a post-earnings selloff driven by surging AI capex. This is the most time-urgent item in the book.",
+        "Total NAV down from $1,261.21 / EUR1,107.73 (Jul 11) to $1,121.53 / EUR974.69 (Aug 5), roughly -11% to -12%, driven mostly by SPCX's -21% move since last run.",
+        "Zero USD cash buffer persists - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk)."
       ]
     }
   ]
