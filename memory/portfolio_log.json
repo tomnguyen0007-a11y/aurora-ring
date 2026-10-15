@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-07-25",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,67 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-07-25",
+      "account": {
+        "nav_usd": 1078.094,
+        "nav_eur_base": 951.02,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -358.27,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 11.3100004,
+          "prior_close": 12.34,
+          "gap_pct": -8.35,
+          "since_last_run_pct": -11.36,
+          "market_value": 780.3900276,
+          "nav_pct": 72.39,
+          "unrealized_pnl": -208.3068724,
+          "daily_pnl": -71.0699724,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still 78 of 80 required events as of the last company update (May 11, 2026); no fresh press release since mid-May. Today's -8.35% move looks like technical/meme-driven profit-taking after a late-June run, not new trial news - no thesis-breaking headline found.",
+            "next_check": "watch for 8-K / press release announcing 80th event and topline unblind"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 72.4% of NAV vs 35% trim threshold (worsened from 69.8% on 2026-07-11); trim ~35.6 shares to reach 35% NAV"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 113.44599915,
+          "prior_close": 118.24,
+          "gap_pct": -4.05,
+          "since_last_run_pct": -22.25,
+          "market_value": 294.95959779,
+          "nav_pct": 27.36,
+          "unrealized_pnl": -149.9634021,
+          "daily_pnl": -12.4644021,
+          "catalyst": {
+            "name": "Q2 2026 earnings (confirmed Aug 4, 2026) + first IPO lockup tranche (20%) unlocking 2nd trading day after earnings (~Aug 6, 2026); Starship test flight same window",
+            "status": "Stock now trading below its $135 IPO price (mark $113.45); HSBC initiated Hold with $115 PT (in-line with current price) citing SpaceX turning away Falcon 9 cargo customers to prioritize Starship, while Morgan Stanley reiterated Buy at $300 PT - wide analyst dispersion. Down 22.3% since last run.",
+            "next_check": "Aug 4 earnings print and stock reaction into the Aug ~6 lockup unlock"
+          },
+          "risk_flag": "WATCH - within cap (27.4% NAV, down from 30.1%) but approaching earnings + first lockup unlock in ~10-12 days"
+        }
+      ],
+      "flags": [
+        "SLS concentration WORSENED to 72.4% of NAV (vs 69.8% on 2026-07-11) - now over 2x the 35% single-name trim threshold - purely because SPCX fell faster in dollar terms, not because SLS was added to.",
+        "Combined unrealized loss roughly doubled since last run: -$172 (2026-07-11) to -$358 today, with no new negative catalyst news found on either name - broad-based drawdown across both positions.",
+        "Zero USD cash buffer persists - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
+        "SPCX now trading below its $135 IPO price for the first time in this log, heading into a two-catalyst window (Aug 4 earnings + ~Aug 6 first lockup unlock, plus a Starship test flight) - expect elevated volatility over the next ~2 weeks.",
+        "No trades were placed. This routine is read-only research only."
       ]
     }
   ]
