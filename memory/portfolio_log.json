@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-07-14",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,66 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-07-14",
+      "account": {
+        "nav_usd": 1224.386,
+        "nav_eur_base": 1077.37,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -178.92,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 12.6899996,
+          "prior_close": 12.62,
+          "gap_pct": 0.55,
+          "since_last_run_pct": -0.55,
+          "market_value": 875.6099724,
+          "nav_pct": 71.51,
+          "unrealized_pnl": -113.0869276,
+          "daily_pnl": 4.8299724,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still 78 of 80 required events as of early-July 2026 CEO commentary; CEO signaled this may be his last public post before entering quiet period ahead of the 80th event; no new event/unblind announcement found",
+            "next_check": "watch for 8-K / press release announcing 80th event"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 71.5% of NAV vs 35% trim threshold (worsened vs 69.8% on 7/11 as SPCX fell faster)"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 138.6100006,
+          "prior_close": 139.14,
+          "gap_pct": -0.38,
+          "since_last_run_pct": -5.01,
+          "market_value": 360.38600156,
+          "nav_pct": 29.43,
+          "unrealized_pnl": -84.53699844,
+          "daily_pnl": -1.37799844,
+          "catalyst": {
+            "name": "$25B bond deal + staggered IPO lockup",
+            "status": "DETERIORATED: stock down ~38% from June 16 peak ($225.64) and down ~25% since IPO per 7/10 Forbes piece; the $25B bond is now reportedly 'trading like junk' despite investment-grade rating at issuance; George Noble (public bear) pegs fair value at $30/share citing bubble valuation; Morgan Stanley flagged China's Long March 10B booster recovery as a competitive threat; Bernstein SocGen maintained Outperform/$239 PT as a counterpoint. First lockup tranche (20% of 180-day block) still expected 2nd full trading day after Q2 2026 earnings (late Jul/early Aug)",
+            "next_check": "Q2 2026 earnings date announcement; bond spread trend; stock reaction into lockup"
+          },
+          "risk_flag": "WATCH - credit/valuation narrative turned materially more negative since 7/11; no longer just a supply-overhang story"
+        }
+      ],
+      "flags": [
+        "SLS concentration worsened to 71.5% of NAV (from 69.8%) purely from SPCX's decline, not new SLS-specific news; REGAL still stuck at 78/80 events with no fresh disclosure.",
+        "SPCX down another 5% since the 7/11 run, with new negative credit-market commentary (bond 'trading like junk') replacing the prior run's 'no negative credit news' read - this is a material change to the catalyst thesis.",
+        "Zero USD cash buffer persists - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
+        "Both single-day gaps vs prior close are small (SLS +0.55%, SPCX -0.38%) - today's premarket move is muted; the deterioration is cumulative over the past 3 days, not an overnight shock."
       ]
     }
   ]
