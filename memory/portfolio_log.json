@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-09-16",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,67 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-09-16",
+      "account": {
+        "nav_usd": 1156.62,
+        "nav_eur_base": 996.94,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -280.21,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 11.34,
+          "prior_close": 11.29,
+          "gap_pct": 0.44,
+          "since_last_run_pct": -11.52,
+          "market_value": 779.01,
+          "nav_pct": 67.35,
+          "unrealized_pnl": -209.69,
+          "daily_pnl": 0,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "UNRESOLVED/CONTESTED: an Aug 28, 2026 news report claimed the trial hit its 80th required event that day; stock jumped then fell -13.15% same day (to $13.21) on the news/no-confirmation whipsaw. As of Sep 16, SELLAS has issued NO 8-K or press release confirming the 80th event or unblinding. Company's own Q2 2026 update (Aug 11) still only guided topline for Q4 2026 - consistent with no breach of guidance, but the reporting gap has drawn legal scrutiny (see risk_flag).",
+            "next_check": "watch for 8-K / press release confirming 80th event, database lock, or topline data; AACR Pancreatic Cancer Conference Sep 25-28 2026 has unrelated SLS009 abstracts (not a REGAL catalyst)"
+          },
+          "risk_flag": "OVER_CONCENTRATED (67.4% of NAV vs 35% trim threshold, trim ~33 shares to reach cap) + NEW: Pomerantz Law Firm investor alert opened ~Sep 1 2026 (reiterated Sep 14) investigating SELLAS/officers for securities fraud tied to the unconfirmed Aug 28 80th-event report and the company's silence since. No SEC enforcement action confirmed, but litigation-headline risk now stacked on top of binary-catalyst and concentration risk."
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 144,
+          "prior_close": 143.49,
+          "gap_pct": 0.36,
+          "since_last_run_pct": -1.32,
+          "market_value": 374.4,
+          "nav_pct": 32.37,
+          "unrealized_pnl": -70.52,
+          "daily_pnl": 1.33,
+          "catalyst": {
+            "name": "Staggered IPO lockup unwind + AI/Starlink ARR growth story",
+            "status": "First tranche already unlocked (~Aug 2026); further unlocks landed/land Sep 9 (done), Sep 24, Oct 9, Oct 24 2026, each up to ~328.4M shares; ~17% of shares outstanding unlocked as of Sep 10. Analysts flagging expected 'near-term volatility... as staggered lock-up unwinds through year-end.' Separately, company touting a $100B ARR target by year-end 2026 (Starlink + new AI contracts via SpaceXAI).",
+            "next_check": "Sep 24 2026 unlock (~8 days out), Oct 9 and Oct 24 unlocks; watch for insider selling volume around each date"
+          },
+          "risk_flag": "WATCH - within 35% cap but next lockup unlock (Sep 24) is ~8 days away and historically these unlocks have coincided with price pressure; stock already -1.3% since last run"
+        }
+      ],
+      "flags": [
+        "NEW SINCE LAST RUN: Pomerantz Law Firm is investigating SELLAS (SLS) for possible securities fraud, opened after an Aug 28, 2026 report claimed the REGAL trial hit its 80th event that day with no subsequent company confirmation; stock fell -13.15% that day. This sits on top of a position that is still 67.4% of NAV, nearly double the 35% trim threshold.",
+        "SLS is down -11.5% since the last log entry (Jul 11) and now shows a larger unrealized loss (-$209.69 vs -$108.26 previously) despite no new negative trial data - the move looks driven by the reporting/silence gap and litigation overhang, not a broken thesis.",
+        "SPCX faces its next lockup unlock on Sep 24, 2026 (~8 days out), part of a multi-tranche unwind (Sep 24, Oct 9, Oct 24) each releasing up to ~328.4M shares - a recurring near-term supply overhang flagged by analysts.",
+        "Zero USD cash buffer persists - account fully invested, no dry powder to average down or rebalance (not on margin, so no forced-liquidation risk).",
+        "No trades placed - this is a read-only research log."
       ]
     }
   ]
