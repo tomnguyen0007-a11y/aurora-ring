@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-09-02",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -10,6 +10,66 @@
     "notes": "Read-only research log. No trades are ever placed by this routine."
   },
   "runs": [
+    {
+      "timestamp": "2026-09-02",
+      "account": {
+        "nav_usd": 1279.61,
+        "nav_eur_base": 1107.7877,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -159.53,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 13.12,
+          "prior_close": 13.22,
+          "gap_pct": -0.76,
+          "since_last_run_pct": 2.82,
+          "market_value": 905.28,
+          "nav_pct": 70.75,
+          "unrealized_pnl": -83.42,
+          "daily_pnl": -6.9,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still 78/80 events as of last confirmed company count (Aug 11, 2026 10-Q/8-K); 80th event unannounced as of Sep 2, ~91 days past schedule. Retail/analyst framing: delay = patients living longer = 'profoundly positive' OS signal, though unconfirmed by company. Stock +41% in August on this sentiment plus read-across from an Eli Lilly oncology acquisition.",
+            "next_check": "watch for 8-K / press release announcing 80th event and topline unblind"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 70.75% of NAV vs 35% trim threshold (worse than last run's 69.8%)"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 141.85,
+          "prior_close": 142.15,
+          "gap_pct": -0.21,
+          "since_last_run_pct": -2.79,
+          "market_value": 368.81,
+          "nav_pct": 28.82,
+          "unrealized_pnl": -76.11,
+          "daily_pnl": -0.99,
+          "catalyst": {
+            "name": "Staggered IPO lockup unlock schedule + Q2 2026 earnings beat",
+            "status": "First 20% tranche unlocked Aug 6, 2026 (no disorderly selloff seen). Q2 revenue $7.8B (+92% YoY, beat est.), adj. EBITDA +191% to $3.5B despite $541M net loss; management guiding $100B annualized revenue run-rate by end-2026. Late Sept 2026: further 7% employee tranches unlock, float expands ~6x. Late Oct/Nov (Q3 earnings): largest single release, ~28% of 180-day block (~1.3B sh). Full lockup expiry Dec 8, 2026. No negative bond/credit news found; Starlink UAE license win and Starship Flight 14 (targeted Sep 15) are near-term positive catalysts.",
+            "next_check": "Late-Sept 7% tranche unlock reaction; Starship Flight 14 (~Sep 15); Q3 earnings date"
+          },
+          "risk_flag": "WATCH - within cap; next lockup supply tranche (~7% of block) due late September"
+        }
+      ],
+      "flags": [
+        "SLS at 70.75% of NAV is now further above the 35% trim threshold than the prior run (69.8%), still with the 80th-event catalyst unconfirmed - concentration risk has not been addressed and has grown slightly in dollar terms.",
+        "Zero USD cash buffer persists - account remains fully invested with no dry powder (not on margin, so no forced-liquidation risk).",
+        "SPCX's next lockup tranche (further 7% employee unlock) lands in the next few weeks; stock is roughly flat since last run (-2.8%) with a strong Q2 print and no credit-negative news.",
+        "CING is referenced in the standing research checklist but is not currently a held position in this account - no CING-specific action taken this run."
+      ]
+    },
     {
       "timestamp": "2026-07-11",
       "account": {
