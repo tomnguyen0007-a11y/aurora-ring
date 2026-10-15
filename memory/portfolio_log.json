@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-08-14",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -10,6 +10,66 @@
     "notes": "Read-only research log. No trades are ever placed by this routine."
   },
   "runs": [
+    {
+      "timestamp": "2026-08-14",
+      "account": {
+        "nav_usd": 1227.56,
+        "nav_eur_base": 1065.2254,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -204.76,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 12.4499998,
+          "prior_close": 12.36,
+          "gap_pct": 0.73,
+          "since_last_run_pct": -2.43,
+          "market_value": 859.0499862,
+          "nav_pct": 69.98,
+          "unrealized_pnl": -129.6469138,
+          "daily_pnl": 6.2099862,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still pre-80th-event as of Q2 2026 corporate update (Aug 11, 2026); last disclosed count was 78/80 events as of May 11, 2026 update. Q2 release added $138.3M cash on hand and SLS009 frontline AML Ph2 topline guided for Q4 2026 (28 pts enrolled). No 8-K announcing the 80th event yet.",
+            "next_check": "watch for 8-K / press release announcing 80th event; topline still guided 2H 2026"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 70.0% of NAV vs 35% trim threshold, unchanged from last run; script computes trim of ~34.5 shares needed to reach 35% cap"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 142.5,
+          "prior_close": 141.29,
+          "gap_pct": 0.86,
+          "since_last_run_pct": -2.34,
+          "market_value": 370.5,
+          "nav_pct": 30.18,
+          "unrealized_pnl": -74.423,
+          "daily_pnl": 3.146,
+          "catalyst": {
+            "name": "First staggered IPO lockup tranche (20% of restricted block, 911.5M shares, ~$100-123B) - RESOLVED since last run",
+            "status": "Unlocked Aug 6, 2026, two trading days after Aug 4 Q2 earnings. Passed without a selloff: stock +2.6% on unlock day, then +15.8% to $133.11 on Aug 7, helped by a $16.8B Tesla AI-chip JV announcement and bullish Citi/Bernstein notes; Morgan Stanley flagged the unlock as an entry point with a $140 target, now essentially reached/exceeded at $142.50. Stock had bottomed at an all-time low of $108.27 on Aug 5 (pre-unlock, post-earnings selloff, -14% that day) before this recovery.",
+            "next_check": "further ~7% lockup tranches Aug-Oct 2026; full lockup expires Dec 8 2026 - watch for renewed supply pressure into those windows"
+          },
+          "risk_flag": "WATCH - within 35% cap; near-term lockup overhang from last run has resolved bullishly, next tranches Aug-Oct are the new watch items"
+        }
+      ],
+      "flags": [
+        "SLS remains critically overconcentrated at 70.0% of NAV (~2x the 35% trim threshold), essentially unchanged from 69.8% a month ago - risk flag has now persisted for over a month with no catalyst resolution.",
+        "Account unrealized P&L has worsened from -$172.41 to -$204.76 since last run; NAV (EUR base) down 3.84% to EUR1,065.23 over 34 days. Zero USD cash buffer persists, no margin used.",
+        "SPCX's first lockup unlock (flagged as an upcoming risk last run) has passed cleanly and resolved bullishly - stock is up ~32% off its Aug 5 all-time low of $108.27 to $142.50, aided by the Tesla AI-chip JV news. Next watch point: further tranches Aug-Oct 2026.",
+        "CING is referenced in this routine's standing search list but is NOT a current IBKR position or watchlist item - stale routine reference, no action taken."
+      ]
+    },
     {
       "timestamp": "2026-07-11",
       "account": {
