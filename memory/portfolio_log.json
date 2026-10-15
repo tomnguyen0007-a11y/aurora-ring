@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-10-15",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,63 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-10-15",
+      "account": {
+        "nav_usd": 1207.3,
+        "nav_eur_base": 1076.2,
+        "cash_eur": 2.78,
+        "unrealized_pnl_eur": -208.89,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 11.85,
+          "prior_close": 11.88,
+          "gap_pct": -0.25,
+          "market_value": 817.65,
+          "nav_pct": 67.73,
+          "unrealized_pnl": -171.05,
+          "daily_pnl": -2.07,
+          "since_last_run_pct": -7.13,
+          "bid_ask": "11.66/11.92",
+          "catalyst": {
+            "status": "REGAL 80th event still unannounced; last public count 78 (May 11, reiterated Aug); SLS009 Ph2 topline guided Q4 2026",
+            "next_check": "8-K announcing 80th event"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 67.7% NAV vs 35%; trim ~33 shares to reach 35%"
+        },
+        {
+          "ticker": "SPCX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 148.6,
+          "prior_close": 152.16,
+          "gap_pct": -2.34,
+          "market_value": 386.36,
+          "nav_pct": 32,
+          "unrealized_pnl": -58.56,
+          "daily_pnl": -9.26,
+          "since_last_run_pct": 1.84,
+          "catalyst": {
+            "status": "Aug lockup tranches passed without selloff; web reports rally to ~162-175 in early Oct then IBKR shows 148.6 (unverified, conflicting); Q3 earnings Oct/Nov",
+            "next_check": "Q3 earnings date; Dec 8 full lockup expiry"
+          },
+          "risk_flag": "WATCH - 32% NAV, just under 35% cap"
+        }
+      ],
+      "flags": [
+        "SLS 67.7% NAV, ~2x trim threshold, no REGAL news in 3 months",
+        "No cash buffer (EUR 2.78)",
+        "SPCX web price reports conflict with IBKR quote; verify",
+        "Script requires stdin JSON; bare invocation fails",
+        "Futures/premarket and SEC overnight searches returned nothing for today; intraday high/low/open/VWAP unavailable from IBKR snapshot (zeros)"
       ]
     }
   ]
