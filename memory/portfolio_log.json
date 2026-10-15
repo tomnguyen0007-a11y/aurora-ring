@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-07-19",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,68 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-07-19",
+      "data_quality_note": "Run executed Sunday 2026-07-19 pre-market; US markets closed since Fri 2026-07-17 close. No live premarket/bid-ask feed available (snapshot returned empty bid_ask/change/open/high/low). 'mark_price' below is Friday 2026-07-17 regular-session close (source: price history 'Last'); 'prior_close' is Thursday 2026-07-16 close, i.e. gap_pct reflects Friday's realized session move, not a live premarket gap.",
+      "account": {
+        "nav_usd": 1243.224,
+        "nav_eur_base": 1089.59,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -190.4,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 13.3001,
+          "prior_close": 11.8186,
+          "gap_pct": 12.54,
+          "since_last_run_pct": 4.23,
+          "market_value": 917.70692415,
+          "nav_pct": 73.82,
+          "unrealized_pnl": -70.98997585,
+          "daily_pnl": 106.95692415,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still 78 of 80 required events as of most recent public reporting (May 11 2026 update, reaffirmed in coverage through mid-July 2026); no 80th-event / topline-readout announcement found as of this run. Stock jumped +12.5% on Fri 2026-07-17 on catalyst-anticipation buying, not on a confirmed data event.",
+            "next_check": "watch for 8-K / press release announcing 80th event and unblinding"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 73.8% of NAV vs 35% trim threshold; concentration WORSENED vs last run (69.8% -> 73.8%) on the Friday rally, despite the 2% NAV risk-sizing rule calling for a ~$25 max add position."
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 124.14099885,
+          "prior_close": 127.07,
+          "gap_pct": -2.31,
+          "since_last_run_pct": -14.93,
+          "market_value": 322.76659701,
+          "nav_pct": 25.96,
+          "unrealized_pnl": -122.15640299,
+          "daily_pnl": -18.11940299,
+          "catalyst": {
+            "name": "Q2 2026 earnings + first staggered IPO lockup unlock (20% base tranche, +10% bonus tranche if SPCX closes >=$175.50 on 5 of the 10 sessions into the earnings date) + $25B investment-grade bond deal already priced/oversubscribed",
+            "status": "Q2 2026 earnings date not yet announced; expected late Jul/early Aug 2026. Stock now well below the $175.50 bonus-tranche trigger, so only the base 20% tranche looks likely to unlock. No negative credit news found. Full 180-day lockup expires Dec 8 2026; Musk's 6.4B shares locked to Jun 12 2027.",
+            "next_check": "Q2 2026 earnings date announcement; price action into that date vs the $175.50 bonus-unlock trigger"
+          },
+          "risk_flag": "WITHIN CAP - dropped to 26.0% of NAV (from 30.1%) purely on price decline, down -14.9% since last run (2026-07-11) with no confirmed negative catalyst; lockup lock unlock still ~2-4 weeks out."
+        }
+      ],
+      "flags": [
+        "SLS concentration WORSENED since last run: now 73.8% of NAV (was 69.8%), more than double the 35% single-name trim threshold, on price strength ahead of an unconfirmed catalyst. Deterministic sizing calc: trimming ~36.3 of 69 shares would bring it back to the 35% cap.",
+        "Zero USD cash buffer persists - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
+        "SPCX down -14.9% since 2026-07-11 with no negative credit/company news found; move looks like general de-risking into the approaching lockup unlock rather than a specific negative catalyst.",
+        "DATA QUALITY: this run happened on a Sunday with markets closed; all 'current' prices are Friday 2026-07-17's close, not a live premarket quote. Re-run once premarket data is live before acting on these numbers.",
+        "READ-ONLY: no orders were placed, modified, or queued during this run."
       ]
     }
   ]
