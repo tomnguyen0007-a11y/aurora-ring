@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-09-09",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,66 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-09-09",
+      "account": {
+        "nav_usd": 1363.49,
+        "nav_eur_base": 1174.2682,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -59.4959133,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 13.98,
+          "prior_close": 13.97,
+          "gap_pct": 0.07,
+          "since_last_run_pct": 9.56,
+          "market_value": 964.62,
+          "nav_pct": 70.75,
+          "unrealized_pnl": -12.3469276,
+          "daily_pnl": 13.1099724,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still 78 of 80 required events as of company's Aug 11, 2026 Q2 update; no 80th-event, database-lock, unblinding, or topline announcement as of Sep 9, 2026. Unverified social-media chatter (unconfirmed, not from company/SEC) speculates the delay itself is a positive OS signal - treated as noise, not news.",
+            "next_check": "watch for 8-K / press release announcing 80th event; company guided initial SLS009 data for Q4 2026"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 70.75% of NAV vs 35% trim threshold (worse than prior run's 69.81%)"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 153.06,
+          "prior_close": 152.87,
+          "gap_pct": 0.12,
+          "since_last_run_pct": 4.89,
+          "market_value": 397.956,
+          "nav_pct": 29.19,
+          "unrealized_pnl": -47.1489857,
+          "daily_pnl": -1.2479857,
+          "catalyst": {
+            "name": "Staggered IPO lockup unlocks (post $25B investment-grade bond deal, no credit issues)",
+            "status": "First tranche (~911.5M shares) unlocked Aug 6 2026, stock rose ~6% that day. TODAY Sep 9 2026 is the Day-90 tranche: up to 319.0M more shares unlock, with a further ~59M shares unlocking Sep 10. Stock closed Sep 4 at $147.95, still ~34% below the June IPO peak of $225.64; average analyst target $225.87 (~50% implied upside).",
+            "next_check": "Price/volume reaction to today's ~319M-share unlock and tomorrow's ~59M-share tranche; next scheduled unlocks continue into 2027"
+          },
+          "risk_flag": "WATCH - within cap; large lockup supply event hits TODAY (Sep 9) plus another tomorrow (Sep 10) - highest near-term event risk in the book"
+        }
+      ],
+      "flags": [
+        "SLS concentration WORSENED to 70.75% of NAV (vs 69.81% last run) purely from price appreciation (+9.56% since Jul 11) with zero rebalancing - still no confirmed 80th-event/unblind news despite retail chatter claiming it's imminent.",
+        "SPCX has its largest lockup unlock to date (~319M shares) unlocking TODAY, plus another ~59M tomorrow - the Aug 6 first-tranche unlock (~911.5M shares) saw the stock actually RISE ~6%, so precedent argues against an automatic sell-off, but today's tranche is larger and warrants a volume/price watch at the open.",
+        "Zero USD cash buffer persists - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
+        "Broad market backdrop constructive: S&P 500 futures modestly positive premarket, oil retreating, dovish Fed commentary - no macro headwind flagged for today's session."
       ]
     }
   ]
