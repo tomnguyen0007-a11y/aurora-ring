@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-08-01",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,68 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-08-01",
+      "note": "Run fired on a Saturday (weekend) - markets closed. All prices/levels reflect Friday 2026-07-31 close, the most recent completed session; next session opens Monday 2026-08-03. Prior log entry is from 2026-07-11 (21 days gap, not the routine's assumed daily cadence).",
+      "account": {
+        "nav_usd": 971.582,
+        "nav_eur_base": 845.27,
+        "cash_usd": 0,
+        "cash_eur": 2.77,
+        "unrealized_pnl_usd": -462.68,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 10.01000025,
+          "prior_close": 10.29,
+          "gap_pct": -2.72,
+          "since_last_run_pct": -21.55,
+          "market_value": 690.69001725,
+          "nav_pct": 71.09,
+          "unrealized_pnl": -298.00688275,
+          "daily_pnl": -19.31998275,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still 78 of 80 required events as of most recent public update (May 11 2026, reaffirmed in Q1 print); IDMC recommended continuation without changes; topline still guided for 2H 2026. No 80th-event announcement yet. Stock round-tripped since last run: rallied from ~$12.76 to >$15 by mid-July on an Alliance Global PT raise ($10->$25) citing slower-than-expected event pace as a survival-benefit signal, then gave it all back to ~$10 by month-end on no new negative data - reads as sentiment/positioning unwind, not a thesis break.",
+            "next_check": "watch for 8-K / press release announcing 80th event and unblinded topline"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 71.1% of NAV vs 35% trim threshold (worse than 69.8% on 2026-07-11)"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 107.7900009,
+          "prior_close": 112.2,
+          "gap_pct": -3.93,
+          "since_last_run_pct": -26.13,
+          "market_value": 280.25400234,
+          "nav_pct": 28.85,
+          "unrealized_pnl": -164.66899766,
+          "daily_pnl": -11.46599766,
+          "catalyst": {
+            "name": "Q2 2026 earnings + first IPO lockup unlock tranche",
+            "status": "Q2 2026 earnings CONFIRMED for after close Tue 2026-08-04. First lockup tranche (20% of restricted shares, ~911.5M shares / ~$123B at recent prices) unlocks 2nd trading day after earnings = Thu 2026-08-06. Stock has fallen from $150 IPO-day open to ~$108, first time below IPO price; Morgan Stanley (Adam Jonas) flagged $100 as the level where market is pricing the AI/Starlink option value near zero. 33 analysts still 22x Strong Buy, consensus target $231.83 - bull case intact but timing/positioning risk into the unlock is the near-term issue. Selling pressure attributed to profit-taking and insiders positioning ahead of earnings/unlock, not a fundamental/credit problem (bond was investment-grade, oversubscribed).",
+            "next_check": "Aug 4 earnings print and guidance; Aug 6 unlock-day trading volume/price action"
+          },
+          "risk_flag": "ELEVATED - both the earnings print and the first (largest, 20%) lockup unlock now land within the next 5 trading days, versus '2-3 weeks out' estimated on 2026-07-11"
+        }
+      ],
+      "flags": [
+        "Account NAV down ~23.7% in EUR base since 2026-07-11 (1107.73 -> 845.27 EUR), driven entirely by these two concentrated, high-volatility single names - no new capital or withdrawals.",
+        "SLS concentration WORSENED, now 71.1% of NAV (was 69.8%), more than double the 35% trim threshold, despite the position itself round-tripping through a +30% rally and back down. No thesis-breaking news; still pre-binary-catalyst.",
+        "SPCX's first and largest lockup unlock (20%, ~$123B) is no longer a distant risk - it's now dated: earnings Aug 4, unlock Aug 6, both within the coming week. This is the single highest-conviction near-term event risk in the book.",
+        "Zero USD cash buffer persists - fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk, but no ability to average down or de-risk without selling).",
+        "Process flag: this run fired 21 days after the prior log entry despite being set up as a recurring pre-market routine - confirm the schedule is actually firing daily/as intended."
       ]
     }
   ]
