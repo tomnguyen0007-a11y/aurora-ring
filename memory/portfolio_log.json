@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-08-04",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -10,6 +10,66 @@
     "notes": "Read-only research log. No trades are ever placed by this routine."
   },
   "runs": [
+    {
+      "timestamp": "2026-08-04",
+      "account": {
+        "nav_usd": 1073.762,
+        "nav_eur_base": 935.5057,
+        "cash_usd": 0,
+        "cash_eur": 2.77,
+        "unrealized_pnl_usd": -359.86,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 11.2,
+          "prior_close": 11.22,
+          "gap_pct": -0.18,
+          "since_last_run_pct": -12.23,
+          "market_value": 772.8,
+          "nav_pct": 71.97,
+          "unrealized_pnl": -215.9,
+          "daily_pnl": -1.38,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still 78 of 80 required events as of the last company update (May 11, 2026); no 80th-event announcement yet as of this run. Q2 2026 earnings/corporate update scheduled after close Thu Aug 6, 2026. Stock fell 32% in July 2026 (worst month since Jan 2024); institutional ownership has since doubled to ~36% ahead of the binary readout.",
+            "next_check": "8-K/press release announcing the 80th event; Aug 6 2026 earnings call for updated REGAL timeline"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 71.97% of NAV, up from 69.8% at last run and now more than double the 35% trim threshold; earnings in 2 trading days with the pivotal readout still pending"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 116.1,
+          "prior_close": 114.53,
+          "gap_pct": 1.37,
+          "since_last_run_pct": -20.44,
+          "market_value": 301.86,
+          "nav_pct": 28.11,
+          "unrealized_pnl": -143.06,
+          "daily_pnl": 4.08,
+          "catalyst": {
+            "name": "First-ever Q2 2026 earnings report (today) directly triggers first IPO lockup tranche unlock",
+            "status": "SpaceX reports its first quarterly results as a public company today, Aug 4 2026, after the close (webcast 4:30pm ET). Two trading days later (Aug 6) insiders can sell up to 20% of restricted holdings (~911.5M shares, ~$123B) - the largest lockup event of the staggered schedule. Stock is down ~43% from its June IPO-era high of $211.39; five further ~7% tranches release at days 70/90/105/120/135 post-IPO (late Aug-Oct); full lockup expires Dec 8 2026.",
+            "next_check": "Earnings print and guidance tonight; stock reaction into the Aug 6 unlock"
+          },
+          "risk_flag": "WATCH - within the 35% cap at 28.1% NAV, but stacked binary events (earnings tonight + lockup unlock in 2 days) make this the higher near-term volatility risk of the two positions"
+        }
+      ],
+      "flags": [
+        "SLS at 71.97% NAV is now more than double the 35% single-name trim threshold and has grown more concentrated since the last run (69.8% -> 71.97%), with Q2 earnings landing Thu Aug 6 - two days out - and the REGAL 80th-event readout still unconfirmed.",
+        "SPCX reports its first-ever public-company earnings today after the close, which directly triggers the largest lockup tranche (~$123B, 20% of restricted shares) unlocking Aug 6 - both positions now have binary/supply catalysts within the same 48-hour window.",
+        "Zero USD cash buffer persists - fully invested with no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
+        "NAV has fallen materially over the ~24-day gap since the last run: EUR-base NAV down from 1107.73 to 935.51 (-15.5%), unrealized loss widened from -172.41 to -359.86 USD, driven by declines in both positions (SLS -12.2%, SPCX -20.4% since last run)."
+      ]
+    },
     {
       "timestamp": "2026-07-11",
       "account": {
