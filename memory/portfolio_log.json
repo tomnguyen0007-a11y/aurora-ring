@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-08-17",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,67 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-08-17",
+      "account": {
+        "nav_usd": 1248.682,
+        "nav_eur_base": 1078.6661,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -182.6,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 12.77999975,
+          "prior_close": 12.78,
+          "gap_pct": 0,
+          "since_last_run_pct": 0.16,
+          "market_value": 881.81998275,
+          "nav_pct": 70.62,
+          "unrealized_pnl": -106.87691725,
+          "daily_pnl": -0.00001725,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still stuck at 78/80 events as of company's Aug 11, 2026 Q2 report; third-party tracker (pdufa.bio) flags the 80th-event announcement as materially overdue vs. company's own implied pace (~91+ days past the window implied by the 78-event May update). Topline still guided for 2H 2026. Cash position $138.3M as of 6/30/26 (ample runway). July 24 2026 arbitration ruling went against SELLAS - ordered to pay ~$1.0M of 3D Medicines' legal fees (minor cash drag, not thesis-breaking).",
+            "next_check": "watch for 8-K / press release announcing 80th event; Q4 2026 topline window"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 70.6% of NAV vs 35% trim threshold (up from 69.8% last run); trim ~34.8 of 69 shares to reach 35% NAV cap"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 142,
+          "prior_close": 140,
+          "gap_pct": 1.43,
+          "since_last_run_pct": -2.69,
+          "market_value": 369.2,
+          "nav_pct": 29.57,
+          "unrealized_pnl": -75.723,
+          "daily_pnl": 5.2,
+          "catalyst": {
+            "name": "Staggered IPO lockup unlock schedule",
+            "status": "First 20% tranche already unlocked Aug 6, 2026 (2nd trading day post-Q2-earnings); bonus 10% accelerant did NOT trigger (stock never held 30%+ above $135 IPO for the required 5-of-10-day window). Next 7% tranche unlocks ~Aug 21, 2026 (~4 days away), another ~7% around Sept 10; full lockup expires Dec 8, 2026. Up to ~44% of insider shares could be sellable by early Sept per lockup trackers.",
+            "next_check": "Aug 21 2026 unlock tranche; stock reaction into and after it"
+          },
+          "risk_flag": "WATCH - within 35% cap (29.6% NAV) but next lockup unlock tranche is ~4 days out"
+        }
+      ],
+      "flags": [
+        "SLS concentration WORSENED to 70.6% of NAV (vs 69.8% on 7/11) while its binary catalyst (REGAL 80th event) is now running well past the company's own implied timeline per third-party trackers - concentration risk stacking on top of catalyst-timing slippage.",
+        "Zero USD cash buffer persists - account fully invested, no dry powder (not on margin, so no forced-liquidation risk).",
+        "SPCX's first lockup tranche unlocked Aug 6 without breaking the stock (trading +1.43% premarket vs prior close); next 7% tranche unlocks in ~4 days (Aug 21) - nearest-term time-sensitive risk in the book.",
+        "Routine had a 37-day gap since last run (2026-07-11 to 2026-08-17) - 'since_last_run' deltas below span over a month, not one session. Recommend running this daily so gap/day-over-day comparisons stay meaningful.",
+        "CING appears in this routine's standard search list but is NOT a held position in this account - searched for informational/watchlist purposes only, no position exists to size or trim."
       ]
     }
   ]
