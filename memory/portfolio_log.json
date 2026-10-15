@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-07-29",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,67 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-07-29",
+      "account": {
+        "nav_usd": 991.78,
+        "nav_eur_base": 872.9135,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -441.84,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 10.0699997,
+          "prior_close": 10.09,
+          "gap_pct": -0.2,
+          "since_last_run_pct": -21.08,
+          "market_value": 694.8299793,
+          "nav_pct": 70.06,
+          "unrealized_pnl": -293.8669207,
+          "daily_pnl": -1.3800207,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still 78 of 80 required events as of last company update (May 11, 2026); no confirmed date for 80th event as of late July; CEO says company will announce 80th event then enter quiet period until topline; no fresh company press release since mid-May, stock now trading mostly on social/meme momentum; lost binding arbitration vs 3D Medicines on July 24, 2026 (~$1.0M in legal fees/costs allocated to SELLAS, financially immaterial); disclosed ~$138.3M cash as of June 30, 2026 (ample runway)",
+            "next_check": "watch for 8-K / press release announcing 80th event and quiet-period start"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 70.1% of NAV vs 35% trim threshold, worse than last run (69.8%); position down 21.1% since 7/11 with no offsetting catalyst news"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 115.3600006,
+          "prior_close": 116.41,
+          "gap_pct": -0.9,
+          "since_last_run_pct": -20.94,
+          "market_value": 299.93600156,
+          "nav_pct": 30.24,
+          "unrealized_pnl": -144.98699844,
+          "daily_pnl": -2.72999844,
+          "catalyst": {
+            "name": "Q2 2026 earnings + first staggered IPO lockup unlock",
+            "status": "Q2 2026 earnings confirmed for Aug 4, 2026 after market close (audio webcast 4:30pm ET); triggers first lockup tranche - up to 20% of restricted holdings (~911.5M shares) unlockable starting Aug 6 (2nd full trading day post-earnings); additional 10% price-contingent tranche needs stock to close 30%+ above $135 IPO price on 5 of 10 sessions before the report (currently ~15% below IPO, unlikely to trigger); further 7% tranches roll Aug 31/Sep 10/Sep 25/Oct 10/Oct 25, a 28% tranche 2 days after Q3 earnings, full lockup expires Dec 9, 2026. Stock briefly traded >20% below IPO price and hit an all-time low of $109.53 on July 28 before rebounding; still down ~30% since June 12 IPO. Wall St. consensus remains mostly Buy (27/31), avg PT $242, though HSBC initiated Hold with PT below IPO price.",
+            "next_check": "Aug 4 earnings print, Aug 6 lockup-unlock reaction, insider selling volume"
+          },
+          "risk_flag": "WATCH - 30.2% of NAV, within cap but two confirmed binary catalysts (earnings + first lockup unlock) land within the next 8 days; position down 20.9% since 7/11"
+        }
+      ],
+      "flags": [
+        "SLS at 70.1% of NAV remains nearly double the 35% single-name trim threshold and has gotten marginally worse since last run; still no resolution on the 80th REGAL event.",
+        "Both positions are down ~21% each since the 7/11 run with no offsetting catalyst confirmation - combined unrealized P&L worsened from -$172.41 to -$441.84 (USD).",
+        "SPCX has two confirmed binary events landing within 8 days of this run (Q2 earnings Aug 4, first lockup tranche opens Aug 6 for up to ~911.5M shares) - highest near-term event density since tracking began.",
+        "Zero USD cash buffer persists - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
+        "CING (Cingulate) was researched per routine ticker list but is not a current position; FDA issued a Complete Response Letter on CTx-1301 (CMC-related, not efficacy/safety) on June 2, 2026, now in resubmission process with ~$30M cash disclosed - included for informational tracking only, no action implied."
       ]
     }
   ]
