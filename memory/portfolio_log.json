@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-07-23",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,67 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-07-23",
+      "account": {
+        "nav_usd": 1129.574,
+        "nav_eur_base": 991.5666,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -296.05,
+        "leverage": "1.0",
+        "margin_used": false,
+        "nav_change_since_last_run_pct": -10.44
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 12.1,
+          "prior_close": 12.08,
+          "gap_pct": 0.17,
+          "since_last_run_pct": -5.17,
+          "market_value": 834.9,
+          "nav_pct": 73.91,
+          "unrealized_pnl": -153.8,
+          "daily_pnl": 1.38,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Still 78 of 80 required events as of May 11, 2026 update; no confirmation of 80th event reached; CEO Fox & Friends appearance (week of Jul 20) fueled retail speculation of imminent news but company has NOT confirmed any data release; stock made new July lows (~$11.84 intraday Jul 22) into the wait",
+            "next_check": "watch for 8-K / press release announcing 80th event and database lock"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 73.91% of NAV vs 35% trim threshold (worse than 69.8% on 7/11); trim ~36.33 sh to reach 35% cap"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 116.34,
+          "prior_close": 115.26,
+          "gap_pct": 0.94,
+          "since_last_run_pct": -20.27,
+          "market_value": 302.48,
+          "nav_pct": 26.78,
+          "unrealized_pnl": -142.44,
+          "daily_pnl": 2.81,
+          "catalyst": {
+            "name": "First-ever public Q2 2026 earnings (Aug 4, after close) + first staggered IPO lockup unlock",
+            "status": "Earnings date confirmed Aug 4 2026; initial 20% lockup tranche unlocks 2nd full trading day after earnings = Aug 6 2026 (up to 911.5M sh eligible); further 7% tranches at 90/105/120/135 days; full lockup expires Dec 8 2026; Musk's 6.4B sh locked to Jun 2027; $25B IG bond deal already priced/closed ($89B demand, proceeds retired bridge loan - credit-positive, not a red flag); stock now trading at its 52-week low ($115.19)",
+            "next_check": "Aug 4 earnings print; Aug 6 lockup unlock trading reaction"
+          },
+          "risk_flag": "WATCH - within 35% cap (down from 30.08%) but down 20.27% since last run and sitting at 52-wk low heading into stacked earnings+lockup catalysts ~2 weeks out"
+        }
+      ],
+      "flags": [
+        "SLS concentration worsened to 73.91% of NAV (from 69.8% on 7/11) - more than double the 35% trim threshold, with zero fresh catalyst confirmation despite retail speculation.",
+        "SPCX down 20.27% since last run and now testing its 52-week low, heading into a confirmed back-to-back binary window: Q2 earnings Aug 4 + first lockup unlock Aug 6.",
+        "Zero USD cash buffer persists across both runs - no dry powder for either event (not on margin, so no forced-liquidation risk).",
+        "Total account NAV down 10.44% since 7/11 ($1,261.21 -> $1,129.57 USD), driven mostly by the SPCX decline."
       ]
     }
   ]
