@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-09-14",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,74 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-09-14",
+      "account": {
+        "nav_usd": 1187.652,
+        "nav_eur_base": 1031.7604,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -264.93,
+        "unrealized_pnl_eur_base": -229.53,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 11.27999975,
+          "prior_close": 11.535,
+          "gap_pct": -2.21,
+          "since_last_run_pct": -11.6,
+          "market_value": 778.31998275,
+          "nav_pct": 65.53,
+          "unrealized_pnl": -210.37691725,
+          "daily_pnl": -18.28501725,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Per Q2-2026 update (Aug 11, 2026 8-K), company was 'approaching' the 80th required event (78 events reported as of May 11, 2026); no 8-K or press release found confirming the 80th event has occurred as of this run. Topline still guided for 2H 2026. Separately, Phase 2 SLS009 (tambiciclib) topline data expected Q4 2026; three preclinical PDAC posters for SLS009 at AACR Pancreatic Cancer Conference, Sept 25-28, 2026 (San Diego) - not the pivotal catalyst.",
+            "next_check": "watch for 8-K / press release announcing 80th REGAL event; AACR posters Sept 25-28 are secondary/non-binary"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 65.5% of NAV vs 35% trim threshold (improved from 69.8% at last run only because the position lost further value, not because it was trimmed)",
+          "risk_sizing": {
+            "over_35pct_nav": true,
+            "trim_shares_to_reach_35pct": 32.15,
+            "two_pct_nav_target_value_usd": 23.75
+          }
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 147.6499939,
+          "prior_close": 151.21,
+          "gap_pct": -2.35,
+          "since_last_run_pct": 1.19,
+          "market_value": 383.88998414,
+          "nav_pct": 32.32,
+          "unrealized_pnl": -61.03301586,
+          "daily_pnl": -9.25601586,
+          "catalyst": {
+            "name": "Staggered 180-day IPO lockup (7% employee tranches every ~15-21 days) + no negative credit news since the $25B investment-grade bond deal",
+            "status": "Day-91 affiliate release (~Sept 10, 2026) already unlocked ~17% of shares outstanding (~1.61B shares across 4 releases) with no lasting negative price impact - stock actually rose ~1.8% over the trailing week. Further 7% employee tranches land through late Sept/Oct; full lockup expires Dec 9, 2026 (Elon Musk / major-holder lockup runs to a separate ~366-day date in 2027). CFO flagged Flight 14 (this month) as SpaceX's first revenue-generating flight at the Goldman Sachs Communacopia conference. Analyst consensus: Buy, avg 12-month PT ~$220.68 (~46% upside from mark).",
+            "next_check": "late-Sept/Oct 7% lockup tranches; Flight 14 outcome; Q2/Q3 2026 earnings date"
+          },
+          "risk_flag": "WITHIN CAP - largest lockup tranche to date already absorbed without a selloff; today's -2.35% gap tracks broad market weakness (S&P futures -0.5% to -0.6% on AI-slowdown headlines), not SPCX-specific news"
+        }
+      ],
+      "flags": [
+        "SLS still 65.5% of NAV vs the 35% trim threshold - the improvement from 69.8% at the last run is entirely due to the position falling another ~11.6% since 2026-07-11, not a trim. NAV is fully unrealized-loss driven: no cash was raised.",
+        "SLS has slid from an intraday ~$13.86 on Sept 8 to $11.28 now (~-19% in under a week) without a confirmed negative catalyst in web/SEC search (no CRL, no failed-trial press release, no 80th-event announcement found). This is either pre-catalyst de-risking/biotech risk-off flow ahead of the still-pending REGAL unblind, or news that hasn't surfaced in search yet - worth a manual check of SELLAS IR/8-K feed intraday.",
+        "Zero USD cash buffer persists - account fully invested, no dry powder to add on weakness or to rebalance down SLS without selling into an unresolved binary catalyst (not on margin, so no forced-liquidation risk).",
+        "SPCX's largest lockup tranche to date (Day-91, ~17% of shares outstanding, ~Sept 10) has already cleared with the stock higher on the week - the lockup overhang thesis from the last run has NOT played out as a negative catalyst so far.",
+        "Broader tape: S&P 500 futures down ~0.5-0.6% pre-market on AI-capex-slowdown headlines - some of today's gap-down in both positions is macro, not stock-specific.",
+        "CING (mentioned in this routine's standing watchlist) is not currently an open IBKR position - no action taken; for reference, FDA issued a CMC-only Complete Response Letter on CTx-1301 (June 1, 2026) and Cingulate has not yet announced a resubmission date."
       ]
     }
   ]
