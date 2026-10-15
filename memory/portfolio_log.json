@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-09-03",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,66 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-09-03",
+      "account": {
+        "nav_usd": 1334.202,
+        "nav_eur_base": 1151.81,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -100.64,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 14.01000025,
+          "prior_close": 14.16,
+          "gap_pct": -1.06,
+          "since_last_run_pct": 9.8,
+          "market_value": 966.69001725,
+          "nav_pct": 72.45,
+          "unrealized_pnl": -22.00688275,
+          "daily_pnl": -10.34998275,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "UNCONFIRMED: an unverified German-media report claims the trial hit its 80th required event, sparking a ~15% single-day retail-driven rally; company has NOT confirmed and its last official count remains 78/80 (May 11 update, reaffirmed in Aug 11 Q2 update). Stocktwits sentiment split - many users flagged the report as unverified and want an official PR/8-K before trusting it.",
+            "next_check": "watch for official 8-K / press release confirming or denying the 80th event; risk of sharp reversal if report proves false"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 72.45% of NAV vs 35% trim threshold, position size worsened (was 69.8%) and now sitting on an unconfirmed-rumor rally"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 140.8800049,
+          "prior_close": 140.71,
+          "gap_pct": 0.12,
+          "since_last_run_pct": -3.45,
+          "market_value": 366.28801274,
+          "nav_pct": 27.45,
+          "unrealized_pnl": -78.63498726,
+          "daily_pnl": 0.44201274,
+          "catalyst": {
+            "name": "Staggered IPO lockup unlock schedule",
+            "status": "First 20% tranche already unlocked Aug 6 2026 (~911.5M shares) - stock actually rose ~6% on the day, absorbing supply well. Next 7% employee tranches: Sep 9 2026 (~319M shares) and Sep 25 2026. Largest single release (~28%, ~1.3B shares) expected late Oct/Nov tied to Q3 earnings; full lockup expiry Dec 8 2026.",
+            "next_check": "Sep 9 2026 unlock (imminent, ~6 days out) and Sep 25 2026 tranche; watch for pre-unlock weakness"
+          },
+          "risk_flag": "WATCH - within 35% cap; next lockup supply event is now days away (Sep 9), not weeks"
+        }
+      ],
+      "flags": [
+        "SLS position has grown to 72.45% of NAV (up from 69.8%), now more than double the 35% trim threshold, and the move is built on an UNCONFIRMED rumor (unverified German report of 80th REGAL event) rather than official disclosure - real risk of a sharp giveback if the company denies or stays silent.",
+        "Zero USD cash buffer persists - fully invested, no dry powder, not on margin so no forced-liquidation risk.",
+        "SPCX's next lockup supply event (Sep 9 2026, ~319M shares) is now only ~6 days away, sooner than previously tracked; second Sep 25 tranche follows shortly after.",
+        "Broad market: futures slightly mixed/negative on Middle East/Strait of Hormuz tension and upcoming labor data - modest headwind, not portfolio-specific."
       ]
     }
   ]
