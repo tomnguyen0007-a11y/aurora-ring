@@ -11,6 +11,17 @@
   },
   "runs": [
     {
+      "timestamp": "2026-09-20",
+      "status": "BLOCKED - no live IBKR data",
+      "note": "IBKR (Interactive Brokers) connector shows as connected/enabled at the account level but exposed zero callable tools this session - could not fetch live positions, account NAV, or mark prices. premarket-research.js was NOT run (no live JSON input available) and no LEVELS/RISK SIZING numbers were computed this run. Positions and figures below are carried over unchanged from the last successful run (2026-07-11) for reference only - treat all prices/NAV/gap% as stale (~10 weeks old), not current. CING appears in the routine's per-ticker instructions but has no record in this log; could not confirm whether it is an actual current holding without live IBKR access.",
+      "news_since_last_run": {
+        "SLS": "REGAL trial (Galinpepimut-S, AML) still shows 78 of 80 required events as of the company's most recent 8-K (Aug 11, 2026) - no confirmed announcement of the 80th event as of Sep 20, 2026 despite some August retail speculation that it had been reached (unconfirmed, retail skeptical per StockTwits). A Seeking Alpha piece flags delayed events as a possible selection-bias signal, and another flags an ownership-structure change ahead of the catalyst. Cash position strong ($138.3M as of Jun 30, 2026).",
+        "CING": "Received an FDA Complete Response Letter (CMC-only issues, no clinical/safety concerns cited) in June 2026 for CTx-1301 (ADHD). As of mid-Sep 2026, company still working to complete CMC work for resubmission; no new PDUFA date set yet.",
+        "SPCX": "Staggered lockup unlocks continuing through Sep 2026 (~7% tranches around Sep 9-10, next around Sep 24), full 180-day lockup expiring ~Dec 8-9, 2026 (separate ~366-day lockup on Musk/major holders into 2027). No new negative credit/bond news found; prior $25B investment-grade bond deal was oversubscribed.",
+        "market": "Could not obtain a same-day premarket futures reading for Sep 20, 2026 via web search (most recent data found was from earlier in the month)."
+      }
+    },
+    {
       "timestamp": "2026-07-11",
       "account": {
         "nav_usd": 1261.212,
