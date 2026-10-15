@@ -10,6 +10,15 @@
 {%- liquid
   assign s = section.settings
   assign product = s.product
+
+  comment
+    Mirrors the hero: the live price and the static line are mutually
+    exclusive, so the page never shows two figures that could disagree.
+  endcomment
+  assign show_live_price = false
+  if product != blank and s.show_price
+    assign show_live_price = true
+  endif
 -%}
 
 <section class="aurora aurora-close" style="{% render 'aurora-spacing', settings: section.settings %}">
@@ -31,10 +40,14 @@
         <div class="aurora-close__action aurora-reveal" style="--aur-reveal-delay: 210ms">
           <a class="aurora__btn aurora__btn--primary" href="{{ s.cta_link | default: routes.all_products_collection_url }}">
             {{ s.cta_label }}
-            {%- if product != blank and s.show_price -%}
+            {%- if show_live_price -%}
               <span class="aurora__price">{{ product.price | money }}</span>
             {%- endif -%}
           </a>
+
+          {%- if show_live_price == false and s.price_note != blank -%}
+            <div class="aur-price-signal">{{ s.price_note }}</div>
+          {%- endif -%}
         </div>
       {%- endif -%}
     </div>
@@ -156,6 +169,13 @@
     { "type": "url", "id": "cta_link", "label": "Button link" },
     { "type": "product", "id": "product", "label": "Product (for live price)" },
     { "type": "checkbox", "id": "show_price", "label": "Show price in button", "default": true },
+    {
+      "type": "text",
+      "id": "price_note",
+      "label": "Price line",
+      "info": "Shown under the button when no product is connected above.",
+      "default": "€249 (VAT incl.)"
+    },
     {
       "type": "richtext",
       "id": "disclaimer",

@@ -59,7 +59,15 @@
         <ul class="aurora-own__list">
           {%- for block in section.blocks -%}
             {%- if block.type == 'ours' -%}
-              <li {{ block.shopify_attributes }}>{{ block.settings.text }}</li>
+              {%- comment -%}
+                The mark is in the markup rather than in a ::before so it can be
+                held out of the accessibility tree explicitly — the column
+                heading above already tells a screen reader which side this is.
+              {%- endcomment -%}
+              <li {{ block.shopify_attributes }}>
+                <span class="aurora-own__mark" aria-hidden="true">✓</span>
+                <span>{{ block.settings.text }}</span>
+              </li>
             {%- endif -%}
           {%- endfor -%}
         </ul>
@@ -70,7 +78,10 @@
         <ul class="aurora-own__list aurora-own__list--muted">
           {%- for block in section.blocks -%}
             {%- if block.type == 'theirs' -%}
-              <li {{ block.shopify_attributes }}>{{ block.settings.text }}</li>
+              <li {{ block.shopify_attributes }}>
+                <span class="aurora-own__mark" aria-hidden="true">✕</span>
+                <span>{{ block.settings.text }}</span>
+              </li>
             {%- endif -%}
           {%- endfor -%}
         </ul>
@@ -117,7 +128,7 @@
   .aurora-own__columns {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 2.5rem;
+    gap: var(--aur-stack-loose);
   }
 
   .aurora-own__col-title {
@@ -141,19 +152,41 @@
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 0.875rem;
+    gap: var(--aur-stack);
   }
 
+  /* Two tracks, so a line that wraps hangs under its own text rather than
+     under the mark. */
   .aurora-own__list li {
+    display: grid;
+    grid-template-columns: 1rem 1fr;
+    gap: 0.75rem;
+    align-items: start;
     font-size: 1.0625rem;
     line-height: 1.45;
     color: var(--aur-text);
   }
 
-  /* The rented column is set back rather than crossed out — deriding the
-     competition reads as insecurity; simply being quieter reads as confidence. */
+  /* The mark sits on the first text line optically rather than on its cap
+     height, which a bare glyph at this size does not do on its own. */
+  .aurora-own__mark {
+    font-size: 0.875rem;
+    line-height: 1.75;
+  }
+
+  .aurora-own__col--ours .aurora-own__mark {
+    color: var(--aur-accent);
+  }
+
+  /* The rented column is marked, not mocked: the cross is set in the dim ink
+     rather than in a warning red, so the side-by-side reads as a statement of
+     fact instead of as a dig at the competition. */
   .aurora-own__list--muted li {
     color: var(--aur-text-muted);
+  }
+
+  .aurora-own__col--theirs .aurora-own__mark {
+    color: var(--aur-text-dim);
   }
 
   .aurora-own__disclaimer {
@@ -167,7 +200,9 @@
   @media screen and (min-width: 750px) {
     .aurora-own__columns {
       grid-template-columns: 1fr 1fr;
-      gap: clamp(2.5rem, 6vw, 6rem);
+      /* Twice the page gutter, so the channel between the two arguments is
+         derived from the page's own rhythm rather than picked by eye. */
+      gap: calc(var(--aur-gutter) * 2);
     }
   }
 {% endstylesheet %}
@@ -232,7 +267,7 @@
         "ours_2": { "type": "ours", "settings": { "text": "Every metric unlocked on day one" } },
         "ours_3": { "type": "ours", "settings": { "text": "Export your raw data whenever you like" } },
         "ours_4": { "type": "ours", "settings": { "text": "Still works in five years, untouched" } },
-        "theirs": { "type": "theirs", "settings": { "text": "£5.99 a month, indefinitely" } },
+        "theirs": { "type": "theirs", "settings": { "text": "€5.99 a month, indefinitely" } },
         "theirs_2": { "type": "theirs", "settings": { "text": "The useful metrics sit behind the paywall" } },
         "theirs_3": { "type": "theirs", "settings": { "text": "Export is limited or unavailable" } },
         "theirs_4": { "type": "theirs", "settings": { "text": "Stop paying and it stops telling you anything" } }

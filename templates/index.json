@@ -19,9 +19,10 @@
         "cta_link": "",
         "product": "",
         "show_price": true,
+        "price_note": "€249 (VAT incl.)",
         "assurance": "Free EU delivery · Free size exchange · No subscription, ever",
         "padding-block-start": 0,
-        "padding-block-end": 24
+        "padding-block-end": 56
       }
     },
     "trust": {
@@ -111,7 +112,7 @@
       "type": "aurora-night",
       "settings": {
         "show_image": true,
-        "image_alt": "Two Aurora rings with the display lit, showing the time",
+        "image_alt": "Aurora smart ring, smooth screenless design.",
         "eyebrow": "While you sleep",
         "heading": "The eight hours you never get to watch.",
         "body": "Aurora reads every stage of your night — deep, REM, light, and the wakings you will not remember — and has an answer waiting before you reach for the kettle.",
@@ -304,13 +305,6 @@
             "text": "In the size and finish you confirmed."
           }
         },
-        "sizer": {
-          "type": "item",
-          "settings": {
-            "title": "Sizing kit",
-            "text": "Posted first, so the fit is right before we ship."
-          }
-        },
         "dock": {
           "type": "item",
           "settings": {
@@ -328,13 +322,14 @@
       },
       "block_order": [
         "ring",
-        "sizer",
         "dock",
         "cable"
       ],
       "settings": {
         "eyebrow": "What arrives",
         "heading": "In the box.",
+        "image_alt": "The Aurora ring, charging dock and USB-C cable laid out flat",
+        "note": "No sizing kit to wait for. You measure at home in under a minute — a ring you already wear, or a strip of paper — and if the fit is wrong when it arrives we send the right size at our cost.",
         "padding-block-start": 128,
         "padding-block-end": 128
       }
@@ -360,7 +355,7 @@
           "type": "faq",
           "settings": {
             "question": "How do I get the right size?",
-            "answer": "<p>Every order includes a free sizing kit. Wear the sizer for 24 hours — finger size shifts with temperature and time of day — then confirm your size and we ship the ring.</p>"
+            "answer": "<p>You measure at home, and it takes under a minute — either measure across the inside of a ring you already wear, or wrap a strip of paper around the finger and lay it flat against a ruler. Both read off the size chart. There is no sizing kit to wait for, so your order ships straight away, and if the fit is wrong when it arrives we send the right size at our cost.</p>"
           }
         },
         "water": {
@@ -426,6 +421,7 @@
         "cta_link": "",
         "product": "",
         "show_price": true,
+        "price_note": "€249 (VAT incl.)",
         "disclaimer": "<p></p><p>Aurora is a general wellness product. It measures and reports trends in sleep, activity and recovery to support your own understanding of your habits. It is not a medical device and is not intended to diagnose, treat, cure or prevent any disease or condition.</p><p>Nothing shown in the app or on this site is medical advice. If you have a health concern, speak to a qualified healthcare professional.</p>",
         "padding-block-start": 128,
         "padding-block-end": 128

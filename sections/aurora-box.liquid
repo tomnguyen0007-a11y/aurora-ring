@@ -2,15 +2,19 @@
   What actually arrives.
 
   A considered purchase stalls on small unknowns — does it come with a charger,
-  do I have to buy a sizing kit. Answering that plainly, right before the price
+  how does sizing work. Answering that plainly, right before the price
   argument, removes the last practical objection.
+
+  Bone, not white. The card surface made this the one section on the homepage
+  that read as a panel laid on the page rather than as part of it, which broke
+  the run of warm tones either side of it.
 {%- endcomment -%}
 
 {%- liquid
   assign s = section.settings
 -%}
 
-<section class="aurora aurora--card aurora-box" style="{% render 'aurora-spacing', settings: section.settings %}">
+<section class="aurora aurora-box" style="{% render 'aurora-spacing', settings: section.settings %}">
   <div class="aurora__inner">
     <header class="aurora-box__head">
       {%- if s.eyebrow != blank -%}
@@ -18,6 +22,26 @@
       {%- endif -%}
       <h2 class="aurora__h2 aurora-reveal" style="--aur-reveal-delay: 80ms">{{ s.heading }}</h2>
     </header>
+
+    {%- comment -%}
+      Optional, and unset by default: a flat-lay of the real contents belongs
+      here once one has been shot, and until then the list carries the section
+      on its own rather than a placeholder standing in for the photograph.
+    {%- endcomment -%}
+    {%- if s.image != blank -%}
+      <div class="aurora-box__media aurora-reveal" style="--aur-reveal-delay: 110ms">
+        {{
+          s.image
+          | image_url: width: 1600
+          | image_tag:
+            widths: '600, 1000, 1600',
+            sizes: '(max-width: 749px) 92vw, 80vw',
+            loading: 'lazy',
+            class: 'aurora-box__img',
+            alt: s.image.alt | default: s.image_alt
+        }}
+      </div>
+    {%- endif -%}
 
     <ol class="aurora-box__list">
       {%- for block in section.blocks -%}
@@ -30,6 +54,15 @@
         </li>
       {%- endfor -%}
     </ol>
+
+    {%- comment -%}
+      The sizing answer, stated where the "what do I have to wait for" doubt
+      actually lands. There is no sizing kit in the operation, so nothing here
+      may imply one is posted out first.
+    {%- endcomment -%}
+    {%- if s.note != blank -%}
+      <p class="aurora-box__note aurora-reveal" style="--aur-reveal-delay: 380ms">{{ s.note }}</p>
+    {%- endif -%}
   </div>
 </section>
 
@@ -40,6 +73,16 @@
 
   .aurora-box__head {
     margin-bottom: var(--aur-stack-loose);
+  }
+
+  .aurora-box__media {
+    margin-bottom: var(--aur-stack-loose);
+  }
+
+  .aurora-box__img {
+    display: block;
+    width: 100%;
+    height: auto;
   }
 
   .aurora-box__list {
@@ -78,10 +121,21 @@
     max-width: 34ch;
   }
 
+  .aurora-box__note {
+    margin: var(--aur-stack) 0 0;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--aur-text-muted);
+    max-width: 58ch;
+  }
+
   @media screen and (min-width: 750px) {
+    /* Sized from the block count rather than pinned to four. The sizing kit
+       that used to hold the second slot is not a real box contents item, and
+       a fixed four-column track left a dead column behind when it went. */
     .aurora-box__list {
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+      gap: 0 var(--aur-gutter);
       border-bottom: 1px solid var(--aur-line);
     }
 
@@ -100,6 +154,24 @@
   "settings": [
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "What arrives" },
     { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "In the box." },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Contents photograph",
+      "info": "A top-down flat lay of everything in the box. Left empty until one is shot."
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Photograph alt text",
+      "default": "The Aurora ring, charging dock and USB-C cable laid out flat"
+    },
+    {
+      "type": "textarea",
+      "id": "note",
+      "label": "Sizing note",
+      "default": "No sizing kit to wait for. You measure at home in under a minute — a ring you already wear, or a strip of paper — and if the fit is wrong when it arrives we send the right size at our cost."
+    },
     { "type": "header", "content": "Padding" },
     { "type": "range", "id": "padding-block-start", "label": "Top", "min": 0, "max": 280, "step": 4, "unit": "px", "default": 128 },
     { "type": "range", "id": "padding-block-end", "label": "Bottom", "min": 0, "max": 280, "step": 4, "unit": "px", "default": 128 }
@@ -121,11 +193,10 @@
       "category": "Aurora",
       "blocks": {
         "item": { "type": "item", "settings": { "title": "The Aurora ring", "text": "In the size and finish you confirmed." } },
-        "item_2": { "type": "item", "settings": { "title": "Sizing kit", "text": "Posted first, so the fit is right before we ship." } },
-        "item_3": { "type": "item", "settings": { "title": "Charging dock", "text": "Full charge in about 90 minutes." } },
-        "item_4": { "type": "item", "settings": { "title": "USB-C cable", "text": "No proprietary connector to lose." } }
+        "item_2": { "type": "item", "settings": { "title": "Charging dock", "text": "Full charge in about 90 minutes." } },
+        "item_3": { "type": "item", "settings": { "title": "USB-C cable", "text": "No proprietary connector to lose." } }
       },
-      "block_order": ["item", "item_2", "item_3", "item_4"]
+      "block_order": ["item", "item_2", "item_3"]
     }
   ]
 }
