@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-08-31",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,67 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-08-31",
+      "account": {
+        "nav_usd": 1295.236,
+        "nav_eur_base": 1118.8657,
+        "cash_usd": 0,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -136.92,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 13.52000045,
+          "prior_close": 13.21,
+          "gap_pct": 2.35,
+          "since_last_run_pct": 5.96,
+          "market_value": 932.88003105,
+          "nav_pct": 72.02,
+          "unrealized_pnl": -55.81686895,
+          "daily_pnl": 21.39003105,
+          "catalyst": {
+            "name": "Phase 3 REGAL trial (Galinpepimut-S, AML) - event-driven unblind",
+            "status": "Company's official Aug 11, 2026 Q2 update still shows 78 of 80 required events; unconfirmed German media report claims the 80th event has been hit, uncorroborated by the company as of this run; final analysis (database lock -> unblind -> topline) triggers on 80th event, guided for 2H 2026",
+            "next_check": "watch for 8-K / press release officially confirming 80th event and unblinding"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 72.0% of NAV vs 35% trim threshold (worse than prior run's 69.8%); trim ~35.5 shares to reach cap at current mark"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 140.4700012,
+          "prior_close": 141.5,
+          "gap_pct": -0.73,
+          "since_last_run_pct": -3.73,
+          "market_value": 365.22200312,
+          "nav_pct": 28.2,
+          "unrealized_pnl": -79.70099688,
+          "daily_pnl": -2.67799688,
+          "catalyst": {
+            "name": "Staggered IPO lockup unlocks + investment-grade bond (no credit news)",
+            "status": "First tranche (Aug 6) and subsequent ~7% tranches (~Aug 12, ~Aug 21) have passed without disorderly selling; next tranche ~Sept 10; full lockup expires Dec 8, 2026. Operational newsflow positive: Starbase Louisiana $100B Starship complex announced Aug 25; successful Falcon Heavy / NASA Roman Space Telescope launch Aug 30. Unconfirmed report (low-confidence, needs primary-source check) of OpenAI cutting API access to Anysphere/Cursor, the AI coding startup SpaceX subsidiary X67 Inc. agreed to acquire per a June 16 2026 8-K.",
+            "next_check": "Sept 10 lockup tranche; confirm Anysphere/OpenAI access story via primary source"
+          },
+          "risk_flag": "WATCH - within cap (28.2%), second-largest single-name risk; lockups absorbed well so far"
+        }
+      ],
+      "flags": [
+        "SLS now 72.0% of NAV - concentration has WORSENED since the last run (69.8% -> 72.0%) as the stock rallied +6% since 2026-07-11; still no official catalyst confirmation.",
+        "Unconfirmed 80th-event rumor (uncorroborated German report) is driving speculative buying and analyst price-target hikes (Alliance Global to $35 from $25, Aug 13) in SLS while the company's own Aug 11 filing still shows 78/80 - a real confirmation announcement is a binary event that could gap this 72%-of-NAV position sharply either way.",
+        "Zero USD cash buffer persists unchanged since last run - no dry powder, not on margin so no forced-liquidation risk.",
+        "SPCX has absorbed three lockup tranches (Aug 6, ~12, ~21) without disorderly selling; next tranche ~Sept 10 is ~10 days out and worth re-checking then.",
+        "Low-confidence, unverified: reports that OpenAI is cutting API access to Anysphere (Cursor), which SpaceX's X67 Inc. subsidiary agreed to acquire in June 2026 - sourced only from a search-engine summary, not a primary filing or wire story; flagged, not acted on."
       ]
     }
   ]
