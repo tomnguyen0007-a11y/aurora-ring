@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-10-17",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,74 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-10-17",
+      "account": {
+        "nav_usd": 1077.5,
+        "nav_eur_base": 956.28,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -359.29,
+        "leverage": "1.0",
+        "margin_used": false,
+        "note": "nav_usd approximated from EUR NAV at implied rate 1.1267"
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 10.08829975,
+          "prior_close": 11.34,
+          "open": 11.17,
+          "high": 11.24,
+          "low": 9.7501,
+          "gap_pct": -11.04,
+          "since_last_run_pct": -20.94,
+          "market_value": 696.09,
+          "nav_pct": 64.6,
+          "unrealized_pnl": -292.6,
+          "daily_pnl": -86.37,
+          "catalyst": {
+            "name": "REGAL Phase 3 80th event",
+            "status": "No 80th-event announcement found; Q2 2026 update says company is approaching it (78 events as of May 11). No unblinding or FDA action reported.",
+            "next_check": "8-K / PR announcing 80th event"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 64.6% NAV vs 35%; trim ~31.6 shares to reach 35%",
+          "setup": "fade/hold - -11% on 15.8M volume with no identified news; no add"
+        },
+        {
+          "ticker": "SPCX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 145.4750061,
+          "prior_close": 148.62,
+          "open": 147.92,
+          "high": 147.92,
+          "low": 142.95,
+          "gap_pct": -2.12,
+          "since_last_run_pct": -0.3,
+          "market_value": 378.24,
+          "nav_pct": 35.1,
+          "unrealized_pnl": -66.69,
+          "daily_pnl": -8.18,
+          "catalyst": {
+            "name": "Staggered lockups",
+            "status": "Aug 6 unlock (~911M shares) and second tranche (~319M) already passed; two more unlocks reported before year-end (secondary sources, unverified); Musk 42% locked to mid-2027; IPO price $135",
+            "next_check": "confirm remaining unlock dates in SpaceX filings"
+          },
+          "risk_flag": "AT_CAP - 35.1% NAV, marginally over 35%",
+          "setup": "hold"
+        }
+      ],
+      "flags": [
+        "SLS -20.9% since last run, 64.6% of NAV; REGAL 80th event still unannounced.",
+        "SPCX now 35.1% of NAV (threshold 35%).",
+        "Net liquidation EUR 956.28 vs 1107.73 at last run (-13.7%).",
+        "Cash EUR 2.78 - no dry powder.",
+        "Premarket futures data not found via search.",
+        "IBKR trading tools were not used; read-only."
       ]
     }
   ]
