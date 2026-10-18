@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-10-18",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,70 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-10-18",
+      "note": "Oct 18 is a Sunday: prices are last session (Fri) data. Futures not found. Script needs stdin JSON (first no-input run errored).",
+      "account": {
+        "nav_usd_est": 1077.4,
+        "nav_eur_base": 956.28,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -359.29,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 10.08829975,
+          "prior_close": 11.34,
+          "open": 11.17,
+          "high": 11.24,
+          "low": 9.7501,
+          "gap_pct": -11.04,
+          "since_last_run_pct": -20.94,
+          "market_value": 696.09,
+          "nav_pct": 64.61,
+          "unrealized_pnl": -292.6,
+          "daily_pnl": -86.37,
+          "catalyst": {
+            "status": "No 80th-event announcement found; Q2 2026 report still says approaching 80th event (78 as of May 11). Unconfirmed after Q2.",
+            "next_check": "8-K/PR announcing 80th event"
+          },
+          "risk_flag": "OVER_CONCENTRATED 64.6% vs 35%; trim ~31.6 sh to reach 35%",
+          "setup": "fade/hold - no news found explaining -11% drop; no confirmed catalyst"
+        },
+        {
+          "ticker": "SPCX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 145.4750061,
+          "prior_close": 148.62,
+          "open": 147.92,
+          "high": 147.92,
+          "low": 142.95,
+          "gap_pct": -2.12,
+          "since_last_run_pct": -0.3,
+          "market_value": 378.24,
+          "nav_pct": 35.11,
+          "unrealized_pnl": -66.69,
+          "daily_pnl": -8.18,
+          "catalyst": {
+            "status": "Staggered lockup tranches (7% each, reportedly Oct 10 and Oct 25); larger 28% tranche after Q3 earnings; full release ~Dec 8-9. Sources are blogs, conflicting.",
+            "next_check": "Q3 earnings date; Oct 25 tranche"
+          },
+          "risk_flag": "AT 35% NAV threshold (35.11%)",
+          "setup": "hold"
+        }
+      ],
+      "flags": [
+        "SLS 64.6% NAV, down 21% since last run, -11% on the session, no news found",
+        "SPCX at 35.1% NAV, lockup supply continues",
+        "No cash buffer (EUR 2.78)",
+        "Futures data unavailable"
       ]
     }
   ]
