@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-10-19",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -66,6 +66,67 @@
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
       ]
+    },
+    {
+      "timestamp": "2026-10-19",
+      "account": {
+        "nav_eur_base": 959.45,
+        "nav_usd_est": 1088.54,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -348.25,
+        "leverage": "1.0",
+        "margin_used": false,
+        "note": "nav_usd derived from EUR NAV at implied FX 1.1386"
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 10.15,
+          "prior_close": 9.98,
+          "gap_pct": 1.72,
+          "market_value": 700.49,
+          "nav_pct": 64.35,
+          "unrealized_pnl": -288.21,
+          "since_last_run_pct": -20.44,
+          "catalyst": {
+            "name": "REGAL Ph3 GPS in AML",
+            "status": "Company last confirmed 78/80 events (May 11). Unconfirmed reports (Aug 28 German press, drop to ~13.21) that 80th event reached; Pomerantz investigation re delayed disclosure; stock -12% on Oct 16 to ~9.98 (13w low 9.19). No company PR/8-K found.",
+            "next_check": "Company 8-K/PR on 80th event or topline"
+          },
+          "risk_flag": "OVER_CONCENTRATED 64.4% vs 35%; trim ~31 shares to reach 35%",
+          "sentiment": "negative (legal probe, unconfirmed event)",
+          "setup": "hold/no-chase; gap +1.7% is dead-cat risk below 10.27 ask"
+        },
+        {
+          "ticker": "SPCX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 148.03,
+          "prior_close": 146.03,
+          "gap_pct": 1.37,
+          "market_value": 384.88,
+          "nav_pct": 35.36,
+          "unrealized_pnl": -60.05,
+          "since_last_run_pct": 1.45,
+          "catalyst": {
+            "name": "IPO lockup tranches",
+            "status": "Q2 earnings Aug 4 triggered first unlock. Third-party trackers list next release Oct 24 (~328M sh) and full expiry Dec 8; dates unverified. Bond-credit news: none found.",
+            "next_check": "Oct 24 unlock; Q3 earnings date"
+          },
+          "risk_flag": "At 35.4% NAV, marginally over threshold (0.03 sh)",
+          "sentiment": "neutral",
+          "setup": "hold into unlock; no add"
+        }
+      ],
+      "flags": [
+        "Run script needs JSON on stdin; fed it live IBKR data.",
+        "SLS down 20% since last run, 64% NAV, zero cash.",
+        "No premarket futures data found for 2026-10-19.",
+        "Price snapshot lacked prior_close/open/high/low (0.0); prior close derived from change; VWAP not available."
+      ],
+      "trades_placed": false
     }
   ]
 }
