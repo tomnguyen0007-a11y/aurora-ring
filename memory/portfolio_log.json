@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-10-21",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -66,6 +66,71 @@
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
       ]
+    },
+    {
+      "timestamp": "2026-10-21",
+      "account": {
+        "nav_usd": 1264.3,
+        "nav_usd_note": "estimated from EUR NAV 1110.42 at prior-run FX ratio",
+        "nav_eur_base": 1110.42,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -171.45,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 12.22000025,
+          "prior_close": 11.98,
+          "gap_pct": 2,
+          "since_last_run_pct": -4.23,
+          "market_value": 843.18,
+          "nav_pct": 66.69,
+          "unrealized_pnl": -145.52,
+          "daily_pnl": 16.56,
+          "catalyst": {
+            "name": "REGAL Ph3 80th event / unblind",
+            "status": "No 80th-event announcement found; last public count 78 (May 11 2026); company in quiet period, database lock steps follow 80th event",
+            "next_check": "8-K / PR announcing 80th event"
+          },
+          "trim_shares_to_35pct": 32.79,
+          "risk_flag": "OVER_CONCENTRATED - 66.7% NAV vs 35%",
+          "setup": "hold (no confirmed catalyst); quote wide 11.95/12.22, high/low/open unavailable pre-market"
+        },
+        {
+          "ticker": "SPCX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 161.1499939,
+          "prior_close": 147.79,
+          "prior_close_note": "derived from IBKR change +13.25",
+          "gap_pct": 9.04,
+          "since_last_run_pct": 10.44,
+          "market_value": 418.99,
+          "nav_pct": 33.14,
+          "unrealized_pnl": -25.93,
+          "daily_pnl": 34.74,
+          "catalyst": {
+            "name": "Staggered IPO lockup tranches",
+            "status": "Q2 earnings (Aug 4) and first unlock (~Aug 6) already passed; later ~7% tranches reportedly incl. Oct 25 (unofficial source), Dec 8/9 expiry; dates conflict across sources",
+            "next_check": "verify tranche dates in SEC filings / IR"
+          },
+          "risk_flag": "WATCH - 33.1% NAV, just under 35% cap; +9% gap pushes toward cap",
+          "setup": "hold / fade risk into possible Oct 25 unlock"
+        }
+      ],
+      "flags": [
+        "Prior run was 2026-07-11 (~3.5 months ago): ~3 months of news gap, catalyst statuses in log were stale.",
+        "SLS 66.7% NAV, ~33 shares above the 35% line; no confirmed 80th event.",
+        "SPCX 33.1% NAV after +9% gap; one more up-move breaches 35% cap.",
+        "Zero cash buffer (EUR 2.78).",
+        "premarket-research.js requires JSON on stdin; bare run errors with Unexpected end of JSON input.",
+        "Premarket futures data for today not found in search."
+      ],
+      "trades_placed": 0
     }
   ]
 }
