@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-10-23",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,67 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-10-23",
+      "account": {
+        "nav_usd": 1214.31,
+        "nav_eur_base": 1047.9,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -261.31,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 11.41,
+          "prior_close": 11.35,
+          "gap_pct": 0.53,
+          "since_last_run_pct": -10.58,
+          "market_value": 787.29,
+          "nav_pct": 64.83,
+          "unrealized_pnl": -201.41,
+          "daily_pnl": 4.14,
+          "catalyst": {
+            "name": "Phase 3 REGAL (GPS, AML) 80th event; SLS009 randomized 1L topline guided Q4 2026",
+            "status": "No public count above 78/80 found; no 80th-event PR found; Oct 20 stock +5% to ~10.49 on buyout chatter (unconfirmed)",
+            "next_check": "8-K/PR for 80th event; SLS009 Q4 topline"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 64.8% NAV vs 35%; trim ~31.75 sh to reach 35%",
+          "setup": "hold/trim-into-strength; wide spread (11.40x12.00), thin volume"
+        },
+        {
+          "ticker": "SPCX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 148.08,
+          "prior_close": 144.75,
+          "gap_pct": 2.3,
+          "since_last_run_pct": 1.48,
+          "market_value": 385.02,
+          "nav_pct": 31.71,
+          "unrealized_pnl": -59.91,
+          "daily_pnl": 8.67,
+          "catalyst": {
+            "name": "Q3 earnings Oct 20 AMC; earnings-linked lockup tranche ~2nd full trading day after (~Oct 22); final lockup expiry Dec 9 2026",
+            "status": "Q3 results/reaction not confirmed via search; prior Aug unlock passed without selloff",
+            "next_check": "Q3 results + post-earnings price action; ir.spacex.com"
+          },
+          "risk_flag": "WATCH - 31.7% NAV, just under 35% cap",
+          "setup": "hold; gap-up +2.3% into fresh unlock supply, fade risk"
+        }
+      ],
+      "flags": [
+        "Prior log was 2026-07-11: 3+ month gap; since-last-run SLS -10.6%, SPCX +1.5%.",
+        "SLS 64.8% NAV, ~2x the 35% cap, binary event pending; IBKR snapshot open/high/low unavailable (0), prior_close derived from change field.",
+        "SPCX NAV 31.7%: a ~10% rally would push it past 35%.",
+        "Cash EUR 2.78 - no dry powder; 2% NAV add size (~$24) not fundable.",
+        "Premarket S&P futures: could not be sourced. CING not held; NDA not resubmitted (CRL 2026-06-01, cash $28.4M).",
+        "No order-placement instructions encountered in any source."
       ]
     }
   ]
