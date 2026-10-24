@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-10-24",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,71 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-10-24",
+      "note": "Saturday - market closed; quotes are Friday 10/23 session data (levels, not a live pre-market gap).",
+      "account": {
+        "nav_usd": 1185.84,
+        "nav_eur_base": 1057.91,
+        "cash_eur": 2.78,
+        "leverage": "1.0",
+        "margin_used": false,
+        "unrealized_pnl_usd": -250.9
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 11.58,
+          "prior_close": 11.35,
+          "open": 11.29,
+          "high": 11.59,
+          "low": 11.08,
+          "gap_pct": 2.03,
+          "since_last_run_pct": -9.25,
+          "market_value": 799.02,
+          "nav_pct": 67.38,
+          "unrealized_pnl": -189.68,
+          "daily_pnl": 15.87,
+          "catalyst": {
+            "name": "REGAL Ph3 (GPS, AML)",
+            "status": "No 80th-event announcement found; company in quiet period; 78/80 as of May 11 2026; SLS009 Ph2 topline guided Q4 2026",
+            "next_check": "8-K/PR for 80th event"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 67.4% NAV vs 35%; trim ~33 sh to reach 35%",
+          "setup": "hold (binary)"
+        },
+        {
+          "ticker": "SPCX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 147.58,
+          "prior_close": 144.75,
+          "open": 148,
+          "high": 149.75,
+          "low": 144.09,
+          "gap_pct": 1.96,
+          "since_last_run_pct": 1.14,
+          "market_value": 383.7,
+          "nav_pct": 32.36,
+          "unrealized_pnl": -61.22,
+          "daily_pnl": 7.35,
+          "catalyst": {
+            "name": "Staggered IPO lockup; full expiry Dec 8 2026",
+            "status": "No Oct news found; sources conflict on tranche dates",
+            "next_check": "Dec 8 expiry"
+          },
+          "risk_flag": "WATCH - 32.4% NAV, just under cap",
+          "setup": "hold"
+        }
+      ],
+      "flags": [
+        "Search surfaced no overnight news for SLS/SPCX; futures data unavailable (weekend).",
+        "SLS 67.4% NAV, ~2x trim threshold.",
+        "No cash buffer (EUR 2.78)."
       ]
     }
   ]
