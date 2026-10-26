@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-10-26",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,64 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-10-26",
+      "account": {
+        "nav_eur_base": 1056.86,
+        "nav_usd_est": 1179.5,
+        "cash_eur": 2.78,
+        "unrealized_pnl_usd": -257.22,
+        "leverage": "1.0",
+        "margin_used": false,
+        "note": "NAV USD estimated via implied FX ~1.116"
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 11.48,
+          "last": 11.53,
+          "bid_ask": "11.54/11.70",
+          "prior_close": 11.54,
+          "gap_pct": -0.52,
+          "market_value": 792.12,
+          "nav_pct": 67.16,
+          "unrealized_pnl": -196.58,
+          "since_last_run_pct": -10.03,
+          "catalyst": {
+            "status": "No 80th-event announcement found; 78 events as of May 11 2026; Q2 report says approaching 80th",
+            "next_check": "8-K/PR on 80th event"
+          },
+          "risk_flag": "OVER_CONCENTRATED 67.2% vs 35%; trim ~33 sh to reach 35%",
+          "setup": "hold (illiquid premarket, 1.9k vol, wide spread)"
+        },
+        {
+          "ticker": "SPCX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 147.8,
+          "prior_close": 147.49,
+          "gap_pct": 0.21,
+          "market_value": 384.28,
+          "nav_pct": 32.58,
+          "unrealized_pnl": -60.64,
+          "since_last_run_pct": 1.29,
+          "catalyst": {
+            "status": "Lockup tranches: sources conflict on Oct dates (Oct 10/25 unofficial; one says 2 trading days after Q3 results); full expiry ~Dec 8",
+            "next_check": "Q3 earnings date / underwriter lockup disclosure"
+          },
+          "risk_flag": "WATCH - 32.6% of NAV, just under cap",
+          "setup": "hold"
+        }
+      ],
+      "flags": [
+        "Prior-run SLS mark 12.76 -> 11.48 (-10%).",
+        "IBKR snapshot lacked prior_close/open/high/low premarket; prior close derived from last-change.",
+        "Futures data not found via search.",
+        "Not run: SEC EDGAR search, CING (not held)."
       ]
     }
   ]
