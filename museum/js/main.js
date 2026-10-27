@@ -52,6 +52,7 @@ const floor = new THREE.Mesh(
   new THREE.MeshPhysicalMaterial({ color: '#cfc8bd', roughness: 0.24, clearcoat: 0.6, clearcoatRoughness: 0.08 }),
 );
 floor.rotation.x = -Math.PI / 2;
+floor.position.y = 0.002; // lifted off the room's bottom face to avoid z-fighting
 floor.receiveShadow = true;
 scene.add(floor);
 
@@ -199,7 +200,7 @@ const lookNow = new THREE.Vector3();
 function setCameraGoal(t) {
   if (activePlate) {
     // Stand two and a half metres in front of the plate, eye level with its centre.
-    camGoal.copy(activePlate.center).add(new THREE.Vector3(0, 0, 2.5));
+    camGoal.copy(activePlate.center).add(new THREE.Vector3(0, 0, 4.4));
     camGoal.y = PLATE_Y;
     lookGoal.copy(activePlate.center);
     return;

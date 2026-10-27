@@ -3,7 +3,7 @@ export default {
   meta: {
     id: 'tide',
     title: 'Tide III',
-    series: 'Drift',
+    series: 'Lines',
     medium: 'Generative shader, layered wave lines, varnished',
     year: '2026',
     note: 'Twenty-four lines of different weight, moving at different speeds.',
