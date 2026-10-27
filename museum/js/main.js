@@ -266,10 +266,10 @@ if (focusId) {
   if (target) openPlate(target);
 }
 
-// Render a first frame. For stills, take a few settling passes so the eased
-// camera reaches its goal before the screenshot.
+// Render the first frame. Frozen stills ease the camera in a single step,
+// so one pass is enough.
 if (isFrozen) {
-  for (let i = 0; i < 40; i++) frame();
+  frame();
   window.__museumReady = true;
 } else {
   frame();
