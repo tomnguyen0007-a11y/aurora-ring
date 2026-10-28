@@ -37,7 +37,7 @@ OUT = os.path.normpath(os.path.join(HERE, '..', 'museum', 'assets', 'hall'))
 WORK = os.path.join(HERE, 'out', 'bake')
 PREVIEW = bool(os.environ.get('BAKE_PREVIEW'))
 ONLY = set(filter(None, os.environ.get('ONLY', '').split(',')))
-SAMPLES = int(os.environ.get('BAKE_SAMPLES', 24 if PREVIEW else 192))
+SAMPLES = int(os.environ.get('BAKE_SAMPLES', 24 if PREVIEW else 160))
 DIV = int(os.environ.get('BAKE_DIV', 4 if PREVIEW else 1))     # atlas size divisor for quick tests
 EXPOSURE_EV = 0.7          # the same as build_hall.py's render
 WINDOW_TINT = 0.18         # how much daylight the window glass lets through (see WINDOW_GLASS)
@@ -45,10 +45,10 @@ JPEG_QUALITY = 86
 
 # group: (colour atlas size, light atlas size). Light is smooth, so it needs fewer pixels.
 ATLAS = {
-    'floor': ((4096, 2480), (2048, 1240)),
-    'shell': ((4096, 4096), (2048, 2048)),
-    'props': ((2048, 2048), (1024, 1024)),
-    'exterior': ((1024, 1024), (512, 512)),
+    'floor': ((4096, 2480), (1024, 620)),
+    'shell': ((4096, 4096), (1024, 1024)),
+    'props': ((2048, 2048), (512, 512)),
+    'exterior': ((1024, 1024), (256, 256)),
 }
 if DIV > 1:
     ATLAS = {k: ((a[0] // DIV, a[1] // DIV), (b[0] // DIV, b[1] // DIV)) for k, (a, b) in ATLAS.items()}
@@ -64,7 +64,7 @@ scene.cycles.samples = SAMPLES
 scene.cycles.use_denoising = False
 scene.cycles.max_bounces = 10
 scene.cycles.diffuse_bounces = 6
-scene.cycles.sample_clamp_indirect = 8.0
+scene.cycles.sample_clamp_indirect = 3.0
 
 
 def log(*a):
@@ -318,7 +318,7 @@ def bake_group(group):
     light = bake(objs, (lw, lh), 'light', f'{group}_light')
     log(group, 'light done')
     emit = bake(objs, (lw, lh), 'emit', f'{group}_emit')
-    sigma = 1.3 if group != 'exterior' else 0.8
+    sigma = 2.2 if group != 'exterior' else 1.0
     light = blur(light, sigma)
     radiance = albedo * resize(light, (cw, ch)) + resize(emit, (cw, ch))
     size = to_jpeg(radiance, os.path.join(OUT, f'{group}.jpg'))

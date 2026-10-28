@@ -1,5 +1,12 @@
 {
  "atlases": {
+  "floor": {
+   "file": "floor.jpg",
+   "size": [
+    2048,
+    1240
+   ]
+  },
   "shell": {
    "file": "shell.jpg",
    "size": [
@@ -22,6 +29,9 @@
    ]
   }
  },
+ "sky": "sky.jpg",
+ "env": "env.hdr",
+ "exposureEV": 0.7,
  "room": {
   "width": 22.0,
   "depth": 13.0,
