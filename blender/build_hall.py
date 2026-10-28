@@ -245,8 +245,8 @@ MAT = {
     'terracotta': simple('Terracotta', '#b25a32', 0.5),
     'white': simple('White', '#f1efe9', 0.8),
     'grass': textured('Grass', '#7a8156', 0.95, 0.02, 0.5, noise_scale=25.0),
-    'leaf': textured('Leaf', '#566640', 0.9, 0.02, 0.5, variation=0.8, noise_scale=18.0),
-    'hill': simple('Hill', '#8da0a6', 1.0),
+    'leaf': textured('Leaf', '#6b7a5e', 0.95, 0.02, 0.5, variation=0.8, noise_scale=18.0),
+    'hill': simple('Hill', '#a9b8bd', 1.0),
     'trunk': simple('Trunk', '#3e2f22', 0.9),
 }
 
@@ -464,7 +464,6 @@ make_box('X_Parapet', (0.3, 18.0, 0.95), (HW + T + 3.85, 0, 0.45), MAT['stone'],
 make_box('X_ParapetCap', (0.44, 18.2, 0.06), (HW + T + 3.85, 0, 0.95), MAT['stone'], bevel=0.008, group='exterior')
 LAWN_Z = -1.2
 make_box('X_Lawn', (6000, 6000, 0.4), (0, 0, LAWN_Z - 0.2), MAT['grass'], group='pano')
-make_box('X_Hedge', (1.0, 70, 1.7), (HW + T + 12, 0, LAWN_Z + 0.85), MAT['leaf'], bevel=0.12, group='pano')
 
 
 def blob(name, centre, radius, squash, seed, subdiv=4):
@@ -487,16 +486,14 @@ def blob(name, centre, radius, squash, seed, subdiv=4):
 
 
 rng_t = random.Random(21)
-for i in range(30):
-    tx = 26 + rng_t.random() * 90
-    ty = (rng_t.random() - 0.5) * 150
-    s_ = 3.6 + rng_t.random() * 4.4
-    make_cylinder(f'X_Trunk{i}', 0.2 * s_ / 3, 2.6 * s_ / 3, (tx, ty, LAWN_Z + 1.3 * s_ / 3), MAT['trunk'], segments=10, group='pano')
-    for k in range(5):
-        a_ = rng_t.random() * 6.283
-        d_ = rng_t.random() * 0.55 * s_
-        blob(f'X_Canopy{i}_{k}', (tx + math.cos(a_) * d_, ty + math.sin(a_) * d_, LAWN_Z + 2.6 * s_ / 3 + s_ * (0.55 + 0.5 * rng_t.random())),
-             s_ * (0.55 + 0.3 * rng_t.random()), 0.85, i * 5 + k)
+# One long, soft treeline far across the lawn: many overlapping crowns, muted by distance.
+for i in range(70):
+    tx = 150 + rng_t.random() * 60
+    ty = -260 + i * 7.5 + rng_t.random() * 5
+    s_ = 9 + rng_t.random() * 7
+    for k in range(3):
+        blob(f'X_Canopy{i}_{k}', (tx + rng_t.random() * 8, ty + rng_t.random() * 8, LAWN_Z + s_ * (0.9 + 0.5 * rng_t.random())),
+             s_ * (0.7 + 0.3 * rng_t.random()), 0.8, i * 3 + k, subdiv=3)
 for i, (hx, hy, hs) in enumerate([(420, -220, 60), (470, -40, 80), (430, 190, 58), (560, 60, 95), (500, -130, 74), (380, 20, 40)]):
     bm = bmesh.new()
     bmesh.ops.create_icosphere(bm, subdivisions=4, radius=1.0)
