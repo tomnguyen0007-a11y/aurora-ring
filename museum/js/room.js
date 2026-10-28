@@ -24,7 +24,7 @@ export function buildRoom(scene, renderer, { reflections }) {
   const bump = plasterBump();
   bump.repeat.set(3, 2);
   const wallMat = new THREE.MeshStandardMaterial({
-    color: '#f0ede6', roughness: 0.93, bumpMap: bump, bumpScale: 0.6,
+    color: '#e6e2da', roughness: 0.93, bumpMap: bump, bumpScale: 0.6,
   });
 
   // A flat wall piece. rotY orients its normal into the room.
@@ -61,7 +61,7 @@ export function buildRoom(scene, renderer, { reflections }) {
   if (reflections) {
     const size = Math.min(1024, Math.round(window.innerWidth * Math.min(window.devicePixelRatio, 2) * 0.5));
     const mirror = new Reflector(new THREE.PlaneGeometry(ROOM.w, ROOM.d), {
-      color: 0x8c8a86, textureWidth: size, textureHeight: size, clipBias: 0.003,
+      color: 0x5f5e5b, textureWidth: size, textureHeight: size, clipBias: 0.003,
     });
     mirror.rotation.x = -Math.PI / 2;
     scene.add(mirror);
@@ -70,7 +70,7 @@ export function buildRoom(scene, renderer, { reflections }) {
     new THREE.PlaneGeometry(ROOM.w, ROOM.d),
     new THREE.MeshStandardMaterial({
       map: maps.color, roughnessMap: maps.rough, roughness: 1, metalness: 0,
-      transparent: reflections, opacity: reflections ? 0.8 : 1,
+      transparent: reflections, opacity: reflections ? 0.86 : 1,
     }),
   );
   concrete.rotation.x = -Math.PI / 2;
@@ -90,7 +90,7 @@ export function buildRoom(scene, renderer, { reflections }) {
   gap(0.03, ROOM.d, HW - 0.015, 0);
 
   // ---- Coffered ceiling and rails -------------------------------------------
-  const beamMat = new THREE.MeshStandardMaterial({ color: '#f2efe9', roughness: 0.9 });
+  const beamMat = new THREE.MeshStandardMaterial({ color: '#e8e5de', roughness: 0.9 });
   const beam = (w, h, d, x, y, z) => {
     const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), beamMat);
     m.position.set(x, y, z);
@@ -151,8 +151,8 @@ export function buildRoom(scene, renderer, { reflections }) {
     m.receiveShadow = true;
     scene.add(m);
   };
-  soft(1.7, 0.42, 1.05, 0.7, 1.7, 0.25);
-  soft(1.3, 0.34, 0.9, -1.2, 3.3, -0.4);
+  soft(1.7, 0.42, 1.05, 0.5, -0.4, 0.25);
+  soft(1.3, 0.34, 0.9, -1.6, 0.4, -0.4);
   soft(2.4, 0.44, 0.7, 7.1, 1.2, Math.PI / 2);
 
   return { group: null };
@@ -192,7 +192,7 @@ export function createTrackSpot(scene, { position, target, intensity = 90, angle
   const cone = new THREE.Mesh(
     new THREE.ConeGeometry(Math.tan(angle) * length, length, 40, 1, true),
     new THREE.MeshBasicMaterial({
-      color, transparent: true, opacity: 0.032, blending: THREE.AdditiveBlending,
+      color, transparent: true, opacity: 0.011, blending: THREE.AdditiveBlending,
       depthWrite: false, side: THREE.DoubleSide, toneMapped: false,
     }),
   );

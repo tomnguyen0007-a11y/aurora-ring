@@ -112,8 +112,8 @@ function cloudForm() {
   const base = Float32Array.from(position.array);
 
   const resin = new THREE.MeshPhysicalMaterial({
-    color: '#e8e2ff', roughness: 0.12, metalness: 0.1, clearcoat: 1, clearcoatRoughness: 0.05,
-    iridescence: 1, iridescenceIOR: 1.5, iridescenceThicknessRange: [250, 900],
+    color: '#16161f', roughness: 0.08, metalness: 0.55, clearcoat: 1, clearcoatRoughness: 0.03,
+    iridescence: 1, iridescenceIOR: 1.9, iridescenceThicknessRange: [300, 1100], envMapIntensity: 1.8,
   });
   const body = new THREE.Mesh(geometry, resin);
   body.position.y = 1.05 + 0.62;
@@ -126,9 +126,9 @@ function cloudForm() {
       const y = base[i * 3 + 1];
       const z = base[i * 3 + 2];
       const d = 1
-        + 0.16 * Math.sin(3.1 * x + t * 0.6 + 1.3 * Math.sin(2.2 * y + t * 0.4))
-        + 0.12 * Math.sin(2.7 * y - t * 0.5 + 2.0 * Math.sin(1.9 * z))
-        + 0.1 * Math.sin(3.4 * z + t * 0.45 + Math.sin(2.3 * x));
+        + 0.26 * Math.sin(4.2 * x + t * 0.6 + 1.3 * Math.sin(2.2 * y + t * 0.4))
+        + 0.2 * Math.sin(3.6 * y - t * 0.5 + 2.0 * Math.sin(1.9 * z))
+        + 0.16 * Math.sin(4.4 * z + t * 0.45 + Math.sin(2.3 * x));
       position.setXYZ(i, x * d, y * d, z * d);
     }
     position.needsUpdate = true;

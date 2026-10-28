@@ -79,9 +79,9 @@ export function concreteMaps(size = 1024) {
         const v = 0.82 + 0.3 * blotch[i] + 0.1 * (grain[i] - 0.5);
         const joint = x < 3 || y < 3 ? 0.55 : 1;
         const k = v * joint;
-        d[i * 4] = 186 * k;
-        d[i * 4 + 1] = 182 * k;
-        d[i * 4 + 2] = 174 * k;
+        d[i * 4] = 150 * k;
+        d[i * 4 + 1] = 146 * k;
+        d[i * 4 + 2] = 139 * k;
         d[i * 4 + 3] = 255;
       }
     }

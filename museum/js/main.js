@@ -25,15 +25,15 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPrefere
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.1;
+renderer.toneMappingExposure = 0.9;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const scene = new THREE.Scene();
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-scene.environmentIntensity = 0.5;
-scene.add(new THREE.HemisphereLight('#fbf6ee', '#8c8277', 0.4));
+scene.environmentIntensity = 0.35;
+scene.add(new THREE.HemisphereLight('#fbf6ee', '#8c8277', 0.25));
 
 const camera = new THREE.PerspectiveCamera(46, 1, 0.1, 100);
 
