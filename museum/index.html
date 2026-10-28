@@ -28,7 +28,8 @@
     }
     .masthead strong { font-family: var(--serif); font-size: 20px; letter-spacing: 0; text-transform: none; font-weight: 500; }
     .plate-panel {
-      position: fixed; left: 24px; bottom: 24px; width: min(360px, calc(100vw - 48px));
+      position: fixed; left: 24px; top: 76px; width: min(360px, calc(100vw - 48px));
+      max-height: calc(100vh - 170px); overflow-y: auto;
       padding: 22px 22px 20px; border-radius: 18px;
       background: color-mix(in srgb, var(--paper) 86%, transparent);
       -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
@@ -78,8 +79,8 @@
     .controls button:disabled { opacity: .5; cursor: default; transform: none; }
     .controls button:focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; }
     @media (max-width: 600px) {
-      .controls { bottom: auto; top: 58px; }
-      .plate-panel { left: 16px; right: 16px; bottom: 16px; width: auto; }
+      .controls { bottom: 16px; }
+      .plate-panel { left: 16px; right: 16px; top: 64px; width: auto; max-height: calc(100vh - 150px); }
       .hint { display: none; }
       .masthead strong { font-size: 17px; }
     }

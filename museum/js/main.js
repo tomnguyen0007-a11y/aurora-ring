@@ -15,6 +15,9 @@ const frozenT = params.has('t') ? parseFloat(params.get('t')) : null;
 const focusId = params.get('focus');
 const quality = params.get('q');
 const isFrozen = frozenT !== null;
+const debug = params.has('debug');
+const stats = { frames: 0, scriptMs: 0, renderMs: 0, paintCalls: 0, paintTris: 0, sceneCalls: 0, sceneTris: 0, sculptMs: 0 };
+if (debug) window.__museumStats = stats;
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const timeScale = reduceMotion ? 0.25 : 1;
 const PAINTING_RES = quality === 'low' ? [256, 320] : quality === 'high' ? [1024, 1280] : [512, 640];
@@ -354,6 +357,8 @@ function frame() {
   camera.updateMatrixWorld();
   frustum.setFromProjectionMatrix(viewProjection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
 
+  const tScript = debug ? performance.now() : 0;
+  if (debug) { renderer.info.autoReset = false; renderer.info.reset(); }
   works.forEach((w, i) => {
     if (w.plate) {
       const goal = !isFrozen && (w === hover || w === active) ? 0.85 : 0.5;
@@ -365,10 +370,29 @@ function frame() {
         w.drawn = true;
       }
     }
-    if (w.sculpture) w.sculpture.update(t);
+    if (w.sculpture) {
+      const ts = debug ? performance.now() : 0;
+      w.sculpture.update(t);
+      if (debug) stats.sculptMs += performance.now() - ts;
+    }
   });
 
+  if (debug) {
+    stats.paintCalls += renderer.info.render.calls;
+    stats.paintTris += renderer.info.render.triangles;
+    renderer.info.reset();
+    stats.scriptMs += performance.now() - tScript;
+  }
+  const tRender = debug ? performance.now() : 0;
   renderer.render(scene, camera);
+  if (debug) {
+    stats.renderMs += performance.now() - tRender;
+    stats.sceneCalls += renderer.info.render.calls;
+    stats.sceneTris += renderer.info.render.triangles;
+    stats.frames++;
+    stats.memory = { ...renderer.info.memory };
+    stats.programs = renderer.info.programs ? renderer.info.programs.length : 0;
+  }
   if (!isFrozen) requestAnimationFrame(frame);
 }
 
