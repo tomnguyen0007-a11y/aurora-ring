@@ -100,6 +100,15 @@
     }
     .toast.is-shown { opacity: 1; transform: translate(-50%, 0); }
 
+    .loading {
+      position: fixed; inset: 0; z-index: 6; display: grid; place-content: center; justify-items: center; gap: 18px;
+      background: var(--ground); font-size: 11px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase;
+      transition: opacity .6s var(--ease), visibility 0s .6s;
+    }
+    .loading.is-done { opacity: 0; visibility: hidden; pointer-events: none; }
+    .loading-track { width: 120px; height: 2px; background: var(--rule); overflow: hidden; border-radius: 2px; }
+    .loading-bar { width: 100%; height: 100%; background: var(--ink); transform: scaleX(.08); transform-origin: left; transition: transform .4s var(--ease); }
+
     /* Phones: a short sheet above a full-width bar. Icons replace the words in the bar. */
     @media (max-width: 720px) {
       .tagline { display: none; }
@@ -123,7 +132,7 @@
       .toast { bottom: 80px; }
     }
     @media (prefers-reduced-motion: reduce) {
-      .panel, .toast, .cta { transition: none; }
+      .panel, .toast, .cta, .loading, .loading-bar { transition: none; }
     }
   </style>
   <script type="importmap">
@@ -132,6 +141,10 @@
 </head>
 <body>
   <canvas id="scene" aria-label="3D gallery with eleven motion paintings and six sculptures"></canvas>
+  <div id="loading" class="loading" role="status">
+    <span>Afterimage Hall</span>
+    <span class="loading-track"><span id="loading-bar" class="loading-bar"></span></span>
+  </div>
   <header class="topbar">
     <span class="brand">Afterimage Hall</span>
     <span class="tagline">11 paintings, 6 sculptures</span>
@@ -146,10 +159,18 @@
     <button type="button" id="plate-more" class="more">More</button>
     <dl class="meta">
       <div><dt>Medium</dt><dd id="plate-medium"></dd></div>
-      <div><dt>Made</dt><dd id="plate-year"></dd></div>
+      <div><dt>Size</dt><dd id="plate-year"></dd></div>
     </dl>
     <button type="button" id="enquire" class="cta">Enquire about this work</button>
     <p class="keys">&larr; &rarr; to browse</p>
+  </aside>
+  <aside id="intro-panel" class="panel intro" role="dialog" aria-labelledby="intro-title" aria-hidden="true">
+    <button type="button" id="intro-close" class="panel-close" aria-label="Close introduction">&times;</button>
+    <p class="eyebrow">Afterimage Hall</p>
+    <h2 id="intro-title">What the eye keeps after the picture is gone</h2>
+    <p class="note">Look at something bright, then look away: the colour you still see is an afterimage. Eleven paintings that never stand still and six sculptures that turn, drift or catch the light, hung in one long room.</p>
+    <button type="button" id="intro-start" class="cta">Begin the walk</button>
+    <p class="keys">&larr; &rarr; to move between works</p>
   </aside>
   <nav class="dock" aria-label="Gallery controls">
     <button type="button" id="prev-work" class="dock-btn arrow" aria-label="Previous work">&larr;</button>

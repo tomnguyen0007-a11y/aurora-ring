@@ -42,7 +42,7 @@ for (const size of sizes) {
   // Frozen stills render once and open the panel from ?focus, with no animation to wait for.
   const page = await browser.newPage({ viewport: { width: size.width, height: size.height }, deviceScaleFactor: size.dsf });
   await page.goto(`http://127.0.0.1:${port}/index.html?t=6&focus=fracture&q=low`, { waitUntil: 'load' });
-  await page.waitForFunction(() => window.__museumReady === true, null, { timeout: 120000 });
+  await page.waitForFunction(() => window.__museumReady === true && window.__hallReady === true, null, { timeout: 240000 });
   await page.waitForTimeout(700);
   const m = await page.evaluate(() => {
     const r = (sel) => { const e = document.querySelector(sel); const b = e.getBoundingClientRect(); return { left: b.left, right: b.right, top: b.top, bottom: b.bottom, w: b.width, h: b.height }; };

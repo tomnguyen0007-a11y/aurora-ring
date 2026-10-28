@@ -1,8 +1,8 @@
 // Shared pipeline for motion paintings.
 // Each painting is a GLSL body that writes one colour per pixel of its plate.
 // The shader renders into a render target every frame, and that texture is
-// wrapped in a varnished (clear-coated) physical material, so the surface
-// picks up real reflections from the room.
+// wrapped in a lit-wall material. The glass in front of the frame (see hall.js) adds
+// the room's reflections.
 import * as THREE from 'three';
 
 const VERTEX = /* glsl */ `
@@ -62,7 +62,7 @@ void main() {
 }`;
 
 // Builds a painting definition into a reusable plate component.
-export function createPainting(def, renderer, uRes = [1024, 1280]) {
+export function createPainting(def, renderer, uRes = [1024, 1280], size = null) {
   const palette = def.palette.map((hex) => new THREE.Color(hex));
 
   const material = new THREE.ShaderMaterial({
@@ -85,19 +85,26 @@ export function createPainting(def, renderer, uRes = [1024, 1280]) {
     depthBuffer: false,
   });
 
-  const [w, h] = def.size;
-  const surface = new THREE.MeshPhysicalMaterial({
-    map: target.texture,
-    roughness: 0.32,
-    clearcoat: 1.0,
-    clearcoatRoughness: 0.05,
-    metalness: 0.0,
-    emissive: new THREE.Color('#ffffff'),
-    emissiveMap: target.texture,
-    emissiveIntensity: 0.5,
+  const [w, h] = size || def.size;
+  // The painting is lit like the wall around it: a spot from above, so the top of the work is a
+  // touch brighter than the bottom. It goes through the scene's tone mapping with everything else.
+  const surface = new THREE.ShaderMaterial({
+    uniforms: { tPaint: { value: target.texture }, uGain: { value: 0.72 } },
+    vertexShader: /* glsl */ `
+      varying vec2 vUv;
+      void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: /* glsl */ `
+      uniform sampler2D tPaint;
+      uniform float uGain;
+      varying vec2 vUv;
+      void main() {
+        vec3 c = texture2D(tPaint, vUv).rgb;
+        gl_FragColor = vec4(c * uGain * (0.84 + 0.16 * vUv.y), 1.0);
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
+      }`,
   });
   const canvas = new THREE.Mesh(new THREE.PlaneGeometry(w, h), surface);
-  canvas.receiveShadow = true;
 
   return {
     meta: def.meta,

@@ -24,9 +24,20 @@ const result = await esbuild.build({
 });
 
 const script = result.outputFiles[0].text.replace(/<\/script/gi, '<\\/script');
+
+// The baked hall (geometry, lighting, sky, reflections) rides inside the page as data URIs,
+// so the single file still works offline and by double-click.
+const MIME = { '.jpg': 'image/jpeg', '.glb': 'model/gltf-binary', '.hdr': 'application/octet-stream' };
+const assetDir = path.join(root, 'assets/hall');
+const assets = {};
+for (const name of fs.readdirSync(assetDir)) {
+  const mime = MIME[path.extname(name)];
+  if (mime) assets[name] = `data:${mime};base64,${fs.readFileSync(path.join(assetDir, name)).toString('base64')}`;
+}
+const assetScript = `window.__ASSETS=${JSON.stringify(assets)};`;
 let html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 html = html.replace(/<script type="importmap">[\s\S]*?<\/script>\s*/, '');
-html = html.replace(/<script type="module" src="\.\/js\/main\.js"><\/script>/, () => `<script>${script}</script>`);
+html = html.replace(/<script type="module" src="\.\/js\/main\.js"><\/script>/, () => `<script>${assetScript}</script>\n<script>${script}</script>`);
 if (html.includes('importmap') || html.includes('js/main.js')) throw new Error('bundle step left a module reference in the HTML');
 
 // Artifact variant: the host wraps the page in its own document skeleton, so keep

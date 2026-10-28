@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { paintingDefs } from './paintings/index.js';
 import { createPainting } from './paintings/common.js';
 import { createSculptures } from './sculptures.js';
-import { buildRoom, createFixture, wallPool, floorPool, ROOM, HEAD_Y } from './room.js';
+import { loadHall, frameGlass } from './hall.js';
+import { HALL } from './hall-data.js';
 import { createAmbient } from './audio.js';
 import { CONFIG } from './config.js';
 
@@ -33,13 +33,13 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPrefere
 let pixelRatio = Math.min(window.devicePixelRatio, 2); // sharp on Retina; adapt() only drops it on a very slow device
 renderer.setPixelRatio(pixelRatio);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.0;
+// The same view transform as the Blender renders (Khronos PBR Neutral, plus the exposure
+// the hall was baked with), so the live works and the baked room agree.
+renderer.toneMapping = THREE.NeutralToneMapping;
+renderer.toneMappingExposure = 2 ** HALL.exposureEV;
 
 const scene = new THREE.Scene();
-const pmrem = new THREE.PMREMGenerator(renderer);
-scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-scene.environmentIntensity = 0.35;
+scene.background = new THREE.Color('#cfcac1');
 
 const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
 
@@ -50,88 +50,67 @@ const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2));
 quadScene.add(quad);
 
 // ---- Room -------------------------------------------------------------
-const { mirror } = buildRoom(scene, renderer, { reflections: quality !== 'low' });
+// The room is baked in Blender and arrives as a few files; the gallery is usable straight
+// away and the room fills in underneath. The floor mirror re-renders the whole scene, so it
+// refreshes every other frame.
 let frameNo = 0;
-if (mirror) {
-  // The mirror re-renders the whole scene, so refresh it every other frame.
-  const original = mirror.onBeforeRender;
-  mirror.onBeforeRender = function (...args) {
-    if (isFrozen || frameNo % 2 === 0) original.apply(this, args);
-  };
-}
-
-const WALL_Z = -ROOM.d / 2;
-const LEFT_X = -ROOM.w / 2;
-const RIGHT_X = ROOM.w / 2;
-const FRAME_DEPTH = 0.08;
-const FRAME_BORDER = 0.07;
-const PLATE_Y = 1.75;
-const frameMat = new THREE.MeshPhysicalMaterial({ color: '#1b1714', roughness: 0.38, clearcoat: 0.6, clearcoatRoughness: 0.2 });
-const matMat = new THREE.MeshStandardMaterial({ color: '#f2eee6', roughness: 0.95 });
-
-const back = (x) => ({ center: new THREE.Vector3(x, PLATE_Y, WALL_Z + FRAME_DEPTH / 2 + 0.02), normal: new THREE.Vector3(0, 0, 1) });
-const left = (z) => ({ center: new THREE.Vector3(LEFT_X + FRAME_DEPTH / 2 + 0.02, PLATE_Y, z), normal: new THREE.Vector3(1, 0, 0) });
-const right = (z) => ({ center: new THREE.Vector3(RIGHT_X - FRAME_DEPTH / 2 - 0.02, PLATE_Y, z), normal: new THREE.Vector3(-1, 0, 0) });
-const slots = {
-  drift: back(-6.4), planes: back(-3.2), fracture: back(0), deco: back(3.2), tide: back(6.4),
-  lattice: left(-5.2), grid: left(-2.6), moire: left(0), strata: left(2.6), halftone: left(5.2),
-  dots: right(5.3),
-};
+const loading = document.getElementById('loading');
+const loadingBar = document.getElementById('loading-bar');
+const hallReady = loadHall(renderer, scene, { reflections: quality !== 'low', onProgress: (p) => { if (loadingBar) loadingBar.style.transform = `scaleX(${p})`; } })
+  .then(({ mirror }) => {
+    if (mirror) {
+      const original = mirror.onBeforeRender;
+      mirror.onBeforeRender = function (...args) {
+        if (isFrozen || frameNo % 2 === 0) original.apply(this, args);
+      };
+    }
+    if (loading) loading.classList.add('is-done');
+    window.__hallReady = true;
+  })
+  .catch((err) => {
+    console.error('The hall could not be loaded', err);
+    if (loading) loading.textContent = 'The hall could not be loaded. Please reload the page.';
+  });
 
 // Every work (painting or sculpture) shares one shape: where it is, where to
 // stand to see it, what to click, and its text.
 const works = [];
+const SPOT_COLOUR = '#ffe6c8';
 
 paintingDefs.forEach((def) => {
-  const plate = createPainting(def, renderer, RES_OVERVIEW);
-  const [w, h] = plate.size;
-  const { center, normal } = slots[def.meta.id];
+  const spec = HALL.art.find((a) => a.id === def.meta.id);
+  const [w, h] = spec.size;
+  const centre = new THREE.Vector3(...spec.centre);
+  const normal = new THREE.Vector3(...spec.normal);
+  const plate = createPainting(def, renderer, RES_OVERVIEW, [w, h]);
 
-  const group = new THREE.Group();
-  group.position.copy(center);
-  group.rotation.y = Math.atan2(normal.x, normal.z);
-
-  // A cream mat inside the dark frame, as in a gallery.
-  const mat = new THREE.Mesh(new THREE.PlaneGeometry(w + 0.28, h + 0.28), matMat);
-  mat.position.z = FRAME_DEPTH / 2 - 0.004;
-  group.add(mat);
-  plate.canvas.position.z = FRAME_DEPTH / 2 + 0.002;
-  group.add(plate.canvas);
-
-  const ow = w + 0.28;
-  const oh = h + 0.28;
-  [
-    [ow + FRAME_BORDER * 2, FRAME_BORDER, 0, oh / 2 + FRAME_BORDER / 2],
-    [ow + FRAME_BORDER * 2, FRAME_BORDER, 0, -oh / 2 - FRAME_BORDER / 2],
-    [FRAME_BORDER, oh, -ow / 2 - FRAME_BORDER / 2, 0],
-    [FRAME_BORDER, oh, ow / 2 + FRAME_BORDER / 2, 0],
-  ].forEach(([bw, bh, bx, by]) => {
-    const bar = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, FRAME_DEPTH), frameMat);
-    bar.position.set(bx, by, 0);
-    group.add(bar);
-  });
-  scene.add(group);
-
-  const head = center.clone().addScaledVector(normal, 2.2);
-  head.y = HEAD_Y;
-  createFixture(scene, { position: head, target: center, yokeTo: def.meta.id === 'dots' ? ROOM.h : undefined });
-  wallPool(scene, center, normal);
+  // The canvas sits just proud of the wall, with the glass a little further out.
+  const yaw = Math.atan2(normal.x, normal.z);
+  plate.canvas.position.copy(centre).addScaledVector(normal, 0.0135);
+  plate.canvas.rotation.y = yaw;
+  scene.add(plate.canvas);
+  const matWidth = 0.07 + 0.015 * (h - 1.5);
+  const glass = frameGlass(w + 2 * matWidth, h + 2 * matWidth);
+  glass.position.copy(centre).addScaledVector(normal, 0.031);
+  glass.rotation.y = yaw;
+  scene.add(glass);
 
   const work = {
-    meta: def.meta, center, normal, dist: 4.6, eyeY: PLATE_Y,
+    meta: def.meta, center: centre, normal, dist: spec.wall === 'alcove' ? 3.7 : h > 1.7 ? 5.0 : 4.4, eyeY: 1.6,
     pick: [plate.canvas], plate, hover: 0, drawn: false,
   };
   plate.canvas.userData.work = work;
   works.push(work);
 });
 
-const SPOT_IDS = new Set(['column', 'knot', 'cloud', 'amphora']);
 createSculptures().forEach((s) => {
   scene.add(s.group);
-  const head = new THREE.Vector3(s.center.x + 1.3, HEAD_Y, s.center.z + 1.7);
-  const light = SPOT_IDS.has(s.meta.id) ? { intensity: 120, angle: 0.3 } : null;
-  createFixture(scene, { position: head, target: s.center, light, yokeTo: ROOM.h });
-  if (s.floorPool) floorPool(scene, ...s.floorPool);
+  if (s.light) {
+    const spot = new THREE.SpotLight(SPOT_COLOUR, s.light.intensity, 0, s.light.angle, 0.8, 2);
+    spot.position.set(...s.light.position);
+    spot.target.position.copy(s.center);
+    scene.add(spot, spot.target);
+  }
   const work = {
     meta: s.meta, center: s.center, normal: s.normal, dist: s.dist, eyeY: s.eyeY,
     pick: [s.group], sculpture: s, hover: 0,
@@ -141,8 +120,9 @@ createSculptures().forEach((s) => {
 });
 
 const byId = Object.fromEntries(works.map((w) => [w.meta.id, w]));
-// Arrow order: the back wall, the window side, then back around the left wall.
-const NAV = ['drift', 'planes', 'fracture', 'deco', 'tide', 'doric', 'cloud', 'dots', 'knot', 'mobile', 'column', 'halftone', 'strata', 'moire', 'grid', 'lattice', 'amphora'].map((id) => byId[id]);
+// Arrow order: a lap of the hall. The left wall from the door, the corner, the back wall,
+// the alcove, the window side, then the sculptures across the floor.
+const NAV = ['lattice', 'grid', 'moire', 'strata', 'amphora', 'drift', 'planes', 'fracture', 'deco', 'tide', 'dots', 'cloud', 'doric', 'halftone', 'knot', 'mobile', 'column'].map((id) => byId[id]);
 const TOUR_HOLD = 8; // seconds on each work
 const pickables = works.flatMap((w) => w.pick);
 
@@ -220,7 +200,20 @@ el('enquire').addEventListener('click', async () => {
   }
 });
 
+const introPanel = el('intro-panel');
+function hideIntro() {
+  introPanel.classList.remove('is-open');
+  introPanel.setAttribute('aria-hidden', 'true');
+}
+el('intro-close').addEventListener('click', hideIntro);
+el('intro-start').addEventListener('click', () => { stopTour(); openWork(NAV[0]); });
+if (!isFrozen && !focusId) {
+  introPanel.classList.add('is-open');
+  introPanel.setAttribute('aria-hidden', 'false');
+}
+
 function openWork(work) {
+  hideIntro();
   active = work;
   index = NAV.indexOf(work);
   const m = work.meta;
@@ -353,8 +346,9 @@ if (!isFrozen) {
 }
 
 // ---- Camera ------------------------------------------------------------------
-const OVERVIEW_POS = new THREE.Vector3(7.9, 2.5, 6.4);
-const OVERVIEW_LOOK = new THREE.Vector3(-1.5, 1.2, -2.6);
+// The standing overview: just inside the door, at eye height, looking down the hall.
+const OVERVIEW_POS = new THREE.Vector3(-10.2, 1.62, 5.6);
+const OVERVIEW_LOOK = new THREE.Vector3(2.5, 1.45, -4.5);
 const camGoal = new THREE.Vector3();
 const lookGoal = new THREE.Vector3();
 const camNow = new THREE.Vector3().copy(OVERVIEW_POS);
@@ -457,8 +451,9 @@ function frame() {
   if (debug) { renderer.info.autoReset = false; renderer.info.reset(); }
   works.forEach((w, i) => {
     if (w.plate) {
-      const goal = !isFrozen && (w === hover || w === active) ? 0.85 : 0.5;
-      w.plate.surface.emissiveIntensity += (goal - w.plate.surface.emissiveIntensity) * (isFrozen ? 1 : 1 - Math.exp(-dt * 6));
+      const goal = !isFrozen && (w === hover || w === active) ? 0.8 : 0.72;
+      const gain = w.plate.surface.uniforms.uGain;
+      gain.value += (goal - gain.value) * (isFrozen ? 1 : 1 - Math.exp(-dt * 6));
       // Paintings move slowly, so each visible one redraws every third frame.
       const turn = w === active || (frameNo + i) % 3 === 0;
       if (isFrozen || !w.drawn || (turn && frustum.intersectsObject(w.plate.canvas))) {
@@ -498,6 +493,10 @@ setTourLabel();
 setMusicLabel('Music off');
 if (focusId && byId[focusId]) openWork(byId[focusId]);
 
-frame();
-window.__museumReady = true;
-if (!isFrozen) requestAnimationFrame(frame);
+// A frozen still waits for the room, so it never captures an empty hall.
+if (isFrozen) {
+  hallReady.then(() => { frame(); window.__museumReady = true; }, () => { frame(); window.__museumReady = true; });
+} else {
+  frame();
+  window.__museumReady = true;
+}

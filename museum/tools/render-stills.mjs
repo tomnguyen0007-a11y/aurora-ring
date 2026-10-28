@@ -11,7 +11,7 @@ const outDir = path.resolve(process.argv[2] ?? path.join(root, 'previews'));
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.PLAYWRIGHT_PATH ?? 'playwright');
 
-const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png' };
+const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.glb': 'model/gltf-binary' };
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://x');
   const file = path.join(root, decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname));
@@ -30,6 +30,10 @@ const shots = [
   { name: 'focus-doric', query: 't=9&focus=doric' },
   { name: 'focus-mobile', query: 't=9&focus=mobile' },
   { name: 'focus-cloud', query: 't=9&focus=cloud' },
+  { name: 'focus-column', query: 't=9&focus=column' },
+  { name: 'focus-knot', query: 't=9&focus=knot' },
+  { name: 'focus-lattice', query: 't=6&focus=lattice' },
+  { name: 'focus-halftone', query: 't=6&focus=halftone' },
 ];
 // MUSEUM_QUALITY=mid|low speeds up software rendering (default is full quality).
 const quality = process.env.MUSEUM_QUALITY ? `&q=${process.env.MUSEUM_QUALITY}` : '';
@@ -53,7 +57,7 @@ page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
 
 for (const shot of selected) {
   await page.goto(`http://127.0.0.1:${port}/index.html?${shot.query}${quality}`, { waitUntil: 'load' });
-  await page.waitForFunction(() => window.__museumReady === true, null, { timeout: 120000 });
+  await page.waitForFunction(() => window.__museumReady === true && window.__hallReady === true, null, { timeout: 240000 });
   await page.waitForTimeout(400); // let the panel transition finish
   await page.screenshot({ path: path.join(outDir, `${shot.name}.png`) });
   console.log('wrote', shot.name);

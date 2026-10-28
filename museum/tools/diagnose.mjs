@@ -30,7 +30,7 @@ const browser = await chromium.launch({
 // (software rendering is slow) and work out the MacBook figures below.
 const page = await browser.newPage({ viewport: { width: 640, height: 400 }, deviceScaleFactor: 1 });
 await page.goto(`http://127.0.0.1:${port}/index.html?debug&q=low`, { waitUntil: 'load' });
-await page.waitForFunction(() => window.__museumReady === true, null, { timeout: 120000 });
+await page.waitForFunction(() => window.__museumReady === true && window.__hallReady === true, null, { timeout: 240000 });
 await page.waitForFunction(() => window.__museumStats && window.__museumStats.frames >= 6, null, { timeout: 400000 });
 await page.evaluate(() => { const s = window.__museumStats; for (const k of ['frames', 'scriptMs', 'renderMs', 'paintCalls', 'paintTris', 'sceneCalls', 'sceneTris', 'sculptMs']) s[k] = 0; });
 await page.waitForFunction(() => window.__museumStats.frames >= 14, null, { timeout: 400000 });
