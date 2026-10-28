@@ -29,7 +29,14 @@ html = html.replace(/<script type="importmap">[\s\S]*?<\/script>\s*/, '');
 html = html.replace(/<script type="module" src="\.\/js\/main\.js"><\/script>/, () => `<script>${script}</script>`);
 if (html.includes('importmap') || html.includes('js/main.js')) throw new Error('bundle step left a module reference in the HTML');
 
+// Artifact variant: the host wraps the page in its own document skeleton, so keep
+// only the head's title, meta and style, and the body's content.
+const head = html.match(/<head>([\s\S]*?)<\/head>/)[1].replace(/<meta charset[^>]*>\s*/i, '').replace(/<meta name="viewport"[^>]*>\s*/i, '');
+const body = html.match(/<body>([\s\S]*)<\/body>/)[1];
+const artifact = `${head}\n${body}`;
+
 fs.mkdirSync(path.join(root, 'dist'), { recursive: true });
+fs.writeFileSync(path.join(root, 'dist/afterimage-hall.artifact.html'), artifact);
 const out = path.join(root, 'dist/afterimage-hall.html');
 fs.writeFileSync(out, html);
 console.log(`wrote ${path.relative(process.cwd(), out)} (${(html.length / 1048576).toFixed(2)} MB)`);

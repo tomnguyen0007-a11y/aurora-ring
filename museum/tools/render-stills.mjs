@@ -32,6 +32,10 @@ const shots = [
 // MUSEUM_QUALITY=mid|low speeds up software rendering (default is full quality).
 const quality = process.env.MUSEUM_QUALITY ? `&q=${process.env.MUSEUM_QUALITY}` : '';
 
+// MUSEUM_ONLY=focus-cloud,room-t14 renders just those shots.
+const only = process.env.MUSEUM_ONLY?.split(',');
+const selected = only ? shots.filter((s) => only.includes(s.name)) : shots;
+
 await new Promise((r) => server.listen(0, '127.0.0.1', r));
 const { port } = server.address();
 fs.mkdirSync(outDir, { recursive: true });
@@ -45,7 +49,7 @@ const errors = [];
 page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') errors.push(`${m.type()}: ${m.text()}`); });
 page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
 
-for (const shot of shots) {
+for (const shot of selected) {
   await page.goto(`http://127.0.0.1:${port}/index.html?${shot.query}${quality}`, { waitUntil: 'load' });
   await page.waitForFunction(() => window.__museumReady === true, null, { timeout: 120000 });
   await page.waitForTimeout(400); // let the panel transition finish

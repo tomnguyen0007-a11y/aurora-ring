@@ -111,10 +111,15 @@ function cloudForm() {
   const position = geometry.attributes.position;
   const base = Float32Array.from(position.array);
 
+  // Oil-slick colour: the hue follows the surface direction and drifts over time,
+  // set per vertex over a glossy metallic finish.
+  const colors = new Float32Array(position.count * 3);
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
   const resin = new THREE.MeshPhysicalMaterial({
-    color: '#16161f', roughness: 0.08, metalness: 0.55, clearcoat: 1, clearcoatRoughness: 0.03,
-    iridescence: 1, iridescenceIOR: 1.9, iridescenceThicknessRange: [300, 1100], envMapIntensity: 1.8,
+    color: '#ffffff', vertexColors: true, roughness: 0.1, metalness: 0.75,
+    clearcoat: 1, clearcoatRoughness: 0.03, iridescence: 0.6, iridescenceIOR: 1.7, envMapIntensity: 1.6,
   });
+  const tint = new THREE.Color();
   const body = new THREE.Mesh(geometry, resin);
   body.position.y = 1.05 + 0.62;
   group.add(body);
@@ -133,6 +138,15 @@ function cloudForm() {
     }
     position.needsUpdate = true;
     geometry.computeVertexNormals();
+    const normal = geometry.attributes.normal;
+    for (let i = 0; i < position.count; i++) {
+      const hue = (0.6 + 0.4 * normal.getY(i) + 0.25 * normal.getX(i) + t * 0.015) % 1;
+      tint.setHSL(hue < 0 ? hue + 1 : hue, 0.6, 0.6);
+      colors[i * 3] = tint.r;
+      colors[i * 3 + 1] = tint.g;
+      colors[i * 3 + 2] = tint.b;
+    }
+    geometry.attributes.color.needsUpdate = true;
   }
   morph(0);
 
@@ -140,10 +154,10 @@ function cloudForm() {
     meta: {
       id: 'cloud',
       title: 'Cloud Form',
-      series: 'Iridescent resin',
-      medium: 'Thin-film iridescent resin, procedural 3D, slow morph',
+      series: 'Oil-slick resin',
+      medium: 'Glossy metallic resin with shifting oil-slick colour, procedural 3D, slow morph',
       year: '2026',
-      note: 'The colour comes from the thickness of the surface, not from pigment. It shifts as you move.',
+      note: 'The colour follows the direction the surface faces and drifts slowly, so it changes as you move.',
     },
     group,
     center: new THREE.Vector3(6.2, 1.65, -2.2),
