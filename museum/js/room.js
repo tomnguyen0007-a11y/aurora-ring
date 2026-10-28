@@ -152,7 +152,7 @@ export function buildRoom(scene, renderer, { reflections }) {
   };
   soft(1.7, 0.42, 1.05, 0.5, -0.4, 0.25);
   soft(1.3, 0.34, 0.9, -1.6, 0.4, -0.4);
-  soft(2.4, 0.44, 0.7, 7.1, 1.2, Math.PI / 2);
+  soft(2.4, 0.44, 0.7, 7.9, -0.4, Math.PI / 2);
 
   // A low rug under the seating anchors it to the floor.
   const rug = new THREE.Mesh(
