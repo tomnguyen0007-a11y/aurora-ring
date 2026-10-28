@@ -150,7 +150,7 @@ const pickables = works.flatMap((w) => w.pick);
 const panel = document.getElementById('plate-panel');
 const el = (id) => document.getElementById(id);
 const panelEls = {
-  count: el('plate-count'), series: el('plate-series'), title: el('plate-title'), note: el('plate-note'),
+  count: el('plate-count'), series: el('plate-series'), title: el('plate-title'), note: el('plate-note'), home: el('plate-home'),
   after: el('plate-after'), medium: el('plate-medium'), year: el('plate-year'),
 };
 const dockCount = el('dock-count');
@@ -230,6 +230,7 @@ function openWork(work) {
   panelEls.series.textContent = m.series;
   panelEls.title.textContent = m.title;
   panelEls.note.textContent = m.note;
+  panelEls.home.textContent = m.home;
   panelEls.after.textContent = m.after;
   panelEls.medium.textContent = m.medium;
   panelEls.year.textContent = m.year;
