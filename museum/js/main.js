@@ -2,9 +2,10 @@ import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { paintingDefs } from './paintings/index.js';
 import { createPainting } from './paintings/common.js';
+import { createAmbient } from './audio.js';
 
 // ?t=<seconds> freezes the clock for deterministic stills and disables idle
-// drift and hover. ?focus=<id> opens one plate. tools/render-stills.mjs uses both.
+// drift, hover, drag and the tour. ?focus=<id> opens one plate on load.
 const params = new URLSearchParams(location.search);
 const frozenT = params.has('t') ? parseFloat(params.get('t')) : null;
 const focusId = params.get('focus');
@@ -37,6 +38,9 @@ quadScene.add(quad);
 // ---- Room -------------------------------------------------------------
 const ROOM = { w: 14, h: 4.6, d: 12 };
 const WALL_Z = -ROOM.d / 2;
+const FRAME_DEPTH = 0.08;
+const FRAME_BORDER = 0.07;
+const PLATE_Y = 1.75;
 
 const room = new THREE.Mesh(
   new THREE.BoxGeometry(ROOM.w, ROOM.h, ROOM.d),
@@ -56,24 +60,31 @@ floor.position.y = 0.002; // lifted off the room's bottom face to avoid z-fighti
 floor.receiveShadow = true;
 scene.add(floor);
 
+// ---- Placements ---------------------------------------------------------
+// Four plates on the back wall, one on each side wall. Each placement gives the
+// plate centre and the direction the plate faces into the room.
+const SIDE_X = ROOM.w / 2 - FRAME_DEPTH / 2 - 0.02;
+const BACK_X = [-4.35, -1.45, 1.45, 4.35];
+const placements = {
+  lattice: { center: new THREE.Vector3(-SIDE_X, PLATE_Y, -1.6), normal: new THREE.Vector3(1, 0, 0) },
+  drift: { center: new THREE.Vector3(BACK_X[0], PLATE_Y, WALL_Z + FRAME_DEPTH / 2 + 0.02), normal: new THREE.Vector3(0, 0, 1) },
+  fracture: { center: new THREE.Vector3(BACK_X[1], PLATE_Y, WALL_Z + FRAME_DEPTH / 2 + 0.02), normal: new THREE.Vector3(0, 0, 1) },
+  tide: { center: new THREE.Vector3(BACK_X[2], PLATE_Y, WALL_Z + FRAME_DEPTH / 2 + 0.02), normal: new THREE.Vector3(0, 0, 1) },
+  bloom: { center: new THREE.Vector3(BACK_X[3], PLATE_Y, WALL_Z + FRAME_DEPTH / 2 + 0.02), normal: new THREE.Vector3(0, 0, 1) },
+  signal: { center: new THREE.Vector3(SIDE_X, PLATE_Y, -1.6), normal: new THREE.Vector3(-1, 0, 0) },
+};
+
 // ---- Frames and plates -------------------------------------------------
 const frameMat = new THREE.MeshPhysicalMaterial({ color: '#1b1714', roughness: 0.38, clearcoat: 0.6, clearcoatRoughness: 0.2 });
-const FRAME_DEPTH = 0.08;
-const FRAME_BORDER = 0.07;
-const PLATE_Y = 1.75;
-
-// Triptych on the back wall. Index order is left to right.
-const SLOT_X = [-2.7, 0, 2.7];
-const slotFor = { drift: 0, fracture: 1, tide: 2 };
 
 const plates = paintingDefs.map((def) => {
   const plate = createPainting(def, renderer);
   const [w, h] = plate.size;
-  const x = SLOT_X[slotFor[def.meta.id]];
-  const center = new THREE.Vector3(x, PLATE_Y, WALL_Z + FRAME_DEPTH / 2 + 0.02);
+  const { center, normal } = placements[def.meta.id];
 
   const group = new THREE.Group();
   group.position.copy(center);
+  group.rotation.y = Math.atan2(normal.x, normal.z);
 
   plate.canvas.position.z = FRAME_DEPTH / 2 + 0.002;
   group.add(plate.canvas);
@@ -91,15 +102,21 @@ const plates = paintingDefs.map((def) => {
     group.add(bar);
   });
 
-  // Each plate gets its own spot, hung above and aimed at its centre. Hover raises it.
+  // Each plate has its own spot, hung in front of it and aimed at its centre.
+  // Hover raises it.
   const spot = new THREE.SpotLight('#fff1dc', 45, 9, 0.36, 0.75, 1.6);
-  spot.position.set(x, ROOM.h - 0.2, WALL_Z + 2.6);
+  spot.position.set(center.x + normal.x * 2.6, ROOM.h - 0.2, center.z + normal.z * 2.6);
   spot.target.position.copy(center);
   scene.add(spot, spot.target);
 
   scene.add(group);
-  return { ...plate, group, center, spot, baseIntensity: 45, hover: 0, def };
+  return { ...plate, group, center, normal, spot, baseIntensity: 45, hover: 0, def };
 });
+
+const byId = Object.fromEntries(plates.map((p) => [p.def.meta.id, p]));
+// Walking order: left wall, back wall left to right, right wall.
+const TOUR_ORDER = ['lattice', 'drift', 'fracture', 'tide', 'bloom', 'signal'].map((id) => byId[id]);
+const TOUR_HOLD = 7; // seconds on each plate
 
 // ---- Plinth and mirror sculpture ---------------------------------------
 const PLINTH_Z = 1.3;
@@ -143,6 +160,8 @@ const panelEls = {
   medium: document.getElementById('plate-medium'),
   year: document.getElementById('plate-year'),
 };
+const tourButton = document.getElementById('tour-toggle');
+const musicButton = document.getElementById('music-toggle');
 let activePlate = null;
 
 function openPlate(plate) {
@@ -163,14 +182,74 @@ function closePlate() {
   panel.setAttribute('aria-hidden', 'true');
 }
 
-document.getElementById('plate-close').addEventListener('click', closePlate);
-window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePlate(); });
+document.getElementById('plate-close').addEventListener('click', () => { stopTour(); closePlate(); });
+window.addEventListener('keydown', (e) => { if (e.key === 'Escape') { stopTour(); closePlate(); } });
 
-// ---- Camera and pointer -------------------------------------------------
+// ---- Guided tour (play / pause) -----------------------------------------
+const tour = { playing: false, index: 0, timer: 0 };
+
+function setTourLabel() {
+  tourButton.textContent = tour.playing ? 'Pause tour' : 'Start tour';
+  tourButton.setAttribute('aria-pressed', String(tour.playing));
+}
+
+function startTour() {
+  tour.playing = true;
+  tour.timer = 0;
+  openPlate(TOUR_ORDER[tour.index]);
+  setTourLabel();
+}
+
+function stopTour() {
+  tour.playing = false;
+  setTourLabel();
+}
+
+tourButton.addEventListener('click', () => {
+  if (tour.playing) {
+    stopTour();
+  } else {
+    if (activePlate) tour.index = TOUR_ORDER.indexOf(activePlate);
+    startTour();
+  }
+});
+
+// ---- Music toggle --------------------------------------------------------
+const ambient = createAmbient();
+let musicOn = false;
+
+function setMusicLabel(text) {
+  musicButton.textContent = text;
+  musicButton.setAttribute('aria-pressed', String(musicOn));
+}
+
+musicButton.addEventListener('click', async () => {
+  try {
+    if (musicOn) {
+      ambient.off();
+      musicOn = false;
+      setMusicLabel('Music off');
+    } else {
+      await ambient.on();
+      musicOn = true;
+      setMusicLabel('Music on');
+    }
+  } catch (err) {
+    musicOn = false;
+    musicButton.disabled = true;
+    setMusicLabel('Music unavailable');
+  }
+});
+
+// ---- Camera, pointer, drag -----------------------------------------------
 const raycaster = new THREE.Raycaster();
 const pointerNdc = new THREE.Vector2();
 const pointerParallax = new THREE.Vector2();
+const DRAG_THRESHOLD = 6; // px before a press counts as a drag, not a click
 let hoverPlate = null;
+let drag = null;
+let yaw = 0;
+let pitch = 0;
 
 function pickPlate(clientX, clientY) {
   pointerNdc.set((clientX / window.innerWidth) * 2 - 1, -(clientY / window.innerHeight) * 2 + 1);
@@ -180,15 +259,46 @@ function pickPlate(clientX, clientY) {
 }
 
 if (!isFrozen) {
+  canvas.addEventListener('pointerdown', (e) => {
+    drag = { x: e.clientX, y: e.clientY, moved: 0, startX: e.clientX, startY: e.clientY };
+  });
+
   window.addEventListener('pointermove', (e) => {
     pointerParallax.set((e.clientX / window.innerWidth) * 2 - 1, (e.clientY / window.innerHeight) * 2 - 1);
+    if (drag) {
+      const dx = e.clientX - drag.x;
+      const dy = e.clientY - drag.y;
+      drag.x = e.clientX;
+      drag.y = e.clientY;
+      drag.moved += Math.abs(dx) + Math.abs(dy);
+      if (drag.moved > DRAG_THRESHOLD) {
+        // Dragging takes over from the tour and closes any open plate.
+        stopTour();
+        if (activePlate) closePlate();
+        yaw = THREE.MathUtils.clamp(yaw - dx * 0.004, -1.0, 1.0);
+        pitch = THREE.MathUtils.clamp(pitch - dy * 0.003, -0.3, 0.3);
+        canvas.style.cursor = 'grabbing';
+      }
+      return;
+    }
     hoverPlate = pickPlate(e.clientX, e.clientY);
-    canvas.style.cursor = hoverPlate ? 'pointer' : 'default';
+    canvas.style.cursor = hoverPlate ? 'pointer' : 'grab';
   });
-  canvas.addEventListener('click', (e) => {
+
+  window.addEventListener('pointerup', (e) => {
+    if (!drag) return;
+    const wasClick = drag.moved <= DRAG_THRESHOLD;
+    drag = null;
+    canvas.style.cursor = 'grab';
+    if (!wasClick) return;
     const hit = pickPlate(e.clientX, e.clientY);
-    if (hit) openPlate(hit);
-    else if (activePlate) closePlate();
+    if (hit) {
+      stopTour();
+      openPlate(hit);
+    } else if (activePlate) {
+      stopTour();
+      closePlate();
+    }
   });
 }
 
@@ -196,16 +306,18 @@ const camGoal = new THREE.Vector3();
 const lookGoal = new THREE.Vector3();
 const camNow = new THREE.Vector3();
 const lookNow = new THREE.Vector3();
+const lookDir = new THREE.Vector3();
 
 function setCameraGoal(t) {
   if (activePlate) {
-    // Stand two and a half metres in front of the plate, eye level with its centre.
-    camGoal.copy(activePlate.center).add(new THREE.Vector3(0, 0, 4.4));
+    // Stand 4.4 m in front of the plate, eye level with its centre.
+    const { center, normal } = activePlate;
+    camGoal.copy(center).addScaledVector(normal, 4.4);
     camGoal.y = PLATE_Y;
-    lookGoal.copy(activePlate.center);
+    lookGoal.copy(center);
     return;
   }
-  // Calm, looping dolly with a little pointer parallax.
+  // Calm, looping dolly with a little pointer parallax and the drag offset.
   const amp = reduceMotion ? 0.2 : 1;
   const sway = Math.sin(t * 0.09) * 0.5 * amp;
   const dolly = (Math.sin(t * 0.05) + 1) * 0.5 * 0.5 * amp;
@@ -215,7 +327,12 @@ function setCameraGoal(t) {
     1.6 + Math.sin(t * 0.13) * 0.04 + pointerParallax.y * 0.06,
     4.6 - dolly + aspectFix,
   );
-  lookGoal.set(0, 1.45, WALL_Z);
+  lookDir.set(
+    Math.sin(yaw) * Math.cos(pitch),
+    Math.sin(pitch) - 0.14,
+    -Math.cos(yaw) * Math.cos(pitch),
+  ).normalize();
+  lookGoal.copy(camGoal).addScaledVector(lookDir, 10);
 }
 
 function resize() {
@@ -236,6 +353,15 @@ function frame() {
   const dt = Math.min(clock.getDelta(), 0.05);
   const t = isFrozen ? frozenT : (elapsed += dt * timeScale);
   const ease = isFrozen ? 1 : 1 - Math.exp(-dt * 3.2);
+
+  if (tour.playing) {
+    tour.timer += dt;
+    if (tour.timer >= TOUR_HOLD) {
+      tour.timer = 0;
+      tour.index = (tour.index + 1) % TOUR_ORDER.length;
+      openPlate(TOUR_ORDER[tour.index]);
+    }
+  }
 
   setCameraGoal(t);
   camNow.lerp(camGoal, ease);
@@ -261,14 +387,12 @@ function frame() {
 // Initial camera pose, so the first frame is already in place.
 camNow.set(0, 1.6, 4.6);
 lookNow.set(0, 1.45, WALL_Z);
+canvas.style.cursor = 'grab';
+setTourLabel();
+setMusicLabel('Music off');
 
-if (focusId) {
-  const target = plates.find((p) => p.def.meta.id === focusId);
-  if (target) openPlate(target);
-}
+if (focusId && byId[focusId]) openPlate(byId[focusId]);
 
-// Render the first frame. Frozen stills ease the camera in a single step,
-// so one pass is enough.
 if (isFrozen) {
   frame();
   window.__museumReady = true;
