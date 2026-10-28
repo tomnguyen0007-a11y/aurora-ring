@@ -5,5 +5,8 @@ import tide from './tide.js';
 import bloom from './bloom.js';
 import lattice from './lattice.js';
 import signal from './signal.js';
+import moire from './moire.js';
+import strata from './strata.js';
+import halftone from './halftone.js';
 
-export const paintingDefs = [drift, fracture, tide, bloom, lattice, signal];
+export const paintingDefs = [drift, fracture, tide, bloom, lattice, signal, moire, strata, halftone];

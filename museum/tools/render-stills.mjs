@@ -21,12 +21,16 @@ const server = http.createServer((req, res) => {
 });
 
 const shots = [
-  { name: 'room-t02', query: 't=2' },
   { name: 'room-t14', query: 't=14' },
-  { name: 'focus-drift', query: 't=6&focus=drift' },
-  { name: 'focus-fracture', query: 't=9&focus=fracture' },
-  { name: 'focus-tide', query: 't=11&focus=tide' },
+  { name: 'wall-left', query: 't=20&yaw=-1.15' },
+  { name: 'window-side', query: 't=20&yaw=1.15' },
+  { name: 'focus-cloud', query: 't=9&focus=cloud' },
+  { name: 'focus-knot', query: 't=9&focus=knot' },
+  { name: 'focus-column', query: 't=9&focus=column' },
+  { name: 'focus-moire', query: 't=6&focus=moire' },
 ];
+// MUSEUM_QUALITY=mid|low speeds up software rendering (default is full quality).
+const quality = process.env.MUSEUM_QUALITY ? `&q=${process.env.MUSEUM_QUALITY}` : '';
 
 await new Promise((r) => server.listen(0, '127.0.0.1', r));
 const { port } = server.address();
@@ -42,7 +46,7 @@ page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') 
 page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
 
 for (const shot of shots) {
-  await page.goto(`http://127.0.0.1:${port}/index.html?${shot.query}`, { waitUntil: 'load' });
+  await page.goto(`http://127.0.0.1:${port}/index.html?${shot.query}${quality}`, { waitUntil: 'load' });
   await page.waitForFunction(() => window.__museumReady === true, null, { timeout: 120000 });
   await page.waitForTimeout(400); // let the panel transition finish
   await page.screenshot({ path: path.join(outDir, `${shot.name}.png`) });
