@@ -37,7 +37,7 @@ const errors = [];
 page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
 page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
 
-await page.goto(`http://127.0.0.1:${port}/index.html`, { waitUntil: 'load' });
+await page.goto(`http://127.0.0.1:${port}/index.html?q=low`, { waitUntil: 'load' });
 await page.waitForFunction(() => window.__museumReady === true, null, { timeout: 120000 });
 
 // Music toggle: on, then off.

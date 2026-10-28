@@ -9,6 +9,8 @@ import { createAmbient } from './audio.js';
 const params = new URLSearchParams(location.search);
 const frozenT = params.has('t') ? parseFloat(params.get('t')) : null;
 const focusId = params.get('focus');
+// ?q=low renders paintings at a quarter of their normal resolution. Used by tests and slow machines.
+const PAINTING_RES = params.get('q') === 'low' ? [256, 320] : [1024, 1280];
 const isFrozen = frozenT !== null;
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const timeScale = reduceMotion ? 0.25 : 1;
@@ -78,7 +80,7 @@ const placements = {
 const frameMat = new THREE.MeshPhysicalMaterial({ color: '#1b1714', roughness: 0.38, clearcoat: 0.6, clearcoatRoughness: 0.2 });
 
 const plates = paintingDefs.map((def) => {
-  const plate = createPainting(def, renderer);
+  const plate = createPainting(def, renderer, PAINTING_RES);
   const [w, h] = plate.size;
   const { center, normal } = placements[def.meta.id];
 
