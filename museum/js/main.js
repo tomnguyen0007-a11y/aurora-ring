@@ -154,6 +154,7 @@ const panelEls = {
   after: el('plate-after'), medium: el('plate-medium'), year: el('plate-year'),
 };
 const dockCount = el('dock-count');
+const moreButton = el('plate-more');
 const toast = el('toast');
 const prevButton = el('prev-work');
 const nextButton = el('next-work');
@@ -195,6 +196,12 @@ function showToast(message) {
   showToast.timer = setTimeout(() => toast.classList.remove('is-shown'), 4200);
 }
 
+moreButton.addEventListener('click', () => {
+  const open = panel.classList.toggle('is-expanded');
+  moreButton.textContent = open ? 'Less' : 'More';
+  requestAnimationFrame(measureShift);
+});
+
 // Enquire: a ready-made email if a contact address is set, otherwise the text is copied.
 el('enquire').addEventListener('click', async () => {
   if (!active) return;
@@ -217,14 +224,16 @@ function openWork(work) {
   active = work;
   index = NAV.indexOf(work);
   const m = work.meta;
-  panelEls.count.textContent = `${index + 1} / ${NAV.length}`;
+  panelEls.count.textContent = `No. ${String(index + 1).padStart(2, '0')}`;
+  panel.classList.remove('is-expanded');
+  moreButton.textContent = 'More';
   panelEls.series.textContent = m.series;
   panelEls.title.textContent = m.title;
   panelEls.note.textContent = m.note;
   panelEls.after.textContent = m.after;
   panelEls.medium.textContent = m.medium;
   panelEls.year.textContent = m.year;
-  dockCount.textContent = `${index + 1} / ${NAV.length}`;
+  dockCount.textContent = `${String(index + 1).padStart(2, '0')} / ${NAV.length}`;
   panel.classList.add('is-open');
   panel.setAttribute('aria-hidden', 'false');
   applyResolutions();
@@ -285,7 +294,7 @@ const ambient = createAmbient();
 let musicOn = false;
 
 function setMusicLabel(text) {
-  musicButton.querySelector('.lbl').textContent = text;
+  musicButton.querySelector('.state').textContent = text.replace(/^Music/, '');
   musicButton.setAttribute('aria-pressed', String(musicOn));
 }
 musicButton.addEventListener('click', async () => {
