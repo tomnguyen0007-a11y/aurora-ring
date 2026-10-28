@@ -92,6 +92,9 @@ export function createPainting(def, renderer, uRes = [1024, 1280]) {
     clearcoat: 1.0,
     clearcoatRoughness: 0.05,
     metalness: 0.0,
+    emissive: new THREE.Color('#ffffff'),
+    emissiveMap: target.texture,
+    emissiveIntensity: 0.5,
   });
   const canvas = new THREE.Mesh(new THREE.PlaneGeometry(w, h), surface);
   canvas.receiveShadow = true;
@@ -101,6 +104,7 @@ export function createPainting(def, renderer, uRes = [1024, 1280]) {
     canvas,
     material,
     target,
+    surface,
     size: [w, h],
     // Advances the painting to time t (seconds) and redraws it into its plate.
     update(t, quad, quadCamera, scene) {

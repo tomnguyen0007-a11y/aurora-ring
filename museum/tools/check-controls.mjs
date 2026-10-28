@@ -49,28 +49,49 @@ await page.click('#music-toggle');
 await page.waitForFunction(() => document.getElementById('music-toggle').textContent === 'Music off', null, { timeout: 15000 });
 check('music button turns off', true);
 
-// Tour: start, check the panel opens, pause.
-await page.click('#tour-toggle');
-await page.waitForTimeout(800);
-const tourPlaying = await page.getAttribute('#tour-toggle', 'aria-pressed');
-const panelOpen = await page.evaluate(() => document.getElementById('plate-panel').classList.contains('is-open'));
-check('tour starts and opens a plate', tourPlaying === 'true' && panelOpen, `aria-pressed=${tourPlaying}`);
-await page.screenshot({ path: path.join(outDir, 'live-tour-start.png') });
-await page.click('#tour-toggle');
-const tourPaused = await page.getAttribute('#tour-toggle', 'aria-pressed');
-check('tour pauses', tourPaused === 'false');
+const title = () => page.textContent('#plate-title');
+const panelOpen = () => page.evaluate(() => document.getElementById('plate-panel').classList.contains('is-open'));
 
-// Drag: a real mouse drag should close the plate and stop the tour.
+// The page opens on the overview, with no work selected.
+check('starts on the overview', !(await panelOpen()));
+
+// Arrow keys step between works.
+await page.keyboard.press('ArrowRight');
+const first = await title();
+check('right arrow opens the first work', (await panelOpen()) && first === 'Drift I', first);
+await page.keyboard.press('ArrowRight');
+const second = await title();
+check('right arrow moves to the next work', second === 'Floating Planes', second);
+await page.keyboard.press('ArrowLeft');
+check('left arrow moves back', (await title()) === 'Drift I');
+await page.screenshot({ path: path.join(outDir, 'live-focus.png') });
+
+// On-screen buttons do the same.
+await page.click('#next-work');
+check('next button works', (await title()) === 'Floating Planes');
+await page.click('#prev-work');
+check('previous button works', (await title()) === 'Drift I');
+
+// Wrapping: left arrow from the first work reaches the last.
+await page.keyboard.press('ArrowLeft');
+check('left arrow wraps to the last work', (await title()) === 'Amphora', await title());
+
+// Escape returns to the overview.
+await page.keyboard.press('Escape');
+check('escape returns to the overview', !(await panelOpen()));
+await page.screenshot({ path: path.join(outDir, 'live-overview.png') });
+
+// Tour: play opens a work, pause stops it.
 await page.click('#tour-toggle');
-await page.mouse.move(640, 400);
-await page.mouse.down();
-for (let i = 1; i <= 10; i++) await page.mouse.move(640 - i * 20, 400);
-await page.mouse.up();
-await page.waitForTimeout(600);
-const afterDragOpen = await page.evaluate(() => document.getElementById('plate-panel').classList.contains('is-open'));
-const afterDragTour = await page.getAttribute('#tour-toggle', 'aria-pressed');
-check('drag closes the plate and stops the tour', !afterDragOpen && afterDragTour === 'false');
-await page.screenshot({ path: path.join(outDir, 'live-after-drag.png') });
+await page.waitForTimeout(500);
+check('tour plays and opens a work', (await page.getAttribute('#tour-toggle', 'aria-pressed')) === 'true' && (await panelOpen()));
+await page.click('#tour-toggle');
+check('tour pauses', (await page.getAttribute('#tour-toggle', 'aria-pressed')) === 'false');
+
+// Clicking empty floor in the overview does nothing harmful; arrows still work after.
+await page.mouse.click(640, 700);
+await page.keyboard.press('ArrowRight');
+check('arrows still work after a click', await panelOpen());
 
 check('no console errors', errors.length === 0, errors.length ? errors.join(' | ') : '');
 

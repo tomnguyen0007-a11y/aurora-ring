@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { Reflector } from 'three/addons/objects/Reflector.js';
 import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-import { concreteMaps, plasterBump, skyTexture } from './textures.js';
+import { concreteMaps, plasterBump, skyTexture, glowTexture } from './textures.js';
 
 export const ROOM = { w: 18, h: 5.2, d: 14 };
 const HW = ROOM.w / 2;
@@ -58,9 +58,10 @@ export function buildRoom(scene, renderer, { reflections }) {
   const maps = concreteMaps();
   maps.color.repeat.set(6, 5);
   maps.rough.repeat.set(6, 5);
+  let mirror = null;
   if (reflections) {
-    const size = Math.min(1024, Math.round(window.innerWidth * Math.min(window.devicePixelRatio, 2) * 0.5));
-    const mirror = new Reflector(new THREE.PlaneGeometry(ROOM.w, ROOM.d), {
+    const size = Math.min(768, Math.round(window.innerWidth * Math.min(window.devicePixelRatio, 2) * 0.5));
+    mirror = new Reflector(new THREE.PlaneGeometry(ROOM.w, ROOM.d), {
       color: 0x5f5e5b, textureWidth: size, textureHeight: size, clipBias: 0.003,
     });
     mirror.rotation.x = -Math.PI / 2;
@@ -147,58 +148,80 @@ export function buildRoom(scene, renderer, { reflections }) {
     const m = new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 8, Math.min(h, d) * 0.4), fabric);
     m.position.set(x, h / 2, z);
     m.rotation.y = rotY;
-    m.castShadow = true;
-    m.receiveShadow = true;
     scene.add(m);
   };
   soft(1.7, 0.42, 1.05, 0.5, -0.4, 0.25);
   soft(1.3, 0.34, 0.9, -1.6, 0.4, -0.4);
   soft(2.4, 0.44, 0.7, 7.1, 1.2, Math.PI / 2);
 
-  return { group: null };
+  // A low rug under the seating anchors it to the floor.
+  const rug = new THREE.Mesh(
+    new THREE.PlaneGeometry(6.2, 4.2),
+    new THREE.MeshStandardMaterial({ color: '#4a463f', roughness: 1, bumpMap: bump, bumpScale: 1.2 }),
+  );
+  rug.rotation.x = -Math.PI / 2;
+  rug.position.set(0.2, 0.007, 1.2);
+  rug.receiveShadow = false;
+  scene.add(rug);
+
+  // Light: a soft warm key, a hemisphere fill, and the window. No shadow maps.
+  const key = new THREE.DirectionalLight('#fff0dc', 1.0);
+  key.position.set(4, 8, 6);
+  scene.add(key);
+  scene.add(new THREE.HemisphereLight('#fbf6ee', '#8c8277', 0.35));
+
+  return { mirror };
 }
 
-// A track spot: housing, glowing lens, SpotLight, and a faint beam of light.
-export function createTrackSpot(scene, { position, target, intensity = 90, angle = 0.42, castShadow = false, yokeTo = RAIL_Y, color = '#ffe9cf' }) {
-  const light = new THREE.SpotLight(color, intensity, 0, angle, 0.8, 2);
-  light.position.copy(position);
-  light.target.position.copy(target);
-  if (castShadow) {
-    light.castShadow = true;
-    light.shadow.mapSize.set(1024, 1024);
-    light.shadow.bias = -0.0004;
-    light.shadow.radius = 4;
-  }
-  scene.add(light, light.target);
+const glow = glowTexture();
+const poolMat = new THREE.MeshBasicMaterial({
+  map: glow, color: '#ffd9a8', transparent: true, opacity: 0.4,
+  blending: THREE.AdditiveBlending, depthWrite: false,
+});
+const shadowMat = new THREE.MeshBasicMaterial({ map: glow, color: 0x000000, transparent: true, opacity: 0.5, depthWrite: false });
 
+// A pool of warm light on a wall, where a spot would land.
+export function wallPool(scene, center, normal) {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(3.8, 5.0), poolMat);
+  m.position.copy(center).addScaledVector(normal, 0.015);
+  m.rotation.y = Math.atan2(normal.x, normal.z);
+  scene.add(m);
+}
+
+// A pool of light and a soft contact shadow on the floor under a sculpture.
+export function floorPool(scene, x, z, radius) {
+  const light = new THREE.Mesh(new THREE.PlaneGeometry(radius * 3.2, radius * 3.2), poolMat);
+  light.rotation.x = -Math.PI / 2;
+  light.position.set(x, 0.009, z);
+  const shade = new THREE.Mesh(new THREE.PlaneGeometry(radius * 1.8, radius * 1.8), shadowMat);
+  shade.rotation.x = -Math.PI / 2;
+  shade.position.set(x, 0.008, z);
+  scene.add(light, shade);
+}
+
+// A track-spot fixture: housing, glowing lens, and a yoke to the rail or ceiling.
+// With `light` set it also casts a real SpotLight; wall paintings use a decal pool
+// instead, which looks the same and costs almost nothing.
+export function createFixture(scene, { position, target, light = null, yokeTo = RAIL_Y }) {
   const housing = new THREE.Group();
   housing.position.copy(position);
   housing.lookAt(target);
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 0.28, 24), blackMat);
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 0.28, 20), blackMat);
   body.rotation.x = Math.PI / 2;
-  const lens = new THREE.Mesh(new THREE.CircleGeometry(0.064, 24), lensMat);
+  const lens = new THREE.Mesh(new THREE.CircleGeometry(0.064, 20), lensMat);
   lens.position.z = 0.141;
   housing.add(body, lens);
   scene.add(housing);
 
-  // Yoke up to the rail (or the ceiling, for a hanging spot).
   const yokeH = Math.max(0.05, yokeTo - position.y);
   const yoke = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, yokeH, 8), blackMat);
   yoke.position.set(position.x, position.y + yokeH / 2, position.z);
   scene.add(yoke);
 
-  // Light cone, from the lens to the target.
-  const length = position.distanceTo(target);
-  const cone = new THREE.Mesh(
-    new THREE.ConeGeometry(Math.tan(angle) * length, length, 40, 1, true),
-    new THREE.MeshBasicMaterial({
-      color, transparent: true, opacity: 0.011, blending: THREE.AdditiveBlending,
-      depthWrite: false, side: THREE.DoubleSide, toneMapped: false,
-    }),
-  );
-  cone.position.copy(position).lerp(target, 0.5);
-  cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), position.clone().sub(target).normalize());
-  scene.add(cone);
-
-  return { light, baseIntensity: intensity };
+  if (!light) return null;
+  const spot = new THREE.SpotLight('#ffe9cf', light.intensity, 0, light.angle, 0.8, 2);
+  spot.position.copy(position);
+  spot.target.position.copy(target);
+  scene.add(spot, spot.target);
+  return spot;
 }

@@ -69,6 +69,12 @@
     }
     .controls button:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0, 0, 0, .14); }
     .controls button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+    body::after {
+      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 1;
+      background: radial-gradient(ellipse at center, transparent 58%, rgba(0, 0, 0, .26) 100%);
+    }
+    .controls { flex-wrap: wrap; justify-content: center; max-width: calc(100vw - 32px); }
+    #prev-work, #next-work { min-width: 44px; padding-left: 0; padding-right: 0; }
     .controls button:disabled { opacity: .5; cursor: default; transform: none; }
     .controls button:focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; }
     @media (max-width: 600px) {
@@ -87,26 +93,30 @@
 </head>
 <body>
   <a class="skip" href="#plate-panel">Skip to plate details</a>
-  <canvas id="scene" aria-label="3D gallery with nine motion paintings and three sculptures"></canvas>
+  <canvas id="scene" aria-label="3D gallery with eleven motion paintings and six sculptures"></canvas>
   <header class="masthead">
     <strong>Afterimage Hall</strong>
-    <span>Nine plates · three sculptures</span>
+    <span>Eleven paintings · six sculptures</span>
   </header>
   <aside id="plate-panel" class="plate-panel" role="dialog" aria-live="polite" aria-labelledby="plate-title" aria-hidden="true">
     <button type="button" id="plate-close" aria-label="Close plate details">×</button>
-    <p class="series" id="plate-series"></p>
+    <p class="series"><span id="plate-count"></span> · <span id="plate-series"></span></p>
     <h2 id="plate-title"></h2>
     <p id="plate-note"></p>
     <dl>
+      <dt>Inspired by</dt><dd id="plate-after"></dd>
       <dt>Medium</dt><dd id="plate-medium"></dd>
-      <dt>Year</dt><dd id="plate-year"></dd>
+      <dt>Made</dt><dd id="plate-year"></dd>
     </dl>
   </aside>
   <nav class="controls" aria-label="Gallery controls">
-    <button type="button" id="tour-toggle" aria-pressed="false">Start tour</button>
+    <button type="button" id="prev-work" aria-label="Previous work">&larr;</button>
+    <button type="button" id="overview">Overview</button>
+    <button type="button" id="next-work" aria-label="Next work">&rarr;</button>
+    <button type="button" id="tour-toggle" aria-pressed="false">Play tour</button>
     <button type="button" id="music-toggle" aria-pressed="false">Music off</button>
   </nav>
-  <p class="hint">Drag to look · Click a plate · Esc to close</p>
+  <p class="hint">&larr; &rarr; move between works · Esc for the overview</p>
   <script type="module" src="./js/main.js"></script>
 </body>
 </html>

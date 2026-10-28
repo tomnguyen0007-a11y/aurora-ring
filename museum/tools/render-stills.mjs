@@ -21,13 +21,15 @@ const server = http.createServer((req, res) => {
 });
 
 const shots = [
-  { name: 'room-t14', query: 't=14' },
-  { name: 'wall-left', query: 't=20&yaw=-1.15' },
-  { name: 'window-side', query: 't=20&yaw=1.15' },
+  { name: 'overview', query: 't=14' },
+  { name: 'focus-planes', query: 't=6&focus=planes' },
+  { name: 'focus-grid', query: 't=6&focus=grid' },
+  { name: 'focus-dots', query: 't=6&focus=dots' },
+  { name: 'focus-deco', query: 't=6&focus=deco' },
+  { name: 'focus-amphora', query: 't=9&focus=amphora' },
+  { name: 'focus-doric', query: 't=9&focus=doric' },
+  { name: 'focus-mobile', query: 't=9&focus=mobile' },
   { name: 'focus-cloud', query: 't=9&focus=cloud' },
-  { name: 'focus-knot', query: 't=9&focus=knot' },
-  { name: 'focus-column', query: 't=9&focus=column' },
-  { name: 'focus-moire', query: 't=6&focus=moire' },
 ];
 // MUSEUM_QUALITY=mid|low speeds up software rendering (default is full quality).
 const quality = process.env.MUSEUM_QUALITY ? `&q=${process.env.MUSEUM_QUALITY}` : '';

@@ -129,3 +129,105 @@ export function skyTexture() {
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
 }
+
+// Soft radial glow, used for light pools on walls and blob shadows on the floor.
+export function glowTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+  g.addColorStop(0, 'rgba(255,255,255,1)');
+  g.addColorStop(0.45, 'rgba(255,255,255,0.45)');
+  g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 128, 128);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+// Ivory marble with grey veins.
+export function marbleTexture(size = 512) {
+  const base = fbmField(size, 31, 5, 4);
+  const warp = fbmField(size, 47, 4, 6);
+  return canvasTexture(size, (d) => {
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const i = y * size + x;
+        const u = x / size;
+        const v = Math.sin((u * 5 + base[i] * 3.2 + warp[i] * 1.5) * Math.PI * 2);
+        const vein = Math.pow(1 - Math.abs(v), 14);
+        const c = 238 - 22 * base[i] - vein * 70;
+        d[i * 4] = c;
+        d[i * 4 + 1] = c - 3;
+        d[i * 4 + 2] = c - 9;
+        d[i * 4 + 3] = 255;
+      }
+    }
+  }, true);
+}
+
+// Terracotta vase surface with black bands, a Greek-key meander, and palmettes.
+// The canvas top is the rim of the vase, the bottom is the foot.
+export function amphoraTexture() {
+  const W = 1024;
+  const H = 1024;
+  const canvas = document.createElement('canvas');
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#b4532a';
+  ctx.fillRect(0, 0, W, H);
+  // Slip variation so the clay does not look flat.
+  for (let i = 0; i < 2600; i++) {
+    ctx.fillStyle = `rgba(${90 + Math.random() * 60},${30 + Math.random() * 30},10,0.05)`;
+    ctx.fillRect(Math.random() * W, Math.random() * H, 30 + Math.random() * 90, 2 + Math.random() * 6);
+  }
+  const black = '#16100d';
+  const band = (y, h) => { ctx.fillStyle = black; ctx.fillRect(0, y, W, h); };
+  band(0, 90);
+  band(H - 130, 130);
+  band(150, 14);
+  band(H - 190, 16);
+
+  // Meander band.
+  ctx.strokeStyle = black;
+  ctx.lineWidth = 7;
+  const key = (x0, y0, w, h) => {
+    for (let x = x0; x < W; x += w) {
+      ctx.beginPath();
+      ctx.moveTo(x, y0 + h);
+      ctx.lineTo(x, y0);
+      ctx.lineTo(x + w * 0.75, y0);
+      ctx.lineTo(x + w * 0.75, y0 + h * 0.7);
+      ctx.lineTo(x + w * 0.25, y0 + h * 0.7);
+      ctx.lineTo(x + w * 0.25, y0 + h * 0.4);
+      ctx.lineTo(x + w * 0.5, y0 + h * 0.4);
+      ctx.stroke();
+    }
+  };
+  key(0, 108, 64, 34);
+  key(0, H - 250, 64, 34);
+
+  // Palmettes around the belly: a fan of petals on a short stem.
+  ctx.fillStyle = black;
+  for (let px = 64; px < W; px += 128) {
+    const cy = 520;
+    for (let k = -3; k <= 3; k++) {
+      ctx.save();
+      ctx.translate(px, cy);
+      ctx.rotate(k * 0.3);
+      ctx.beginPath();
+      ctx.ellipse(0, -62, 9, 46, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    ctx.fillRect(px - 4, cy, 8, 70);
+  }
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.anisotropy = 8;
+  return tex;
+}
