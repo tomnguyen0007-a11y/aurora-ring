@@ -5,6 +5,7 @@ import { createPainting } from './paintings/common.js';
 import { createSculptures } from './sculptures.js';
 import { buildRoom, createFixture, wallPool, floorPool, ROOM, HEAD_Y } from './room.js';
 import { createAmbient } from './audio.js';
+import { CONFIG } from './config.js';
 
 // URL options:
 //   ?t=<seconds>  freeze the clock for deterministic stills (no hover, tour or adaptation)
@@ -20,11 +21,16 @@ const stats = { frames: 0, scriptMs: 0, renderMs: 0, paintCalls: 0, paintTris: 0
 if (debug) window.__museumStats = stats;
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const timeScale = reduceMotion ? 0.25 : 1;
-const PAINTING_RES = quality === 'low' ? [256, 320] : quality === 'high' ? [1024, 1280] : [512, 640];
+// Paintings redraw at a resolution that matches how big they look: small in the overview, sharp
+// when focused. ?q=low keeps everything small, for tests.
+const RES_OVERVIEW = quality === 'low' ? [256, 320] : [384, 480];
+const RES_NEIGHBOUR = quality === 'low' ? [256, 320] : [512, 640];
+const RES_FOCUS = quality === 'low' ? [256, 320] : [1024, 1280];
+const FRAME_MS = 29; // draws every 2nd frame on a 60 Hz screen, which halves the heat
 
 const canvas = document.getElementById('scene');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-let pixelRatio = Math.min(window.devicePixelRatio, 1.5);
+let pixelRatio = Math.min(window.devicePixelRatio, 2); // sharp on Retina; adapt() only drops it on a very slow device
 renderer.setPixelRatio(pixelRatio);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -77,7 +83,7 @@ const slots = {
 const works = [];
 
 paintingDefs.forEach((def) => {
-  const plate = createPainting(def, renderer, PAINTING_RES);
+  const plate = createPainting(def, renderer, RES_OVERVIEW);
   const [w, h] = plate.size;
   const { center, normal } = slots[def.meta.id];
 
@@ -147,6 +153,8 @@ const panelEls = {
   count: el('plate-count'), series: el('plate-series'), title: el('plate-title'), note: el('plate-note'),
   after: el('plate-after'), medium: el('plate-medium'), year: el('plate-year'),
 };
+const dockCount = el('dock-count');
+const toast = el('toast');
 const prevButton = el('prev-work');
 const nextButton = el('next-work');
 const overviewButton = el('overview');
@@ -155,6 +163,55 @@ const musicButton = el('music-toggle');
 
 let active = null;
 let index = -1; // -1 is the overview
+
+// The camera's view is shifted so the work stays visible next to the panel (desktop)
+// or above the bottom sheet (phone). The shift is measured from the panel itself.
+const shift = new THREE.Vector2(0, 0);
+const shiftGoal = new THREE.Vector2(0, 0);
+function measureShift() {
+  const r = panel.getBoundingClientRect();
+  const sheet = window.innerWidth <= 720;
+  if (sheet) shiftGoal.set(0, (window.innerHeight - r.top) / 2);
+  else shiftGoal.set((window.innerWidth - r.left) / 2, 0);
+}
+
+// Plates redraw sharp when focused and small when they are only a thumbnail in the overview.
+function applyResolutions() {
+  works.forEach((w) => {
+    if (!w.plate) return;
+    const [rw, rh] = !active ? RES_OVERVIEW : w === active ? RES_FOCUS : RES_NEIGHBOUR;
+    if (w.res !== rw) {
+      w.plate.setRes(rw, rh);
+      w.res = rw;
+      w.drawn = false;
+    }
+  });
+}
+
+function showToast(message) {
+  toast.textContent = message;
+  toast.classList.add('is-shown');
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => toast.classList.remove('is-shown'), 4200);
+}
+
+// Enquire: a ready-made email if a contact address is set, otherwise the text is copied.
+el('enquire').addEventListener('click', async () => {
+  if (!active) return;
+  const m = active.meta;
+  const subject = `Enquiry: ${m.title}`;
+  const body = `Hello, I would like to enquire about "${m.title}" (${m.series}) in ${CONFIG.studioName}.`;
+  if (CONFIG.contactEmail) {
+    window.location.href = `mailto:${CONFIG.contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(body);
+    showToast('Enquiry text copied. Set contactEmail in js/config.js to send it by email.');
+  } catch (err) {
+    showToast(body);
+  }
+});
 
 function openWork(work) {
   active = work;
@@ -167,15 +224,21 @@ function openWork(work) {
   panelEls.after.textContent = m.after;
   panelEls.medium.textContent = m.medium;
   panelEls.year.textContent = m.year;
+  dockCount.textContent = `${index + 1} / ${NAV.length}`;
   panel.classList.add('is-open');
   panel.setAttribute('aria-hidden', 'false');
+  applyResolutions();
+  measureShift();
 }
 
 function showOverview() {
   active = null;
   index = -1;
+  dockCount.textContent = 'Overview';
   panel.classList.remove('is-open');
   panel.setAttribute('aria-hidden', 'true');
+  applyResolutions();
+  shiftGoal.set(0, 0);
 }
 
 function step(direction) {
@@ -199,7 +262,7 @@ window.addEventListener('keydown', (e) => {
 const tour = { playing: false, timer: 0 };
 
 function setTourLabel() {
-  tourButton.textContent = tour.playing ? 'Pause tour' : 'Play tour';
+  tourButton.querySelector('.lbl').textContent = tour.playing ? 'Pause tour' : 'Play tour';
   tourButton.setAttribute('aria-pressed', String(tour.playing));
 }
 function stopTour() {
@@ -222,7 +285,7 @@ const ambient = createAmbient();
 let musicOn = false;
 
 function setMusicLabel(text) {
-  musicButton.textContent = text;
+  musicButton.querySelector('.lbl').textContent = text;
   musicButton.setAttribute('aria-pressed', String(musicOn));
 }
 musicButton.addEventListener('click', async () => {
@@ -261,6 +324,16 @@ function pickWork(clientX, clientY) {
 
 if (!isFrozen) {
   window.addEventListener('pointermove', (e) => { pendingMove = e; });
+  // A horizontal swipe on a touch screen moves to the next or previous work.
+  let swipe = null;
+  canvas.addEventListener('pointerdown', (e) => { swipe = e.pointerType === 'touch' ? { x: e.clientX, y: e.clientY } : null; });
+  canvas.addEventListener('pointerup', (e) => {
+    if (!swipe) return;
+    const dx = e.clientX - swipe.x;
+    const dy = e.clientY - swipe.y;
+    swipe = null;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.4) step(dx < 0 ? 1 : -1);
+  });
   canvas.addEventListener('click', (e) => {
     const hit = pickWork(e.clientX, e.clientY);
     stopTour();
@@ -300,6 +373,7 @@ function resize() {
   camera.aspect = w / h;
   camera.fov = camera.aspect < 1 ? 80 : 60;
   camera.updateProjectionMatrix();
+  if (active) measureShift();
 }
 window.addEventListener('resize', resize);
 resize();
@@ -309,10 +383,10 @@ let avgDt = 0.016;
 let slowFor = 0;
 function adapt(dt) {
   avgDt += (dt - avgDt) * 0.05;
-  if (avgDt > 0.034 && pixelRatio > 0.75) {
+  if (avgDt > 0.075 && pixelRatio > 1) {
     slowFor += dt;
-    if (slowFor > 1.5) {
-      pixelRatio = Math.max(0.75, pixelRatio - 0.25);
+    if (slowFor > 2) {
+      pixelRatio = Math.max(1, pixelRatio - 0.25);
       resize();
       slowFor = 0;
       avgDt = 0.02;
@@ -328,8 +402,18 @@ const frustum = new THREE.Frustum();
 const viewProjection = new THREE.Matrix4();
 let elapsed = 0;
 
+let lastDraw = 0;
 function frame() {
-  const dt = Math.min(clock.getDelta(), 0.05);
+  if (!isFrozen) {
+    // Cap at roughly 30 frames a second: it looks the same for slow art and halves the heat.
+    const now = performance.now();
+    if (now - lastDraw < FRAME_MS) {
+      requestAnimationFrame(frame);
+      return;
+    }
+    lastDraw = now;
+  }
+  const dt = Math.min(clock.getDelta(), 0.1);
   const t = isFrozen ? frozenT : (elapsed += dt * timeScale);
   const ease = isFrozen ? 1 : 1 - Math.exp(-dt * 2.4);
   frameNo++;
@@ -354,6 +438,8 @@ function frame() {
   lookNow.lerp(lookGoal, ease);
   camera.position.copy(camNow);
   camera.lookAt(lookNow);
+  shift.lerp(shiftGoal, isFrozen ? 1 : 1 - Math.exp(-dt * 5));
+  camera.setViewOffset(window.innerWidth, window.innerHeight, shift.x, shift.y, window.innerWidth, window.innerHeight);
   camera.updateMatrixWorld();
   frustum.setFromProjectionMatrix(viewProjection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
 
@@ -397,6 +483,7 @@ function frame() {
 }
 
 canvas.style.cursor = 'default';
+applyResolutions();
 setTourLabel();
 setMusicLabel('Music off');
 if (focusId && byId[focusId]) openWork(byId[focusId]);

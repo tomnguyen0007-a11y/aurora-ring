@@ -106,6 +106,11 @@ export function createPainting(def, renderer, uRes = [1024, 1280]) {
     target,
     surface,
     size: [w, h],
+    // Redraw resolution: high for the focused work, low for small plates in the overview.
+    setRes(width, height) {
+      target.setSize(width, height);
+      material.uniforms.uRes.value.set(width, height);
+    },
     // Advances the painting to time t (seconds) and redraws it into its plate.
     update(t, quad, quadCamera, scene) {
       material.uniforms.uTime.value = t;
