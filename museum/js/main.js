@@ -97,7 +97,7 @@ paintingDefs.forEach((def) => {
   scene.add(glass);
 
   const work = {
-    meta: def.meta, center: centre, normal, dist: spec.wall === 'alcove' ? 3.7 : h > 1.7 ? 5.0 : 4.4, eyeY: 1.6,
+    meta: def.meta, center: centre, normal, dist: spec.wall === 'alcove' ? 3.3 : h > 1.7 ? 3.7 : 3.2, eyeY: 1.6,
     pick: [plate.canvas], plate, hover: 0, drawn: false,
   };
   plate.canvas.userData.work = work;
