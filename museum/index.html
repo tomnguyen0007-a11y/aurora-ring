@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="icon" href="data:,">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Afterimage Hall</title>
+  <meta name="description" content="A walkable gallery of original motion paintings and sculptures, rendered in real time.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+  <style>
+    /* Design: a museum wall label, not an app. Small type, hairline rules, square controls,
+       off-white paper and near-black ink. One accent (vermilion) for hover and focus only.
+       Type: Hanken Grotesk throughout, bold and tight for titles, regular for text.
+       Layout: the room fills the screen. A compact label sits beside the work on desktop and
+       becomes a short bottom sheet on phones; the camera shifts so the work stays in view. */
+    :root {
+      --ground: #e9e8e4;
+      --paper: #f3f2ee;
+      --ink: #131313;
+      --mute: #6a6861;
+      --rule: rgba(19, 19, 19, 0.16);
+      --accent: #c4402c;
+      --sans: 'Hanken Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --serif: var(--sans);
+      --ease: cubic-bezier(.2, .7, .2, 1);
+      --gutter: max(20px, env(safe-area-inset-left, 0px));
+      color-scheme: light;
+    }
+    html, body { margin: 0; height: 100%; background: var(--ground); color: var(--ink); overflow: hidden; font-family: var(--sans); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+    canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; }
+    button { font: inherit; color: inherit; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .topbar {
+      position: fixed; z-index: 3; top: max(20px, env(safe-area-inset-top, 0px)); left: var(--gutter);
+      right: max(20px, env(safe-area-inset-right, 0px)); display: flex; justify-content: space-between; align-items: baseline; gap: 16px; pointer-events: none;
+    }
+    .brand { font-size: 13px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; }
+    .tagline { font-size: 11px; letter-spacing: .06em; color: var(--mute); font-variant-numeric: tabular-nums; }
+
+    /* The label */
+    .panel {
+      position: fixed; z-index: 3; right: max(28px, env(safe-area-inset-right, 0px)); bottom: 92px; width: min(250px, calc(100vw - 56px));
+      box-sizing: border-box; max-height: calc(100vh - 150px); overflow-y: auto; padding: 17px 18px 16px;
+      background: var(--paper); border: 1px solid var(--rule); border-radius: 22px;
+      display: flex; flex-direction: column; gap: 8px;
+      opacity: 0; transform: translateY(8px); pointer-events: none; visibility: hidden;
+      transition: opacity .4s var(--ease), transform .4s var(--ease), visibility 0s .4s;
+    }
+    .panel.is-open { opacity: 1; transform: none; pointer-events: auto; visibility: visible; transition-delay: 0s; }
+    .eyebrow { margin: 0; padding-right: 28px; font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--mute); font-variant-numeric: tabular-nums; }
+    .eyebrow #plate-count { color: var(--accent); }
+    .eyebrow #plate-series::before { content: "\00a0\00b7\00a0"; }
+    .panel h2 { margin: 0; font-size: 19px; font-weight: 700; line-height: 1.08; letter-spacing: -.025em; text-wrap: balance; }
+    .after { margin: 0; font-size: 12px; font-weight: 500; line-height: 1.4; color: var(--mute); }
+    .note { margin: 0; font-size: 12.5px; line-height: 1.5; color: #3a3935; }
+    .home { margin: 0; display: grid; gap: 2px; font-size: 12px; line-height: 1.5; color: #3a3935; }
+    .home span:first-child { font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+    .more { display: none; align-self: flex-start; padding: 0; border: 0; background: none; font-size: 12px; font-weight: 500; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; color: var(--ink); }
+    .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 2px 0 0; padding-top: 12px; border-top: 1px solid var(--rule); }
+    .meta div { min-width: 0; }
+    .meta dt { margin-bottom: 3px; font-size: 10px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--mute); }
+    .meta dd { margin: 0; font-size: 12px; line-height: 1.4; }
+    .cta {
+      margin-top: 2px; padding: 10px 16px; border: 1px solid var(--ink); border-radius: 999px; background: var(--ink); color: var(--paper);
+      font-size: 12px; font-weight: 500; letter-spacing: .02em; text-align: left; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center; transition: background .2s, border-color .2s;
+    }
+    .cta::after { content: "\2192"; }
+    .cta:hover { background: var(--accent); border-color: var(--accent); }
+    .keys { margin: 0; font-size: 11px; color: var(--mute); }
+    .panel-close { position: absolute; top: 14px; right: 14px; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%; background: none; font-size: 20px; line-height: 1; cursor: pointer; color: var(--mute); transition: color .2s; }
+    .panel-close:hover { color: var(--accent); background: rgba(19, 19, 19, .06); }
+
+    /* The bar: browse on the left, view controls on the right */
+    .dock {
+      position: fixed; z-index: 4; left: 50%; bottom: max(24px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+      display: flex; align-items: center; gap: 2px; padding: 5px; background: var(--paper);
+      border: 1px solid var(--rule); border-radius: 999px;
+    }
+    .dock-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; min-width: 36px; padding: 0 14px;
+      border: 0; border-radius: 999px; background: transparent; cursor: pointer; font-size: 12px; font-weight: 500; letter-spacing: .04em; white-space: nowrap;
+      transition: background .2s, color .2s;
+    }
+    .dock-btn:hover { color: var(--accent); }
+    .dock-btn[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+    .dock-btn:disabled { opacity: .45; cursor: default; }
+    .dock-btn svg { display: none; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+    .dock-btn.arrow { width: 36px; padding: 0; font-size: 16px; font-weight: 400; }
+    .dock-count { min-width: 58px; text-align: center; font-size: 12px; letter-spacing: .06em; color: var(--mute); font-variant-numeric: tabular-nums; }
+    .dock-sep { width: 1px; height: 18px; margin: 0 6px; background: var(--rule); }
+    #tour-toggle .ico-pause, #tour-toggle[aria-pressed="true"] .ico-play { display: none !important; }
+
+    .toast {
+      position: fixed; z-index: 5; left: 50%; bottom: 84px; transform: translate(-50%, 8px); max-width: min(420px, calc(100vw - 32px));
+      padding: 11px 18px; border: 1px solid var(--rule); border-radius: 16px; background: var(--paper); font-size: 12px; line-height: 1.45;
+      opacity: 0; pointer-events: none; transition: opacity .3s var(--ease), transform .3s var(--ease);
+    }
+    .toast.is-shown { opacity: 1; transform: translate(-50%, 0); }
+
+    .loading {
+      position: fixed; inset: 0; z-index: 6; display: grid; place-content: center; justify-items: center; gap: 18px;
+      background: var(--ground); font-size: 11px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase;
+      transition: opacity .6s var(--ease), visibility 0s .6s;
+    }
+    .loading.is-done { opacity: 0; visibility: hidden; pointer-events: none; }
+    .loading-track { width: 120px; height: 2px; background: var(--rule); overflow: hidden; border-radius: 2px; }
+    .loading-bar { width: 100%; height: 100%; background: var(--ink); transform: scaleX(.08); transform-origin: left; transition: transform .4s var(--ease); }
+
+    /* Phones: a short sheet above a full-width bar. Icons replace the words in the bar. */
+    @media (max-width: 720px) {
+      .tagline { display: none; }
+      .panel { border-radius: 20px; }
+      .dock { left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); transform: none; justify-content: space-between; bottom: max(12px, env(safe-area-inset-bottom, 0px)); padding: 3px; }
+      .dock-btn .lbl, .dock-btn .state, .dock-sep { display: none; }
+      .dock-btn svg { display: block; }
+      .dock-btn { padding: 0; width: 46px; height: 46px; }
+      .dock-btn.arrow { width: 46px; }
+      .dock-count { flex: 1; min-width: 0; }
+      .panel { left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); bottom: calc(max(12px, env(safe-area-inset-bottom, 0px)) + 58px); width: auto; max-height: 40vh; padding: 18px 18px 16px; gap: 9px; }
+      .panel h2 { font-size: 20px; }
+      .note { font-size: 14px; line-height: 1.5; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+      .panel.is-expanded .note { display: block; }
+      .more { display: inline-block; }
+      .meta { display: none; }
+      .panel.is-expanded .meta { display: grid; }
+      .home { display: none; }
+      .panel.is-expanded .home { display: grid; }
+      .keys { display: none; }
+      .toast { bottom: 80px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .panel, .toast, .cta, .loading, .loading-bar { transition: none; }
+    }
+  </style>
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three/three.module.js", "three/addons/": "./vendor/three/examples/jsm/" } }
+  </script>
+</head>
+<body>
+  <canvas id="scene" aria-label="3D gallery with eleven motion paintings and six sculptures"></canvas>
+  <div id="loading" class="loading" role="status">
+    <span>Afterimage Hall</span>
+    <span class="loading-track"><span id="loading-bar" class="loading-bar"></span></span>
+  </div>
+  <header class="topbar">
+    <span class="brand">Afterimage Hall</span>
+    <span class="tagline">11 paintings, 6 sculptures</span>
+  </header>
+  <aside id="plate-panel" class="panel" role="dialog" aria-live="polite" aria-labelledby="plate-title" aria-hidden="true">
+    <button type="button" id="plate-close" class="panel-close" aria-label="Close details">&times;</button>
+    <p class="eyebrow"><span id="plate-count"></span><span id="plate-series"></span></p>
+    <h2 id="plate-title"></h2>
+    <p class="after">After <span id="plate-after"></span></p>
+    <p id="plate-note" class="note"></p>
+    <p class="home"><span>At home</span><span id="plate-home"></span></p>
+    <button type="button" id="plate-more" class="more">More</button>
+    <dl class="meta">
+      <div><dt>Medium</dt><dd id="plate-medium"></dd></div>
+      <div><dt>Size</dt><dd id="plate-year"></dd></div>
+    </dl>
+    <button type="button" id="enquire" class="cta">Enquire about this work</button>
+    <p class="keys">&larr; &rarr; to browse</p>
+  </aside>
+  <aside id="intro-panel" class="panel intro" role="dialog" aria-labelledby="intro-title" aria-hidden="true">
+    <button type="button" id="intro-close" class="panel-close" aria-label="Close introduction">&times;</button>
+    <p class="eyebrow">Afterimage Hall</p>
+    <h2 id="intro-title">What the eye keeps after the picture is gone</h2>
+    <p class="note">Look at something bright, then look away: the colour you still see is an afterimage. Eleven paintings that never stand still and six sculptures that turn, drift or catch the light, hung in one long room.</p>
+    <button type="button" id="intro-start" class="cta">Begin the walk</button>
+    <p class="keys">&larr; &rarr; to move between works</p>
+  </aside>
+  <nav class="dock" aria-label="Gallery controls">
+    <button type="button" id="prev-work" class="dock-btn arrow" aria-label="Previous work">&larr;</button>
+    <span id="dock-count" class="dock-count">Overview</span>
+    <button type="button" id="next-work" class="dock-btn arrow" aria-label="Next work">&rarr;</button>
+    <span class="dock-sep"></span>
+    <button type="button" id="overview" class="dock-btn" aria-label="Back to the overview"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1"/></svg><span class="lbl">Overview</span></button>
+    <button type="button" id="tour-toggle" class="dock-btn" aria-pressed="false" aria-label="Play or pause the tour"><svg class="ico-play" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg><svg class="ico-pause" viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></svg><span class="lbl">Play tour</span></button>
+    <button type="button" id="music-toggle" class="dock-btn" aria-pressed="false" aria-label="Turn music on or off"><svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg><span class="lbl">Music<span class="state"> off</span></span></button>
+  </nav>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
