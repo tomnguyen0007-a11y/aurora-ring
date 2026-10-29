@@ -328,12 +328,18 @@ def bake_group(group):
     unwrap(group, objs)
     prepared.add(group)
     (cw, ch), (lw, lh) = ATLAS[group]
-    albedo = bake(objs, (cw, ch), 'albedo', f'{group}_albedo')
-    log(group, 'albedo done')
-    light = bake(objs, (lw, lh), 'light', f'{group}_light')
-    log(group, 'light done')
-    emit = bake(objs, (lw, lh), 'emit', f'{group}_emit')
-        light = blur(light, sigma)
+    raw = os.path.join(WORK, f'{group}.npz')
+    if os.environ.get('COMPOSE_ONLY') and os.path.exists(raw):
+        z = np.load(raw)
+        albedo, light, emit = z['albedo'], z['light'], z['emit']
+    else:
+        albedo = bake(objs, (cw, ch), 'albedo', f'{group}_albedo')
+        log(group, 'albedo done')
+        light = bake(objs, (lw, lh), 'light', f'{group}_light')
+        log(group, 'light done')
+        emit = bake(objs, (lw, lh), 'emit', f'{group}_emit')
+        np.savez(raw, albedo=albedo, light=light, emit=emit)
+    light = smooth_light(light, 2.0 if group != 'exterior' else 1.0)
     radiance = albedo * resize(light, (cw, ch)) + resize(emit, (cw, ch))
     size = to_jpeg(radiance, os.path.join(OUT, f'{group}.jpg'))
     log(group, f'{cw}x{ch}', f'{size / 1024:.0f} KB')
