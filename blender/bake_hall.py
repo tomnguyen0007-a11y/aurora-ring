@@ -39,7 +39,7 @@ PREVIEW = bool(os.environ.get('BAKE_PREVIEW'))
 ONLY = set(filter(None, os.environ.get('ONLY', '').split(',')))
 SAMPLES = int(os.environ.get('BAKE_SAMPLES', 24 if PREVIEW else 160))
 DIV = int(os.environ.get('BAKE_DIV', 4 if PREVIEW else 1))     # atlas size divisor for quick tests
-EXPOSURE_EV = 0.8          # the same as build_hall.py's render
+EXPOSURE_EV = 1.0          # the same as build_hall.py's render
 WINDOW_TINT = 0.18         # how much daylight the window glass lets through (see WINDOW_GLASS)
 JPEG_QUALITY = 86
 
@@ -252,13 +252,19 @@ def blur(a, sigma):
 def smooth_light(light, sigma):
     """Two-scale clean-up of bake noise. Where the light is smooth (ceilings, beams, wall
     between pools) a wide blur is used; where it has an edge (a spot's pool, a shadow) the
-    narrow blur is kept, so pools stay crisp."""
-    small = blur(light, sigma)
-    big = blur(light, sigma * 4.0)
+    narrow blur is kept, so pools stay crisp. Pixels nothing was baked into are left out of
+    the average, so the dark of empty atlas space never bleeds into thin things like a mat."""
+    mask = (light.sum(axis=-1, keepdims=True) > 0).astype(np.float32)
+
+    def masked_blur(s):
+        return blur(light * mask, s) / np.maximum(blur(mask, s), 1e-4)
+
+    small = masked_blur(sigma)
+    big = masked_blur(sigma * 6.0)
     lum_s = small.mean(axis=-1, keepdims=True)
     lum_b = big.mean(axis=-1, keepdims=True)
-    w = np.exp(-(((lum_s - lum_b) / (0.12 * lum_b + 0.02)) ** 2))
-    return small * (1 - w) + big * w
+    w = np.exp(-(((lum_s - lum_b) / (0.3 * lum_b + 0.03)) ** 2))
+    return (small * (1 - w) + big * w) * mask
 
 
 def resize(a, size):
@@ -300,7 +306,7 @@ def srgb_encode(c):
 
 
 # A slight cooling of the whole picture, so the warm floor does not tint the walls and ceiling.
-GRADE = np.array([float(x) for x in os.environ.get('GRADE', '0.94,0.99,1.08').split(',')], dtype=np.float32)
+GRADE = np.array([float(x) for x in os.environ.get('GRADE', '0.92,0.99,1.10').split(',')], dtype=np.float32)
 
 
 def to_jpeg(linear_rgb, path, flip=True, dither=True, grade=True):

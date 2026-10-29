@@ -32,7 +32,7 @@ export const HALL = {
   },
   "sky": "sky.jpg",
   "env": "env.hdr",
-  "exposureEV": 0.7,
+  "exposureEV": 1.0,
   "room": {
     "width": 22.0,
     "depth": 13.0,

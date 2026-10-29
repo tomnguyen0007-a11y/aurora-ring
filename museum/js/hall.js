@@ -191,7 +191,7 @@ export async function loadHall(renderer, scene, { reflections = true, onProgress
 // The glass in front of a work: it adds only the room's reflection (a black dielectric,
 // blended additively), clear head-on and mirror-like at a grazing angle.
 const glassMaterial = new THREE.MeshStandardMaterial({
-  color: 0x000000, roughness: 0.03, metalness: 0, envMapIntensity: 1.0,
+  color: 0x000000, roughness: 0.03, metalness: 0, envMapIntensity: 0.3,
   transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
 });
 
