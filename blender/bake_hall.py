@@ -212,6 +212,7 @@ def point_materials_at(objs, image):
 
 def bake(objs, size, kind, name):
     img = make_image(name, size)
+    scene.cycles.samples = 4 if kind == 'albedo' else SAMPLES    # colour has no noise to average away
     point_materials_at(objs, img)
     select_only(objs)
     margin = max(4, size[0] // 256)
@@ -300,6 +301,7 @@ def to_jpeg(linear_rgb, path, flip=True, dither=True):
 
 
 info = {'atlases': {}}
+prepared = set()     # groups already pruned and unwrapped in this run
 
 
 def bake_group(group):
@@ -312,6 +314,7 @@ def bake_group(group):
         prune_hidden(objs)
         objs = [o for o in objs if len(o.data.polygons)]
     unwrap(group, objs)
+    prepared.add(group)
     (cw, ch), (lw, lh) = ATLAS[group]
     albedo = bake(objs, (cw, ch), 'albedo', f'{group}_albedo')
     log(group, 'albedo done')
@@ -334,6 +337,11 @@ def export_geometry():
         objs = group_objects(group)
         if not objs:
             continue
+        if group not in prepared:
+            if group != 'floor':
+                prune_hidden(objs)
+                objs = [o for o in objs if len(o.data.polygons)]
+            unwrap(group, objs)
         select_only(objs)
         for o in objs:
             if o.parent:
