@@ -524,8 +524,8 @@ def spot(name, loc, target, power=2600, size=34, blend=0.9, hang_to=None):
     loc, target = Vector(loc), Vector(target)
     rot = (target - loc).to_track_quat('-Z', 'Y').to_euler()
     data = bpy.data.lights.new(name, 'SPOT')
-    data.energy = power
-    data.color = (1.0, 0.82, 0.6)          # about 3300 K, warm-neutral
+    data.energy = power * 1.2
+    data.color = (1.0, 0.88, 0.74)         # about 3800 K, warm-neutral
     data.spot_size = math.radians(size)
     data.spot_blend = blend
     data.shadow_soft_size = 0.05
@@ -983,7 +983,7 @@ if VIEW == 'pano':
 
 scene.render.engine = 'CYCLES'
 scene.cycles.device = 'CPU'
-scene.cycles.samples = 24 if PREVIEW else 128
+scene.cycles.samples = 64 if os.environ.get('HIRES') else (24 if PREVIEW else 128)
 scene.cycles.use_denoising = True
 scene.cycles.denoiser = 'OPENIMAGEDENOISE'
 scene.cycles.max_bounces = 8 if PREVIEW else 12
@@ -994,8 +994,8 @@ scene.cycles.sample_clamp_indirect = 8.0
 if VIEW == 'pano':
     scene.render.resolution_x, scene.render.resolution_y = (1024, 512) if PREVIEW else (2048, 1024)
 else:
-    scene.render.resolution_x = 960 if PREVIEW else 1920
-    scene.render.resolution_y = 600 if PREVIEW else 1200
+    scene.render.resolution_x = 1600 if os.environ.get('HIRES') else (960 if PREVIEW else 1920)
+    scene.render.resolution_y = 1000 if os.environ.get('HIRES') else (600 if PREVIEW else 1200)
 scene.render.resolution_percentage = 100
 scene.view_settings.view_transform = 'Khronos PBR Neutral'
 scene.view_settings.look = 'None'
