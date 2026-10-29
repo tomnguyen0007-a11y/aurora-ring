@@ -39,7 +39,7 @@ PREVIEW = bool(os.environ.get('BAKE_PREVIEW'))
 ONLY = set(filter(None, os.environ.get('ONLY', '').split(',')))
 SAMPLES = int(os.environ.get('BAKE_SAMPLES', 24 if PREVIEW else 160))
 DIV = int(os.environ.get('BAKE_DIV', 4 if PREVIEW else 1))     # atlas size divisor for quick tests
-EXPOSURE_EV = 0.5          # the same as build_hall.py's render
+EXPOSURE_EV = 0.75         # the same as build_hall.py's render
 WINDOW_TINT = 0.18         # how much daylight the window glass lets through (see WINDOW_GLASS)
 JPEG_QUALITY = 86
 

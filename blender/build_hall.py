@@ -264,7 +264,7 @@ def emission(name, color, strength):
 
 
 LENS = emission('Lens', (1.0, 0.86, 0.66, 1.0), 25.0)
-PANEL = emission('DaylightPanel', (0.95, 0.97, 1.0, 1.0), 1.4)
+PANEL = emission('DaylightPanel', (0.95, 0.97, 1.0, 1.0), 3.2)
 
 
 def glass(name, ior=1.45, tint=(1.0, 1.0, 1.0)):
@@ -439,7 +439,7 @@ for x in BEAMS_X:
     make_box(f'S_BeamY{x}', (0.32, D, 0.45), (x, 0, H - 0.225), MAT['ceiling'], bevel=0.004, group='shell')
 for y in BEAMS_Y:
     make_box(f'S_BeamX{y}', (W, 0.3, 0.38), (0, y, H - 0.19), MAT['ceiling'], bevel=0.004, group='shell')
-for x, y, pw, pd in ((-5.5, -2.15, 3.2, 2.5), (5.5, 2.15, 3.2, 2.5)):
+for x, y, pw, pd in ((-5.5, -2.15, 3.6, 2.7), (5.5, 2.15, 3.6, 2.7)):
     make_box(f'S_Panel{x}_{y}', (pw, pd, 0.02), (x, y, H - 0.012), PANEL, group='shell')
 
 # Window: black steel mullions set in the reveal, with the glass inside them.
@@ -999,7 +999,7 @@ else:
 scene.render.resolution_percentage = 100
 scene.view_settings.view_transform = 'Khronos PBR Neutral'
 scene.view_settings.look = 'None'
-scene.view_settings.exposure = 0.5
+scene.view_settings.exposure = 0.75
 scene.render.image_settings.file_format = 'PNG'
 scene.render.filepath = os.path.join(OUT, f'preview_{VIEW}.png' if PREVIEW else f'hero_{VIEW}.png')
 
