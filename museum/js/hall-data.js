@@ -18,8 +18,8 @@ export const HALL = {
     "props": {
       "file": "props.jpg",
       "size": [
-        2048,
-        2048
+        4096,
+        4096
       ]
     },
     "exterior": {

@@ -58,23 +58,23 @@ check('starts on the overview', !(await panelOpen()));
 // Arrow keys step between works.
 await page.keyboard.press('ArrowRight');
 const first = await title();
-check('right arrow opens the first work', (await panelOpen()) && first === 'Drift I', first);
+check('right arrow opens the first work', (await panelOpen()) && first === 'Lattice IV', first);
 await page.keyboard.press('ArrowRight');
 const second = await title();
-check('right arrow moves to the next work', second === 'Floating Planes', second);
+check('right arrow moves to the next work', second === 'Primary Divisions', second);
 await page.keyboard.press('ArrowLeft');
-check('left arrow moves back', (await title()) === 'Drift I');
+check('left arrow moves back', (await title()) === 'Lattice IV');
 await page.screenshot({ path: path.join(outDir, 'live-focus.png') });
 
 // On-screen buttons do the same.
 await page.click('#next-work');
-check('next button works', (await title()) === 'Floating Planes');
+check('next button works', (await title()) === 'Primary Divisions');
 await page.click('#prev-work');
-check('previous button works', (await title()) === 'Drift I');
+check('previous button works', (await title()) === 'Lattice IV');
 
 // Wrapping: left arrow from the first work reaches the last.
 await page.keyboard.press('ArrowLeft');
-check('left arrow wraps to the last work', (await title()) === 'Amphora', await title());
+check('left arrow wraps to the last work', (await title()) === 'Lumen Column', await title());
 
 // Escape returns to the overview.
 await page.keyboard.press('Escape');

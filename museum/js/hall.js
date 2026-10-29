@@ -40,6 +40,7 @@ const FLOOR_FRAGMENT = /* glsl */ `
   varying vec3 vWorld;
   void main() {
     vec3 base = texture2D(tBaked, vBaked).rgb;
+    base = mix(vec3(dot(base, vec3(0.299, 0.587, 0.114))), base, 0.78) * 0.94;   // paler, like the reference oak
     vec3 toEye = cameraPosition - vWorld;
     float dist = length(toEye);
     float cosT = clamp(toEye.y / dist, 0.0, 1.0);
@@ -135,7 +136,7 @@ export async function loadHall(renderer, scene, { reflections = true, onProgress
         name: 'SatinFloor',
         uniforms: {
           color: { value: null }, tDiffuse: { value: null }, textureMatrix: { value: null },
-          tBaked: { value: null }, uShine: { value: 0.3 }, uBlur: { value: 0.0026 },
+          tBaked: { value: null }, uShine: { value: 0.22 }, uBlur: { value: 0.0026 },
         },
         vertexShader: FLOOR_VERTEX,
         fragmentShader: FLOOR_FRAGMENT,
