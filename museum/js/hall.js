@@ -13,6 +13,19 @@ import { HALL } from './hall-data.js';
 // In the single-file build every asset is inlined as a data URI under window.__ASSETS.
 const assetUrl = (name) => (window.__ASSETS && window.__ASSETS[name]) || `./assets/hall/${name}`;
 
+// Binary files are decoded straight from the inlined data URI. A sandboxed page (an artifact
+// viewer, say) may forbid fetch() on data: URLs, so the single-file build never uses it.
+async function assetBuffer(name) {
+  const inline = window.__ASSETS && window.__ASSETS[name];
+  if (inline) {
+    const bytes = Uint8Array.from(atob(inline.slice(inline.indexOf(',') + 1)), (c) => c.charCodeAt(0));
+    return bytes.buffer;
+  }
+  const res = await fetch(assetUrl(name));
+  if (!res.ok) throw new Error(`${name}: ${res.status}`);
+  return res.arrayBuffer();
+}
+
 const FLOOR_VERTEX = /* glsl */ `
   uniform mat4 textureMatrix;
   varying vec4 vReflect;
@@ -79,13 +92,23 @@ export async function loadHall(renderer, scene, { reflections = true, onProgress
   const tick = (p) => p.then((v) => { onProgress(++done / total); return v; });
 
   const [gltf, shellTex, propsTex, exteriorTex, floorTex, skyTex, envHdr] = await Promise.all([
-    tick(new GLTFLoader().loadAsync(assetUrl('hall.glb'))),
+    tick(assetBuffer('hall.glb').then((buf) => new GLTFLoader().parseAsync(buf, ''))),
     tick(loadTexture(HALL.atlases.shell.file)),
     tick(loadTexture(HALL.atlases.props.file)),
     tick(loadTexture(HALL.atlases.exterior.file)),
     tick(loadTexture(HALL.atlases.floor.file)),
     tick(loadTexture(HALL.sky, { flipY: true })),
-    tick(new RGBELoader().loadAsync(assetUrl(HALL.env))),
+    tick(assetBuffer(HALL.env).then((buf) => {
+      const data = new RGBELoader().parse(buf);
+      const tex = new THREE.DataTexture(data.data, data.width, data.height, THREE.RGBAFormat, data.type);
+      tex.colorSpace = THREE.LinearSRGBColorSpace;
+      tex.minFilter = THREE.LinearFilter;
+      tex.magFilter = THREE.LinearFilter;
+      tex.generateMipmaps = false;
+      tex.flipY = true;
+      tex.needsUpdate = true;
+      return tex;
+    })),
   ]);
   [shellTex, propsTex, exteriorTex, floorTex].forEach((t) => { t.anisotropy = maxAniso; });
 

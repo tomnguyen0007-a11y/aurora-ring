@@ -69,6 +69,7 @@ const hallReady = loadHall(renderer, scene, { reflections: quality !== 'low', on
   })
   .catch((err) => {
     console.error('The hall could not be loaded', err);
+    window.__hallError = String(err && err.message || err);
     if (loading) loading.textContent = 'The hall could not be loaded. Please reload the page.';
   });
 
