@@ -39,7 +39,7 @@ PREVIEW = bool(os.environ.get('BAKE_PREVIEW'))
 ONLY = set(filter(None, os.environ.get('ONLY', '').split(',')))
 SAMPLES = int(os.environ.get('BAKE_SAMPLES', 24 if PREVIEW else 160))
 DIV = int(os.environ.get('BAKE_DIV', 4 if PREVIEW else 1))     # atlas size divisor for quick tests
-EXPOSURE_EV = 0.75         # the same as build_hall.py's render
+EXPOSURE_EV = 0.8          # the same as build_hall.py's render
 WINDOW_TINT = 0.18         # how much daylight the window glass lets through (see WINDOW_GLASS)
 JPEG_QUALITY = 86
 
@@ -299,9 +299,13 @@ def srgb_encode(c):
     return np.where(c <= 0.0031308, c * 12.92, 1.055 * np.power(c, 1 / 2.4) - 0.055)
 
 
-def to_jpeg(linear_rgb, path, flip=True, dither=True):
+# A slight cooling of the whole picture, so the warm floor does not tint the walls and ceiling.
+GRADE = np.array([float(x) for x in os.environ.get('GRADE', '0.94,0.99,1.08').split(',')], dtype=np.float32)
+
+
+def to_jpeg(linear_rgb, path, flip=True, dither=True, grade=True):
     """Linear scene radiance to a display-referred JPEG, with a touch of dither against banding."""
-    c = srgb_encode(neutral_tonemap(linear_rgb * (2.0 ** EXPOSURE_EV)))
+    c = srgb_encode(neutral_tonemap(linear_rgb * (GRADE if grade else 1.0) * (2.0 ** EXPOSURE_EV)))
     if dither:
         rng = np.random.default_rng(5)
         c = c + (rng.random(c.shape[:2] + (1,), dtype=np.float32) - rng.random(c.shape[:2] + (1,), dtype=np.float32)) / 255.0
@@ -434,7 +438,7 @@ def write_sky():
     arr = render_pano(os.path.join(WORK, 'sky.exr'), (11.0, 0.0, 1.7), (w, h),
                       lambda o: o.get('bake') != 'pano', 24 if PREVIEW else 96)
     arr = roll_to_three(arr) * WINDOW_TINT
-    size = to_jpeg(arr, os.path.join(OUT, 'sky.jpg'), dither=True)
+    size = to_jpeg(arr, os.path.join(OUT, 'sky.jpg'), dither=True, grade=False)
     log('sky.jpg', f'{size / 1024:.0f} KB')
     info['sky'] = 'sky.jpg'
 

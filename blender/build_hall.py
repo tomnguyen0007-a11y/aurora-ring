@@ -264,7 +264,7 @@ def emission(name, color, strength):
 
 
 LENS = emission('Lens', (1.0, 0.86, 0.66, 1.0), 25.0)
-PANEL = emission('DaylightPanel', (0.95, 0.97, 1.0, 1.0), 3.2)
+PANEL = emission('DaylightPanel', (0.95, 0.97, 1.0, 1.0), 4.6)
 
 
 def glass(name, ior=1.45, tint=(1.0, 1.0, 1.0)):
@@ -999,7 +999,7 @@ else:
 scene.render.resolution_percentage = 100
 scene.view_settings.view_transform = 'Khronos PBR Neutral'
 scene.view_settings.look = 'None'
-scene.view_settings.exposure = 0.75
+scene.view_settings.exposure = 0.8
 scene.render.image_settings.file_format = 'PNG'
 scene.render.filepath = os.path.join(OUT, f'preview_{VIEW}.png' if PREVIEW else f'hero_{VIEW}.png')
 
