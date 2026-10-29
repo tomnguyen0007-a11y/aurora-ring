@@ -135,7 +135,7 @@ export async function loadHall(renderer, scene, { reflections = true, onProgress
         name: 'SatinFloor',
         uniforms: {
           color: { value: null }, tDiffuse: { value: null }, textureMatrix: { value: null },
-          tBaked: { value: null }, uShine: { value: 0.5 }, uBlur: { value: 0.0022 },
+          tBaked: { value: null }, uShine: { value: 0.3 }, uBlur: { value: 0.0026 },
         },
         vertexShader: FLOOR_VERTEX,
         fragmentShader: FLOOR_FRAGMENT,

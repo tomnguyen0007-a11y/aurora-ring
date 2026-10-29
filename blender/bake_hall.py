@@ -47,7 +47,7 @@ JPEG_QUALITY = 86
 ATLAS = {
     'floor': ((4096, 2480), (1024, 620)),
     'shell': ((4096, 4096), (1024, 1024)),
-    'props': ((2048, 2048), (512, 512)),
+    'props': ((4096, 4096), (512, 512)),
     'exterior': ((1024, 1024), (256, 256)),
 }
 if DIV > 1:
@@ -249,6 +249,18 @@ def blur(a, sigma):
     return out
 
 
+def smooth_light(light, sigma):
+    """Two-scale clean-up of bake noise. Where the light is smooth (ceilings, beams, wall
+    between pools) a wide blur is used; where it has an edge (a spot's pool, a shadow) the
+    narrow blur is kept, so pools stay crisp."""
+    small = blur(light, sigma)
+    big = blur(light, sigma * 4.0)
+    lum_s = small.mean(axis=-1, keepdims=True)
+    lum_b = big.mean(axis=-1, keepdims=True)
+    w = np.exp(-(((lum_s - lum_b) / (0.12 * lum_b + 0.02)) ** 2))
+    return small * (1 - w) + big * w
+
+
 def resize(a, size):
     """Bilinear upsample of a float RGB array to (w, h)."""
     h0, w0 = a.shape[:2]
@@ -321,8 +333,7 @@ def bake_group(group):
     light = bake(objs, (lw, lh), 'light', f'{group}_light')
     log(group, 'light done')
     emit = bake(objs, (lw, lh), 'emit', f'{group}_emit')
-    sigma = 2.2 if group != 'exterior' else 1.0
-    light = blur(light, sigma)
+        light = blur(light, sigma)
     radiance = albedo * resize(light, (cw, ch)) + resize(emit, (cw, ch))
     size = to_jpeg(radiance, os.path.join(OUT, f'{group}.jpg'))
     log(group, f'{cw}x{ch}', f'{size / 1024:.0f} KB')

@@ -3,29 +3,29 @@
   "floor": {
    "file": "floor.jpg",
    "size": [
-    2048,
-    1240
+    4096,
+    2480
    ]
   },
   "shell": {
    "file": "shell.jpg",
    "size": [
-    2048,
-    2048
+    4096,
+    4096
    ]
   },
   "props": {
    "file": "props.jpg",
    "size": [
-    1024,
-    1024
+    2048,
+    2048
    ]
   },
   "exterior": {
    "file": "exterior.jpg",
    "size": [
-    512,
-    512
+    1024,
+    1024
    ]
   }
  },

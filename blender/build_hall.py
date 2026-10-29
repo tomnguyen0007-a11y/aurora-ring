@@ -246,7 +246,7 @@ MAT = {
     'white': simple('White', '#f1efe9', 0.8),
     'grass': textured('Grass', '#7a8156', 0.95, 0.02, 0.5, noise_scale=25.0),
     'leaf': textured('Leaf', '#6b7a5e', 0.95, 0.02, 0.5, variation=0.8, noise_scale=18.0),
-    'hill': simple('Hill', '#a9b8bd', 1.0),
+    'hill': simple('Hill', '#8e9f9a', 1.0),
     'trunk': simple('Trunk', '#3e2f22', 0.9),
 }
 
@@ -485,15 +485,6 @@ def blob(name, centre, radius, squash, seed, subdiv=4):
     return link(o, 'pano')
 
 
-rng_t = random.Random(21)
-# One long, soft treeline far across the lawn: many overlapping crowns, muted by distance.
-for i in range(70):
-    tx = 150 + rng_t.random() * 60
-    ty = -260 + i * 7.5 + rng_t.random() * 5
-    s_ = 9 + rng_t.random() * 7
-    for k in range(3):
-        blob(f'X_Canopy{i}_{k}', (tx + rng_t.random() * 8, ty + rng_t.random() * 8, LAWN_Z + s_ * (0.9 + 0.5 * rng_t.random())),
-             s_ * (0.7 + 0.3 * rng_t.random()), 0.8, i * 3 + k, subdiv=3)
 for i, (hx, hy, hs) in enumerate([(420, -220, 60), (470, -40, 80), (430, 190, 58), (560, 60, 95), (500, -130, 74), (380, 20, 40)]):
     bm = bmesh.new()
     bmesh.ops.create_icosphere(bm, subdivisions=4, radius=1.0)
