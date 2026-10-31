@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-10-31",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,65 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-10-31",
+      "account": {
+        "nav_eur_base": 915.23,
+        "nav_usd_est": 1024,
+        "cash_eur": 2.78,
+        "leverage": "1.0",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 9.6692,
+          "prior_close": 10.155,
+          "open": 9.63,
+          "high": 9.79,
+          "low": 9.3,
+          "gap_pct": -4.78,
+          "nav_pct": 65.15,
+          "unrealized_pnl": -321.52,
+          "daily_pnl": -33.52,
+          "since_last_run_pct": -24.22,
+          "catalyst": {
+            "status": "80th event reached Oct 28 2026 per company PR; database lock/unblinding underway; topline guided this quarter (by Dec 31). Success bar cited: median OS 12.6 vs 8.0 mo",
+            "next_check": "topline PR / 8-K"
+          },
+          "strategy": {
+            "setup": "hold - binary, no trim/add executed; pre-read idea only",
+            "trim_shares_to_35pct": 31.93
+          }
+        },
+        {
+          "ticker": "SPCX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 136.028,
+          "prior_close": 143.89,
+          "open": 137.89,
+          "high": 140.2,
+          "low": 134.5,
+          "gap_pct": -5.46,
+          "nav_pct": 34.54,
+          "unrealized_pnl": -91.25,
+          "daily_pnl": -20.44,
+          "since_last_run_pct": -6.78,
+          "catalyst": {
+            "status": "Conflicting sources on Q3 earnings/lockup timing (Oct 22 vs early Nov); unverified. Remaining 180-day lockup expires Dec 8 2026",
+            "next_check": "confirm earnings date"
+          }
+        }
+      ],
+      "flags": [
+        "SLS 65% NAV vs 35% threshold; 80th event reached, readout imminent",
+        "SPCX 34.5% NAV, just under threshold",
+        "Data gaps: no futures data found; SLS prior_close absent in snapshot (derived from change); SEC EDGAR/CING not searched"
       ]
     }
   ]
