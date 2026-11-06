@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-11-06",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -66,6 +66,65 @@
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
       ]
+    },
+    {
+      "timestamp": "2026-11-06",
+      "account": {
+        "nav_eur_base": 1084.14,
+        "nav_usd_approx": 1212.6,
+        "cash_eur": 301.78,
+        "gross_position_value_eur": 782.36,
+        "unrealized_pnl_eur": -499.18,
+        "leverage": "0.72",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "shares": 69,
+          "avg_price": 14.32894058,
+          "mark_price": 7.96,
+          "prior_close": 7.88,
+          "gap_pct": 1.02,
+          "market_value": 549.24,
+          "nav_pct": 45.29,
+          "unrealized_pnl": -439.457,
+          "since_last_run_pct": -37.62,
+          "catalyst": {
+            "name": "REGAL Phase 3 (GPS, AML)",
+            "status": "80th event reached Oct 28 2026 (stock -15% to 10.38 that day); database lock/unblind underway; topline guided Q4 2026. No readout found yet.",
+            "next_check": "topline press release / 8-K"
+          },
+          "risk_flag": "OVER_CONCENTRATED 45.3% vs 35%; trim ~15.7 sh to reach 35%",
+          "setup": "hold-into-binary or trim to cap; thin premarket liquidity (bid 7.84/ask 8.00)"
+        },
+        {
+          "ticker": "SPCX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 126.36,
+          "prior_close": 123.62,
+          "gap_pct": 2.22,
+          "market_value": 328.536,
+          "nav_pct": 27.09,
+          "unrealized_pnl": -116.387,
+          "since_last_run_pct": -13.4,
+          "catalyst": {
+            "name": "Lockups: Q3-earnings-linked ~28% tranche (late Oct/Nov est.), final expiry Dec 8-9",
+            "status": "Dates unconfirmed; sources conflict; Q3 earnings outcome not found",
+            "next_check": "424B4 / Q3 earnings date"
+          },
+          "risk_flag": "WATCH - within cap",
+          "setup": "hold; supply overhang"
+        }
+      ],
+      "flags": [
+        "Research script needs stdin JSON; ran with IBKR data. No CING position held.",
+        "SLS 45.3% NAV >35% cap; down 37.6% since last run.",
+        "Cash now EUR 301.78 (~25% NAV) - undeployed since last run.",
+        "Premarket futures data not found via search; overnight SEC filing search not completed (no sec.gov hits)."
+      ],
+      "notes": "Read-only. No trades placed."
     }
   ]
 }
