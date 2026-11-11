@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-11-11",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,62 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-11-11",
+      "account": {
+        "nav_eur_base": 1158.54,
+        "nav_usd_est": 1319.1,
+        "cash_eur": 59.18,
+        "gross_position_value_eur": 1099.36,
+        "leverage": "0.95",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "shares": 101,
+          "avg_price": 11.28163663,
+          "mark_price": 8.41,
+          "prior_close": 8.37,
+          "gap_pct": 0.48,
+          "market_value": 849.41,
+          "nav_pct": 64.39,
+          "unrealized_pnl": -290.04,
+          "daily_pnl": 4.04,
+          "since_last_run_pct": -34.09,
+          "catalyst": {
+            "name": "REGAL Phase 3 (GPS, AML)",
+            "status": "80th event reached per company PR dated 2026-10-28; final analysis triggered; database lock/unblinding pending; no topline found",
+            "next_check": "topline PR / 8-K"
+          },
+          "risk_flag": "OVER_CONCENTRATED - 64.4% NAV vs 35%; ~46 shares above threshold"
+        },
+        {
+          "ticker": "SPCX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 145.88,
+          "prior_close": 143.09,
+          "gap_pct": 1.95,
+          "market_value": 379.29,
+          "nav_pct": 28.75,
+          "unrealized_pnl": -65.63,
+          "daily_pnl": 7.25,
+          "since_last_run_pct": -0.03,
+          "catalyst": {
+            "name": "Staggered lockup expiries",
+            "status": "Sources conflict on dates (Aug 6, Sep 24, Oct 22 after Q3); unverified",
+            "next_check": "SEC filings for next unlock/Q3 date"
+          },
+          "risk_flag": "WATCH"
+        }
+      ],
+      "flags": [
+        "SLS 80th event reached Oct 28: topline binary imminent; position 64% NAV, up from 69 to 101 shares (adds since last run not made by this routine).",
+        "Cash rose 2.78 -> 59.18 EUR; unexplained (deposit?).",
+        "SLS: intraday high/low/open and prior_close not returned by IBKR (0.0) - levels partial; web futures data unavailable; ir.sellaslifesciences.com blocked by network policy; premarket-research.js requires stdin JSON (fails with no input)."
       ]
     }
   ]
