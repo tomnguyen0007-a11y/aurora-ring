@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-11-13",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -66,6 +66,66 @@
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
       ]
+    },
+    {
+      "timestamp": "2026-11-13T08:12Z",
+      "account": {
+        "nav_eur_base": 1274.95,
+        "nav_usd_est": 1390.4,
+        "cash_eur": 63.07,
+        "leverage": "0.95",
+        "margin_used": false,
+        "note": "USD NAV estimated via EUR/USD ~0.917 implied by gross position value"
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "shares": 101,
+          "avg_price": 10.21166891,
+          "mark_price": 9.46,
+          "prior_close": 8.03,
+          "gap_pct": 17.81,
+          "market_value": 955.46,
+          "nav_pct": 68.72,
+          "unrealized_pnl": -75.92,
+          "daily_pnl": 144.43,
+          "bid": 9.38,
+          "ask": 9.56,
+          "volume": 32150,
+          "catalyst": {
+            "name": "REGAL Ph3 GPS in AML",
+            "status": "80th event reached Oct 28 2026; stock fell ~15% to 10.38 that day; DB lock/unblind then topline guided this quarter (Q4 2026)",
+            "next_check": "topline PR/8-K - could land any day"
+          },
+          "trim_shares_to_35pct": 49.56,
+          "risk_flag": "OVER_CONCENTRATED 68.7% NAV vs 35%; binary event imminent"
+        },
+        {
+          "ticker": "SPCX",
+          "shares": 2.6,
+          "avg_price": 171.12423077,
+          "mark_price": 140.85,
+          "market_value": 366.21,
+          "nav_pct": 26.34,
+          "unrealized_pnl": -78.71,
+          "daily_pnl": 2.37,
+          "bid": 140.78,
+          "ask": 140.9,
+          "volume": 417089,
+          "catalyst": {
+            "name": "Staggered lockup",
+            "status": "Unverified aggregator reports: ~28% tranche tied to Q3 earnings (Nov est.); full 180-day expiry ~Dec 8-9 2026",
+            "next_check": "Q3 earnings date / official lockup disclosure"
+          },
+          "risk_flag": "WATCH"
+        }
+      ],
+      "flags": [
+        "premarket-research.js reads stdin JSON; run with no input it crashes (Unexpected end of JSON input). Fed it live IBKR data manually.",
+        "SLS position grew 69->101 shares, avg cost 14.33->10.21 since last run (user added).",
+        "No premarket futures data found; no SEC filing search done (sec.gov search not run)"
+      ],
+      "no_trades_placed": true
     }
   ]
 }
