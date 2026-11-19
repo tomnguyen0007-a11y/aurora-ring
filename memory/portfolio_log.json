@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-11-19",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -66,6 +66,169 @@
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
       ]
+    },
+    {
+      "timestamp": "2026-11-19",
+      "mode": "READ_ONLY_RESEARCH - no orders placed",
+      "data_sources": {
+        "account": "IBKR get_account_summary / get_account_balances / get_account_positions (2026-11-19)",
+        "quotes": "IBKR get_price_snapshot (SLS, SPCX)",
+        "script": "scripts/premarket-research.js, stdin from IBKR inputs (run 1 failed: no stdin piped)",
+        "news": "WebSearch standard + extended; SEC/IR fetch blocked for ir.sellaslifesciences.com (DNS)"
+      },
+      "account": {
+        "base_currency": "EUR",
+        "net_liquidation_eur": 1887.21,
+        "nav_usd_derived": 2077.17,
+        "fx_eur_per_usd": 0.90855075,
+        "cash_eur": 704.35,
+        "cash_usd": 756.08,
+        "gross_position_value_eur": 1182.86,
+        "leverage": "0.63",
+        "unrealized_pnl_usd_positions": 334.07,
+        "margin_used": false,
+        "open_orders": [
+          {
+            "order_id": 1058949346,
+            "side": "SELL",
+            "qty": 10,
+            "type": "LIMIT",
+            "limit": 14.85,
+            "tif": "DAY",
+            "status": "NEW",
+            "placed": "2026-11-19T09:23:43Z",
+            "note": "NOT placed by this routine; flagged for Tom to review"
+          }
+        ]
+      },
+      "reconciliation_flags": [
+        "Positions differ materially from the 2026-07-11 log: SLS 69 sh @ 14.33 then, 76 sh @ 9.23 now; SPCX 2.6 sh @ 171.12 then, 1.6 sh @ 159.89 now. Log history for those lots is not reconstructable from this run.",
+        "SPCX prior close not returned by IBKR snapshot; derived 143.50 from change field (146.78 - 3.28). Daily P&L 5.28 is consistent with that derivation.",
+        "NAV in USD derived from EUR base net liquidation at 0.90855 EUR/USD. Cash reconciles to within rounding."
+      ],
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 76,
+          "avg_cost_usd": 9.23,
+          "prior_close": 17.95,
+          "mark_price": 13.91,
+          "gap_pct": -22.51,
+          "since_last_run_pct": 9.01,
+          "day_range_note": "IBKR day high/low/open returned 0; use last/bid-ask only",
+          "bid_ask": {
+            "bid": 13.9,
+            "ask": 13.92
+          },
+          "market_value_usd": 1056.4,
+          "nav_pct": 50.86,
+          "unrealized_pnl_usd": 355.02,
+          "daily_pnl_usd": -307.8,
+          "vwap_proxy": "not available from IBKR snapshot",
+          "price_levels": {
+            "high_52w": 24.89,
+            "low_52w": 1.39,
+            "high_13w": 24.89,
+            "low_13w": 7.14
+          },
+          "catalyst": {
+            "status_update": "REGAL 80th event announced 2026-10-28. Topline announced 2026-11-17 via GlobeNewswire: OS median 24.0 mo GPS vs 14.7 mo BAT, HR 0.59, two-sided p=0.035, n=126, 80 deaths. Positive primary endpoint, topline only, not peer reviewed, no CI reported.",
+            "prior_log_catalyst_now_stale": "The 80th-event catalyst in the 2026-07-11 log has occurred and the readout is out.",
+            "new_overhang": "Same day as topline (2026-11-17), company launched a proposed $150.0M underwritten public offering (J.P. Morgan, TD Cowen; 30-day greenshoe $22.5M). Pricing not found as of this run. $150M is roughly 10-11M shares at ~$14, a large dilution relative to the current position.",
+            "next_steps_company": "FDA discussions; BLA submission targeted 1H 2027 per secondary source (Pharmacally), not verified against company release."
+          },
+          "risk_sizing": {
+            "over_35pct_nav": true,
+            "trim_shares_to_35pct": 23.73,
+            "shares_to_trim_rounded": 24,
+            "value_to_trim_usd_at_mark": 333.7,
+            "two_pct_nav_target_usd": 41.54,
+            "note": "Position is about 25x the 2% NAV target. Adding is not indicated. Open SELL 10 @ 14.85 would leave 66 sh (~44% NAV), still above threshold."
+          },
+          "trade_idea": {
+            "news_sentiment_score": -0.2,
+            "scoring_basis": "Clinical news is positive (+0.5 weight). Dilution overhang on same day is strongly negative (-0.7 weight). Net mildly negative. Judgment, not a model output.",
+            "setup_today": "Post-news gap-down with an overhang. Not a gap-and-go. Fade-to-hold or trim into any bounce is the more defensible read.",
+            "plan": [
+              "HOLD: no adds. Position is far over the 35% NAV cap.",
+              "TRIM: 24 sh to get back to 35% NAV, into strength or the 14.85 limit. The existing 10 sh SELL @14.85 is in the right direction but not enough on its own.",
+              "WATCH: offering pricing 8-K/424B5. Price at pricing sets dilution cost. A pricing well below 13.91 is a further negative signal.",
+              "WATCH: FDA meeting outcome and BLA timing. Any material change to the 14.85 / 13.91 levels should prompt review."
+            ]
+          }
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 1.6,
+          "avg_cost_usd": 159.89,
+          "prior_close": 143.5,
+          "prior_close_source": "derived from IBKR change field",
+          "mark_price": 146.8,
+          "gap_pct": 2.3,
+          "since_last_run_pct": 0.6,
+          "bid_ask": {
+            "bid": 146.75,
+            "ask": 146.83
+          },
+          "market_value_usd": 234.88,
+          "nav_pct": 11.31,
+          "unrealized_pnl_usd": -20.95,
+          "daily_pnl_usd": 5.28,
+          "price_levels": {
+            "high_52w": 225.64,
+            "low_52w": 104.83,
+            "high_13w": 176.42,
+            "low_13w": 120.39
+          },
+          "catalyst": {
+            "bond": "Reported $20-25B investment-grade bond deal (June-July 2026), Baa1/BBB+. Maturity and coupon not verified from sources found.",
+            "lockup": "Staggered lockup. Sources say first large tranche around Q2 earnings, with one source citing about 2026-08-06 (911.5M shares). Log said late Jul/early Aug and full expiry Dec 8 2026. Sources conflict. Several tranches may already have passed by today.",
+            "note": "Lockup dates in the 2026-07-11 log are not verified and may be stale. Confirm against SEC filings before acting."
+          },
+          "risk_sizing": {
+            "over_35pct_nav": false,
+            "trim_shares": 0,
+            "two_pct_nav_target_usd": 41.54,
+            "note": "Position is ~5.6x below the 2% NAV target by value. Within cap."
+          },
+          "trade_idea": {
+            "news_sentiment_score": 0,
+            "setup_today": "Up 2.3% from derived prior close. No fresh SPCX-specific news found today.",
+            "plan": [
+              "HOLD. No action warranted from this research.",
+              "WATCH: Q2 earnings date and lockup schedule confirmation."
+            ]
+          }
+        }
+      ],
+      "tickers_not_held_skipped": [
+        "CING: not held in IBKR account; web search skipped."
+      ],
+      "premarket_futures": "No S&P 500 premarket futures data for 2026-11-19 found in search. Not reported.",
+      "compounding_scorecard": {
+        "nav_usd_2026_07_11": 1261.21,
+        "nav_usd_2026_11_19_derived": 2077.17,
+        "change_pct": 64.7,
+        "caveat": "Includes any deposits or withdrawals since July, which the log does not record. Not a pure performance number."
+      },
+      "flags": [
+        "URGENT FOR REVIEW: Open SELL 10 SLS @ 14.85 DAY limit (order 1058949346) placed 09:23Z today. Not placed by this routine. Confirm it is intended.",
+        "SLS 50.9% of NAV vs 35% cap. Trim about 24 sh.",
+        "SLS: $150M underwritten offering launched 2026-11-17, same day as positive topline. Pricing not yet confirmed. Largest near-term risk.",
+        "SLS: The 80th-event catalyst from the July log has already happened. Topline was positive (HR 0.59, p=0.035).",
+        "Account is fully invested: cash 0 in USD; EUR 17.41 idle. No dry powder.",
+        "Position sizes differ materially from the July log. Reconcile before trusting historical lot data."
+      ],
+      "sources": [
+        "https://www.globenewswire.com/news-release/2026/11/17/3404429/0/en/sellas-life-sciences-announces-positive-pivotal-phase-3-regal-trial-data-showing-immunotherapeutic-cancer-vaccine-galinpepimut-s-gps-demonstrated-a-statistically-significant-and-cl.html",
+        "https://ir.sellaslifesciences.com/news/News-Details/2026/SELLAS-Life-Sciences-Announces-Proposed-150-0-Million-Underwritten-Public-Offering/default.aspx",
+        "https://ir.sellaslifesciences.com/news/News-Details/2026/SELLAS-Life-Sciences-Reaches-80th-Event-in-Phase-3-REGAL-Trial-of-Galinpepimut-S-GPS-in-Acute-Myeloid-Leukemia/default.aspx (search snippet only; fetch blocked)",
+        "https://www.startuphub.ai/news/spacex-spcx-debt-bond-lockup-2026-07-01",
+        "https://www.sec.gov/Archives/edgar/data/0001390478/000139047826000021/sls-20261112.htm (listed, not opened)"
+      ],
+      "status": "NO TRADES PLACED. Read-only research."
     }
   ]
 }
