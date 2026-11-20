@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-11-20T11:13:26Z",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -65,6 +65,124 @@
         "SLS at 69.8% of NAV is nearly double the 35% single-name trim threshold, in a pre-binary-catalyst biotech with no news that breaks the thesis but no catalyst confirmation either.",
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
+      ]
+    },
+    {
+      "timestamp": "2026-11-20T11:13:26Z",
+      "source": "IBKR live pull + premarket-research.js + web search",
+      "account": {
+        "base_currency": "EUR",
+        "net_liquidation_base_eur": 1924.55,
+        "net_liquidation_usd": 2090.692,
+        "cash_eur": 17.41,
+        "cash_usd": 807.18,
+        "settled_cash_base": 753.73,
+        "stock_market_value_usd": 1283.51,
+        "unrealized_pnl_base": 279.09,
+        "leverage": "0.61",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "contract_id": 390872440,
+          "name": "SELLAS Life Sciences Group",
+          "shares": 66,
+          "avg_price": 9.40494848,
+          "mark_price": 14.77,
+          "prior_close_derived": 14.86,
+          "gap_pct": -0.61,
+          "market_value_usd": 974.82,
+          "nav_pct": 46.63,
+          "unrealized_pnl_usd": 354.09,
+          "daily_pnl_usd": -5.94,
+          "catalyst": {
+            "name": "Phase 3 REGAL (galinpepimut-S, AML) final analysis",
+            "status": "80th event reached, announced 2026-10-28; company guided topline primary-endpoint results this quarter (Q4 2026)",
+            "next_check": "topline press release / 8-K"
+          },
+          "risk": {
+            "over_35pct_nav": true,
+            "trim_shares_to_35pct": 16.46,
+            "two_pct_nav_target_usd": 41.81
+          }
+        },
+        {
+          "ticker": "SPCX",
+          "contract_id": 890493863,
+          "name": "SpaceX",
+          "shares": 1.6,
+          "avg_price": 159.894375,
+          "mark_price": 132.63,
+          "prior_close_derived": 138.43,
+          "gap_pct": -4.19,
+          "market_value_usd": 212.21,
+          "nav_pct": 10.15,
+          "unrealized_pnl_usd": -43.62,
+          "daily_pnl_usd": -9.28,
+          "catalyst": {
+            "name": "IPO lockup unlock tranches; $25B bond (early Jul 2026)",
+            "status": "Large unlock 2026-08-06 (~911.5M sh); further tranche expected Nov (estimate, secondary sources); full 180-day lockup ends 2026-12-08",
+            "next_check": "Q3 earnings date; official unlock calendar; bond terms in SEC filings"
+          },
+          "risk": {
+            "over_35pct_nav": false,
+            "trim_shares_to_35pct": 0,
+            "two_pct_nav_target_usd": 41.81
+          }
+        },
+        {
+          "ticker": "ANT",
+          "contract_id": 943990769,
+          "name": "Anthropic PBC Cl A (NASDAQ: ANT)",
+          "shares": 1,
+          "avg_price": 101.000003,
+          "mark_price": 91.02,
+          "prior_close_derived": 97.17,
+          "gap_pct": -6.33,
+          "market_value_usd": 91.02,
+          "nav_pct": 4.35,
+          "unrealized_pnl_usd": -9.98,
+          "daily_pnl_usd": -6.15,
+          "catalyst": {
+            "name": "Post-IPO trading (listed 2026-11-19); IPO range was $70-78 per amended S-1",
+            "status": "Offering expected to close 2026-11-20; no company news found for 2026-11-20",
+            "next_check": "first analyst initiations (typically ~25 days post-IPO, unconfirmed); lockup terms in S-1"
+          },
+          "risk": {
+            "over_35pct_nav": false,
+            "trim_shares_to_35pct": 0,
+            "two_pct_nav_target_usd": 41.81
+          }
+        }
+      ],
+      "open_orders": [
+        {
+          "order_id": 2091800110,
+          "side": "BUY",
+          "qty": 7,
+          "symbol": "ANT",
+          "limit": 85.05,
+          "status": "EXPIRED",
+          "note": "expired, not working"
+        }
+      ],
+      "reconciliation_flags": [
+        "Prior log (2026-07-11) shows SLS 69 sh @14.33 and SPCX 2.6 sh @171.12 and no ANT; live IBKR shows SLS 66 sh @9.40, SPCX 1.6 sh @159.89, ANT 1 sh @101.00. Logged history does not reconcile with the live account; treat live IBKR as authoritative.",
+        "Prior log last_run 2026-07-11, so the news window spans ~4 months, not overnight.",
+        "Prior close not returned by IBKR snapshot; derived as last minus change field.",
+        "No premarket S&P 500 futures data found for 2026-11-20 (search returned only older data)."
+      ],
+      "flags": [
+        "SLS at 46.6% of NAV vs 35% trim threshold (trim ~16.5 sh to comply). Binary topline readout guided for this quarter; 80th event reached 2026-10-28.",
+        "ANT is a day-2 post-IPO position with ~6% intraday drop; cost basis 101 is above the IPO range 70-78.",
+        "Stale open-order noise: 7 ANT buy @85.05 expired; no working orders.",
+        "Read-only routine: no orders placed."
+      ],
+      "recommendations_for_review": [
+        "SLS: consider trimming ~16 sh pre-readout to get under 35% NAV; the readout is binary and sizing is the largest single risk.",
+        "SPCX: lockup supply into Q3 earnings; hold/watch.",
+        "ANT: hold a 1-share starter; no action until analyst coverage/lockup details."
       ]
     }
   ]
