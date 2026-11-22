@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-11-22",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -66,6 +66,111 @@
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
       ]
+    },
+    {
+      "timestamp": "2026-11-22",
+      "data_sources": {
+        "account": "IBKR get_account_summary / get_account_balances / get_account_positions (live)",
+        "quotes": "IBKR get_price_snapshot (last trade timestamps correspond to the most recent completed session, approx 2026-11-20; Nov 22 is a Sunday)",
+        "premarket_script_input": "live IBKR positions + prior_close from snapshots; prior_run = 2026-07-11 log (stale, see flags)"
+      },
+      "account": {
+        "nav_usd": 2040.786,
+        "nav_eur_base": 1878.18,
+        "stock_market_value_usd": 1232.95,
+        "cash_usd": 807.18,
+        "cash_eur": 17.41,
+        "excess_liquidity_eur": 753.39,
+        "unrealized_pnl_usd": 255.39,
+        "leverage": "0.6 (per IBKR summary)",
+        "margin_used": false
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 66,
+          "avg_price": 9.4,
+          "mark_price": 14.21,
+          "prior_close": 14.86,
+          "gap_pct": -4.37,
+          "market_value_usd": 937.86,
+          "nav_pct": 45.96,
+          "unrealized_pnl_usd": 317.13,
+          "daily_pnl_usd": -42.9,
+          "catalyst": {
+            "name": "REGAL Phase 3 (galinpepimut-S, AML) final analysis",
+            "status": "Topline reported Nov 17, 2026 (8-K): OS median 24.0 vs 14.7 mo, HR 0.59, two-sided p=0.035, n=126. Company plans FDA meeting on accelerated filing; BLA targeted 1H 2027.",
+            "dilution": "Underwritten offering priced Nov 18, 2026: $150.0M gross, expected close ~Nov 20 (8-K Item 1.01). Final pricing and closing not confirmed in this run."
+          },
+          "news_sentiment_score": 0.2,
+          "risk_flag": "OVER_CONCENTRATED - 46.0% NAV vs 35% trim threshold"
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 1.6,
+          "avg_price": 159.89,
+          "mark_price": 129.56,
+          "prior_close": 138.43,
+          "gap_pct": -6.41,
+          "market_value_usd": 207.29,
+          "nav_pct": 10.16,
+          "unrealized_pnl_usd": -48.54,
+          "daily_pnl_usd": -14.2,
+          "catalyst": {
+            "name": "Staggered IPO lockup unlocks",
+            "status": "Multiple unlock tranches already released (Aug 6 and Aug 20, 2026). A Q3-earnings-linked release was reported as expected in Nov 2026; final 180-day expiry reported as ~Dec 8-9, 2026 (sources disagree). Bond/credit news NOT confirmed by search.",
+            "dilution": "n/a"
+          },
+          "news_sentiment_score": -0.3,
+          "risk_flag": "WATCH - within cap; lockup supply overhang; stock -6.4% in latest session"
+        },
+        {
+          "ticker": "ANT",
+          "company": "UNVERIFIED - search returned Antalpha Platform (ANTA), a different issuer",
+          "shares": 1,
+          "avg_price": 101,
+          "mark_price": 87.8,
+          "prior_close": 97.17,
+          "gap_pct": -9.64,
+          "market_value_usd": 87.8,
+          "nav_pct": 4.3,
+          "unrealized_pnl_usd": -13.2,
+          "daily_pnl_usd": -9.37,
+          "catalyst": {
+            "name": "None confirmed",
+            "status": "No reliable news for IBKR symbol ANT found. Do not attribute ANTA news to this position.",
+            "dilution": "n/a"
+          },
+          "news_sentiment_score": null,
+          "risk_flag": "DATA_CHECK - confirm issuer and exchange of contract 943990769 before any decision"
+        }
+      ],
+      "script_output": {
+        "note": "scripts/premarket-research.js run on live input from the step above",
+        "sls_trim_shares_to_35pct": 15.73,
+        "two_pct_nav_target_value_usd": 40.82
+      },
+      "flags": [
+        "SLS at 46.0% of NAV is above the 35% trim threshold. Trim to 35% needs ~15.7 shares at 14.21, but the $150M offering may price below the market and could move the stock. Review before acting.",
+        "Stale baseline: the 2026-07-11 log does not reconcile with the live account (SLS avg cost 14.33 vs live 9.40; shares 69 vs 66; no ANT position; cash 0 vs 807 USD). Trend/compounding comparisons vs July are not meaningful until the baseline is reset.",
+        "ANT position has no verified issuer. Identity is unconfirmed.",
+        "Futures and overnight market data not found. Sunday run; verify premarket before the open.",
+        "CING was in the routine's search list but is not a current holding. Not searched."
+      ],
+      "compounding_scorecard": {
+        "nav_usd_prior_2026-07-11": 1261.21,
+        "nav_usd_now": 2040.79,
+        "change_usd": 779.58,
+        "note": "Not attributable to performance: deposit/withdrawal history not available to this routine."
+      },
+      "trade_ideas_read_only": {
+        "SLS": "Setup: hold or trim, not add. Position is over the trim threshold and the dilution from the offering is an overhang. Plan: review the offering price; if the company's final pricing is well below 14.21, consider trimming toward ~35% NAV on the next session. No order placed.",
+        "SPCX": "Setup: hold with watch for gap-and-fade into the Q3-earnings unlock window. Plan: no add until the earnings date and unlock size are confirmed.",
+        "ANT": "Setup: hold pending issuer check. No thesis can be formed until identity is confirmed."
+      },
+      "routine_status": "READ-ONLY. No trades placed. No orders created, modified, or queued."
     }
   ]
 }
