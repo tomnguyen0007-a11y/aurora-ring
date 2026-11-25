@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-11-25",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -66,6 +66,154 @@
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
       ]
+    },
+    {
+      "timestamp": "2026-11-25",
+      "snapshot_utc": "2026-11-25T11:10Z (premarket quotes, IBKR REALTIME)",
+      "read_only": true,
+      "account": {
+        "currency": "EUR",
+        "nav_eur": 1792.32,
+        "nav_usd_equiv": 1960.65,
+        "fx_eur_per_usd": 0.91414465,
+        "cash_eur": 755.13,
+        "gross_position_value_eur": 1037.19,
+        "unrealized_pnl_usd": 160.38,
+        "leverage": "0.58",
+        "open_orders": 0,
+        "note": "Prior run (2026-07-11) reported NAV EUR 1107.73, cash EUR 2.78, zero USD cash. Current account holds ANT (new) and ~42% cash. Deposit/withdrawal history not checked, so NAV change is not split into return vs contributions."
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 66,
+          "avg_price": 9.40494848,
+          "mark_price": 13.08,
+          "prior_close": 13.25,
+          "gap_pct": -1.28,
+          "since_last_run_pct": 2.51,
+          "market_value_usd": 863.28,
+          "nav_pct": 44.03,
+          "unrealized_pnl_usd": 242.55,
+          "daily_pnl_usd": -11.22,
+          "risk": {
+            "over_35pct_nav": true,
+            "trim_shares_to_35pct": 13.54,
+            "trim_value_usd_approx": 177,
+            "two_pct_nav_target_usd": 39.21
+          },
+          "catalyst": {
+            "name": "REGAL Phase 3 (galinpepimut-S, AML) final analysis",
+            "status": "80th event reached Oct 28, 2026, which triggers the final analysis. Company says topline primary endpoint (overall survival) results expected this quarter, after database lock and unblinding. Potential BLA tied to positive result.",
+            "days_to_catalyst": "~0-35 (guided this quarter, i.e. by end Dec 2026)",
+            "source": "https://finviz.com/news/410013/sellas-life-sciences-reaches-80th-event-in-phase-3-regal-trial-of-galinpepimut-s-gps-in-acute-myeloid-leukemia"
+          },
+          "news_sentiment": "Mixed-to-binary. Event trigger is positive process news, but outcome is binary. One secondary source cites a 10.38 close on the announcement day, which conflicts with current 13.08; treat as unreliable.",
+          "setup": "Binary-catalyst pre-market. Gap -1.28%. Position is 44% of NAV vs 35% cap.",
+          "plan": {
+            "action": "TRIM candidate (human decision)",
+            "detail": "Trim ~13-14 shares (~$177) to return to 35% NAV before readout. Hold remainder through readout only if the binary risk is accepted. Do not add.",
+            "hard_block": "No order placed by this routine."
+          }
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 1.6,
+          "avg_price": 159.894375,
+          "mark_price": 123.27,
+          "prior_close": 125.81,
+          "gap_pct": -2.02,
+          "since_last_run_pct": -15.52,
+          "market_value_usd": 197.23,
+          "nav_pct": 10.06,
+          "unrealized_pnl_usd": -58.6,
+          "daily_pnl_usd": -4.06,
+          "risk": {
+            "over_35pct_nav": false,
+            "trim_shares_to_35pct": 0,
+            "two_pct_nav_target_usd": 39.21
+          },
+          "catalyst": {
+            "name": "IPO lockup tranches + $ bond deal",
+            "status": "Lockup first tranche timing conflicts across sources (around Aug 6; after Q2 earnings early-mid Aug; Sep 24). Full lockup expiry Dec 8, 2026 per prior log. Bond size conflicts ($20B vs $25B); one source reports 5 senior unsecured tranches, coupons 5.35%-6.65%, maturities 2031-2056, refinancing the xAI bridge loan (one source: hard maturity Sep 2027).",
+            "days_to_catalyst": "Lockup dates unresolved; prior log's ~2-3 weeks is stale (dated July)",
+            "sources": [
+              "https://www.startuphub.ai/news/spacex-spcx-debt-bond-lockup-2026-07-01",
+              "https://www.fool.com/investing/2026/09/15/spacexs-next-share-unlock-is-coming-history-says-t"
+            ]
+          },
+          "news_sentiment": "Negative supply overhang from lockups; bond refinancing is neutral-to-negative. Secondary sources, low confidence.",
+          "setup": "Gap-and-fade continuation (-2.02% pre-mkt, -15.5% since Jul 11 log). Within cap.",
+          "plan": {
+            "action": "HOLD, no add",
+            "detail": "Position is 10% of NAV, well above 2% target, so no add. Verify lockup dates from the prospectus/8-K before sizing around the unlock."
+          }
+        },
+        {
+          "ticker": "ANT",
+          "company": "Anthropic PBC Class A (Nasdaq IPO)",
+          "shares": 1,
+          "avg_price": 101,
+          "mark_price": 77.46,
+          "prior_close": 81.9,
+          "gap_pct": -5.42,
+          "since_last_run_pct": null,
+          "market_value_usd": 77.43,
+          "nav_pct": 3.95,
+          "unrealized_pnl_usd": -23.57,
+          "daily_pnl_usd": -4.47,
+          "risk": {
+            "over_35pct_nav": false,
+            "trim_shares_to_35pct": 0,
+            "two_pct_nav_target_usd": 39.21
+          },
+          "catalyst": {
+            "name": "Post-IPO trading; lockup release schedule",
+            "status": "IPO priced $83 on Nov 19, 2026; opened $111.50; close reported ~$97.17 (one source). Standard 180-day lockup, ending ~mid-May 2027; some holders to Nov 2027. Partial early sales possible (reported ~10% of non-founder insider shares from first trading day; 35% of employee shares after first quarterly report early 2027). Figures from secondary coverage.",
+            "days_to_catalyst": "No scheduled release found in next 30 days",
+            "source": "https://www.foxbusiness.com/markets/anthropic-begins-trading-nasdaq-record-breaking-ipo"
+          },
+          "news_sentiment": "Neutral-to-negative. Trading ~7% below IPO price and ~20% below reported Nov 19 close; no company-specific negative news found.",
+          "setup": "Gap-and-fade continuation (-5.42% pre-mkt, below IPO price).",
+          "plan": {
+            "action": "HOLD, no add",
+            "detail": "Position is ~4% of NAV, already above the 2% target, so no add. Verify lockup terms from the S-1/prospectus."
+          }
+        }
+      ],
+      "trade_history_summary": {
+        "source": "IBKR get_account_trades, YEAR_TO_DATE (253 fills, read from saved export)",
+        "note": "Heavy SLS round-trip activity Jun-Nov 2026, last SLS sells Nov 17-19 at 15.31-19.25. Single SPCX sell Nov 13 at 140.62. ANT buy 1 at 100 on Nov 19. Trades were placed outside this routine; the source of these orders is not known from the data available.",
+        "fills_checked": "Only the SLS/SPCX/ANT fills were summarized, using jq. The full export was not reviewed line by line."
+      },
+      "flags": [
+        "STALE LOG: last prior run was 2026-07-11 (~4.5 months). Positions, cash and catalyst status all changed.",
+        "SLS 44.0% of NAV vs 35% trim threshold (over by ~9 points, ~13.5 shares).",
+        "SLS binary catalyst guided this quarter (80th event reached Oct 28, 2026). Prior log's 78-of-80 status is outdated.",
+        "Position-share discrepancies vs July log: SLS 69 -> 66, SPCX 2.6 -> 1.6; ANT added. Trade history shows activity not logged by this routine.",
+        "Cash is now ~42% of NAV (EUR 755); prior flag 'zero cash buffer' no longer applies.",
+        "CING is not held; its catalyst search was skipped per 'Others' rule (only held tickers searched).",
+        "Pre-market S&P futures for 2026-11-25 not found; search returned only older items. Market context unavailable.",
+        "Secondary-source conflicts on SPCX bond/lockup and SLS post-announcement price. Verify with filings before acting."
+      ],
+      "research_sources": [
+        "https://finviz.com/news/410013/sellas-life-sciences-reaches-80th-event-in-phase-3-regal-trial-of-galinpepimut-s-gps-in-acute-myeloid-leukemia",
+        "https://www.rttnews.com/3705395/sellas-phase-3-regal-aml-trial-of-galinpepimut-s-reaches-final-analysis-trigger.aspx",
+        "https://www.startuphub.ai/news/spacex-spcx-debt-bond-lockup-2026-07-01",
+        "https://www.fool.com/investing/2026/09/15/spacexs-next-share-unlock-is-coming-history-says-t",
+        "https://www.foxbusiness.com/markets/anthropic-begins-trading-nasdaq-record-breaking-ipo",
+        "https://www.money365.market/articles/anthropic-ipo-first-day-lockups-software-stocks"
+      ],
+      "compounding_scorecard": {
+        "nav_eur_prior": 1107.73,
+        "nav_eur_now": 1792.32,
+        "change_eur_pct": 61.8,
+        "note": "Not a clean return figure: cash deposits/withdrawals unknown. Unrealized P&L moved from -172.41 USD (Jul 11) to +160.38 USD (now).",
+        "unrealized_pnl_usd_now": 160.38
+      },
+      "orders_placed_by_routine": 0
     }
   ]
 }
