@@ -1,7 +1,7 @@
 {
   "meta": {
     "created": "2026-07-11",
-    "last_run": "2026-07-11",
+    "last_run": "2026-11-27",
     "account_currency_base": "EUR",
     "risk_rules": {
       "single_name_nav_trim_threshold_pct": 35,
@@ -66,6 +66,131 @@
         "Zero USD cash buffer - account fully invested, no dry powder to add on weakness (not on margin, so no forced-liquidation risk).",
         "SPCX facing its first staggered lockup unlock in ~2-3 weeks; stock already down 4-5% pre-market with no negative credit news (bond was oversubscribed, investment-grade)."
       ]
+    },
+    {
+      "timestamp": "2026-11-27",
+      "run_type": "premarket_readonly",
+      "data_sources": {
+        "account": "IBKR get_account_summary / get_account_positions / get_account_balances / get_account_orders (read-only)",
+        "quotes": "IBKR get_price_snapshot (last, change, prior_close; open/high/low returned empty)",
+        "news": "WebSearch standard; WebFetch of sec.gov blocked (DNS, not resolvable from session)",
+        "script": "scripts/premarket-research.js (stdin from IBKR data at /tmp/ibkr_input.json)"
+      },
+      "account": {
+        "currency_base": "EUR",
+        "nav_usd": 1969.874,
+        "nav_eur_base": 1814.1342,
+        "cash_usd": 807.18,
+        "cash_eur": 17.41,
+        "unrealized_pnl_usd": 185.14,
+        "unrealized_pnl_eur_base": 168.86,
+        "gross_position_value_eur": 1060.49,
+        "leverage": "0.58",
+        "margin_used": false,
+        "open_orders": 0
+      },
+      "positions": [
+        {
+          "ticker": "SLS",
+          "company": "SELLAS Life Sciences Group",
+          "shares": 66,
+          "avg_price": 9.40494848,
+          "mark_price": 13.06,
+          "prior_close": 12.77,
+          "gap_pct": 2.27,
+          "since_last_run_pct": 2.35,
+          "market_value": 861.96,
+          "nav_pct": 43.76,
+          "unrealized_pnl": 241.23,
+          "daily_pnl": 19.14,
+          "risk": {
+            "over_35pct_nav": true,
+            "trim_shares_to_reach_35pct": 13.21,
+            "two_pct_nav_target_value_usd": 39.4
+          },
+          "catalyst": {
+            "name": "REGAL Phase 3 (galinpepimut-S, AML) - final OS analysis",
+            "status": "80th event reached 2026-10-28 (per company release). Topline announced 2026-11-17: primary OS endpoint met, HR 0.59, two-sided p=0.035, median OS 24.0 vs 14.7 mo (BAT). Not peer reviewed; no HR CI in release (per secondary source). FDA meeting planned; BLA prep for 1H 2027.",
+            "financing": "Reported (single source, unverified): $150M underwritten offering, 11,538,462 sh at $13.00, closing ~2026-11-20. Not confirmed on sec.gov (blocked) or second news source.",
+            "next_check": "Confirm offering 8-K terms and closing; FDA meeting outcome; peer-reviewed data"
+          },
+          "news_sentiment_score": 4,
+          "setup": "HOLD / TRIM-TO-CAP",
+          "notes": "Binary catalyst already resolved positive per two sources. Position is 43.8% NAV vs 35% cap. Price (13.06) sits near reported $13.00 offering price. Quote timestamp ~1.7h older than SPCX/ANT quotes; treat as possibly stale."
+        },
+        {
+          "ticker": "SPCX",
+          "company": "SpaceX",
+          "shares": 1.6,
+          "avg_price": 159.894375,
+          "mark_price": 132.2,
+          "prior_close": 127.44,
+          "gap_pct": 3.74,
+          "since_last_run_pct": -9.4,
+          "market_value": 211.52,
+          "nav_pct": 10.74,
+          "unrealized_pnl": -44.31,
+          "daily_pnl": 7.62,
+          "risk": {
+            "over_35pct_nav": false,
+            "trim_shares_to_reach_35pct": 0,
+            "two_pct_nav_target_value_usd": 39.4
+          },
+          "catalyst": {
+            "name": "Staggered IPO lockup unlocks",
+            "status": "First large unlock reported in August 2026 (secondary sources). Further tranches Sep/Oct; full 180-day expiry reported ~Dec 8-9, 2026. Sources conflict on September dates (Sep 10 / Sep 24 / Sep 25). $25B IG bond (~Jul 1, 2026) terms not confirmed.",
+            "next_check": "Verify unlock dates against SpaceX primary filings before acting"
+          },
+          "news_sentiment_score": -2,
+          "setup": "HOLD (within cap; supply overhang)",
+          "notes": "Prior log catalyst (Q2 earnings-linked unlock late Jul/early Aug) is superseded; that window has passed. Share count fell 2.6 -> 1.6 since 2026-07-11, cause not verified."
+        },
+        {
+          "ticker": "ANT",
+          "company": "unverified",
+          "shares": 1,
+          "avg_price": 101,
+          "mark_price": 86.43,
+          "prior_close": 82.79,
+          "gap_pct": 4.4,
+          "since_last_run_pct": null,
+          "market_value": 86.43,
+          "nav_pct": 4.39,
+          "unrealized_pnl": -14.57,
+          "daily_pnl": 3.64,
+          "risk": {
+            "over_35pct_nav": false,
+            "trim_shares_to_reach_35pct": 0,
+            "two_pct_nav_target_value_usd": 39.4
+          },
+          "catalyst": {
+            "name": "none verified",
+            "status": "No earnings, analyst or catalyst data found for this ticker. Identity of issuer not confirmed (one aggregator labels ANT as Anthropic; unverified).",
+            "next_check": "Confirm issuer and listing"
+          },
+          "news_sentiment_score": 0,
+          "setup": "HOLD (insufficient data)",
+          "notes": "Not in prior log: new position since 2026-07-11."
+        }
+      ],
+      "flags": [
+        "SLS at 43.8% NAV vs 35% trim threshold (was 69.8% in prior log). Rule-based trim: ~13 shares.",
+        "SLS topline positive per two sources, but the $13.00 / $150M offering is single-sourced; verify before acting.",
+        "Positions changed since 2026-07-11 log (SLS 69->66, SPCX 2.6->1.6, ANT added) with no cause visible in this session. Verify fills.",
+        "ANT position: issuer unverified, no data.",
+        "sec.gov unreachable from session; all filing references are from search snippets only.",
+        "Premarket futures for 2026-11-27 not found. Nov 27 is the Friday after Thanksgiving; thin/early-close session likely (general calendar knowledge, not verified here).",
+        "CING (watch list) not held; not researched."
+      ],
+      "scorecard": {
+        "nav_eur_2026_07_11": 1107.7268,
+        "nav_eur_2026_11_27": 1814.1342,
+        "change_eur_pct": 63.8,
+        "nav_usd_2026_07_11": 1261.212,
+        "nav_usd_2026_11_27": 1969.874,
+        "change_usd_pct": 56.2,
+        "caveat": "Not a true return: cash went from 0 to ~807 USD, so deposits/transfers may be included. Need cash-flow history to compute performance."
+      }
     }
   ]
 }
